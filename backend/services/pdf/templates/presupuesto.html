@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<style>
+  .header { background: {{ colores.navy }}; color: white; padding: 24px; border-radius: 8px; }
+  .header h1 { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+  .header .sub { color: #94A3B8; font-size: 11px; margin-top: 4px; }
+  .meta { display: flex; justify-content: space-between; margin-top: 18px; font-size: 12px; }
+  .meta .label { color: #64748B; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta .value { font-weight: 700; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 11px; }
+  th { text-align: left; padding: 8px 6px; background: #F1F5F9; color: #64748B;
+       font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  th.num, td.num { text-align: right; }
+  td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
+  .cap { font-weight: 700; color: {{ colores.blue }}; padding-top: 14px; font-size: 10px;
+         text-transform: uppercase; letter-spacing: 0.5px; }
+  .totales { margin-top: 22px; margin-left: auto; width: 55%; font-size: 12px; }
+  .totales .row { display: flex; justify-content: space-between; padding: 5px 0; }
+  .totales .row.final { border-top: 2px solid {{ colores.navy }}; margin-top: 6px; padding-top: 10px;
+                        font-size: 16px; font-weight: 900; color: {{ colores.navy }}; }
+  .estado { display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 999px;
+            font-size: 10px; font-weight: 700; background: #EFF6FF; color: {{ colores.blue }}; }
+  .notas { margin-top: 20px; padding: 12px; background: #FFFBEB; border-radius: 6px;
+           font-size: 11px; color: #92400E; }
+  .footer { margin-top: 36px; font-size: 9px; color: #94A3B8; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>PRESUPUESTO</h1>
+    <div class="sub">Generado con DARIVO PRO · {{ fecha_generacion }}</div>
+  </div>
+
+  <div class="meta">
+    <div>
+      <div class="label">Cliente</div>
+      <div class="value">{{ presupuesto.client_name }}</div>
+      {% if presupuesto.city %}<div>{{ presupuesto.city }}</div>{% endif %}
+      {% if presupuesto.phone %}<div>{{ presupuesto.phone }}</div>{% endif %}
+    </div>
+    <div>
+      <div class="label">Estado</div>
+      <div class="estado">{{ presupuesto.status }}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Partida</th>
+        <th class="num">Cant.</th>
+        <th class="num">P. Unit.</th>
+        <th class="num">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(cap='') %}
+      {% for item in presupuesto["items"] %}
+        {% if item.cat_label != ns.cap %}
+          {% set ns.cap = item.cat_label %}
+          <tr><td colspan="4" class="cap">{{ ns.cap }}</td></tr>
+        {% endif %}
+        <tr>
+          <td>{{ item.svc_label }}</td>
+          <td class="num">{{ "%.2f"|format(item.qty or 0) }} {{ item.unit }}</td>
+          <td class="num">S/ {{ "%.2f"|format(item.unit_price or 0) }}</td>
+          <td class="num">S/ {{ "%.2f"|format(item.subtotal or 0) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totales">
+    <div class="row">
+      <span>Materiales y partidas</span>
+      <span>S/ {{ "%.2f"|format(presupuesto.total_base or 0) }}</span>
+    </div>
+    <div class="row">
+      <span>Mano de obra ({{ presupuesto.margin or 0 }}%)</span>
+      <span>S/ {{ "%.2f"|format(presupuesto.total_labor or 0) }}</span>
+    </div>
+    <div class="row final">
+      <span>TOTAL</span>
+      <span>S/ {{ "%.2f"|format(presupuesto.total_final or 0) }}</span>
+    </div>
+  </div>
+
+  {% if presupuesto.notes %}
+  <div class="notas"><strong>Notas:</strong> {{ presupuesto.notes }}</div>
+  {% endif %}
+
+  <div class="footer">
+    Este presupuesto tiene validez de 30 días desde su emisión · DARIVO PRO
+  </div>
+</body>
+</html>

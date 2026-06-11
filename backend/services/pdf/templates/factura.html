@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<style>
+  .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .empresa h2 { font-size: 16px; font-weight: 900; color: #0A1628; }
+  .empresa div { font-size: 10px; color: #64748B; margin-top: 2px; }
+  .box { border: 2px solid #0A1628; border-radius: 8px; padding: 12px 18px; text-align: center; }
+  .box .tipo { font-size: 11px; font-weight: 700; color: #0A1628; }
+  .box .ruc { font-size: 10px; color: #64748B; margin: 4px 0; }
+  .box .num { font-size: 14px; font-weight: 900; color: #2563EB; }
+  .cliente { margin-top: 20px; padding: 12px; background: #F1F5F9; border-radius: 6px; font-size: 11px; }
+  .cliente .label { color: #64748B; font-size: 9px; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 11px; }
+  th { text-align: left; padding: 8px 6px; background: #0A1628; color: white;
+       font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  th.num, td.num { text-align: right; }
+  td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
+  .totales { margin-top: 20px; margin-left: auto; width: 50%; font-size: 12px; }
+  .totales .row { display: flex; justify-content: space-between; padding: 5px 0; }
+  .totales .row.final { border-top: 2px solid #0A1628; margin-top: 6px; padding-top: 10px;
+                        font-size: 16px; font-weight: 900; color: #0A1628; }
+  .footer { margin-top: 36px; font-size: 9px; color: #94A3B8; text-align: center; }
+</style>
+</head>
+<body>
+  {% set biz = factura.biz_data or factura.bizData or {} %}
+  {% set sym = factura.sym or 'S/' %}
+  <div class="top">
+    <div class="empresa">
+      <h2>{{ biz.razonSocial or 'Mi empresa' }}</h2>
+      <div>{{ biz.direccion or '' }}</div>
+      {% if biz.telefono %}<div>Tel: {{ biz.telefono }}</div>{% endif %}
+    </div>
+    <div class="box">
+      <div class="tipo">FACTURA ELECTRÓNICA</div>
+      <div class="ruc">RUC {{ biz.ruc or '' }}</div>
+      <div class="num">{{ factura.inv_num or factura.invNum }}</div>
+    </div>
+  </div>
+
+  <div class="cliente">
+    <div class="label">Señor(es)</div>
+    <strong>{{ factura.client_name or factura.clientName }}</strong>
+    {% set cruc = factura.client_ruc or factura.clientRuc %}
+    {% if cruc %}<div>RUC/DNI: {{ cruc }}</div>{% endif %}
+    {% set cdir = factura.client_dir or factura.clientDir %}
+    {% if cdir %}<div>{{ cdir }}</div>{% endif %}
+    <div>Fecha de emisión: {{ factura.inv_date or factura.invDate }}</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Descripción</th>
+        <th class="num">Cant.</th>
+        <th class="num">P. Unit.</th>
+        <th class="num">Importe</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in factura["items"] %}
+      <tr>
+        <td>{{ item.desc }}</td>
+        <td class="num">{{ "%.2f"|format(item.cantidad or 0) }}</td>
+        <td class="num">{{ sym }} {{ "%.2f"|format(item.pu or 0) }}</td>
+        <td class="num">{{ sym }} {{ "%.2f"|format(item.subtotal or 0) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totales">
+    <div class="row">
+      <span>Op. Gravada</span>
+      <span>{{ sym }} {{ "%.2f"|format(factura.subtotal_base or factura.subtotalBase or 0) }}</span>
+    </div>
+    <div class="row">
+      <span>IGV (18%)</span>
+      <span>{{ sym }} {{ "%.2f"|format(factura.igv_amount or factura.igvAmount or 0) }}</span>
+    </div>
+    <div class="row final">
+      <span>IMPORTE TOTAL</span>
+      <span>{{ sym }} {{ "%.2f"|format(factura.total_final or factura.totalFinal or 0) }}</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    Representación impresa de la factura electrónica · Generado con DARIVO PRO · {{ fecha_generacion }}
+  </div>
+</body>
+</html>

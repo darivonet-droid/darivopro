@@ -1,0 +1,71 @@
+---
+description: DARIVO PRO — Reglas globales del proyecto
+globs: ["**/*.ts","**/*.tsx","**/*.js","**/*.jsx","**/*.py"]
+---
+
+# DARIVO PRO — Cursor Rules
+
+## Identidad del producto
+SaaS mobile-first para profesionales de construcción y reformas en Perú / LATAM.
+**Objetivo supremo: crear presupuesto o factura en < 60 segundos.**
+
+## Stack exacto
+| Capa        | Tecnología                                      |
+|-------------|--------------------------------------------------|
+| Frontend    | Next.js 14 (App Router) + TypeScript + Tailwind  |
+| Backend     | FastAPI (Python 3.11) ó Node.js 20 (Express/TS) |
+| DB          | Supabase (PostgreSQL + Auth + Storage + Realtime)|
+| Deploy FE   | Vercel                                           |
+| Deploy BE   | Vercel Functions ó Railway                       |
+| PDF         | WeasyPrint (Python) ó Puppeteer (Node)           |
+| WhatsApp    | Meta Cloud API                                   |
+| CI/CD       | GitHub Actions → Vercel                         |
+
+## Reglas de código
+
+### TypeScript / Frontend
+- Siempre tipado estricto (`strict: true` en tsconfig)
+- Componentes: PascalCase, un componente por archivo
+- Hooks personalizados: prefijo `use` (ej: `usePresupuesto`)
+- No usar `any` — usar tipos explícitos o generics
+- Imports absolutos desde `@/` (configurado en tsconfig paths)
+- Server Components por defecto en Next.js 14 App Router
+- Client Components solo cuando necesiten estado o eventos → `"use client"`
+
+### Python / Backend
+- FastAPI con Pydantic v2 para validación
+- Async/await en todos los endpoints
+- snake_case para variables y funciones
+- Type hints obligatorios en todas las funciones
+- Manejo de errores: HTTPException con códigos correctos
+
+### API Contract
+- Todos los endpoints: `/api/v1/{recurso}`
+- Respuesta estándar: `{ data: T, error: string | null, meta?: object }`
+- Auth: Bearer token JWT de Supabase en header `Authorization`
+- Errores siempre en español para el usuario
+
+### Diseño / UI
+- Sistema de colores: SIEMPRE desde `@/lib/theme.ts` — nunca hex directo
+- Mobile-first, maxWidth 390px en contenedores de app
+- Textos visibles al usuario SIEMPRE en español
+- Animaciones: clases `.su` `.fi` `.pi` definidas en globals.css
+- No usar librerías de componentes UI externas (solo el design system propio)
+
+### Supabase
+- Row Level Security (RLS) activado en TODAS las tablas
+- Políticas RLS: usuario solo ve datos de su `tenant_id`
+- Usar Supabase client del lado server para mutaciones
+- Usar Supabase client del lado client solo para suscripciones realtime
+
+### Git / GitHub
+- Commits en español con conventional commits:
+  `feat:` `fix:` `refactor:` `docs:` `chore:` `test:`
+- Ramas: `main` (producción), `dev` (desarrollo), `feature/nombre-feature`
+- PR obligatorio para mergear a `main`
+- No commitear `.env` nunca — usar `.env.example`
+
+### Seguridad
+- Variables de entorno: nunca en código, siempre en `.env.local`
+- RUC/DNI: nunca en logs
+- Tokens de WhatsApp: solo en backend, nunca expuestos al frontend
