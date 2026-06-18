@@ -1,23 +1,29 @@
-# Entornos
+# ═══ SECRETOS — nunca subir a GitHub ═══
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env.local
+*.pem
+*.key
 
-# Node
+# Node / Next.js
 node_modules/
 frontend/.next/
 frontend/out/
 frontend/coverage/
 *.tsbuildinfo
-next-env.d.ts
 
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+backend/.venv/
 .pytest_cache/
 
 # IDE / SO
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/

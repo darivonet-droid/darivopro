@@ -8,7 +8,7 @@ interface CookieASetear {
   options?: CookieOptions;
 }
 
-const RUTAS_PUBLICAS = ["/login", "/registro"];
+const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena"];
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req });

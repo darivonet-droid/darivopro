@@ -1,6 +1,5 @@
 // DARIVO PRO — Presupuestos (Server Component)
 import Link from "next/link";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { PresupuestosList } from "@/components/presupuesto/PresupuestosList";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
@@ -40,11 +39,17 @@ export default async function PresupuestosPage() {
   }));
 
   return (
-    <div>
-      <PageHeader
-        titulo="Presupuestos"
-        subtitulo={`${presupuestos.length} en total`}
-        accion={
+    <div className="min-h-screen" style={{ background: "#F8FAFF" }}>
+      <header className="px-5 pb-5 pt-6" style={{ background: T.navy }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-black" style={{ color: T.white }}>
+              Presupuestos
+            </h1>
+            <p className="mt-0.5 text-xs" style={{ color: T.textLight }}>
+              {presupuestos.length} en total
+            </p>
+          </div>
           <Link
             href="/presupuestos/nuevo"
             className="rounded-xl px-4 py-2.5 text-sm font-bold"
@@ -52,8 +57,9 @@ export default async function PresupuestosPage() {
           >
             + Nuevo
           </Link>
-        }
-      />
+        </div>
+      </header>
+
       <main className="px-4 py-4">
         <PresupuestosList iniciales={presupuestos} />
       </main>

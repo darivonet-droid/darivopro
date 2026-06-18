@@ -1,20 +1,18 @@
 "use client";
-// DARIVO PRO — Lista de presupuestos con acciones rápidas
 import { useState } from "react";
-import { Card } from "@/components/ui/Card";
+import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Pill } from "@/components/ui/Pill";
 import { Button } from "@/components/ui/Button";
+import { PresupuestoCard } from "@/components/presupuesto/PresupuestoCard";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
 import { useAppStore } from "@/store/useAppStore";
-import { fmtPEN } from "@/lib/utils";
-import { STATUS_COLORS, T } from "@/lib/theme";
+import { T } from "@/lib/theme";
 import type { Presupuesto } from "@/types";
 
 const SIGUIENTE_ESTADO: Record<Presupuesto["status"], Presupuesto["status"] | null> = {
-  "Borrador": "Pendiente de firma",
+  Borrador: "Pendiente de firma",
   "Pendiente de firma": "Aprobado",
-  "Aprobado": null,
+  Aprobado: null,
 };
 
 export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
@@ -29,7 +27,11 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
         emoji="📋"
         titulo="Sin presupuestos todavía"
         descripcion="Crea tu primer presupuesto en menos de 60 segundos."
-      />
+      >
+        <Link href="/presupuestos/nuevo">
+          <Button>Nuevo presupuesto</Button>
+        </Link>
+      </EmptyState>
     );
   }
 
@@ -38,7 +40,9 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     if (!siguiente) return;
     const ok = await actualizarEstado(p.id, siguiente);
     if (ok) {
-      setPresupuestos((prev) => prev.map((x) => (x.id === p.id ? { ...x, status: siguiente } : x)));
+      setPresupuestos((prev) =>
+        prev.map((x) => (x.id === p.id ? { ...x, status: siguiente } : x))
+      );
       mostrarToast(`Presupuesto → ${siguiente}`);
     } else {
       mostrarToast("No se pudo actualizar el estado", "error");
@@ -67,51 +71,44 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
       {presupuestos.map((p) => {
         const expandido = abierto === p.id;
         return (
-          <Card key={p.id} onClick={() => setAbierto(expandido ? null : p.id)}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold" style={{ color: T.text }}>{p.clientName}</div>
-                <div className="mt-0.5 text-xs" style={{ color: T.textMid }}>
-                  {p.items.length} partida{p.items.length === 1 ? "" : "s"}
-                  {p.city ? ` · ${p.city}` : ""}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-black" style={{ color: T.navy }}>{fmtPEN(p.totalFinal)}</div>
-                <div className="mt-1">
-                  <Pill label={p.status} color={STATUS_COLORS[p.status] ?? T.textMid} />
-                </div>
-              </div>
-            </div>
-
-            {expandido && (
-              <div className="fi mt-3 flex gap-2 border-t pt-3" style={{ borderColor: T.slateD }}>
-                {SIGUIENTE_ESTADO[p.status] && (
+          <PresupuestoCard
+            key={p.id}
+            presupuesto={p}
+            onClick={() => setAbierto(expandido ? null : p.id)}
+            footer={
+              expandido ? (
+                <div
+                  className="fi mt-3 flex gap-2 border-t pt-3"
+                  style={{ borderColor: T.slateD }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {SIGUIENTE_ESTADO[p.status] && (
+                    <Button
+                      variant="success"
+                      className="flex-1 !px-2 !py-2.5 !text-xs"
+                      onClick={() => avanzarEstado(p)}
+                    >
+                      → {SIGUIENTE_ESTADO[p.status]}
+                    </Button>
+                  )}
                   <Button
-                    variant="success"
+                    variant="ghost"
                     className="flex-1 !px-2 !py-2.5 !text-xs"
-                    onClick={(e) => { e.stopPropagation(); avanzarEstado(p); }}
+                    onClick={() => descargarPDF(p.id)}
                   >
-                    → {SIGUIENTE_ESTADO[p.status]}
+                    PDF
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  className="flex-1 !px-2 !py-2.5 !text-xs"
-                  onClick={(e) => { e.stopPropagation(); descargarPDF(p.id); }}
-                >
-                  PDF
-                </Button>
-                <Button
-                  variant="danger"
-                  className="!px-3 !py-2.5 !text-xs"
-                  onClick={(e) => { e.stopPropagation(); borrar(p.id); }}
-                >
-                  Eliminar
-                </Button>
-              </div>
-            )}
-          </Card>
+                  <Button
+                    variant="danger"
+                    className="!px-3 !py-2.5 !text-xs"
+                    onClick={() => borrar(p.id)}
+                  >
+                    Eliminar
+                  </Button>
+                </div>
+              ) : undefined
+            }
+          />
         );
       })}
     </div>

@@ -1,10 +1,12 @@
 "use client";
 // DARIVO PRO — Wizard de nuevo presupuesto (objetivo: < 60 segundos)
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { NuevaPartidaModal } from "@/components/presupuesto/NuevaPartidaModal";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
+import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
 import { useAppStore } from "@/store/useAppStore";
 import { CATALOGO, partidaALinea } from "@/lib/catalog";
 import { presupuestoSchema } from "@/lib/validations";
@@ -28,6 +30,22 @@ export function NuevoPresupuestoWizard() {
   const [margin, setMargin] = useState(40);
   const [notes, setNotes] = useState("");
   const [errorPaso, setErrorPaso] = useState<string | null>(null);
+  const [modalPartida, setModalPartida] = useState(false);
+
+  const draft = { clientName, phone, city, items, margin, notes, iaResult: null };
+  const { cargar, limpiar } = usePresupuestoDraft(draft);
+
+  useEffect(() => {
+    const saved = cargar();
+    if (saved && saved.items.length > 0) {
+      setClientName(saved.clientName);
+      setPhone(saved.phone);
+      setCity(saved.city);
+      setItems(saved.items);
+      setMargin(saved.margin);
+      setNotes(saved.notes);
+    }
+  }, [cargar]);
 
   const totalBase  = useMemo(() => items.reduce((s, it) => s + it.subtotal, 0), [items]);
   const totalLabor = Math.round(totalBase * margin) / 100;
@@ -87,6 +105,7 @@ export function NuevoPresupuestoWizard() {
     }
     const creado = await crear(payload);
     if (creado) {
+      limpiar();
       mostrarToast("Presupuesto creado ✓");
       router.push("/presupuestos");
       router.refresh();
@@ -207,8 +226,26 @@ export function NuevoPresupuestoWizard() {
               <span className="text-sm font-black" style={{ color: T.white }}>{fmtPEN(totalBase)}</span>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={() => setModalPartida(true)}
+            className="mt-4 w-full rounded-2xl py-3.5 text-sm font-bold text-white"
+            style={{
+              background: `linear-gradient(135deg, ${T.amber} 0%, ${T.blue} 100%)`,
+            }}
+          >
+            + Nueva partida personalizada
+          </button>
         </div>
       )}
+
+      <NuevaPartidaModal
+        open={modalPartida}
+        categoria={capitulo}
+        onClose={() => setModalPartida(false)}
+        onAdd={(linea) => setItems((prev) => [...prev, linea])}
+      />
 
       {/* Paso 3: Resumen */}
       {paso === 2 && (

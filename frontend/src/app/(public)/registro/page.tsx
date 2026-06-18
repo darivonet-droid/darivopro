@@ -1,82 +1,154 @@
 "use client";
-// DARIVO PRO — Crear cuenta
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
 import { T } from "@/lib/theme";
 
+const ERRORES: Record<string, string> = {
+  user_already_exists:         "Ya existe una cuenta con ese correo 👀",
+  email_address_invalid:       "Ese correo no parece válido, revísalo",
+  weak_password:               "La contraseña es muy débil, ponle más caracteres",
+  over_email_send_rate_limit:  "Espera un momento antes de intentar de nuevo",
+};
+
+function mensajeError(code?: string): string {
+  return ERRORES[code ?? ""] ?? "No se pudo crear la cuenta. Inténtalo de nuevo";
+}
+
 export default function RegistroPage() {
-  const router = useRouter();
+  const router   = useRouter();
   const supabase = createClient();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [exito, setExito] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [nombre,    setNombre]    = useState("");
+  const [email,     setEmail]     = useState("");
+  const [password,  setPassword]  = useState("");
+  const [confirmar, setConfirmar] = useState("");
+  const [error,     setError]     = useState<string | null>(null);
+  const [exito,     setExito]     = useState(false);
+  const [loading,   setLoading]   = useState(false);
 
   const registrar = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
+      setError("La contraseña debe tener mínimo 8 caracteres");
       return;
     }
+    if (password !== confirmar) {
+      setError("Las contraseñas no coinciden, chécalas 👀");
+      return;
+    }
+
     setLoading(true);
-    setError(null);
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { nombre_empresa: nombre } },
+    });
     setLoading(false);
+
     if (error) {
-      setError("No se pudo crear la cuenta. Inténtalo de nuevo.");
+      setError(mensajeError(error.code));
       return;
     }
     if (data.session) {
-      router.push("/dashboard");
+      router.push("/onboarding/1");
       router.refresh();
     } else {
-      setExito(true); // requiere confirmación por correo
+      setExito(true);
     }
   };
 
+  /* ── Estado de éxito (confirmar correo) */
   if (exito) {
     return (
-      <div className="su rounded-3xl p-6 text-center" style={{ background: T.white }}>
-        <div className="text-4xl">📬</div>
-        <h2 className="mt-3 text-lg font-extrabold" style={{ color: T.text }}>Revisa tu correo</h2>
-        <p className="mt-1 text-sm" style={{ color: T.textMid }}>
-          Te enviamos un enlace para confirmar tu cuenta.
-        </p>
+      <div className="flex flex-col gap-6">
+        <div
+          className="rounded-2xl bg-white p-8 text-center"
+          style={{ boxShadow: "0 2px 20px rgba(10,22,40,0.09)" }}
+        >
+          <div
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-3xl"
+            style={{ background: T.greenPale }}
+          >
+            📬
+          </div>
+          <h2 className="text-lg font-extrabold" style={{ color: T.text }}>
+            ¡Revisa tu correo!
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: T.textMid }}>
+            Enviamos un enlace de confirmación a{" "}
+            <span className="font-bold" style={{ color: T.blue }}>{email}</span>.
+            <br />Activa tu cuenta para entrar.
+          </p>
+          <Link
+            href="/login"
+            className="mt-5 block text-sm font-bold"
+            style={{ color: T.blue }}
+          >
+            Volver al inicio de sesión →
+          </Link>
+        </div>
       </div>
     );
   }
 
+  /* ── Formulario */
   return (
-    <form onSubmit={registrar} className="su flex flex-col gap-4 rounded-3xl p-6" style={{ background: T.white }}>
-      <h2 className="text-lg font-extrabold" style={{ color: T.text }}>Crear cuenta</h2>
+    <div className="flex flex-col gap-6">
 
-      <Input
-        label="Correo electrónico"
-        type="email"
-        placeholder="tu@correo.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <Input
-        label="Contraseña"
-        type="password"
-        placeholder="Mínimo 8 caracteres"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+      <div className="rounded-2xl bg-white p-6" style={{ boxShadow: "0 2px 20px rgba(10,22,40,0.09)" }}>
+        <h1 className="mb-1 text-xl font-extrabold" style={{ color: T.text }}>
+          Crear cuenta gratis
+        </h1>
+        <p className="mb-6 text-sm" style={{ color: T.textMid }}>
+          Tu primer presupuesto en menos de 60 segundos
+        </p>
 
-      {error && <p className="text-sm font-semibold" style={{ color: T.red }}>{error}</p>}
+        <form onSubmit={registrar} className="flex flex-col gap-4">
+          <AuthInput
+            label="Nombre de tu empresa"
+            type="text"
+            placeholder="Ej: Construcciones Pérez"
+            autoComplete="organization"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            required
+          />
+          <AuthInput
+            label="Correo electrónico"
+            type="email"
+            placeholder="tu@correo.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <AuthInput
+            label="Contraseña"
+            type="password"
+            placeholder="Mínimo 8 caracteres"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <AuthInput
+            label="Confirmar contraseña"
+            type="password"
+            placeholder="Repite tu contraseña"
+            autoComplete="new-password"
+            value={confirmar}
+            onChange={(e) => setConfirmar(e.target.value)}
+            required
+          />
 
-      <Button type="submit" full disabled={loading}>
-        {loading ? "Creando cuenta…" : "Crear cuenta gratis"}
-      </Button>
+          {error && <ErrorBanner mensaje={error} />}
+
+          <AuthButton loading={loading} texto="Crear cuenta" textoLoading="Creando cuenta…" />
+        </form>
+      </div>
 
       <p className="text-center text-sm" style={{ color: T.textMid }}>
         ¿Ya tienes cuenta?{" "}
@@ -84,6 +156,60 @@ export default function RegistroPage() {
           Inicia sesión
         </Link>
       </p>
-    </form>
+
+    </div>
+  );
+}
+
+/* ── Componentes internos ───────────────────────────────────── */
+
+interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+}
+function AuthInput({ label, ...props }: AuthInputProps) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
+        {label}
+      </span>
+      <input
+        {...props}
+        className="w-full rounded-xl px-4 py-3.5 text-sm font-medium outline-none transition-all focus:ring-2"
+        style={{
+          background: "#fff",
+          color:      T.text,
+          border:     `1.5px solid ${T.slateD}`,
+          // @ts-expect-error custom property
+          "--tw-ring-color": T.blue,
+        }}
+      />
+    </label>
+  );
+}
+
+function ErrorBanner({ mensaje }: { mensaje: string }) {
+  return (
+    <div
+      className="flex items-start gap-2.5 rounded-xl px-4 py-3"
+      style={{ background: T.redPale, border: `1px solid ${T.red}22` }}
+    >
+      <span className="mt-0.5 text-base">⚠️</span>
+      <p className="text-sm font-semibold leading-snug" style={{ color: T.red }}>
+        {mensaje}
+      </p>
+    </div>
+  );
+}
+
+function AuthButton({ loading, texto, textoLoading }: { loading: boolean; texto: string; textoLoading: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+      style={{ background: T.blue }}
+    >
+      {loading ? textoLoading : texto}
+    </button>
   );
 }

@@ -1,29 +1,36 @@
-// DARIVO PRO — Ajustes (Server Component)
+// DARIVO PRO — Configuración (Server Component)
 import { PageHeader } from "@/components/ui/PageHeader";
-import { AjustesForm } from "@/components/ajustes/AjustesForm";
+import { ConfigTabs } from "@/components/ajustes/ConfigTabs";
 import { createServerClient } from "@/lib/supabase/server";
 
-export default async function AjustesPage() {
+export default async function ConfiguracionPage() {
   const supabase = createServerClient();
-  const [{ data: { user } }, { data: perfil }] = await Promise.all([
+
+  const [
+    { data: { user } },
+    { data: perfil },
+    { data: tarifas },
+  ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("*").single(),
+    supabase.from("precios_usuario").select("svc_id, precio").order("svc_id"),
   ]);
 
   return (
     <div>
-      <PageHeader titulo="Ajustes" subtitulo="Tu empresa y tu cuenta" />
+      <PageHeader titulo="Configuración" subtitulo="Empresa, tarifas y categorías" />
       <main className="px-4 py-4">
-        <AjustesForm
+        <ConfigTabs
           email={user?.email ?? ""}
           inicial={{
             razonSocial: perfil?.razon_social ?? "",
-            ruc: perfil?.ruc ?? "",
-            direccion: perfil?.direccion ?? "",
-            telefono: perfil?.telefono ?? "",
-            moneda: perfil?.moneda ?? "PEN",
-            simbolo: perfil?.simbolo ?? "S/",
+            ruc:         perfil?.ruc          ?? "",
+            direccion:   perfil?.direccion    ?? "",
+            telefono:    perfil?.telefono     ?? "",
+            moneda:      perfil?.moneda       ?? "PEN",
+            simbolo:     perfil?.simbolo      ?? "S/",
           }}
+          tarifas={tarifas ?? []}
         />
       </main>
     </div>
