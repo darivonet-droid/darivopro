@@ -2,6 +2,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { verificarLimitePresupuesto } from "@/lib/plan-limits";
 import type { Presupuesto, LineaPresupuesto } from "@/types";
 
 interface ItemRow {
@@ -77,12 +78,21 @@ export function usePresupuesto() {
   }, [supabase]);
 
   const crear = useCallback(async (
-    presupuesto: Omit<Presupuesto, "id" | "tenant_id" | "createdAt">
+    presupuesto: Omit<Presupuesto, "id" | "tenant_id" | "createdAt">,
+    onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
   ): Promise<Presupuesto | null> => {
     setLoading(true);
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); setError("Sesión expirada"); return null; }
+
+    const limite = await verificarLimitePresupuesto(supabase);
+    if (!limite.ok) {
+      setLoading(false);
+      setError("Límite de plan alcanzado");
+      onUpgrade?.(limite.razon);
+      return null;
+    }
 
     const { data, error } = await supabase
       .from("presupuestos")

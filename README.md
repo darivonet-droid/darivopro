@@ -20,8 +20,8 @@ git clone https://github.com/tu-org/darivo-pro.git
 cd darivo-pro
 
 # 2. Variables de entorno
-cp .env.example .env.local        # frontend
-cp .env.example backend/.env      # backend
+cp frontend/.env.example frontend/.env.local   # frontend
+cp backend/.env.example backend/.env            # backend
 # Editar con tus keys de Supabase, WhatsApp, etc.
 
 # 3. Supabase — ejecutar migración
@@ -88,7 +88,9 @@ darivo-pro/
 │   └── migrations/         # SQL — tablas, RLS, triggers, storage
 │       ├── 001_initial.sql # perfiles, presupuestos, items, facturas, partidas, precios
 │       └── 002_clientes.sql# tabla clientes
-├── .env.example            # Template variables de entorno
+├── frontend/.env.example   # Template → copiar a frontend/.env.local
+├── backend/.env.example    # Template → copiar a backend/.env
+├── .env.example            # Índice de dónde va cada variable
 └── README.md
 ```
 

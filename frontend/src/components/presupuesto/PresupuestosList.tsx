@@ -1,11 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
+import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { PresupuestoCard } from "@/components/presupuesto/PresupuestoCard";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
+import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { T } from "@/lib/theme";
 import type { Presupuesto } from "@/types";
 
@@ -16,10 +19,21 @@ const SIGUIENTE_ESTADO: Record<Presupuesto["status"], Presupuesto["status"] | nu
 };
 
 export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
-  const [presupuestos, setPresupuestos] = useState(iniciales);
+  const [presupuestos, setPresupuestos] = useState(() => {
+    if (iniciales.length > 0) return iniciales;
+    return leerListaCache<Presupuesto>("presupuestos") ?? iniciales;
+  });
   const [abierto, setAbierto] = useState<string | null>(null);
+  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(presupuestos);
   const { actualizarEstado, eliminar, generarPDF } = usePresupuesto();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+
+  useEffect(() => {
+    if (iniciales.length > 0) {
+      setPresupuestos(iniciales);
+      guardarListaCache("presupuestos", iniciales);
+    }
+  }, [iniciales]);
 
   if (presupuestos.length === 0) {
     return (
@@ -68,7 +82,7 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
 
   return (
     <div className="flex flex-col gap-2.5">
-      {presupuestos.map((p) => {
+      {slice.map((p) => {
         const expandido = abierto === p.id;
         return (
           <PresupuestoCard
@@ -111,6 +125,7 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
           />
         );
       })}
+      <PaginacionLista visible={visible} total={total} hayMas={hayMas} onCargarMas={cargarMas} />
     </div>
   );
 }

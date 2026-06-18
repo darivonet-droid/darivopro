@@ -1,0 +1,19 @@
+{
+  "name": "Darivo Pro",
+  "short_name": "Darivo",
+  "description": "Presupuestos y facturas de reformas en Perú",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#2563EB",
+  "background_color": "#0A1628",
+  "lang": "es-PE",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

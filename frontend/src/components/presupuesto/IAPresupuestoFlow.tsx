@@ -29,6 +29,8 @@ export function IAPresupuestoFlow() {
   const router = useRouter();
   const { crear, generarPDF, loading } = usePresupuesto();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
+  const modoOffline = useAppStore((s) => s.modoOffline);
 
   const [modo, setModo]               = useState<Modo>("elegir");
   const [descripcion, setDescripcion] = useState("");
@@ -66,6 +68,10 @@ export function IAPresupuestoFlow() {
   }, [cargar]);
 
   const generarConIA = useCallback(async (texto: string) => {
+    if (modoOffline) {
+      mostrarToast("Sin conexión — la IA requiere internet", "error");
+      return;
+    }
     setProcesando(true);
     try {
       const res = await fetch("/api/ia/presupuesto", {
@@ -74,6 +80,10 @@ export function IAPresupuestoFlow() {
         body: JSON.stringify({ descripcion: texto }),
       });
       const json = await res.json();
+      if (res.status === 429) {
+        mostrarUpgrade("ia_limite");
+        return;
+      }
       if (!res.ok) {
         mostrarToast(json.error ?? "Error con la IA", "error");
         return;
@@ -88,7 +98,7 @@ export function IAPresupuestoFlow() {
     } finally {
       setProcesando(false);
     }
-  }, [clientName, mostrarToast]);
+  }, [clientName, mostrarToast, mostrarUpgrade, modoOffline]);
 
   const iniciarVoz = () => {
     setModo("hablar");
@@ -170,7 +180,7 @@ export function IAPresupuestoFlow() {
       totalFinal: resultado.total,
       status: "Borrador",
       notes: `${numPresupuesto} · Generado con IA`,
-    });
+    }, mostrarUpgrade);
     if (!creado) {
       mostrarToast("No se pudo guardar", "error");
       return;

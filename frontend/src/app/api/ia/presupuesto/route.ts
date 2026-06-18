@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { IA_SYSTEM_PROMPT, parseIAResponse } from "@/lib/presupuesto-ia";
+import { parseIAResponse, IA_SYSTEM_PROMPT } from "@/lib/presupuesto-ia";
+import {
+  obtenerPlanTipo,
+  verificarLimiteIA,
+  registrarUsoIA,
+} from "@/lib/plan-limits";
 
 export async function POST(req: NextRequest) {
   const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const limite = await verificarLimiteIA(supabase);
+  if (!limite.ok) {
+    return NextResponse.json(
+      { error: "Límite diario de IA alcanzado (3/día)", razon: limite.razon },
+      { status: 429 }
+    );
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -52,6 +65,11 @@ export async function POST(req: NextRequest) {
     const body = await res.json();
     const text = body.content?.[0]?.text ?? "";
     const resultado = parseIAResponse(text);
+
+    const plan = await obtenerPlanTipo(supabase);
+    if (plan !== "pro" && plan !== "empresa") {
+      await registrarUsoIA(supabase);
+    }
 
     return NextResponse.json({ data: resultado });
   } catch (e) {

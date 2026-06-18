@@ -20,6 +20,7 @@ export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const { crear, loading } = usePresupuesto();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
   const [paso, setPaso] = useState(0);
   const [clientName, setClientName] = useState("");
@@ -103,7 +104,7 @@ export function NuevoPresupuestoWizard() {
       setErrorPaso(valido.error.errors[0]?.message ?? "Revisa los datos");
       return;
     }
-    const creado = await crear(payload);
+    const creado = await crear(payload, mostrarUpgrade);
     if (creado) {
       limpiar();
       mostrarToast("Presupuesto creado ✓");

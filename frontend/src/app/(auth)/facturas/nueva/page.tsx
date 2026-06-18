@@ -1,20 +1,25 @@
-// DARIVO PRO — Nueva factura (Server Component)
-import { PageHeader } from "@/components/ui/PageHeader";
+// DARIVO PRO — Nueva factura
 import { NuevaFacturaForm } from "@/components/facturacion/NuevaFacturaForm";
 import { createServerClient } from "@/lib/supabase/server";
-import type { EmpresaData, Presupuesto } from "@/types";
+import { T } from "@/lib/theme";
+import type { Cliente, EmpresaData, LineaPresupuesto, Presupuesto } from "@/types";
 
-export default async function NuevaFacturaPage() {
+export default async function NuevaFacturaPage({
+  searchParams,
+}: {
+  searchParams: { presupuesto?: string };
+}) {
   const supabase = createServerClient();
 
-  const [perfilRes, countRes, aprobadosRes] = await Promise.all([
+  const [perfilRes, facturasRes, aprobadosRes, clientesRes] = await Promise.all([
     supabase.from("perfiles").select("*").single(),
-    supabase.from("facturas").select("inv_id", { count: "exact", head: true }),
+    supabase.from("facturas").select("inv_num"),
     supabase
       .from("presupuestos")
       .select("*, items:presupuesto_items(*)")
       .eq("status", "Aprobado")
       .order("created_at", { ascending: false }),
+    supabase.from("clientes").select("*").order("nombre"),
   ]);
 
   const perfil = perfilRes.data;
@@ -29,7 +34,7 @@ export default async function NuevaFacturaPage() {
       }
     : null;
 
-  const numeroSugerido = `F001-${String((countRes.count ?? 0) + 1).padStart(6, "0")}`;
+  const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
 
   const aprobados: Presupuesto[] = (aprobadosRes.data ?? []).map((row) => ({
     id: row.id,
@@ -37,11 +42,11 @@ export default async function NuevaFacturaPage() {
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>) => ({
+    items: (row.items ?? []).map((it: Record<string, unknown>): LineaPresupuesto => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
-      calcType: (it.calc_type ?? "fixed") as Presupuesto["items"][number]["calcType"],
+      calcType: (it.calc_type ?? "fixed") as LineaPresupuesto["calcType"],
       basePrice: Number(it.base_price ?? 0),
       unit: String(it.unit ?? ""),
       qty: Number(it.qty ?? 0),
@@ -57,10 +62,30 @@ export default async function NuevaFacturaPage() {
     notes: row.notes ?? undefined,
   }));
 
+  const clientes: Cliente[] = (clientesRes.data ?? []).map((row) => ({
+    id: row.id,
+    nombre: row.nombre,
+    telefono: row.telefono ?? undefined,
+    ruc: row.ruc ?? undefined,
+    direccion: row.direccion ?? undefined,
+    ciudad: row.ciudad ?? undefined,
+    notas: row.notas ?? undefined,
+    createdAt: row.created_at,
+  }));
+
   return (
-    <div>
-      <PageHeader titulo="Nueva factura" subtitulo="Formato SUNAT con IGV 18%" backHref="/facturas" />
-      <NuevaFacturaForm empresa={empresa} numeroSugerido={numeroSugerido} aprobados={aprobados} />
+    <div className="min-h-screen" style={{ background: "#F8FAFF" }}>
+      <header className="px-5 pb-4 pt-6" style={{ background: T.navy }}>
+        <h1 className="text-xl font-black" style={{ color: "#FFFFFF" }}>Nueva factura</h1>
+        <p className="text-xs" style={{ color: "#94A3B8" }}>Boleta o factura · IGV 18%</p>
+      </header>
+      <NuevaFacturaForm
+        empresa={empresa}
+        numerosExistentes={numerosExistentes}
+        aprobados={aprobados}
+        clientes={clientes}
+        presupuestoId={searchParams.presupuesto}
+      />
     </div>
   );
 }

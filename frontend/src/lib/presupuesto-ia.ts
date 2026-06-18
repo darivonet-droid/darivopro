@@ -1,4 +1,5 @@
 import type { LineaPresupuesto } from "@/types";
+import { calcIGV } from "@/lib/utils";
 
 export const IA_SYSTEM_PROMPT =
   "Eres asistente de presupuestos para contratistas en Perú. Convierte descripción en JSON: {titulo, items:[{descripcion,cantidad,unidad,precio_unit,total}], subtotal, igv(subtotal*0.18), total}. Precios mercado Lima 2025.";
@@ -62,8 +63,7 @@ export function iaItemsALineas(
 
 export function recalcularTotalesIA(items: IAPresupuestoItem[]): IAPresupuestoResult {
   const subtotal = Math.round(items.reduce((s, it) => s + it.total, 0) * 100) / 100;
-  const igv = Math.round(subtotal * 0.18 * 100) / 100;
-  const total = Math.round((subtotal + igv) * 100) / 100;
+  const { igv, total } = calcIGV(subtotal);
   return { titulo: "", items, subtotal, igv, total };
 }
 
@@ -75,8 +75,7 @@ export function parseIAResponse(text: string): IAPresupuestoResult {
   const subtotal =
     parsed.subtotal ??
     parsed.items.reduce((s, it) => s + Number(it.total ?? 0), 0);
-  const igv = parsed.igv ?? Math.round(subtotal * 0.18 * 100) / 100;
-  const total = parsed.total ?? subtotal + igv;
+  const { igv, total } = calcIGV(subtotal);
   return { ...parsed, subtotal, igv, total };
 }
 

@@ -11,14 +11,11 @@ export const fmtPEN = (n: number, sym = "S/") =>
 /** Fecha hoy YYYY-MM-DD */
 export const hoy = () => new Date().toISOString().slice(0, 10);
 
-/** Calcula IGV 18% Perú */
-export const calcIGV = (base: number, incluido = false) => {
-  if (incluido) {
-    const igv  = base * (18/118);
-    return { neto: base - igv, igv, total: base };
-  }
-  const igv = base * 0.18;
-  return { neto: base, igv, total: base + igv };
+/** Calcula IGV 18% Perú — siempre subtotal × 0.18 */
+export const calcIGV = (subtotal: number) => {
+  const igv = Math.round(subtotal * 0.18 * 100) / 100;
+  const total = Math.round((subtotal + igv) * 100) / 100;
+  return { neto: subtotal, igv, total };
 };
 
 /** Agrupa items por capítulo */

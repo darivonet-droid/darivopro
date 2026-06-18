@@ -8,7 +8,8 @@ interface CookieASetear {
   options?: CookieOptions;
 }
 
-const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena"];
+const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena", "/precios"];
+const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar", "/nueva-contrasena"];
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req });
@@ -36,7 +37,7 @@ export async function middleware(req: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-  if (user && esPublica) {
+  if (user && RUTAS_SOLO_INVITADO.some((r) => req.nextUrl.pathname.startsWith(r))) {
     const url = req.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

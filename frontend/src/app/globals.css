@@ -15,8 +15,14 @@ body {
 body {
   background: var(--slate);
   color: #1E293B;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .su, .fi, .pi, .animate-pulse {
+    animation: none !important;
+  }
 }
 
 /* ── Animaciones del design system ─────────────────────────── */

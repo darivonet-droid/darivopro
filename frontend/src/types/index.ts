@@ -61,6 +61,8 @@ export interface EmpresaData {
   telefono?: string;
   moneda: "PEN" | "USD";
   simbolo: string;
+  tipoComprobante?: "boleta" | "factura";
+  formaPago?: "Efectivo" | "Yape" | "Transferencia" | "Crédito";
 }
 
 export interface Partida {

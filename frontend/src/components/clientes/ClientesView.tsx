@@ -1,12 +1,15 @@
 "use client";
 // DARIVO PRO — Gestión de clientes
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
+import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { useClientes } from "@/hooks/useClientes";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
+import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { clienteSchema } from "@/lib/validations";
 import { T } from "@/lib/theme";
 import type { Cliente } from "@/types";
@@ -14,12 +17,23 @@ import type { Cliente } from "@/types";
 const FORM_VACIO = { nombre: "", telefono: "", ruc: "", direccion: "", ciudad: "" };
 
 export function ClientesView({ iniciales }: { iniciales: Cliente[] }) {
-  const [clientes, setClientes] = useState(iniciales);
+  const [clientes, setClientes] = useState(() => {
+    if (iniciales.length > 0) return iniciales;
+    return leerListaCache<Cliente>("clientes") ?? iniciales;
+  });
   const [mostrandoForm, setMostrandoForm] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
   const [error, setError] = useState<string | null>(null);
   const { crear, eliminar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(clientes);
+
+  useEffect(() => {
+    if (iniciales.length > 0) {
+      setClientes(iniciales);
+      guardarListaCache("clientes", iniciales);
+    }
+  }, [iniciales]);
 
   const guardar = async () => {
     setError(null);
@@ -84,7 +98,7 @@ export function ClientesView({ iniciales }: { iniciales: Cliente[] }) {
         />
       )}
 
-      {clientes.map((c) => (
+      {slice.map((c) => (
         <Card key={c.id}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -112,6 +126,7 @@ export function ClientesView({ iniciales }: { iniciales: Cliente[] }) {
           </div>
         </Card>
       ))}
+      <PaginacionLista visible={visible} total={total} hayMas={hayMas} onCargarMas={cargarMas} />
     </div>
   );
 }

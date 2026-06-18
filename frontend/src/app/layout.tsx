@@ -4,13 +4,19 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "DARIVO PRO",
   description: "Presupuestos y facturas de reformas en menos de 60 segundos",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Darivo Pro",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0A1628",
+  themeColor: "#2563EB",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -22,11 +22,19 @@
   .totales .row.final { border-top: 2px solid #0A1628; margin-top: 6px; padding-top: 10px;
                         font-size: 16px; font-weight: 900; color: #0A1628; }
   .footer { margin-top: 36px; font-size: 9px; color: #94A3B8; text-align: center; }
+  .pagado { position: fixed; top: 40%; left: 50%; transform: translate(-50%,-50%) rotate(-18deg);
+            border: 4px solid #059669; color: #059669; font-size: 42px; font-weight: 900;
+            padding: 12px 28px; border-radius: 8px; opacity: 0.35; letter-spacing: 4px; }
 </style>
 </head>
 <body>
   {% set biz = factura.biz_data or factura.bizData or {} %}
   {% set sym = factura.sym or 'S/' %}
+  {% set status = factura.inv_status or factura.invStatus or '' %}
+  {% set tipo_doc = biz.tipoComprobante or 'factura' %}
+  {% if status == 'Cobrada' %}
+  <div class="pagado">PAGADO</div>
+  {% endif %}
   <div class="top">
     <div class="empresa">
       <h2>{{ biz.razonSocial or 'Mi empresa' }}</h2>
@@ -34,7 +42,7 @@
       {% if biz.telefono %}<div>Tel: {{ biz.telefono }}</div>{% endif %}
     </div>
     <div class="box">
-      <div class="tipo">FACTURA ELECTRÓNICA</div>
+      <div class="tipo">{% if tipo_doc == 'boleta' %}BOLETA DE VENTA{% else %}FACTURA ELECTRÓNICA{% endif %}</div>
       <div class="ruc">RUC {{ biz.ruc or '' }}</div>
       <div class="num">{{ factura.inv_num or factura.invNum }}</div>
     </div>
@@ -87,7 +95,8 @@
   </div>
 
   <div class="footer">
-    Representación impresa de la factura electrónica · Generado con DARIVO PRO · {{ fecha_generacion }}
+    {% if biz.formaPago %}Forma de pago: {{ biz.formaPago }} · {% endif %}
+    Representación impresa del comprobante · Generado con DARIVO PRO · {{ fecha_generacion }}
   </div>
 </body>
 </html>

@@ -2,6 +2,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { verificarLimiteFactura } from "@/lib/plan-limits";
 import { buildWAMessage } from "@/lib/utils";
 import type { EmpresaData, Factura, LineaFactura } from "@/types";
 
@@ -60,12 +61,21 @@ export function useFactura() {
   }, [supabase]);
 
   const crear = useCallback(async (
-    factura: Omit<Factura, "invId" | "tenant_id">
+    factura: Omit<Factura, "invId" | "tenant_id">,
+    onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
   ): Promise<Factura | null> => {
     setLoading(true);
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); setError("Sesión expirada"); return null; }
+
+    const limite = await verificarLimiteFactura(supabase);
+    if (!limite.ok) {
+      setLoading(false);
+      setError("Límite de facturas alcanzado");
+      onUpgrade?.(limite.razon);
+      return null;
+    }
 
     const { data, error } = await supabase
       .from("facturas")
