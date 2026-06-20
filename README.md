@@ -48,13 +48,23 @@ uvicorn main:app --reload --port 8000
 ```
 
 ### Backend → Railway
+1. Crear servicio en Railway con **Root Directory: `backend`**
+2. Builder: **Dockerfile** (usa `backend/railway.toml`)
+3. Variables en Railway Dashboard (mínimo para arrancar):
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`
+   - `SERVICE_KEY` (legacy)
+   - `WA_PHONE_NUMBER_ID`, `WA_ACCESS_TOKEN` (solo si usas WhatsApp Meta API)
+4. GitHub Secret: `RAILWAY_TOKEN` (Account → Tokens → crear token)
+5. El servicio debe llamarse **`darivo-pro-api`** o cambiar el nombre en `.github/workflows/deploy.yml`
+
 ```bash
-npm install -g @railway/cli
+cd backend
 railway login
-railway init
+railway link
 railway up
-# Agregar variables de entorno en Railway Dashboard
 ```
+
+> **Nota:** PDF y WhatsApp ya funcionan en Next.js (Vercel). El backend FastAPI es **opcional/legacy**.
 
 ### Supabase
 ```bash

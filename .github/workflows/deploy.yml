@@ -79,14 +79,19 @@ jobs:
     needs: [test-frontend, test-backend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Railway
-        uses: bervProject/railway-deploy@main
-        with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service: darivo-pro-api
+      - name: Instalar Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy a Railway (carpeta backend/)
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service darivo-pro-api --detach --ci
 
   # ─── SUPABASE MIGRATIONS ────────────────────────────────────────────────────
   supabase-migrate:
