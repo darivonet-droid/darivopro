@@ -13,12 +13,6 @@ frontend/.next/
 frontend/out/
 frontend/coverage/
 frontend/test-output/
-frontend/public/sw.js
-frontend/public/sw.js.map
-frontend/public/workbox-*.js
-frontend/public/workbox-*.js.map
-frontend/public/swe-worker-*.js
-frontend/public/swe-worker-*.js.map
 *.tsbuildinfo
 
 # Python
