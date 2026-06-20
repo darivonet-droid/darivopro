@@ -1,6 +1,7 @@
 # DARIVO PRO — CI/CD GitHub Actions
 # Frontend → Vercel automático (integración nativa)
-# Backend → Railway o Render al hacer push a main
+# Backend → Railway al hacer push a main (opcional si hay RAILWAY_TOKEN)
+# Supabase → db push con supabase link en CI
 
 name: DARIVO PRO — Deploy
 
@@ -73,12 +74,15 @@ jobs:
           WA_VERIFY_TOKEN:       test
           SERVICE_KEY:           test
 
-  # ─── DEPLOY BACKEND (solo en push a main) ───────────────────────────────────
+  # ─── DEPLOY BACKEND (solo en push a main, opcional) ─────────────────────────
   deploy-backend:
     name: Deploy Backend → Railway
     needs: [test-frontend, test-backend]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      secrets.RAILWAY_TOKEN != ''
     defaults:
       run:
         working-directory: ./backend
@@ -98,7 +102,15 @@ jobs:
     name: Supabase Migrations
     needs: [test-frontend, test-backend]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      secrets.SUPABASE_ACCESS_TOKEN != '' &&
+      secrets.SUPABASE_DB_PASSWORD != ''
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: kyckjapprmtfahnkuucz
     steps:
       - uses: actions/checkout@v4
 
@@ -107,11 +119,17 @@ jobs:
         with:
           version: latest
 
-      - name: Push migraciones
-        run: supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD:  ${{ secrets.SUPABASE_DB_PASSWORD }}
+      - name: Verificar estructura supabase/
+        run: |
+          test -f supabase/config.toml || (echo "Falta supabase/config.toml" && exit 1)
+          test -d supabase/migrations || (echo "Falta supabase/migrations/" && exit 1)
+          ls -la supabase/migrations/
+
+      - name: Vincular proyecto Supabase
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD" --yes
+
+      - name: Aplicar migraciones (db push)
+        run: supabase db push --yes
 
   # NOTA: El deploy del frontend en Vercel es automático
   # por la integración nativa GitHub ↔ Vercel

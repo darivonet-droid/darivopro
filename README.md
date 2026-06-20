@@ -68,9 +68,21 @@ railway up
 
 ### Supabase
 ```bash
+# Local (opcional)
 npx supabase login
-npx supabase db push   # aplica migraciones
+npx supabase link --project-ref kyckjapprmtfahnkuucz
+npx supabase db push
 ```
+
+En **CI (GitHub Actions)**, el job `supabase-migrate` ejecuta:
+1. `supabase link --project-ref kyckjapprmtfahnkuucz`
+2. `supabase db push`
+
+Secrets requeridos en GitHub:
+- `SUPABASE_ACCESS_TOKEN` — [Account Tokens](https://supabase.com/dashboard/account/tokens)
+- `SUPABASE_DB_PASSWORD` — Project → Settings → Database
+
+Project ref producción: `kyckjapprmtfahnkuucz`
 
 ## Estructura del proyecto
 ```
@@ -95,9 +107,14 @@ darivo-pro/
 │   ├── tests/              # Pytest
 │   └── Dockerfile          # Deploy Railway (incluye libs de WeasyPrint)
 ├── supabase/
+│   ├── config.toml         # Config CLI (requerido para db push en CI)
 │   └── migrations/         # SQL — tablas, RLS, triggers, storage
-│       ├── 001_initial.sql # perfiles, presupuestos, items, facturas, partidas, precios
-│       └── 002_clientes.sql# tabla clientes
+│       ├── 001_initial.sql
+│       ├── 002_clientes.sql
+│       ├── 003_clientes_rls.sql
+│       ├── 004_onboarding.sql
+│       ├── 005_plan_limits.sql
+│       └── 006_registro_perfil.sql
 ├── frontend/.env.example   # Template → copiar a frontend/.env.local
 ├── backend/.env.example    # Template → copiar a backend/.env
 ├── .env.example            # Índice de dónde va cada variable
@@ -112,6 +129,7 @@ SUPABASE_URL
 SUPABASE_SERVICE_KEY
 SUPABASE_ACCESS_TOKEN
 SUPABASE_DB_PASSWORD
+SUPABASE_PROJECT_REF   # opcional; CI usa kyckjapprmtfahnkuucz
 WA_PHONE_NUMBER_ID
 WA_ACCESS_TOKEN
 WA_VERIFY_TOKEN
