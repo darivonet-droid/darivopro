@@ -12,6 +12,7 @@ node_modules/
 frontend/.next/
 frontend/out/
 frontend/coverage/
+frontend/test-output/
 frontend/public/sw.js
 frontend/public/sw.js.map
 frontend/public/workbox-*.js

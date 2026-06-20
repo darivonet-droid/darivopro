@@ -1,4 +1,4 @@
-// DARIVO PRO — Route Handler: Enviar WhatsApp
+// DARIVO PRO — Route Handler: Enlace WhatsApp (sin backend FastAPI)
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -11,13 +11,11 @@ export async function POST(req: NextRequest) {
   if (!to || !message)
     return NextResponse.json({ error: "Faltan parámetros" }, { status: 400 });
 
-  const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8000";
-  const res = await fetch(`${backendUrl}/api/v1/whatsapp/enviar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Service-Key": process.env.SERVICE_KEY! },
-    body: JSON.stringify({ to, message, documentUrl }),
-  });
+  const digits = String(to).replace(/\D/g, "");
+  const numero = digits.startsWith("51") ? digits : `51${digits}`;
+  const fullMessage = documentUrl ? `${message}\n\nPDF: ${documentUrl}` : message;
+  const waUrl = `https://wa.me/${numero}?text=${encodeURIComponent(fullMessage)}`;
 
-  if (!res.ok) return NextResponse.json({ error: "Error WhatsApp" }, { status: 500 });
-  return NextResponse.json({ data: await res.json() });
+  // Legacy compatible response shape
+  return NextResponse.json({ data: { waUrl } });
 }

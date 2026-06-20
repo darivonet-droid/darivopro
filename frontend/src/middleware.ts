@@ -9,7 +9,8 @@ interface CookieASetear {
 }
 
 const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena", "/precios"];
-const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar", "/nueva-contrasena"];
+// /nueva-contrasena: el usuario llega con sesión de recuperación — no redirigir al dashboard
+const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar"];
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({ request: req });

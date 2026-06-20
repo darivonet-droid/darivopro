@@ -44,6 +44,12 @@ const mapRow = (row: FacturaRow): Factura => ({
   bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
 });
 
+function buildWhatsAppDeepLink(phone: string, message: string): string {
+  const digits = phone.replace(/\D/g, "");
+  const num = digits.startsWith("51") ? digits : `51${digits}`;
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
+}
+
 export function useFactura() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
@@ -113,7 +119,7 @@ export function useFactura() {
     return !error;
   }, [supabase]);
 
-  const enviarWhatsApp = useCallback(async (factura: Factura, telefono: string): Promise<boolean> => {
+  const enviarWhatsApp = useCallback(async (factura: Factura, telefono: string, pdfUrl: string): Promise<string> => {
     const mensaje = buildWAMessage(
       factura.clientName,
       factura.items,
@@ -121,13 +127,8 @@ export function useFactura() {
       factura.bizData,
       factura.invNum
     );
-    const res = await fetch("/api/whatsapp/enviar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to: telefono, message: mensaje }),
-    });
-    if (!res.ok) setError("No se pudo enviar por WhatsApp");
-    return res.ok;
+    const fullMessage = `${mensaje}\n\nPDF: ${pdfUrl}`;
+    return buildWhatsAppDeepLink(telefono, fullMessage);
   }, []);
 
   const generarPDF = useCallback(async (invId: string): Promise<string | null> => {

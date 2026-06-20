@@ -59,9 +59,15 @@ export function FacturasList({ iniciales }: { iniciales: Factura[] }) {
       mostrarToast("Ingresa un número válido con código de país", "error");
       return;
     }
-    mostrarToast("Enviando por WhatsApp…");
-    const ok = await enviarWhatsApp(f, numero);
-    mostrarToast(ok ? "Factura enviada ✓" : "No se pudo enviar", ok ? "ok" : "error");
+    mostrarToast("Preparando enlace de WhatsApp…");
+    const pdfUrl = await generarPDF(f.invId);
+    if (!pdfUrl) {
+      mostrarToast("No se pudo generar el PDF", "error");
+      return;
+    }
+    const waUrl = await enviarWhatsApp(f, numero, pdfUrl);
+    window.open(waUrl, "_blank", "noopener,noreferrer");
+    mostrarToast("Abriendo WhatsApp…", "ok");
   };
 
   return (

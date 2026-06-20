@@ -316,3 +316,78 @@ alwaysApply: true
 # ✅ "Crea el componente NuevoPresupuesto mobile-first, flujo de 3 pasos, colores de T"
 # ❌ "Haz el backend" (vago, Cursor inventa)
 # ❌ "Crea algo para WhatsApp" (sin contexto, errores)
+
+# ══════════════════════════════════════════════════════
+# 🇵🇪 VOCABULARIO PERÚ — UI visible al usuario
+# ══════════════════════════════════════════════════════
+# En TODA la UI que ve el usuario final (labels, botones, toasts, modales,
+# PDFs, WhatsApp), usar vocabulario peruano de obra:
+#   ✅ "gasfitero"        ❌ "fontanero"
+#   ✅ "maestro de obra"  ❌ "albañil" (como término principal de usuario)
+#   ✅ "cotización"       ❌ "presupuesto" (en textos visibles al usuario)
+# Nota interna: el código puede mantener nombres técnicos (tablas, rutas,
+# tipos) como presupuestos/facturas; la UI siempre habla en lenguaje Perú.
+
+# ══════════════════════════════════════════════════════
+# 🔢 NUMERACIÓN OFICIAL DE DOCUMENTOS
+# ══════════════════════════════════════════════════════
+# Correlativos únicos por profesional, generados de forma atómica (SQL/RPC):
+#   Cotizaciones → COT-001, COT-002, COT-003 …
+#   Boletas      → B001-00000001, B001-00000002 …
+#   Facturas     → F001-00000001, F001-00000002 …
+# Formato boleta/factura: prefijo + guion + 8 dígitos con ceros a la izquierda.
+# NUNCA calcular el siguiente número solo en frontend sin lock atómico en BD.
+
+# ══════════════════════════════════════════════════════
+# 🧾 FACTURACIÓN SUNAT — reglas de negocio
+# ══════════════════════════════════════════════════════
+# Tipo de comprobante AUTOMÁTICO según cliente:
+#   Cliente SIN RUC (solo DNI o sin documento) → Boleta (B001-…)
+#   Cliente CON RUC (11 dígitos válidos)       → Factura (F001-…)
+# Detracción OBLIGATORIA cuando:
+#   - Comprobante = Factura  Y  total > S/ 700.00
+#   Tasas y códigos SUNAT según tipo de servicio:
+#     Reparación / Mantenimiento → 12% · códigos 022 / 037
+#     Construcción / Remodelación → 4%  · código 030
+# Mostrar monto detracción y neto a depositar en PDF y resumen antes de emitir.
+# IGV siempre: subtotal × 0.18 (18% Perú).
+
+# ══════════════════════════════════════════════════════
+# 💳 PASARELA DE PAGO — dLocal Go (futuro)
+# ══════════════════════════════════════════════════════
+# Pasarela oficial para cobros en Perú/LATAM: dLocal Go.
+# PROHIBIDO integrar Stripe o Lemon Squeezy para este producto.
+# ESTADO ACTUAL: NO integrar todavía — solo documentar y preparar hooks.
+# Activar cuando haya usuarios pagando planes Pro/Empresa.
+# Webhook futuro: verificar firma HMAC + idempotency (pagos_procesados)
+# antes de UPDATE perfiles.plan_tipo y plan_activo_hasta.
+
+# ══════════════════════════════════════════════════════
+# 🔒 SEGURIDAD — secretos en chat
+# ══════════════════════════════════════════════════════
+# Las claves de Supabase (anon, service_role), Anthropic, WhatsApp, dLocal Go
+# y cualquier token NUNCA se escriben en mensajes de chat, commits, logs
+# ni capturas. Solo viven en .env.local (frontend) o .env (backend/servidor).
+# Si el usuario pega una clave por error → avisar que la rote en el panel
+# del proveedor y no repetirla en la conversación.
+
+# ══════════════════════════════════════════════════════
+# 🤖 SELECCIÓN DE AGENTE / MODELO EN CURSOR
+# ══════════════════════════════════════════════════════
+# Tareas mecánicas (sintaxis, typos, estilos, fixes de una línea, formatos):
+#   → Composer 2.5 (rápido, diff mínimo)
+# Arquitectura compleja, lógica SUNAT, detracciones, numeración atómica,
+# migraciones SQL sensibles, diseño de flujos multi-paso:
+#   → Sonnet u Opus (razonamiento profundo, revisar edge cases)
+# Regla: no usar Opus para cambiar un string de UI; no usar Composer
+# para rediseñar facturación electrónica Perú sin supervisión.
+
+# ══════════════════════════════════════════════════════
+# ✅ CHECKLIST ampliado (reglas nuevas)
+# ══════════════════════════════════════════════════════
+# □ UI dice "cotización", "gasfitero", "maestro de obra" (no sinónimos España)
+# □ Correlativos COT- / B001- / F001- con 8 dígitos y generación atómica
+# □ Boleta auto sin RUC · Factura auto con RUC · detracción si Factura > S/700
+# □ Pasarela futura = dLocal Go (sin Stripe/Lemon Squeezy por ahora)
+# □ Cero secretos en chat — solo .env.local / .env
+# □ Modelo acorde a la tarea (Composer 2.5 vs Sonnet/Opus)

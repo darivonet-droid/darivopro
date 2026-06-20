@@ -1,5 +1,8 @@
 # DARIVO PRO — Generador de PDF con WeasyPrint
-# Genera PDF profesional del presupuesto/factura y lo sube a Supabase Storage
+# ⚠️ LEGACY: La generación de PDF en producción ya NO usa este módulo.
+#    Los PDFs se generan en Next.js (frontend/src/lib/pdf/) con @react-pdf/renderer
+#    y Route Handlers en frontend/src/app/api/pdf/.
+#    Se conserva por referencia de plantillas HTML y posible uso local.
 
 from datetime import datetime
 
