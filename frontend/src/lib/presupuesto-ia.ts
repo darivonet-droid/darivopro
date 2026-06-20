@@ -34,7 +34,7 @@ export const DRAFT_STORAGE_KEY = "darivo_presupuesto_draft";
 
 const CALC_MAP: Record<string, LineaPresupuesto["calcType"]> = {
   m2: "m2",
-  m²: "m2",
+  "m²": "m2",
   unit: "unit",
   unidad: "unit",
   hora: "hour",
