@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { T } from "@/lib/theme";
 
@@ -23,6 +23,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState<string | null>(null);
   const [loading,  setLoading]  = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "confirmacion") {
+      setError("El enlace de confirmación expiró o no es válido. Pide uno nuevo desde registro.");
+    }
+  }, []);
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -32,11 +32,11 @@ export default function OnboardingStep1() {
 
     const { error: dbErr } = await supabase
       .from("perfiles")
-      .update({
+      .upsert({
+        id: user.id,
         razon_social: nombre.trim(),
         ...(ruc ? { ruc: ruc.trim() } : {}),
-      })
-      .eq("id", user.id);
+      });
 
     setLoading(false);
     if (dbErr) {

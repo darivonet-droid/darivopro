@@ -1,31 +1,44 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { T } from "@/lib/theme";
+import type { AuthError } from "@supabase/supabase-js";
 
 const ERRORES: Record<string, string> = {
-  user_already_exists:         "Ya existe una cuenta con ese correo 👀",
-  email_address_invalid:       "Ese correo no parece válido, revísalo",
-  weak_password:               "La contraseña es muy débil, ponle más caracteres",
-  over_email_send_rate_limit:  "Espera un momento antes de intentar de nuevo",
+  user_already_exists: "Ya existe una cuenta con ese correo 👀",
+  email_address_invalid: "Ese correo no parece válido, revísalo",
+  weak_password: "La contraseña es muy débil, ponle más caracteres",
+  over_email_send_rate_limit: "Espera un momento antes de intentar de nuevo",
+  signup_disabled: "El registro está desactivado por ahora",
 };
 
-function mensajeError(code?: string): string {
-  return ERRORES[code ?? ""] ?? "No se pudo crear la cuenta. Inténtalo de nuevo";
+function mensajeError(error: AuthError): string {
+  if (error.code && ERRORES[error.code]) return ERRORES[error.code];
+
+  const msg = error.message.toLowerCase();
+  if (msg.includes("already registered") || msg.includes("user already registered")) {
+    return "Ya existe una cuenta con ese correo 👀";
+  }
+  if (msg.includes("password")) {
+    return "La contraseña no cumple los requisitos mínimos";
+  }
+  if (msg.includes("email")) {
+    return "Ese correo no parece válido, revísalo";
+  }
+
+  return error.message || "No se pudo crear la cuenta. Inténtalo de nuevo";
 }
 
 export default function RegistroPage() {
-  const router   = useRouter();
   const supabase = createClient();
-  const [nombre,    setNombre]    = useState("");
-  const [email,     setEmail]     = useState("");
-  const [password,  setPassword]  = useState("");
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [error,     setError]     = useState<string | null>(null);
-  const [exito,     setExito]     = useState(false);
-  const [loading,   setLoading]   = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [exito, setExito] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const registrar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,23 +54,40 @@ export default function RegistroPage() {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
+
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding/1")}`;
+    const { data, error: authError } = await supabase.auth.signUp({
+      email: email.trim(),
       password,
-      options: { data: { nombre_empresa: nombre } },
+      options: {
+        data: { nombre_empresa: nombre.trim() },
+        emailRedirectTo: redirectTo,
+      },
     });
+
     setLoading(false);
 
-    if (error) {
-      setError(mensajeError(error.code));
+    if (authError) {
+      setError(mensajeError(authError));
       return;
     }
-    if (data.session) {
-      router.push("/onboarding/1");
-      router.refresh();
-    } else {
-      setExito(true);
+
+    // Supabase oculta usuarios duplicados: identities vacío = correo ya registrado
+    if (data.user && (!data.user.identities || data.user.identities.length === 0)) {
+      setError("Ya existe una cuenta con ese correo 👀");
+      return;
     }
+
+    if (data.session && data.user) {
+      await supabase.from("perfiles").upsert({
+        id: data.user.id,
+        razon_social: nombre.trim() || null,
+      });
+      window.location.assign("/onboarding/1");
+      return;
+    }
+
+    setExito(true);
   };
 
   /* ── Estado de éxito (confirmar correo) */
@@ -97,7 +127,6 @@ export default function RegistroPage() {
   /* ── Formulario */
   return (
     <div className="flex flex-col gap-6">
-
       <div className="rounded-2xl bg-white p-6" style={{ boxShadow: "0 2px 20px rgba(10,22,40,0.09)" }}>
         <h1 className="mb-1 text-xl font-extrabold" style={{ color: T.text }}>
           Crear cuenta gratis
@@ -156,16 +185,14 @@ export default function RegistroPage() {
           Inicia sesión
         </Link>
       </p>
-
     </div>
   );
 }
 
-/* ── Componentes internos ───────────────────────────────────── */
-
 interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
 }
+
 function AuthInput({ label, ...props }: AuthInputProps) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -177,8 +204,8 @@ function AuthInput({ label, ...props }: AuthInputProps) {
         className="w-full rounded-xl px-4 py-3.5 text-sm font-medium outline-none transition-all focus:ring-2"
         style={{
           background: "#fff",
-          color:      T.text,
-          border:     `1.5px solid ${T.slateD}`,
+          color: T.text,
+          border: `1.5px solid ${T.slateD}`,
           // @ts-expect-error custom property
           "--tw-ring-color": T.blue,
         }}
