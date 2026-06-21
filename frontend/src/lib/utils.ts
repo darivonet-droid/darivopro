@@ -1,9 +1,5 @@
 // DARIVO PRO — Utilidades globales
 
-/** Formatea como EUR */
-export const fmt = (n: number) =>
-  (n || 0).toLocaleString("es-ES", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
-
 /** Formatea como Sol peruano */
 export const fmtPEN = (n: number, sym = "S/") =>
   `${sym} ${(n || 0).toLocaleString("es-PE", { minimumFractionDigits:2, maximumFractionDigits:2 })}`;

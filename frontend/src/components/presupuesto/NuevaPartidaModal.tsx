@@ -13,10 +13,10 @@ const CHIPS: { id: CalcChip; label: string }[] = [
 ];
 
 const UNIT_LABEL: Record<CalcChip, string> = {
-  m2:    "€/M²",
-  unit:  "€/UND",
-  hour:  "€/H",
-  fixed: "€",
+  m2:    "S/ · m²",
+  unit:  "S/ · und",
+  hour:  "S/ · hora",
+  fixed: "S/",
 };
 
 interface NuevaPartidaModalProps {
