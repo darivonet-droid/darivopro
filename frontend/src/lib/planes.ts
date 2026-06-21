@@ -25,7 +25,7 @@ export const PLANES: Plan[] = [
     precioMensual: 39,
     precioAnual: 390,
     features: [
-      { texto: "20 presupuestos/mes", incluido: true },
+      { texto: "20 cotizaciones/mes", incluido: true },
       { texto: "10 facturas/mes", incluido: true },
       { texto: "PDF con tu nombre", incluido: true },
       { texto: "IGV automático", incluido: true },
@@ -45,7 +45,7 @@ export const PLANES: Plan[] = [
     destacado: true,
     badge: "MÁS USADO",
     features: [
-      { texto: "Presupuestos ilimitados", incluido: true },
+      { texto: "Cotizaciones ilimitadas", incluido: true },
       { texto: "Facturas ilimitadas", incluido: true },
       { texto: "IA texto + voz 🎤", incluido: true },
       { texto: "Logo personalizado", incluido: true },

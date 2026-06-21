@@ -94,7 +94,7 @@ export function ClientesView({ iniciales }: { iniciales: Cliente[] }) {
         <EmptyState
           emoji="👷"
           titulo="Sin clientes todavía"
-          descripcion="Guarda tus clientes para crear presupuestos aún más rápido."
+          descripcion="Guarda tus clientes para crear cotizaciones aún más rápido."
         />
       )}
 

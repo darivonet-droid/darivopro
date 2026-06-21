@@ -18,11 +18,11 @@ export const LIMITES = {
 export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo: string }> = {
   presupuestos_gratis: {
     titulo: "Límite de plan gratis",
-    subtitulo: "Ya usaste tus 5 presupuestos. Pásate a Pro para seguir trabajando.",
+    subtitulo: "Ya usaste tus 5 cotizaciones. Pásate a Pro para seguir trabajando.",
   },
   presupuestos_basico: {
     titulo: "Límite mensual alcanzado",
-    subtitulo: "Tu plan Básico incluye 20 presupuestos/mes. Pro es ilimitado.",
+    subtitulo: "Tu plan Básico incluye 20 cotizaciones/mes. Pro es ilimitado.",
   },
   facturas_basico: {
     titulo: "Límite de facturas",

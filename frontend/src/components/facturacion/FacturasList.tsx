@@ -29,7 +29,7 @@ export function FacturasList({ iniciales }: { iniciales: Factura[] }) {
       <EmptyState
         emoji="🧾"
         titulo="Sin facturas todavía"
-        descripcion="Emite tu primera factura desde un presupuesto aprobado o desde cero."
+        descripcion="Emite tu primera factura desde una cotización aprobada o desde cero."
       />
     );
   }

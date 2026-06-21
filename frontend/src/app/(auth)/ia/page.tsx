@@ -23,7 +23,7 @@ export default function IAPage() {
               Asistente IA
             </h1>
             <p className="text-xs" style={{ color: T.textLight }}>
-              Presupuesto en segundos con Claude
+              Cotización en segundos con Claude
             </p>
           </div>
         </div>

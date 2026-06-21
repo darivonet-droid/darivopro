@@ -2,17 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { CATEGORIAS } from "@/lib/catalog";
 import { T } from "@/lib/theme";
 import { ProgressBar, OnbButton, ErrorBanner } from "../_shared";
-
-const CATEGORIAS = [
-  { id: "albanileria",   emoji: "🧱", label: "Albañilería"   },
-  { id: "fontaneria",    emoji: "💧", label: "Fontanería"    },
-  { id: "electricidad",  emoji: "⚡", label: "Electricidad"  },
-  { id: "pintura",       emoji: "🎨", label: "Pintura"       },
-  { id: "carpinteria",   emoji: "🚪", label: "Carpintería"   },
-  { id: "climatizacion", emoji: "❄️", label: "Climatización" },
-];
 
 export default function OnboardingStep2() {
   const router   = useRouter();
@@ -86,7 +78,7 @@ export default function OnboardingStep2() {
                 className="text-sm font-bold leading-tight"
                 style={{ color: activo ? T.amberD : T.text }}
               >
-                {cat.label}
+                {cat.nombre}
               </span>
               {activo && (
                 <span

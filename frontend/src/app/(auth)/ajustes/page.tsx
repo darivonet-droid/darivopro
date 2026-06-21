@@ -23,12 +23,13 @@ export default async function ConfiguracionPage() {
         <ConfigTabs
           email={user?.email ?? ""}
           inicial={{
-            razonSocial: perfil?.razon_social ?? "",
-            ruc:         perfil?.ruc          ?? "",
-            direccion:   perfil?.direccion    ?? "",
-            telefono:    perfil?.telefono     ?? "",
-            moneda:      perfil?.moneda       ?? "PEN",
-            simbolo:     perfil?.simbolo      ?? "S/",
+            razonSocial:      perfil?.razon_social      ?? "",
+            ruc:              perfil?.ruc               ?? "",
+            direccion:        perfil?.direccion         ?? "",
+            telefono:         perfil?.telefono          ?? "",
+            moneda:           perfil?.moneda            ?? "PEN",
+            simbolo:          perfil?.simbolo           ?? "S/",
+            ctaDetracciones:  perfil?.cta_detracciones ?? "",
           }}
           tarifas={tarifas ?? []}
         />

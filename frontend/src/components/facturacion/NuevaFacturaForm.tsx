@@ -6,60 +6,114 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
-import { facturaSchema } from "@/lib/validations";
+import { boletaSchema, facturaSchema } from "@/lib/validations";
 import {
   buildFacturaWhatsAppUrl,
+  calcularDetraccion,
+  DETRACCION_UMBRAL,
   nextNumeroComprobante,
+  OPCIONES_DETRACCION,
+  validarRucFactura,
   type FormaPago,
   type TipoComprobante,
 } from "@/lib/factura-utils";
 import { calcIGV, fmtPEN, hoy } from "@/lib/utils";
 import { T } from "@/lib/theme";
-import type { Cliente, EmpresaData, Factura, LineaFactura, Presupuesto } from "@/types";
+import type {
+  Cliente, Detraccion, EmpresaData, Factura, LineaFactura,
+  Presupuesto, TipoDetraccion,
+} from "@/types";
 
 const FORMAS_PAGO: FormaPago[] = ["Efectivo", "Yape", "Transferencia", "Crédito"];
 const LINEA_VACIA: LineaFactura = { desc: "", cantidad: 1, pu: 0, subtotal: 0 };
 
 interface Props {
-  empresa: EmpresaData | null;
+  empresa:           EmpresaData | null;
   numerosExistentes: string[];
-  aprobados: Presupuesto[];
-  clientes: Cliente[];
-  presupuestoId?: string;
+  aprobados:         Presupuesto[];
+  clientes:          Cliente[];
+  presupuestoId?:    string;
 }
 
+/* ─── Paso 0: elegir tipo de comprobante ──────────────────── */
+function PasoCero({ onElegir }: { onElegir: (tipo: TipoComprobante) => void }) {
+  return (
+    <div className="flex flex-col gap-5 px-4 py-6">
+      <div className="text-center">
+        <p className="text-xl font-black" style={{ color: T.navy }}>¿Tu cliente tiene RUC?</p>
+        <p className="mt-1 text-sm" style={{ color: T.textMid }}>Esto determina el tipo de comprobante SUNAT</p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onElegir("factura")}
+        className="flex items-center gap-4 rounded-2xl p-5 transition-transform active:scale-95"
+        style={{ background: T.white, border: `2px solid ${T.blue}`, boxShadow: "0 4px 20px rgba(37,99,235,0.12)" }}
+      >
+        <span className="text-3xl">🏢</span>
+        <div className="text-left">
+          <p className="font-extrabold" style={{ color: T.blue }}>Sí, tiene RUC → Factura</p>
+          <p className="text-xs mt-0.5" style={{ color: T.textMid }}>Serie F001 · IGV desglosado · Detracción si aplica</p>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onElegir("boleta")}
+        className="flex items-center gap-4 rounded-2xl p-5 transition-transform active:scale-95"
+        style={{ background: T.white, border: `2px solid ${T.green}`, boxShadow: "0 4px 20px rgba(16,185,129,0.12)" }}
+      >
+        <span className="text-3xl">👤</span>
+        <div className="text-left">
+          <p className="font-extrabold" style={{ color: T.greenD }}>No tiene RUC → Boleta</p>
+          <p className="text-xs mt-0.5" style={{ color: T.textMid }}>Serie B001 · IGV incluido · DNI si total &gt; S/700</p>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* ─── Formulario principal ────────────────────────────────── */
 export function NuevaFacturaForm({
-  empresa,
-  numerosExistentes,
-  aprobados,
-  clientes,
-  presupuestoId,
+  empresa, numerosExistentes, aprobados, clientes, presupuestoId,
 }: Props) {
-  const router = useRouter();
+  const router       = useRouter();
   const { crear, generarPDF, loading } = useFactura();
-  const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const mostrarToast   = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
-  const [tipo, setTipo]               = useState<TipoComprobante>("factura");
-  const [clientName, setClientName]   = useState("");
-  const [clientRuc, setClientRuc]     = useState("");
-  const [clientDir, setClientDir]     = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [items, setItems]             = useState<LineaFactura[]>([{ ...LINEA_VACIA }]);
-  const [desdeQuote, setDesdeQuote]   = useState(presupuestoId ?? "");
-  const [formaPago, setFormaPago]     = useState<FormaPago>("Efectivo");
-  const [pagado, setPagado]           = useState(false);
-  const [error, setError]             = useState<string | null>(null);
-  const [guardada, setGuardada]       = useState<Factura | null>(null);
-  const [pdfUrl, setPdfUrl]           = useState<string | null>(null);
+  // Paso 0: elegir tipo de comprobante
+  const [tipo, setTipo]             = useState<TipoComprobante | null>(null);
+
+  const [clientName,   setClientName]   = useState("");
+  const [clientRuc,    setClientRuc]    = useState("");
+  const [clientDni,    setClientDni]    = useState("");
+  const [clientDir,    setClientDir]    = useState("");
+  const [clientPhone,  setClientPhone]  = useState("");
+  const [items,        setItems]        = useState<LineaFactura[]>([{ ...LINEA_VACIA }]);
+  const [desdeQuote,   setDesdeQuote]   = useState(presupuestoId ?? "");
+  const [formaPago,    setFormaPago]    = useState<FormaPago>("Efectivo");
+  const [pagado,       setPagado]       = useState(false);
+  const [detTipo,      setDetTipo]      = useState<TipoDetraccion | null>(null);
+  const [error,        setError]        = useState<string | null>(null);
+  const [guardada,     setGuardada]     = useState<Factura | null>(null);
+  const [pdfUrl,       setPdfUrl]       = useState<string | null>(null);
 
   const invNum = useMemo(
-    () => nextNumeroComprobante(tipo, numerosExistentes),
+    () => tipo ? nextNumeroComprobante(tipo, numerosExistentes) : "",
     [tipo, numerosExistentes]
   );
-  const sym = empresa?.simbolo ?? "S/";
+
+  const sym          = empresa?.simbolo ?? "S/";
   const subtotalBase = useMemo(() => items.reduce((s, it) => s + it.subtotal, 0), [items]);
   const { igv, total } = calcIGV(subtotalBase);
+
+  // Detracción: solo en facturas > S/700
+  const aplicaDetraccion = tipo === "factura" && total > DETRACCION_UMBRAL;
+  const detraccion: Detraccion | undefined = useMemo(() => {
+    if (!aplicaDetraccion || !detTipo) return undefined;
+    return calcularDetraccion(total, detTipo, empresa?.cta_detracciones ?? undefined);
+  }, [aplicaDetraccion, detTipo, total, empresa]);
 
   const importarPresupuesto = (id: string) => {
     setDesdeQuote(id);
@@ -68,18 +122,10 @@ export function NuevaFacturaForm({
     setClientName(p.clientName);
     if (p.phone) setClientPhone(p.phone);
     const lineas: LineaFactura[] = p.items.map((it) => ({
-      desc: it.svcLabel,
-      cantidad: it.qty,
-      pu: it.unitPrice,
-      subtotal: it.subtotal,
+      desc: it.svcLabel, cantidad: it.qty, pu: it.unitPrice, subtotal: it.subtotal,
     }));
     if (p.totalLabor > 0) {
-      lineas.push({
-        desc: `Mano de obra (${p.margin}%)`,
-        cantidad: 1,
-        pu: p.totalLabor,
-        subtotal: p.totalLabor,
-      });
+      lineas.push({ desc: `Mano de obra (${p.margin}%)`, cantidad: 1, pu: p.totalLabor, subtotal: p.totalLabor });
     }
     setItems(lineas.length ? lineas : [{ ...LINEA_VACIA }]);
   };
@@ -111,44 +157,60 @@ export function NuevaFacturaForm({
 
   const emitir = async () => {
     setError(null);
+    if (!tipo) return;
     if (!empresa || !/^\d{11}$/.test(empresa.ruc)) {
       setError("Completa el RUC de tu empresa en Configuración");
       return;
     }
-    const valido = facturaSchema.safeParse({ clientName, clientRuc, clientDir, items });
-    if (!valido.success) {
-      setError(valido.error.errors[0]?.message ?? "Revisa los datos");
+
+    // Validar RUC cliente en facturas
+    if (tipo === "factura") {
+      if (!clientRuc) { setError("Ingresa el RUC del cliente"); return; }
+      if (!validarRucFactura(clientRuc)) {
+        setError("El RUC debe tener 11 dígitos y empezar en 10 o 20");
+        return;
+      }
+      const valido = facturaSchema.safeParse({ clientName, clientRuc, clientDir, items });
+      if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
+    } else {
+      // Boleta: DNI obligatorio si total > 700
+      if (total > DETRACCION_UMBRAL && !clientDni) {
+        setError(`Para boletas mayores a S/700 debes ingresar el DNI del cliente`);
+        return;
+      }
+      const valido = boletaSchema.safeParse({ clientName, clientDni, clientDir, items });
+      if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
+    }
+
+    // Detracción obligatoria en facturas > S/700
+    if (aplicaDetraccion && !detTipo) {
+      setError("Selecciona el tipo de detracción (obligatorio para facturas > S/700)");
       return;
     }
 
-    const invStatus = pagado ? "Cobrada" : "Emitida";
-    const bizData: EmpresaData = {
-      ...empresa,
-      tipoComprobante: tipo,
-      formaPago,
-    };
+    const bizData: EmpresaData = { ...empresa, tipoComprobante: tipo, formaPago };
 
     const creada = await crear({
       invNum,
       invDate: hoy(),
-      invStatus,
+      invStatus: pagado ? "Cobrada" : "Emitida",
+      tipoDoc: tipo,
       clientName: clientName.trim(),
-      clientRuc: clientRuc.trim() || undefined,
-      clientDir: clientDir.trim() || undefined,
-      moneda: empresa.moneda,
+      clientRuc:  tipo === "factura" ? clientRuc.trim() || undefined : undefined,
+      clientDni:  tipo === "boleta"  ? clientDni.trim() || undefined : undefined,
+      clientDir:  clientDir.trim() || undefined,
+      moneda:     empresa.moneda,
       sym,
       items,
       subtotalBase,
-      igvAmount: igv,
+      igvAmount:  igv,
       totalFinal: total,
+      detraccion,
       fromQuoteId: desdeQuote || undefined,
       bizData,
     }, mostrarUpgrade);
 
-    if (!creada) {
-      mostrarToast("No se pudo emitir", "error");
-      return;
-    }
+    if (!creada) { mostrarToast("No se pudo emitir", "error"); return; }
 
     setGuardada(creada);
     mostrarToast(`${invNum} emitida ✓`);
@@ -156,6 +218,7 @@ export function NuevaFacturaForm({
     if (url) setPdfUrl(url);
   };
 
+  /* ── Pantalla de éxito ─────────────────────────────────── */
   if (guardada) {
     return (
       <div className="flex flex-col gap-4 px-4 py-4">
@@ -165,28 +228,31 @@ export function NuevaFacturaForm({
         >
           <p className="text-2xl font-black" style={{ color: T.greenD }}>✓ {guardada.invNum}</p>
           <p className="mt-1 text-sm" style={{ color: T.greenD }}>
-            {pagado ? "Marcada como PAGADA — sello en PDF" : "Emitida como pendiente"}
+            {pagado ? "Marcada como PAGADA" : "Emitida como pendiente"}
           </p>
+          {guardada.detraccion && (
+            <div className="mt-3 rounded-xl px-3 py-2 text-xs" style={{ background: T.amberPale }}>
+              <p className="font-bold" style={{ color: T.amberD }}>
+                SPOT: {guardada.detraccion.pct}% = {fmtPEN(guardada.detraccion.monto, sym)}
+              </p>
+              <p style={{ color: T.amberD }}>
+                Neto a cobrar: {fmtPEN(guardada.detraccion.neto, sym)}
+              </p>
+            </div>
+          )}
         </div>
         {pdfUrl && (
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
             className="block rounded-2xl py-3.5 text-center text-sm font-bold text-white"
-            style={{ background: T.navy }}
-          >
+            style={{ background: T.navy }}>
             📄 Descargar PDF
           </a>
         )}
         {clientPhone && (
-          <a
-            href={buildFacturaWhatsAppUrl(clientPhone, guardada.invNum, total, sym)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <a href={buildFacturaWhatsAppUrl(clientPhone, guardada.invNum, total, sym)}
+            target="_blank" rel="noopener noreferrer"
             className="block rounded-2xl py-3.5 text-center text-sm font-bold text-white"
-            style={{ background: "#25D366" }}
-          >
+            style={{ background: "#25D366" }}>
             💬 Compartir por WhatsApp
           </a>
         )}
@@ -197,34 +263,45 @@ export function NuevaFacturaForm({
     );
   }
 
+  /* ── Paso 0: elegir tipo ───────────────────────────────── */
+  if (!tipo) {
+    return (
+      <>
+        <Link href="/facturas" className="mx-4 mt-4 inline-block text-sm font-semibold" style={{ color: T.textMid }}>
+          ← Volver
+        </Link>
+        <PasoCero onElegir={(t) => { setTipo(t); setDetTipo(null); }} />
+      </>
+    );
+  }
+
+  /* ── Formulario ────────────────────────────────────────── */
   return (
     <div className="flex flex-col gap-4 px-4 py-4" style={{ background: "#F8FAFF" }}>
       <Link href="/facturas" className="text-sm font-semibold" style={{ color: T.textMid }}>
         ← Volver
       </Link>
 
-      {/* Tipo Boleta / Factura */}
-      <div className="flex gap-2 rounded-2xl p-1" style={{ background: T.navyLight }}>
-        {(["boleta", "factura"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTipo(t)}
-            className="flex-1 rounded-xl py-2.5 text-sm font-bold capitalize"
-            style={{
-              background: tipo === t ? T.blue : "transparent",
-              color: tipo === t ? T.white : T.textLight,
-            }}
-          >
-            {t === "boleta" ? "Boleta" : "Factura"}
-          </button>
-        ))}
-      </div>
-
-      {/* Número automático */}
-      <div className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: T.navy }}>
-        <span className="text-xs font-bold" style={{ color: T.slateDD }}>Número</span>
-        <span className="text-sm font-black" style={{ color: T.white }}>{invNum}</span>
+      {/* Tipo seleccionado (con opción de cambiar) */}
+      <div className="flex items-center justify-between rounded-2xl px-4 py-3"
+        style={{ background: tipo === "factura" ? T.bluePale : T.greenPale }}>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide"
+            style={{ color: tipo === "factura" ? T.blue : T.greenD }}>
+            {tipo === "factura" ? "🏢 Factura Electrónica" : "👤 Boleta de Venta"}
+          </p>
+          <p className="text-sm font-black" style={{ color: tipo === "factura" ? T.navy : T.greenD }}>
+            {invNum}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setTipo(null)}
+          className="text-xs font-semibold"
+          style={{ color: T.textMid }}
+        >
+          Cambiar
+        </button>
       </div>
 
       {/* Cliente autocompletado */}
@@ -233,12 +310,9 @@ export function NuevaFacturaForm({
           <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
             Cliente guardado
           </span>
-          <select
-            onChange={(e) => seleccionarCliente(e.target.value)}
-            defaultValue=""
+          <select onChange={(e) => seleccionarCliente(e.target.value)} defaultValue=""
             className="w-full rounded-xl px-4 py-3 text-sm font-medium outline-none"
-            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
-          >
+            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
             <option value="">— Buscar o escribir abajo —</option>
             {clientes.map((c) => (
               <option key={c.id} value={c.id}>{c.nombre}{c.ruc ? ` · ${c.ruc}` : ""}</option>
@@ -247,29 +321,53 @@ export function NuevaFacturaForm({
         </label>
       )}
 
+      {/* Importar cotización */}
       {aprobados.length > 0 && (
         <label className="block">
           <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
-            Importar desde presupuesto
+            Importar desde cotización
           </span>
-          <select
-            value={desdeQuote}
-            onChange={(e) => importarPresupuesto(e.target.value)}
+          <select value={desdeQuote} onChange={(e) => importarPresupuesto(e.target.value)}
             className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
-          >
+            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
             <option value="">— Desde cero —</option>
             {aprobados.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.clientName} · {fmtPEN(p.totalFinal)}
-              </option>
+              <option key={p.id} value={p.id}>{p.clientName} · {fmtPEN(p.totalFinal)}</option>
             ))}
           </select>
         </label>
       )}
 
+      {/* Campos del cliente */}
       <Input label="Cliente *" value={clientName} onChange={(e) => setClientName(e.target.value)} />
-      <Input label="RUC / DNI" inputMode="numeric" value={clientRuc} onChange={(e) => setClientRuc(e.target.value)} />
+
+      {tipo === "factura" && (
+        <>
+          <Input
+            label="RUC del cliente * (11 dígitos, empieza en 10 o 20)"
+            inputMode="numeric"
+            value={clientRuc}
+            onChange={(e) => setClientRuc(e.target.value)}
+          />
+          {clientRuc && !validarRucFactura(clientRuc) && (
+            <p className="text-xs font-semibold" style={{ color: T.red }}>
+              RUC inválido — debe tener 11 dígitos y empezar en 10 o 20
+            </p>
+          )}
+        </>
+      )}
+
+      {tipo === "boleta" && (
+        <>
+          <Input
+            label={`DNI del cliente${total > DETRACCION_UMBRAL ? " * (obligatorio > S/700)" : " (opcional)"}`}
+            inputMode="numeric"
+            value={clientDni}
+            onChange={(e) => setClientDni(e.target.value)}
+          />
+        </>
+      )}
+
       <Input label="Dirección" value={clientDir} onChange={(e) => setClientDir(e.target.value)} />
       <Input label="Teléfono WhatsApp" inputMode="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
 
@@ -280,37 +378,29 @@ export function NuevaFacturaForm({
         </span>
         <div className="grid grid-cols-2 gap-2">
           {FORMAS_PAGO.map((fp) => (
-            <button
-              key={fp}
-              type="button"
-              onClick={() => setFormaPago(fp)}
+            <button key={fp} type="button" onClick={() => setFormaPago(fp)}
               className="rounded-xl py-2.5 text-xs font-bold"
               style={{
                 background: formaPago === fp ? T.bluePale : T.white,
                 color: formaPago === fp ? T.blue : T.textMid,
                 border: `1.5px solid ${formaPago === fp ? T.blue : T.slateD}`,
-              }}
-            >
+              }}>
               {fp}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Estado Pendiente / Pagado */}
+      {/* Estado */}
       <div className="flex gap-2">
         {([false, true] as const).map((p) => (
-          <button
-            key={String(p)}
-            type="button"
-            onClick={() => setPagado(p)}
+          <button key={String(p)} type="button" onClick={() => setPagado(p)}
             className="flex-1 rounded-xl py-3 text-sm font-bold"
             style={{
               background: pagado === p ? (p ? T.green : T.amberPale) : T.white,
               color: pagado === p ? (p ? T.white : T.amberD) : T.textMid,
               border: `1.5px solid ${pagado === p ? (p ? T.green : T.amber) : T.slateD}`,
-            }}
-          >
+            }}>
             {p ? "Pagado" : "Pendiente"}
           </button>
         ))}
@@ -320,66 +410,132 @@ export function NuevaFacturaForm({
       <div className="flex flex-col gap-2">
         {items.map((it, i) => (
           <div key={i} className="rounded-2xl bg-white p-3 shadow-sm">
-            <input
-              placeholder="Descripción"
-              value={it.desc}
+            <input placeholder="Descripción" value={it.desc}
               onChange={(e) => cambiarLinea(i, "desc", e.target.value)}
               className="w-full rounded-lg px-2.5 py-2 text-sm outline-none"
-              style={{ background: T.slate }}
-            />
+              style={{ background: T.slate }} />
             <div className="mt-2 flex items-center gap-2">
-              <input
-                type="number"
-                min={0}
-                value={it.cantidad || ""}
+              <input type="number" min={0} value={it.cantidad || ""}
                 onChange={(e) => cambiarLinea(i, "cantidad", e.target.value)}
                 className="w-16 rounded-lg py-2 text-center text-sm font-bold outline-none"
-                style={{ background: T.slate }}
-              />
-              <input
-                type="number"
-                min={0}
-                value={it.pu || ""}
+                style={{ background: T.slate }} />
+              <input type="number" min={0} value={it.pu || ""}
                 onChange={(e) => cambiarLinea(i, "pu", e.target.value)}
                 className="w-24 rounded-lg py-2 text-center text-sm font-bold outline-none"
-                style={{ background: T.slate }}
-              />
-              <span className="ml-auto text-sm font-black" style={{ color: T.blue }}>
-                {fmtPEN(it.subtotal, sym)}
-              </span>
+                style={{ background: T.slate }} />
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm font-black" style={{ color: T.blue }}>
+                  {fmtPEN(it.subtotal, sym)}
+                </span>
+                {items.length > 1 && (
+                  <button type="button" onClick={() => setItems((prev) => prev.filter((_, j) => j !== i))}
+                    className="text-xs font-bold" style={{ color: T.red }}>✕</button>
+                )}
+              </div>
             </div>
           </div>
         ))}
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setItems((prev) => [...prev, { ...LINEA_VACIA }])}
           className="rounded-xl border-2 border-dashed py-2 text-xs font-bold"
-          style={{ borderColor: T.slateDD, color: T.textMid }}
-        >
+          style={{ borderColor: T.slateDD, color: T.textMid }}>
           + Agregar línea
         </button>
       </div>
 
       {/* Totales */}
       <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <div className="flex justify-between text-sm">
-          <span style={{ color: T.textMid }}>Subtotal</span>
-          <span className="font-bold">{fmtPEN(subtotalBase, sym)}</span>
-        </div>
-        <div className="mt-2 flex justify-between text-sm">
-          <span style={{ color: T.textMid }}>IGV (18%)</span>
-          <span className="font-bold">{fmtPEN(igv, sym)}</span>
-        </div>
-        <div className="mt-3 flex justify-between border-t pt-3 text-lg font-black" style={{ borderColor: T.slateD, color: T.blue }}>
-          <span>TOTAL</span>
-          <span>{fmtPEN(total, sym)}</span>
-        </div>
+        {tipo === "boleta" ? (
+          // Boleta: IGV incluido, no desglosado
+          <div className="flex justify-between text-lg font-black" style={{ color: T.blue }}>
+            <span>TOTAL (IGV incl.)</span>
+            <span>{fmtPEN(total, sym)}</span>
+          </div>
+        ) : (
+          // Factura: IGV desglosado
+          <>
+            <div className="flex justify-between text-sm">
+              <span style={{ color: T.textMid }}>Op. Gravada</span>
+              <span className="font-bold">{fmtPEN(subtotalBase, sym)}</span>
+            </div>
+            <div className="mt-2 flex justify-between text-sm">
+              <span style={{ color: T.textMid }}>IGV (18%)</span>
+              <span className="font-bold">{fmtPEN(igv, sym)}</span>
+            </div>
+            <div className="mt-3 flex justify-between border-t pt-3 text-lg font-black"
+              style={{ borderColor: T.slateD, color: T.blue }}>
+              <span>TOTAL</span>
+              <span>{fmtPEN(total, sym)}</span>
+            </div>
+          </>
+        )}
       </div>
 
-      {error && <p className="text-center text-sm font-semibold" style={{ color: T.red }}>{error}</p>}
+      {/* Sección detracción (solo facturas > S/700) */}
+      {aplicaDetraccion && (
+        <div className="rounded-2xl p-4" style={{ background: T.amberPale, border: `1.5px solid ${T.amber}` }}>
+          <p className="mb-3 text-xs font-extrabold uppercase tracking-wide" style={{ color: T.amberD }}>
+            ⚠ Operación sujeta a Detracción SPOT (total &gt; S/700)
+          </p>
+          <div className="flex flex-col gap-2">
+            {OPCIONES_DETRACCION.map((op) => {
+              const sel = detTipo === op.tipo;
+              return (
+                <button
+                  key={op.tipo}
+                  type="button"
+                  onClick={() => setDetTipo(sel ? null : op.tipo)}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all"
+                  style={{
+                    background: sel ? T.amber : T.white,
+                    border: `1.5px solid ${sel ? T.amberD : T.slateD}`,
+                    color: sel ? T.white : T.text,
+                  }}
+                >
+                  <span className="text-xl">{op.emoji}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold">{op.label}</p>
+                    <p className="text-[10px]" style={{ color: sel ? "rgba(255,255,255,0.80)" : T.textMid }}>
+                      Código {op.codigos} · {op.pct}%
+                    </p>
+                  </div>
+                  {sel && <span className="font-extrabold">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {detraccion && (
+            <div className="mt-3 rounded-xl px-4 py-3" style={{ background: T.white }}>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: T.textMid }}>Total</span>
+                <span className="font-bold">{fmtPEN(total, sym)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: T.amberD }}>Detracción ({detraccion.pct}%)</span>
+                <span className="font-bold" style={{ color: T.red }}>− {fmtPEN(detraccion.monto, sym)}</span>
+              </div>
+              <div className="mt-2 flex justify-between border-t pt-2 text-base font-black"
+                style={{ borderColor: T.slateD, color: T.green }}>
+                <span>NETO A COBRAR</span>
+                <span>{fmtPEN(detraccion.neto, sym)}</span>
+              </div>
+              <p className="mt-2 text-[10px]" style={{ color: T.textLight }}>
+                Depositar detracción en Banco de la Nación
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p className="text-center text-sm font-semibold" style={{ color: T.red }}>{error}</p>
+      )}
 
       <Button full variant="success" disabled={loading} onClick={emitir}>
-        {loading ? "Emitiendo…" : `Emitir ${tipo === "boleta" ? "boleta" : "factura"} · ${fmtPEN(total, sym)}`}
+        {loading
+          ? "Emitiendo…"
+          : `Emitir ${tipo === "boleta" ? "boleta" : "factura"} · ${fmtPEN(total, sym)}`}
       </Button>
     </div>
   );

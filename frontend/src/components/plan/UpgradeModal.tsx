@@ -5,7 +5,7 @@ import { UPGRADE_MENSAJES, type UpgradeRazon } from "@/lib/plan-limits";
 import { T } from "@/lib/theme";
 
 const PRO_FEATURES = [
-  "Presupuestos ilimitados",
+  "Cotizaciones ilimitadas",
   "Facturas ilimitadas",
   "IA texto + voz 🎤",
   "Logo personalizado",

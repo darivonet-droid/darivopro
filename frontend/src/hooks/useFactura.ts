@@ -12,8 +12,10 @@ interface FacturaRow {
   inv_num: string;
   inv_date: string;
   inv_status: Factura["invStatus"];
+  tipo_doc: Factura["tipoDoc"] | null;
   client_name: string;
   client_ruc: string | null;
+  client_dni: string | null;
   client_dir: string | null;
   moneda: Factura["moneda"];
   sym: string;
@@ -21,6 +23,11 @@ interface FacturaRow {
   subtotal_base: number | null;
   igv_amount: number | null;
   total_final: number | null;
+  detraccion_tipo: string | null;
+  detraccion_pct: number | null;
+  detraccion_monto: number | null;
+  neto_cobrar: number | null;
+  cta_detracciones: string | null;
   from_quote_id: string | null;
   biz_data: EmpresaData | null;
 }
@@ -31,8 +38,10 @@ const mapRow = (row: FacturaRow): Factura => ({
   invNum: row.inv_num,
   invDate: row.inv_date,
   invStatus: row.inv_status,
+  tipoDoc: row.tipo_doc ?? "factura",
   clientName: row.client_name,
   clientRuc: row.client_ruc ?? undefined,
+  clientDni: row.client_dni ?? undefined,
   clientDir: row.client_dir ?? undefined,
   moneda: row.moneda ?? "PEN",
   sym: row.sym ?? "S/",
@@ -40,6 +49,13 @@ const mapRow = (row: FacturaRow): Factura => ({
   subtotalBase: Number(row.subtotal_base ?? 0),
   igvAmount: Number(row.igv_amount ?? 0),
   totalFinal: Number(row.total_final ?? 0),
+  detraccion: row.detraccion_tipo ? {
+    tipo: row.detraccion_tipo as import("@/types").TipoDetraccion,
+    pct: Number(row.detraccion_pct ?? 0),
+    monto: Number(row.detraccion_monto ?? 0),
+    neto: Number(row.neto_cobrar ?? 0),
+    ctaDetracciones: row.cta_detracciones ?? undefined,
+  } : undefined,
   fromQuoteId: row.from_quote_id ?? undefined,
   bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
 });
@@ -90,8 +106,10 @@ export function useFactura() {
         inv_num: factura.invNum,
         inv_date: factura.invDate,
         inv_status: factura.invStatus,
+        tipo_doc: factura.tipoDoc,
         client_name: factura.clientName,
         client_ruc: factura.clientRuc ?? null,
+        client_dni: factura.clientDni ?? null,
         client_dir: factura.clientDir ?? null,
         moneda: factura.moneda,
         sym: factura.sym,
@@ -99,6 +117,11 @@ export function useFactura() {
         subtotal_base: factura.subtotalBase,
         igv_amount: factura.igvAmount,
         total_final: factura.totalFinal,
+        detraccion_tipo: factura.detraccion?.tipo ?? null,
+        detraccion_pct: factura.detraccion?.pct ?? null,
+        detraccion_monto: factura.detraccion?.monto ?? null,
+        neto_cobrar: factura.detraccion?.neto ?? null,
+        cta_detracciones: factura.detraccion?.ctaDetracciones ?? null,
         from_quote_id: factura.fromQuoteId ?? null,
         biz_data: factura.bizData,
       })

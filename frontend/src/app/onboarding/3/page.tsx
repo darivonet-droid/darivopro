@@ -44,7 +44,7 @@ export default function OnboardingStep3() {
         <p className="mt-2 text-sm leading-relaxed" style={{ color: T.textMid }}>
           Tienes{" "}
           <span className="font-bold" style={{ color: T.blue }}>
-            5 presupuestos gratis
+            5 cotizaciones gratis
           </span>{" "}
           para empezar.
           <br />
@@ -69,7 +69,7 @@ export default function OnboardingStep3() {
           </div>
           <div>
             <p className="text-base font-extrabold leading-snug" style={{ color: T.white }}>
-              Haz tu primer presupuesto
+              Haz tu primera cotización
             </p>
             <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.70)" }}>
               en menos de 1 minuto
@@ -108,7 +108,7 @@ export default function OnboardingStep3() {
           boxShadow:   "0 4px 20px rgba(37,99,235,0.35)",
         }}
       >
-        {loading ? "Abriendo tu panel…" : "Crear mi primer presupuesto →"}
+        {loading ? "Abriendo tu panel…" : "Crear mi primera cotización →"}
       </button>
 
       <p className="mt-3 text-center text-xs" style={{ color: T.textLight }}>

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "DARIVO PRO",
-  description: "Presupuestos y facturas de reformas en menos de 60 segundos",
+  description: "Cotizaciones y facturas de reformas en menos de 60 segundos",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

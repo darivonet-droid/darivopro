@@ -40,11 +40,27 @@ export const empresaSchema = z.object({
   telefono: z.string().optional(),
   moneda: z.enum(["PEN", "USD"]),
   simbolo: z.string(),
+  ctaDetracciones: z.string().optional(),
 });
 
 export const facturaSchema = z.object({
   clientName: z.string().min(2, "Ingresa el nombre del cliente"),
-  clientRuc: z.string().regex(/^\d{8}$|^\d{11}$/, "RUC (11) o DNI (8) inválido").optional().or(z.literal("")),
+  clientRuc: z.string()
+    .regex(/^\d{11}$/, "RUC debe tener 11 dígitos")
+    .refine((r) => r.startsWith("10") || r.startsWith("20"), "RUC debe comenzar en 10 o 20")
+    .optional()
+    .or(z.literal("")),
+  clientDni: z.string().regex(/^\d{8}$/, "DNI debe tener 8 dígitos").optional().or(z.literal("")),
+  clientDir: z.string().optional(),
+  items: z.array(lineaFacturaSchema).min(1, "Agrega al menos una línea"),
+});
+
+export const boletaSchema = z.object({
+  clientName: z.string().min(2, "Ingresa el nombre del cliente"),
+  clientDni: z.string()
+    .regex(/^\d{8}$/, "DNI debe tener 8 dígitos")
+    .optional()
+    .or(z.literal("")),
   clientDir: z.string().optional(),
   items: z.array(lineaFacturaSchema).min(1, "Agrega al menos una línea"),
 });

@@ -1,7 +1,7 @@
 {
   "name": "Darivo Pro",
   "short_name": "Darivo",
-  "description": "Presupuestos y facturas de reformas en Perú",
+  "description": "Cotizaciones y facturas de reformas en Perú",
   "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",

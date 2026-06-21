@@ -187,7 +187,7 @@ export function IAPresupuestoFlow() {
     }
     setGuardadoId(creado.id);
     limpiar();
-    mostrarToast("Presupuesto guardado ✓");
+    mostrarToast("Cotización guardada ✓");
     const url = await generarPDF(creado.id);
     if (url) setPdfUrl(url);
   };
@@ -197,7 +197,7 @@ export function IAPresupuestoFlow() {
       mostrarToast("Agrega teléfono del cliente", "error");
       return;
     }
-    const msg = `Hola, te envío el presupuesto ${numPresupuesto} por S/ ${resultado?.total.toFixed(2)}.\n\nGenerado con DARIVO PRO`;
+    const msg = `Hola, te envío la cotización ${numPresupuesto} por S/ ${resultado?.total.toFixed(2)}.\n\nGenerado con DARIVO PRO`;
     window.open(buildWhatsAppUrl(phone, msg), "_blank");
   };
 
@@ -206,7 +206,7 @@ export function IAPresupuestoFlow() {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm" style={{ color: T.textMid }}>
-          Describe el trabajo y la IA genera el presupuesto en segundos.
+          Describe el trabajo y la IA genera la cotización en segundos.
         </p>
         <button
           type="button"
@@ -301,7 +301,7 @@ export function IAPresupuestoFlow() {
       <div className="flex flex-col gap-4">
         <div className="rounded-2xl px-4 py-3" style={{ background: T.navyLight }}>
           <p className="text-xs font-bold uppercase" style={{ color: T.textLight }}>
-            Nº presupuesto
+            Nº cotización
           </p>
           <p className="text-lg font-black" style={{ color: T.white }}>
             {numPresupuesto}
@@ -367,7 +367,7 @@ export function IAPresupuestoFlow() {
               className="rounded-2xl py-3.5 text-sm font-bold"
               style={{ background: T.slate, color: T.textMid }}
             >
-              Ver mis presupuestos
+              Ver mis cotizaciones
             </button>
           </div>
         )}

@@ -117,7 +117,7 @@ export function PreciosView() {
           Elige tu plan
         </h1>
         <p className="mt-1 text-sm" style={{ color: T.textMid }}>
-          Presupuestos y facturas para maestros de obra
+          Cotizaciones y facturas para maestros de obra
         </p>
       </div>
 
@@ -173,7 +173,7 @@ export function PreciosView() {
         </p>
         <p className="mt-1 text-sm leading-relaxed" style={{ color: T.text }}>
           Solo al registrarte:{" "}
-          <span className="font-bold">5 presupuestos</span> y PDF con marca de agua DARIVO PRO.
+          <span className="font-bold">5 cotizaciones</span> y PDF con marca de agua DARIVO PRO.
         </p>
         <Link
           href="/registro"

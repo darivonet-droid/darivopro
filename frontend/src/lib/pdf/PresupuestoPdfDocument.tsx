@@ -105,7 +105,7 @@ export function PresupuestoPdfDocument({ data, fechaGeneracion }: Props) {
     <Document>
       <Page size="A4" style={baseStyles.page}>
         <View style={s.header}>
-          <Text style={s.headerTitle}>PRESUPUESTO</Text>
+          <Text style={s.headerTitle}>COTIZACIÓN</Text>
           <Text style={s.headerSub}>
             Generado con DARIVO PRO · {fechaGeneracion}
           </Text>
@@ -175,7 +175,7 @@ export function PresupuestoPdfDocument({ data, fechaGeneracion }: Props) {
         ) : null}
 
         <Text style={baseStyles.footer}>
-          Este presupuesto tiene validez de 30 días desde su emisión · DARIVO PRO
+          Esta cotización tiene validez de 30 días desde su emisión · DARIVO PRO
         </Text>
       </Page>
     </Document>

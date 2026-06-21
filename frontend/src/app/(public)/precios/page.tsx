@@ -3,7 +3,7 @@ import { PreciosView } from "@/components/precios/PreciosView";
 
 export const metadata: Metadata = {
   title: "Precios — DARIVO PRO",
-  description: "Planes Básico, Pro y Empresa para presupuestos y facturas de obra en Perú.",
+  description: "Planes Básico, Pro y Empresa para cotizaciones y facturas de obra en Perú.",
 };
 
 export default function PreciosPage() {

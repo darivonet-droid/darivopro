@@ -37,6 +37,7 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
         telefono: form.telefono || null,
         moneda: form.moneda,
         simbolo: form.simbolo,
+        cta_detracciones: form.ctaDetracciones || null,
       })
       .eq("id", user.id);
     setGuardando(false);
@@ -63,6 +64,13 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
           <Input label="RUC *" placeholder="11 dígitos" inputMode="numeric" maxLength={11} value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
           <Input label="Dirección fiscal *" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
           <Input label="Teléfono" inputMode="tel" value={form.telefono ?? ""} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+          <Input
+            label="Cuenta detracciones (Banco de la Nación)"
+            placeholder="Ej: 00-123456789"
+            inputMode="numeric"
+            value={form.ctaDetracciones ?? ""}
+            onChange={(e) => setForm({ ...form, ctaDetracciones: e.target.value })}
+          />
 
           <label className="block">
             <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>Moneda</span>

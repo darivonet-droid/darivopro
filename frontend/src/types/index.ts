@@ -35,14 +35,26 @@ export interface LineaFactura {
   subtotal: number;
 }
 
+export type TipoDetraccion = "construccion" | "mantenimiento";
+
+export interface Detraccion {
+  tipo:  TipoDetraccion;
+  pct:   number;          // 4 o 12
+  monto: number;
+  neto:  number;
+  ctaDetracciones?: string;
+}
+
 export interface Factura {
   invId: string;
   tenant_id: string;
   invNum: string;
   invDate: string;
   invStatus: "Pendiente" | "Emitida" | "Cobrada";
+  tipoDoc: "boleta" | "factura";
   clientName: string;
   clientRuc?: string;
+  clientDni?: string;
   clientDir?: string;
   moneda: "PEN" | "USD";
   sym: string;
@@ -50,6 +62,7 @@ export interface Factura {
   subtotalBase: number;
   igvAmount: number;
   totalFinal: number;
+  detraccion?: Detraccion;
   fromQuoteId?: string;
   bizData: EmpresaData;
 }
@@ -63,6 +76,7 @@ export interface EmpresaData {
   simbolo: string;
   tipoComprobante?: "boleta" | "factura";
   formaPago?: "Efectivo" | "Yape" | "Transferencia" | "Crédito";
+  cta_detracciones?: string;
 }
 
 export interface Partida {

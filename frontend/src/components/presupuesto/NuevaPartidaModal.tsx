@@ -19,6 +19,27 @@ const UNIT_LABEL: Record<CalcChip, string> = {
   fixed: "S/",
 };
 
+/** Solo dígitos y un separador decimal (, o .) mientras el usuario escribe */
+function sanitizePrecioInput(raw: string): string {
+  const value = raw.replace(/[^\d.,]/g, "");
+  if (!value) return "";
+
+  const sepIndex = value.search(/[.,]/);
+  if (sepIndex === -1) return value;
+
+  const intPart = value.slice(0, sepIndex);
+  const sep = value[sepIndex];
+  const decPart = value.slice(sepIndex + 1).replace(/[.,]/g, "");
+  return intPart + sep + decPart;
+}
+
+/** Convierte texto con coma o punto a número >= 0 */
+function parsePrecioToNumber(value: string): number {
+  if (!value.trim()) return 0;
+  const num = parseFloat(value.replace(",", "."));
+  return Number.isFinite(num) && num >= 0 ? num : 0;
+}
+
 interface NuevaPartidaModalProps {
   open: boolean;
   categoria: Capitulo;
@@ -39,9 +60,13 @@ export function NuevaPartidaModal({
 
   if (!open) return null;
 
-  const precioNum = parseFloat(precio.replace(",", ".")) || 0;
+  const precioNum = parsePrecioToNumber(precio);
   const unitMap: Record<CalcChip, string> = {
     m2: "m²", unit: "und", hour: "h", fixed: "fijo",
+  };
+
+  const handlePrecioChange = (raw: string) => {
+    setPrecio(sanitizePrecioInput(raw));
   };
 
   const añadir = () => {
@@ -144,14 +169,13 @@ export function NuevaPartidaModal({
             </span>
             <div className="relative">
               <input
-                type="number"
-                min={0}
-                step={0.01}
+                type="text"
+                inputMode="decimal"
                 value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
+                onChange={(e) => handlePrecioChange(e.target.value)}
                 onFocus={() => setFocused("precio")}
                 onBlur={() => setFocused(null)}
-                placeholder="0.00"
+                placeholder="0,00"
                 className="w-full rounded-xl py-4 pl-4 pr-12 text-xl font-black outline-none"
                 style={{
                   background: T.white,

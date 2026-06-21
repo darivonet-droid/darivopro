@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { fmtPEN } from "@/lib/utils";
+import { CATEGORIAS } from "@/lib/catalog";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
 
@@ -115,7 +116,7 @@ export default async function DashboardPage() {
           {/* Texto */}
           <div className="flex-1">
             <p className="text-base font-extrabold leading-tight" style={{ color: T.white }}>
-              Nuevo presupuesto
+              Nueva cotización
             </p>
             <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.70)" }}>
               Combina partidas · menos de 60 seg
@@ -137,25 +138,28 @@ export default async function DashboardPage() {
           Categorías
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
-          {CATEGORIAS.map((cat) => (
+          {CATEGORIAS.map((cat) => {
+            const chip = DASHBOARD_CHIP[cat.id] ?? { bg: T.slate, color: T.textMid };
+            return (
             <Link
               key={cat.id}
               href={`/presupuestos/nuevo?cat=${cat.id}`}
               className="flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-transform active:scale-95"
-              style={{ background: cat.bg }}
+              style={{ background: chip.bg }}
             >
               <span className="text-xl">{cat.emoji}</span>
-              <span className="text-sm font-bold" style={{ color: cat.color }}>
-                {cat.label}
+              <span className="text-sm font-bold" style={{ color: chip.color }}>
+                {cat.nombre}
               </span>
             </Link>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── Últimos presupuestos ────────────────────────────── */}
         <div className="mb-3 mt-6 flex items-center justify-between">
           <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
-            Últimos presupuestos
+            Últimas cotizaciones
           </h2>
           <Link href="/presupuestos" className="text-xs font-bold" style={{ color: T.blue }}>
             Ver todos →
@@ -166,7 +170,7 @@ export default async function DashboardPage() {
           {recientes.length === 0 ? (
             <div className="rounded-2xl bg-white py-10 text-center shadow-sm">
               <p className="text-sm font-semibold" style={{ color: T.textMid }}>
-                Aún no tienes presupuestos
+                Aún no tienes cotizaciones
               </p>
               <p className="mt-1 text-xs" style={{ color: T.textLight }}>
                 Crea el primero en menos de 60 seg ⚡
@@ -258,11 +262,12 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 /* ─── Datos de categorías ──────────────────────────────────── */
-const CATEGORIAS = [
-  { id: "albanileria",   emoji: "🧱", label: "Albañilería",   bg: "#FEF3C7", color: "#92400E" },
-  { id: "fontaneria",    emoji: "💧", label: "Fontanería",    bg: "#D1FAE5", color: "#065F46" },
-  { id: "electricidad",  emoji: "⚡", label: "Electricidad",  bg: "#FEF9C3", color: "#854D0E" },
-  { id: "pintura",       emoji: "🎨", label: "Pintura",       bg: "#FCE7F3", color: "#9D174D" },
-  { id: "carpinteria",   emoji: "🚪", label: "Carpintería",   bg: "#FEF0E7", color: "#7C2D12" },
-  { id: "climatizacion", emoji: "❄️", label: "Climatización", bg: "#EFF6FF", color: "#1E40AF" },
-];
+/** Solo estilos visuales del chip en dashboard; nombres/emojis vienen de catalog.ts */
+const DASHBOARD_CHIP: Record<string, { bg: string; color: string }> = {
+  albanileria:   { bg: "#FEF3C7", color: "#92400E" },
+  fontaneria:    { bg: "#D1FAE5", color: "#065F46" },
+  electricidad:  { bg: "#FEF9C3", color: "#854D0E" },
+  pintura:       { bg: "#FCE7F3", color: "#9D174D" },
+  carpinteria:   { bg: "#FEF0E7", color: "#7C2D12" },
+  climatizacion: { bg: "#EFF6FF", color: "#1E40AF" },
+};

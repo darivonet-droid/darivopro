@@ -39,11 +39,11 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     return (
       <EmptyState
         emoji="📋"
-        titulo="Sin presupuestos todavía"
-        descripcion="Crea tu primer presupuesto en menos de 60 segundos."
+        titulo="Sin cotizaciones todavía"
+        descripcion="Crea tu primera cotización en menos de 60 segundos."
       >
         <Link href="/presupuestos/nuevo">
-          <Button>Nuevo presupuesto</Button>
+          <Button>Nueva cotización</Button>
         </Link>
       </EmptyState>
     );
@@ -57,7 +57,7 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
       setPresupuestos((prev) =>
         prev.map((x) => (x.id === p.id ? { ...x, status: siguiente } : x))
       );
-      mostrarToast(`Presupuesto → ${siguiente}`);
+      mostrarToast(`Cotización → ${siguiente}`);
     } else {
       mostrarToast("No se pudo actualizar el estado", "error");
     }
@@ -67,7 +67,7 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     const ok = await eliminar(id);
     if (ok) {
       setPresupuestos((prev) => prev.filter((x) => x.id !== id));
-      mostrarToast("Presupuesto eliminado");
+      mostrarToast("Cotización eliminada");
     } else {
       mostrarToast("No se pudo eliminar", "error");
     }

@@ -1,20 +1,24 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { baseStyles, C, fmtMoney } from "./styles";
-import type { EmpresaData, LineaFactura } from "@/types";
+import type { Detraccion, EmpresaData, LineaFactura } from "@/types";
+import { OPCIONES_DETRACCION } from "@/lib/factura-utils";
 
 export interface FacturaPdfData {
   inv_num: string;
   inv_date: string;
   inv_status?: string | null;
+  tipo_doc?: "boleta" | "factura" | null;
   client_name: string;
   client_ruc?: string | null;
+  client_dni?: string | null;
   client_dir?: string | null;
   sym?: string | null;
   items: LineaFactura[];
   subtotal_base?: number | null;
   igv_amount?: number | null;
   total_final?: number | null;
+  detraccion?: Detraccion | null;
   biz_data?: EmpresaData | null;
 }
 
@@ -93,6 +97,38 @@ const s = StyleSheet.create({
     opacity: 0.35,
     transform: "rotate(-18deg)",
   },
+  spotBox: {
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+    borderRadius: 4,
+    backgroundColor: "#FFFBEB",
+  },
+  spotTitle: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: "#B45309",
+    marginBottom: 4,
+  },
+  spotLine: { fontSize: 9, color: "#78350F", marginTop: 2 },
+  detrRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 3,
+    fontSize: 11,
+  },
+  netoFinal: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 2,
+    borderTopColor: "#10B981",
+    marginTop: 6,
+    paddingTop: 8,
+    fontSize: 13,
+    fontFamily: "Helvetica-Bold",
+    color: "#065F46",
+  },
 });
 
 interface Props {
@@ -101,21 +137,28 @@ interface Props {
 }
 
 export function FacturaPdfDocument({ data, fechaGeneracion }: Props) {
-  const biz = data.biz_data ?? ({} as EmpresaData);
-  const sym = data.sym ?? "S/";
-  const pagado = data.inv_status === "Cobrada";
-  const esBoleta = biz.tipoComprobante === "boleta";
+  const biz      = data.biz_data ?? ({} as EmpresaData);
+  const sym      = data.sym ?? "S/";
+  const pagado   = data.inv_status === "Cobrada";
+  // tipo_doc tiene precedencia; si falta, caer a tipoComprobante del biz_data
+  const esBoleta = (data.tipo_doc ?? biz.tipoComprobante) === "boleta";
+  const det      = data.detraccion ?? null;
+
+  const opDet = det
+    ? OPCIONES_DETRACCION.find((o) => o.tipo === det.tipo)
+    : null;
 
   return (
     <Document>
       <Page size="A4" style={baseStyles.page}>
         {pagado ? <Text style={s.pagado}>PAGADO</Text> : null}
 
+        {/* Cabecera empresa + número */}
         <View style={s.top}>
           <View>
             <Text style={s.empresaName}>{biz.razonSocial ?? "Mi empresa"}</Text>
             {biz.direccion ? <Text style={s.empresaLine}>{biz.direccion}</Text> : null}
-            {biz.telefono ? <Text style={s.empresaLine}>Tel: {biz.telefono}</Text> : null}
+            {biz.telefono  ? <Text style={s.empresaLine}>Tel: {biz.telefono}</Text> : null}
           </View>
           <View style={s.box}>
             <Text style={s.boxTipo}>
@@ -126,14 +169,17 @@ export function FacturaPdfDocument({ data, fechaGeneracion }: Props) {
           </View>
         </View>
 
+        {/* Datos del cliente */}
         <View style={s.cliente}>
-          <Text style={s.label}>Señor(es)</Text>
+          <Text style={s.label}>{esBoleta ? "Señor(a)" : "Señor(es)"}</Text>
           <Text style={{ fontFamily: "Helvetica-Bold", marginTop: 2 }}>{data.client_name}</Text>
-          {data.client_ruc ? <Text style={{ marginTop: 2 }}>RUC/DNI: {data.client_ruc}</Text> : null}
+          {data.client_ruc ? <Text style={{ marginTop: 2 }}>RUC: {data.client_ruc}</Text> : null}
+          {data.client_dni ? <Text style={{ marginTop: 2 }}>DNI: {data.client_dni}</Text> : null}
           {data.client_dir ? <Text>{data.client_dir}</Text> : null}
           <Text style={{ marginTop: 4 }}>Fecha de emisión: {data.inv_date}</Text>
         </View>
 
+        {/* Tabla de items */}
         <View style={s.thRow}>
           <Text style={[s.th, s.colDesc]}>Descripción</Text>
           <Text style={[s.th, s.colQty]}>Cant.</Text>
@@ -150,20 +196,66 @@ export function FacturaPdfDocument({ data, fechaGeneracion }: Props) {
           </View>
         ))}
 
+        {/* Totales */}
         <View style={s.totales}>
-          <View style={s.totalRow}>
-            <Text>Op. Gravada</Text>
-            <Text>{fmtMoney(Number(data.subtotal_base), sym)}</Text>
-          </View>
-          <View style={s.totalRow}>
-            <Text>IGV (18%)</Text>
-            <Text>{fmtMoney(Number(data.igv_amount), sym)}</Text>
-          </View>
-          <View style={s.totalFinal}>
-            <Text>IMPORTE TOTAL</Text>
-            <Text>{fmtMoney(Number(data.total_final), sym)}</Text>
-          </View>
+          {esBoleta ? (
+            // Boleta: IGV incluido sin desglose
+            <View style={s.totalFinal}>
+              <Text>TOTAL (IGV incl.)</Text>
+              <Text>{fmtMoney(Number(data.total_final), sym)}</Text>
+            </View>
+          ) : (
+            // Factura: IGV desglosado
+            <>
+              <View style={s.totalRow}>
+                <Text>Op. Gravada</Text>
+                <Text>{fmtMoney(Number(data.subtotal_base), sym)}</Text>
+              </View>
+              <View style={s.totalRow}>
+                <Text>IGV (18%)</Text>
+                <Text>{fmtMoney(Number(data.igv_amount), sym)}</Text>
+              </View>
+              <View style={s.totalFinal}>
+                <Text>IMPORTE TOTAL</Text>
+                <Text>{fmtMoney(Number(data.total_final), sym)}</Text>
+              </View>
+            </>
+          )}
+
+          {/* Detracción SPOT */}
+          {det && opDet && (
+            <>
+              <View style={s.detrRow}>
+                <Text style={{ color: "#B45309" }}>Detracción {opDet.pct}%</Text>
+                <Text style={{ color: "#B45309" }}>- {fmtMoney(det.monto, sym)}</Text>
+              </View>
+              <View style={s.netoFinal}>
+                <Text>NETO A COBRAR</Text>
+                <Text>{fmtMoney(det.neto, sym)}</Text>
+              </View>
+            </>
+          )}
         </View>
+
+        {/* Leyenda SPOT */}
+        {det && opDet && (
+          <View style={s.spotBox}>
+            <Text style={s.spotTitle}>
+              Operación sujeta al Sistema de Pago de Obligaciones Tributarias (SPOT)
+            </Text>
+            <Text style={s.spotLine}>
+              Tipo: {opDet.label}
+            </Text>
+            <Text style={s.spotLine}>
+              Código: {opDet.codigos} · Tasa: {opDet.pct}%
+            </Text>
+            {det.ctaDetracciones && (
+              <Text style={s.spotLine}>
+                Depositar en Banco de la Nación · Cuenta: {det.ctaDetracciones}
+              </Text>
+            )}
+          </View>
+        )}
 
         <Text style={baseStyles.footer}>
           {biz.formaPago ? `Forma de pago: ${biz.formaPago} · ` : ""}

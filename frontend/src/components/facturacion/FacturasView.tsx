@@ -113,7 +113,7 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
             style={{ background: "#FFFBEB", border: `1.5px solid ${T.amber}` }}
           >
             <p className="text-xs font-extrabold tracking-wide" style={{ color: T.amberD }}>
-              ⚡ PRESUPUESTOS APROBADOS — CONVERTIR EN FACTURA
+              ⚡ COTIZACIONES APROBADAS — CONVERTIR EN FACTURA
             </p>
             <div className="mt-3 flex flex-col gap-2">
               {aprobados.slice(0, 3).map((p) => (

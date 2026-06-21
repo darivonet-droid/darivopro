@@ -132,7 +132,7 @@ export default function RegistroPage() {
           Crear cuenta gratis
         </h1>
         <p className="mb-6 text-sm" style={{ color: T.textMid }}>
-          Tu primer presupuesto en menos de 60 segundos
+          Tu primera cotización en menos de 60 segundos
         </p>
 
         <form onSubmit={registrar} className="flex flex-col gap-4">

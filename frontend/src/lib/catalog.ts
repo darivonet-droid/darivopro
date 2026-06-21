@@ -14,7 +14,7 @@ export const CATALOGO: Capitulo[] = [
     ],
   },
   {
-    id: "fontaneria", nombre: "Fontanería", emoji: "🚿", color: "#0D9488",
+    id: "fontaneria", nombre: "Gasfitería", emoji: "🚿", color: "#0D9488",
     partidas: [
       { id: "fon-punto-agua",    nombre: "Punto de agua",              tipo: "unidad", precio: 120, unidad: "pto" },
       { id: "fon-punto-desague", nombre: "Punto de desagüe",           tipo: "unidad", precio: 140, unidad: "pto" },
@@ -62,6 +62,16 @@ export const CATALOGO: Capitulo[] = [
     ],
   },
 ];
+
+/** Metadatos de categoría para UI — nombres y emojis desde CATALOGO (fuente única) */
+export type CategoriaMeta = Pick<Capitulo, "id" | "nombre" | "emoji" | "color">;
+
+export const CATEGORIAS: CategoriaMeta[] = CATALOGO.map(({ id, nombre, emoji, color }) => ({
+  id,
+  nombre,
+  emoji,
+  color,
+}));
 
 const TIPO_A_CALC: Record<Partida["tipo"], LineaPresupuesto["calcType"]> = {
   m2: "m2",

@@ -1,7 +1,7 @@
 "use client";
 // DARIVO PRO — Wizard de nuevo presupuesto (objetivo: < 60 segundos)
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { NuevaPartidaModal } from "@/components/presupuesto/NuevaPartidaModal";
@@ -18,6 +18,7 @@ const PASOS = ["Cliente", "Partidas", "Resumen"] as const;
 
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { crear, loading } = usePresupuesto();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
@@ -47,6 +48,13 @@ export function NuevoPresupuestoWizard() {
       setNotes(saved.notes);
     }
   }, [cargar]);
+
+  useEffect(() => {
+    const cat = searchParams.get("cat");
+    if (cat && CATALOGO.some((c) => c.id === cat)) {
+      setCapituloActivo(cat);
+    }
+  }, [searchParams]);
 
   const totalBase  = useMemo(() => items.reduce((s, it) => s + it.subtotal, 0), [items]);
   const totalLabor = Math.round(totalBase * margin) / 100;
@@ -107,11 +115,11 @@ export function NuevoPresupuestoWizard() {
     const creado = await crear(payload, mostrarUpgrade);
     if (creado) {
       limpiar();
-      mostrarToast("Presupuesto creado ✓");
+      mostrarToast("Cotización creada ✓");
       router.push("/presupuestos");
       router.refresh();
     } else {
-      mostrarToast("No se pudo guardar el presupuesto", "error");
+      mostrarToast("No se pudo guardar la cotización", "error");
     }
   };
 
@@ -320,7 +328,7 @@ export function NuevoPresupuestoWizard() {
           <Button full onClick={avanzar}>Continuar →</Button>
         ) : (
           <Button full variant="success" disabled={loading} onClick={guardar}>
-            {loading ? "Guardando…" : `Guardar presupuesto · ${fmtPEN(totalFinal)}`}
+            {loading ? "Guardando…" : `Guardar cotización · ${fmtPEN(totalFinal)}`}
           </Button>
         )}
       </div>

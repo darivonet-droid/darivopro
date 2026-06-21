@@ -1,3 +1,4 @@
+# LEGACY: no usado por frontend actual, pendiente de decidir si se elimina
 # DARIVO PRO — Catálogo base de partidas de obra (precios referenciales PEN)
 # Debe mantenerse en sincronía con frontend/src/lib/catalog.ts
 

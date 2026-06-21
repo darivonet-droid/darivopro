@@ -31,6 +31,7 @@ export default async function NuevaFacturaPage({
         telefono: perfil.telefono ?? undefined,
         moneda: perfil.moneda ?? "PEN",
         simbolo: perfil.simbolo ?? "S/",
+        cta_detracciones: perfil.cta_detracciones ?? undefined,
       }
     : null;
 

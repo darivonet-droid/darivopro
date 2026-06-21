@@ -1,3 +1,4 @@
+# LEGACY: no usado por frontend actual, pendiente de decidir si se elimina
 # DARIVO PRO — Endpoints de catálogo (partidas + precios de la empresa)
 import copy
 from typing import List

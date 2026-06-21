@@ -5,7 +5,7 @@ import { NuevoPresupuestoWizard } from "@/components/presupuesto/NuevoPresupuest
 export default function NuevoPresupuestoPage() {
   return (
     <div style={{ background: "#F8FAFF" }}>
-      <PageHeader titulo="Nuevo presupuesto" subtitulo="Listo en menos de 60 segundos" backHref="/presupuestos" />
+      <PageHeader titulo="Nueva cotización" subtitulo="Listo en menos de 60 segundos" backHref="/presupuestos" />
       <NuevoPresupuestoWizard />
     </div>
   );
