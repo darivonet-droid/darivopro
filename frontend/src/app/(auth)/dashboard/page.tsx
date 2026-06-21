@@ -9,34 +9,49 @@ import { T } from "@/lib/theme";
 export default async function DashboardPage() {
   const supabase = createServerClient();
 
+  // Primer día del mes actual para filtrar ingresos del mes
+  const inicioMes = new Date();
+  inicioMes.setDate(1);
+  inicioMes.setHours(0, 0, 0, 0);
+
   const [
     { data: { user } },
     { data: perfil },
-    { data: presRaw },
-    { data: facsRaw },
+    { data: statsRaw },   // todos los presupuestos — solo id+status para conteos exactos
+    { data: presRaw },    // últimos 5 para la lista visual
+    { data: facsRaw },    // facturas del mes para ingresos
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("razon_social, onboarding_done").single(),
+    supabase.from("presupuestos").select("id, status"),
     supabase
       .from("presupuestos")
       .select("id, status, total_final, client_name, created_at, presupuesto_items(count)")
       .order("created_at", { ascending: false })
-      .limit(20),
-    supabase.from("facturas").select("inv_status, total_final"),
+      .limit(5),
+    supabase
+      .from("facturas")
+      .select("inv_status, total_final")
+      .gte("created_at", inicioMes.toISOString()),
   ]);
 
   // Redirigir a onboarding si no lo completó
   if (perfil && perfil.onboarding_done === false) redirect("/onboarding/1");
 
-  const pres      = presRaw ?? [];
-  const facs      = facsRaw ?? [];
+  const stats     = statsRaw ?? [];
+  const pres      = presRaw  ?? [];
+  const facs      = facsRaw  ?? [];
   const nombre    = perfil?.razon_social || user?.email?.split("@")[0] || "Maestro";
-  const aprobados = pres.filter((p) => p.status === "Aprobado").length;
-  const pendientes= pres.filter((p) => p.status !== "Aprobado").length;
+
+  // Conteos calculados sobre el total real, no sobre los 5 de la lista
+  const aprobados = stats.filter((p) => p.status === "Aprobado").length;
+  const pendientes = stats.filter((p) => p.status === "Pendiente de firma").length;
+
+  // Ingresos = facturas cobradas en el mes actual
   const ingresos  = facs
     .filter((f) => f.inv_status === "Cobrada")
     .reduce((s, f) => s + Number(f.total_final ?? 0), 0);
-  const recientes = pres.slice(0, 5);
+  const recientes = pres;
 
   return (
     <div className="min-h-screen" style={{ background: "#F8FAFF" }}>
@@ -75,7 +90,7 @@ export default async function DashboardPage() {
           <StatCard valor={pendientes} label="Pendientes" color={T.amber} />
           <StatCard
             valor={fmtPEN(ingresos)}
-            label="Ingresos"
+            label="Ingresos mes"
             color={T.blueL}
             small
           />
