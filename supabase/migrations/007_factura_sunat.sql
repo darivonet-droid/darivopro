@@ -34,7 +34,8 @@ ALTER TABLE comprobante_series ENABLE ROW LEVEL SECURITY;
 -- La tabla es de lectura/escritura libre para usuarios autenticados
 -- (el incremento se hace con SELECT...FOR UPDATE desde el backend si se necesita)
 -- Por ahora permitimos lectura pública y escritura autenticada
-CREATE POLICY IF NOT EXISTS "autenticado puede leer series"
+DROP POLICY IF EXISTS "autenticado puede leer series" ON comprobante_series;
+CREATE POLICY "autenticado puede leer series"
   ON comprobante_series FOR SELECT
   USING (auth.uid() IS NOT NULL);
 
