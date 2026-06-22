@@ -80,6 +80,8 @@ jobs:
     needs: [test-frontend, test-backend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     defaults:
       run:
         working-directory: ./backend
@@ -87,13 +89,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Instalar Railway CLI
-        if: ${{ secrets.RAILWAY_TOKEN != '' }}
+        if: env.RAILWAY_TOKEN != ''
         run: npm install -g @railway/cli
 
       - name: Deploy a Railway (carpeta backend/)
-        if: ${{ secrets.RAILWAY_TOKEN != '' }}
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
         run: railway up --service darivo-pro-api --detach --ci
 
   # ─── SUPABASE MIGRATIONS ────────────────────────────────────────────────────
@@ -104,30 +104,30 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_ID: kyckjapprmtfahnkuucz
+      SUPABASE_DB_PASSWORD:  ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID:   kyckjapprmtfahnkuucz
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Supabase CLI
-        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' }}
+        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
       - name: Verificar estructura supabase/
-        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' }}
+        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
         run: |
           test -f supabase/config.toml || (echo "Falta supabase/config.toml" && exit 1)
           test -d supabase/migrations || (echo "Falta supabase/migrations/" && exit 1)
           ls -la supabase/migrations/
 
       - name: Vincular proyecto Supabase
-        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' }}
+        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD" --yes
 
       - name: Aplicar migraciones (db push)
-        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && secrets.SUPABASE_DB_PASSWORD != '' }}
+        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
         run: supabase db push --yes
 
   # NOTA: El deploy del frontend en Vercel es automático
