@@ -128,7 +128,7 @@ jobs:
 
       - name: Aplicar migraciones (db push)
         if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
-        run: supabase db push --yes
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --yes
 
   # NOTA: El deploy del frontend en Vercel es automático
   # por la integración nativa GitHub ↔ Vercel
