@@ -14,7 +14,7 @@ import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { LineaPresupuesto } from "@/types";
 
-const PASOS = ["Cliente", "Partidas", "Resumen"] as const;
+const PASOS = ["Partidas", "Cliente", "Resumen"] as const;
 
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
@@ -112,12 +112,12 @@ export function NuevoPresupuestoWizard() {
 
   const avanzar = () => {
     setErrorPaso(null);
-    if (paso === 0 && clientName.trim().length < 2) {
-      setErrorPaso("Ingresa el nombre del cliente");
+    if (paso === 0 && items.length === 0) {
+      setErrorPaso("Agrega al menos una partida");
       return;
     }
-    if (paso === 1 && items.length === 0) {
-      setErrorPaso("Agrega al menos una partida");
+    if (paso === 1 && clientName.trim().length < 2) {
+      setErrorPaso("Ingresa el nombre del cliente");
       return;
     }
     setPaso((p) => p + 1);
@@ -171,22 +171,14 @@ export function NuevoPresupuestoWizard() {
         ))}
       </div>
 
-      {/* Paso 1: Cliente */}
+      {/* Paso 1: Partidas */}
       {paso === 0 && (
-        <div className="su flex flex-col gap-4">
-          <Input label="Nombre del cliente *" placeholder="Ej: Juan Pérez" value={clientName} onChange={(e) => setClientName(e.target.value)} autoFocus />
-          <Input label="Teléfono (WhatsApp)" placeholder="51 999 999 999" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          <Input label="Ciudad" placeholder="Ej: Lima" value={city} onChange={(e) => setCity(e.target.value)} />
-        </div>
-      )}
-
-      {/* Paso 2: Partidas */}
-      {paso === 1 && (
         <div className="su">
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3">
             {CATALOGO.map((cap) => (
               <button
                 key={cap.id}
+                type="button"
                 onClick={() => setCapituloActivo(cap.id)}
                 className="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-transform active:scale-95"
                 style={
@@ -284,6 +276,15 @@ export function NuevoPresupuestoWizard() {
         onClose={() => setModalPartida(false)}
         onAdd={(linea) => setItems((prev) => [...prev, linea])}
       />
+
+      {/* Paso 2: Cliente */}
+      {paso === 1 && (
+        <div className="su flex flex-col gap-4">
+          <Input label="Nombre del cliente *" placeholder="Ej: Juan Pérez" value={clientName} onChange={(e) => setClientName(e.target.value)} autoFocus />
+          <Input label="Teléfono (WhatsApp)" placeholder="51 999 999 999" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <Input label="Ciudad" placeholder="Ej: Lima" value={city} onChange={(e) => setCity(e.target.value)} />
+        </div>
+      )}
 
       {/* Paso 3: Resumen */}
       {paso === 2 && (
