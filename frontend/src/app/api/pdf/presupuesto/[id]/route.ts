@@ -22,6 +22,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
     const url = await generarPdfPresupuesto({
       id: presupuesto.id,
+      cot_num: presupuesto.cot_num,
       client_name: presupuesto.client_name,
       city: presupuesto.city,
       phone: presupuesto.phone,

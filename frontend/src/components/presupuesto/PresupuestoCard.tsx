@@ -28,6 +28,11 @@ export function PresupuestoCard({ presupuesto: p, href, onClick, footer }: Presu
     <>
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 pr-2">
+          {p.cotNum && (
+            <p className="text-[10px] font-black uppercase tracking-wide" style={{ color: T.blue }}>
+              {p.cotNum}
+            </p>
+          )}
           <p className="text-sm font-bold leading-snug" style={{ color: T.text }}>
             {p.clientName}
           </p>

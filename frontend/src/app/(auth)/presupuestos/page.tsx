@@ -15,6 +15,7 @@ export default async function PresupuestosPage() {
   const presupuestos: Presupuesto[] = (data ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
+    cotNum: row.cot_num ?? undefined,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,

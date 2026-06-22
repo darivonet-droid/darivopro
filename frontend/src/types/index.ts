@@ -15,6 +15,7 @@ export interface LineaPresupuesto {
 export interface Presupuesto {
   id: string;
   tenant_id: string;
+  cotNum?: string;
   clientName: string;
   phone?: string;
   city?: string;

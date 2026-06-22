@@ -115,7 +115,7 @@ export function NuevoPresupuestoWizard() {
     const creado = await crear(payload, mostrarUpgrade);
     if (creado) {
       limpiar();
-      mostrarToast("Cotización creada ✓");
+      mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
       router.push("/presupuestos");
       router.refresh();
     } else {

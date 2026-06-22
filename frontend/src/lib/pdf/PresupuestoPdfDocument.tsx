@@ -13,6 +13,7 @@ export interface PresupuestoItemRow {
 
 export interface PresupuestoPdfData {
   id: string;
+  cot_num?: string | null;
   client_name: string;
   city?: string | null;
   phone?: string | null;
@@ -106,6 +107,11 @@ export function PresupuestoPdfDocument({ data, fechaGeneracion }: Props) {
       <Page size="A4" style={baseStyles.page}>
         <View style={s.header}>
           <Text style={s.headerTitle}>COTIZACIÓN</Text>
+          {data.cot_num ? (
+            <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", color: C.white, marginTop: 4 }}>
+              {data.cot_num}
+            </Text>
+          ) : null}
           <Text style={s.headerSub}>
             Generado con DARIVO PRO · {fechaGeneracion}
           </Text>

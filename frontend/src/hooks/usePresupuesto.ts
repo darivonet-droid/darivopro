@@ -20,6 +20,7 @@ interface ItemRow {
 interface PresupuestoRow {
   id: string;
   user_id: string;
+  cot_num: string | null;
   client_name: string;
   phone: string | null;
   city: string | null;
@@ -48,6 +49,7 @@ const mapItem = (it: ItemRow): LineaPresupuesto => ({
 const mapRow = (row: PresupuestoRow): Presupuesto => ({
   id: row.id,
   tenant_id: row.user_id,
+  cotNum: row.cot_num ?? undefined,
   clientName: row.client_name,
   phone: row.phone ?? undefined,
   city: row.city ?? undefined,

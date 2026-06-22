@@ -79,10 +79,6 @@ export function parseIAResponse(text: string): IAPresupuestoResult {
   return { ...parsed, subtotal, igv, total };
 }
 
-export function nextPresupuestoNum(secuencia = 1): string {
-  return `P001-${String(secuencia).padStart(5, "0")}`;
-}
-
 export function buildWhatsAppUrl(phone: string, message: string): string {
   const digits = phone.replace(/\D/g, "");
   const num = digits.startsWith("51") ? digits : `51${digits}`;

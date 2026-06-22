@@ -10,7 +10,6 @@ import { useAppStore } from "@/store/useAppStore";
 import {
   buildWhatsAppUrl,
   iaItemsALineas,
-  nextPresupuestoNum,
   recalcularTotalesIA,
   type IAPresupuestoItem,
   type IAPresupuestoResult,
@@ -40,8 +39,8 @@ export function IAPresupuestoFlow() {
   const [clientName, setClientName]   = useState("");
   const [phone, setPhone]             = useState("");
   const [guardadoId, setGuardadoId]   = useState<string | null>(null);
+  const [cotNum, setCotNum]           = useState<string | null>(null);
   const [pdfUrl, setPdfUrl]           = useState<string | null>(null);
-  const [numPresupuesto]              = useState(() => nextPresupuestoNum(1));
 
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
@@ -179,13 +178,14 @@ export function IAPresupuestoFlow() {
       totalLabor: resultado.igv,
       totalFinal: resultado.total,
       status: "Borrador",
-      notes: `${numPresupuesto} · Generado con IA`,
+      notes: "Generado con IA",
     }, mostrarUpgrade);
     if (!creado) {
       mostrarToast("No se pudo guardar", "error");
       return;
     }
     setGuardadoId(creado.id);
+    setCotNum(creado.cotNum ?? null);
     limpiar();
     mostrarToast("Cotización guardada ✓");
     const url = await generarPDF(creado.id);
@@ -197,7 +197,7 @@ export function IAPresupuestoFlow() {
       mostrarToast("Agrega teléfono del cliente", "error");
       return;
     }
-    const msg = `Hola, te envío la cotización ${numPresupuesto} por S/ ${resultado?.total.toFixed(2)}.\n\nGenerado con DARIVO PRO`;
+    const msg = `Hola, te envío la cotización ${cotNum ?? ""} por S/ ${resultado?.total.toFixed(2)}.\n\nGenerado con DARIVO PRO`;
     window.open(buildWhatsAppUrl(phone, msg), "_blank");
   };
 
@@ -304,7 +304,7 @@ export function IAPresupuestoFlow() {
             Nº cotización
           </p>
           <p className="text-lg font-black" style={{ color: T.white }}>
-            {numPresupuesto}
+            {cotNum ?? "Se asigna al guardar"}
           </p>
         </div>
 
