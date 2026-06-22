@@ -59,7 +59,7 @@ export default async function DashboardPage() {
 
       {/* ══ HEADER NAVY ═══════════════════════════════════════ */}
       <header
-        className="relative px-5 pb-14 pt-6"
+        className="relative px-5 pb-24 pt-6"
         style={{ background: T.navy }}
       >
         {/* Badge esquina derecha */}
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
       </header>
 
       {/* ══ CONTENIDO ═════════════════════════════════════════ */}
-      <div className="-mt-8 px-4">
+      <div className="-mt-14 px-4">
 
         {/* ── 3 tarjetas oscuras ─────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
