@@ -29,6 +29,7 @@ export function NuevoPresupuestoWizard() {
   const [city, setCity] = useState("");
   const [capituloActivo, setCapituloActivo] = useState(CATALOGO[0].id);
   const [items, setItems] = useState<LineaPresupuesto[]>([]);
+  const [qtyRaw, setQtyRaw] = useState<Record<string, string>>({});
   const [margin, setMargin] = useState(40);
   const [notes, setNotes] = useState("");
   const [errorPaso, setErrorPaso] = useState<string | null>(null);
@@ -68,6 +69,34 @@ export function NuevoPresupuestoWizard() {
       prev.some((it) => it.svcId === svcId)
         ? prev.filter((it) => it.svcId !== svcId)
         : [...prev, partidaALinea(cap, partida)]
+    );
+  };
+
+  /** Solo dígitos y UN separador decimal (coma o punto) — igual que NuevaPartidaModal */
+  const sanitizeQty = (raw: string): string => {
+    const v = raw.replace(/[^\d.,]/g, "");
+    if (!v) return "";
+    const sep = v.search(/[.,]/);
+    if (sep === -1) return v;
+    return v.slice(0, sep) + v[sep] + v.slice(sep + 1).replace(/[.,]/g, "");
+  };
+
+  const parseQty = (raw: string): number => {
+    if (!raw.trim()) return 0;
+    const n = parseFloat(raw.replace(",", "."));
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+
+  const cambiarQtyRaw = (svcId: string, raw: string) => {
+    const sanitized = sanitizeQty(raw);
+    setQtyRaw((prev) => ({ ...prev, [svcId]: sanitized }));
+    const qty = parseQty(sanitized);
+    setItems((prev) =>
+      prev.map((it) =>
+        it.svcId === svcId
+          ? { ...it, qty: qty || it.qty, subtotal: Math.round(it.unitPrice * (qty || it.qty) * 100) / 100 }
+          : it
+      )
     );
   };
 
@@ -210,11 +239,11 @@ export function NuevoPresupuestoWizard() {
                           Cant. ({p.unidad})
                         </span>
                         <input
-                          type="number"
-                          min={0.5}
-                          step={0.5}
-                          value={linea.qty}
-                          onChange={(e) => cambiarQty(p.id, Math.max(0.5, Number(e.target.value)))}
+                          type="text"
+                          inputMode="decimal"
+                          value={qtyRaw[p.id] ?? String(linea.qty)}
+                          onChange={(e) => cambiarQtyRaw(p.id, e.target.value)}
+                          placeholder="1"
                           className="w-20 rounded-lg px-2.5 py-1.5 text-center text-sm font-bold outline-none"
                           style={{ background: T.slate, color: T.text }}
                         />
