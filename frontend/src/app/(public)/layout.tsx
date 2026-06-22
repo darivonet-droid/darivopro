@@ -39,6 +39,12 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         </div>
       </main>
 
+      <footer className="px-5 py-3 text-center">
+        <p className="text-[10px]" style={{ color: T.textLight }}>
+          Build: 22 Jun 2026, 11:30 — Darivo Pro
+        </p>
+      </footer>
+
     </div>
   );
 }
