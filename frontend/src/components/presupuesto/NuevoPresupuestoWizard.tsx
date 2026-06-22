@@ -199,13 +199,18 @@ export function NuevoPresupuestoWizard() {
               return (
                 <div
                   key={p.id}
-                  className="rounded-2xl p-3.5 shadow-sm transition-colors"
+                  className="rounded-2xl shadow-sm transition-colors"
                   style={{
                     background: T.white,
                     border: `1.5px solid ${linea ? capitulo.color : "transparent"}`,
                   }}
                 >
-                  <button onClick={() => agregar(capitulo.id, p.id)} className="flex w-full items-center justify-between text-left">
+                  {/* Tap target cubre todo el padding de la card */}
+                  <button
+                    type="button"
+                    onClick={() => agregar(capitulo.id, p.id)}
+                    className="flex w-full items-center justify-between p-3.5 text-left"
+                  >
                     <div>
                       <div className="text-sm font-bold" style={{ color: T.text }}>{p.nombre}</div>
                       <div className="text-xs" style={{ color: T.textMid }}>
@@ -225,7 +230,11 @@ export function NuevoPresupuestoWizard() {
                   </button>
 
                   {linea && (
-                    <div className="fi mt-3 flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: T.slateD }}>
+                    <div
+                      className="fi flex items-center justify-between gap-3 border-t px-3.5 pb-3.5 pt-3"
+                      style={{ borderColor: T.slateD }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase" style={{ color: T.textMid }}>
                           Cant. ({p.unidad})
