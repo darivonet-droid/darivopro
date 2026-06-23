@@ -13,6 +13,8 @@ frontend/.next/
 frontend/out/
 frontend/coverage/
 frontend/test-output/
+test-output/
+frontend/.e2e-pdf.mjs
 *.tsbuildinfo
 
 # Python
