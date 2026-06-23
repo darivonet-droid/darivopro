@@ -1,65 +1,53 @@
 "use client";
-// DARIVO PRO — Ajustes: datos de la empresa + sesión
+// DARIVO PRO — Empresa tab (diseño Fable 5 exacto — inline fields)
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/store/useAppStore";
 import { empresaSchema, type EmpresaForm } from "@/lib/validations";
 import { T } from "@/lib/theme";
 
 export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: string }) {
-  const router = useRouter();
+  const router   = useRouter();
   const supabase = createClient();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
-  const modoOffline = useAppStore((s) => s.modoOffline);
+  const modoOffline  = useAppStore((s) => s.modoOffline);
   const [form, setForm] = useState<EmpresaForm>(inicial);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]       = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
-  // Estado real de conexión: la página cargó datos desde Supabase, así que
-  // el backend responde salvo que estemos en modo offline detectado por la PWA.
   const conectado = !modoOffline;
   const MODULOS = [
-    ["perfiles", "Empresa"],
-    ["presupuestos", "Cotizaciones"],
-    ["facturas", "Facturas"],
-    ["clientes", "Clientes"],
-    ["categorias", "Catálogo"],
-    ["documentos", "PDF / Docs"],
+    ["perfiles",    "Empresa"    ],
+    ["presupuestos","Cotizaciones"],
+    ["facturas",    "Facturas"   ],
+    ["clientes",    "Clientes"   ],
+    ["categorias",  "Catálogo"   ],
+    ["documentos",  "PDF / Docs" ],
   ];
 
   const guardar = async () => {
     setError(null);
     const valido = empresaSchema.safeParse(form);
-    if (!valido.success) {
-      setError(valido.error.errors[0]?.message ?? "Revisa los datos");
-      return;
-    }
+    if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
     setGuardando(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setGuardando(false); return; }
     const { error: dbError } = await supabase
       .from("perfiles")
       .update({
-        razon_social: form.razonSocial,
-        ruc: form.ruc,
-        direccion: form.direccion,
-        telefono: form.telefono || null,
-        moneda: form.moneda,
-        simbolo: form.simbolo,
-        cta_detracciones: form.ctaDetracciones || null,
+        razon_social:      form.razonSocial,
+        ruc:               form.ruc,
+        direccion:         form.direccion,
+        telefono:          form.telefono || null,
+        moneda:            form.moneda,
+        simbolo:           form.simbolo,
+        cta_detracciones:  form.ctaDetracciones || null,
       })
       .eq("id", user.id);
     setGuardando(false);
-    if (dbError) {
-      mostrarToast("No se pudo guardar", "error");
-    } else {
-      mostrarToast("Datos de empresa guardados ✓");
-      router.refresh();
-    }
+    if (dbError) { mostrarToast("No se pudo guardar", "error"); }
+    else { mostrarToast("Datos de empresa guardados ✓"); router.refresh(); }
   };
 
   const cerrarSesion = async () => {
@@ -68,111 +56,98 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
     router.refresh();
   };
 
+  const FIELDS = [
+    { label: "Razón social / Nombre", k: "razonSocial"      as keyof EmpresaForm, ph: "Mi Empresa S.A.C." },
+    { label: "RUC",                   k: "ruc"              as keyof EmpresaForm, ph: "20XXXXXXXXX"        },
+    { label: "Dirección fiscal",      k: "direccion"        as keyof EmpresaForm, ph: "Av. Principal 123, Lima" },
+    { label: "Teléfono",              k: "telefono"         as keyof EmpresaForm, ph: "+51 9XX XXX XXX"    },
+    { label: "Cta. Detracciones",     k: "ctaDetracciones"  as keyof EmpresaForm, ph: "00-123456789"       },
+  ];
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Resumen navy: datos reales de la empresa + estado real de Supabase */}
-      <div className="su rounded-2xl px-5 py-4" style={{ background: T.navy }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="truncate text-base font-black" style={{ color: T.white }}>
-              {form.razonSocial || "Sin razón social"}
-            </p>
-            <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
-              RUC {form.ruc || "—"} · {form.simbolo} {form.moneda}
-            </p>
-          </div>
-          <span
-            className="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold"
-            style={{
-              background: conectado ? `${T.green}22` : `${T.amber}22`,
-              color: conectado ? T.green : T.amber,
-            }}
-          >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ background: conectado ? T.green : T.amber }}
+    <div className="fi" style={{ paddingBottom: 20 }}>
+      <p style={{ fontSize: 13, color: T.textMid, marginBottom: 12 }}>Estos datos aparecen en todas tus facturas</p>
+
+      {/* Inline fields card */}
+      <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 14 }}>
+        {FIELDS.map((f, i) => (
+          <div key={f.k} style={{ padding: "13px 16px", borderBottom: i < FIELDS.length - 1 ? `1px solid ${T.slateD}` : "none" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 5 }}>{f.label}</p>
+            <input
+              value={(form[f.k] as string) ?? ""}
+              onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
+              placeholder={f.ph}
+              style={{ border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.text, background: "transparent", width: "100%", fontFamily: "inherit" }}
             />
+          </div>
+        ))}
+      </div>
+
+      {/* Moneda */}
+      <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "13px 16px", marginBottom: 14 }}>
+        <p style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>Moneda por defecto</p>
+        <div style={{ display: "flex", gap: 8 }}>
+          {(["PEN", "USD"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setForm({ ...form, moneda: v, simbolo: v === "PEN" ? "S/" : "$" })}
+              style={{ flex: 1, padding: 11, borderRadius: 11, border: `2px solid ${form.moneda === v ? T.blue : T.slateD}`, background: form.moneda === v ? T.bluePale : "none", cursor: "pointer", fontSize: 13, fontWeight: 800, color: form.moneda === v ? T.blue : T.textMid }}
+            >
+              {v === "PEN" ? "S/ Sol peruano" : "$ Dólar"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Supabase status card */}
+      <div style={{ background: T.navyLight, borderRadius: 14, padding: "16px 18px", marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5 }}>Backend · Supabase</p>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: conectado ? `${T.green}22` : `${T.amber}22`, color: conectado ? T.green : T.amber }}>
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: conectado ? T.green : T.amber }} />
             {conectado ? "Conectado" : "Sin conexión"}
           </span>
         </div>
-
-        <p
-          className="mb-3 mt-4 text-[11px] font-bold uppercase tracking-wide"
-          style={{ color: "rgba(255,255,255,0.4)" }}
-        >
-          Backend · Supabase
-        </p>
-        <div className="grid grid-cols-2 gap-2.5">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {MODULOS.map(([id, label]) => (
-            <div key={id} className="flex items-center gap-2">
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ background: conectado ? T.green : "rgba(255,255,255,0.25)" }}
-              />
-              <div className="min-w-0">
-                <p className="truncate font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>
-                  {id}
-                </p>
-                <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  {label}
-                </p>
+            <div key={id} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 6, height: 6, borderRadius: 3, background: conectado ? T.green : "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "monospace" }}>{id}</p>
+                <p style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{label}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <Card>
-        <h2 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>Mi empresa</h2>
-        <div className="flex flex-col gap-3">
-          <Input label="Razón social *" placeholder="Ej: Construcciones Pérez SAC" value={form.razonSocial} onChange={(e) => setForm({ ...form, razonSocial: e.target.value })} />
-          <Input label="RUC *" placeholder="11 dígitos" inputMode="numeric" maxLength={11} value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
-          <Input label="Dirección fiscal *" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
-          <Input label="Teléfono" inputMode="tel" value={form.telefono ?? ""} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
-          <Input
-            label="Cuenta detracciones (Banco de la Nación)"
-            placeholder="Ej: 00-123456789"
-            inputMode="numeric"
-            value={form.ctaDetracciones ?? ""}
-            onChange={(e) => setForm({ ...form, ctaDetracciones: e.target.value })}
-          />
+      {error && <p style={{ fontSize: 13, fontWeight: 600, color: T.red, marginBottom: 10 }}>{error}</p>}
 
-          <label className="block">
-            <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>Moneda</span>
-            <div className="flex gap-2">
-              {(["PEN", "USD"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setForm({ ...form, moneda: m, simbolo: m === "PEN" ? "S/" : "$" })}
-                  className="flex-1 rounded-xl py-2.5 text-sm font-bold transition-transform active:scale-95"
-                  style={
-                    form.moneda === m
-                      ? { background: T.blue, color: T.white }
-                      : { background: T.white, color: T.textMid, border: `1.5px solid ${T.slateD}` }
-                  }
-                >
-                  {m === "PEN" ? "S/ Soles" : "$ Dólares"}
-                </button>
-              ))}
-            </div>
-          </label>
+      {/* Save button */}
+      <button
+        type="button"
+        onClick={guardar}
+        disabled={guardando}
+        style={{ width: "100%", padding: 16, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}35`, marginBottom: 10, opacity: guardando ? 0.7 : 1 }}
+      >
+        {guardando ? "Guardando…" : "Guardar cambios"}
+      </button>
 
-          {error && <p className="text-sm font-semibold" style={{ color: T.red }}>{error}</p>}
-          <Button full disabled={guardando} onClick={guardar}>
-            {guardando ? "Guardando…" : "Guardar cambios"}
-          </Button>
-        </div>
-      </Card>
+      {/* Cuenta / sesión */}
+      <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Cuenta</p>
+        <p style={{ fontSize: 13, color: T.text, marginBottom: 12 }}>{email}</p>
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          style={{ width: "100%", padding: 12, borderRadius: 12, border: `1.5px solid ${T.red}30`, background: T.redPale, cursor: "pointer", fontSize: 14, fontWeight: 700, color: T.red }}
+        >
+          Cerrar sesión
+        </button>
+      </div>
 
-      <Card>
-        <h2 className="text-sm font-extrabold" style={{ color: T.text }}>Cuenta</h2>
-        <p className="mt-1 text-xs" style={{ color: T.textMid }}>{email}</p>
-        <div className="mt-3">
-          <Button variant="danger" full onClick={cerrarSesion}>Cerrar sesión</Button>
-        </div>
-      </Card>
-
-      <p className="pb-4 text-center text-[10px]" style={{ color: T.textLight }}>
+      <p style={{ fontSize: 10, color: T.textLight, textAlign: "center", paddingBottom: 8 }}>
         DARIVO PRO v1.0 · Hecho para construir más rápido
       </p>
     </div>

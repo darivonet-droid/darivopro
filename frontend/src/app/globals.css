@@ -54,6 +54,22 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* Button press micro-interaction (matches reference) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+button:active {
+  transform: scale(0.96);
+  transition: transform 0.08s;
+}
+
+/* Scrollbar slim */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 2px; }
+
+/* Range accent */
+input[type="range"] { accent-color: #2563EB; width: 100%; }
+
 /* Quitar spinners de inputs numéricos */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

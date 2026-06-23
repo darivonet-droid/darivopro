@@ -1,22 +1,101 @@
 "use client";
-// DARIVO PRO — Wizard de nuevo presupuesto (objetivo: < 60 segundos)
-import { useEffect, useMemo, useState } from "react";
+// DARIVO PRO — Wizard de cotización (diseño Fable 5 exacto)
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { NuevaPartidaModal } from "@/components/presupuesto/NuevaPartidaModal";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
 import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
 import { useCatalogo } from "@/hooks/useCatalogo";
 import { useAppStore } from "@/store/useAppStore";
-import { CATALOGO, partidaALinea } from "@/lib/catalog";
 import { presupuestoSchema } from "@/lib/validations";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
-import type { LineaPresupuesto } from "@/types";
+import type { LineaPresupuesto, Capitulo, Partida } from "@/types";
+import Link from "next/link";
 
-const PASOS = ["Partidas", "Cliente", "Resumen"] as const;
+// ─── SVG atoms ────────────────────────────────────────────────────────────────
+const chevronPath = "M9 18l6-6-6-6";
+const checkPath   = "M20 6L9 17l-5-5";
+const plusPath    = "M12 5v14 M5 12h14";
+const savePath    = ["M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z","M17 21v-8H7v8","M7 3v5h8"];
+const zapPath     = "M13 2L3 14h9l-1 8 10-12h-9l1-8z";
 
+type SvgPath = string | string[];
+function Ic({ d, size = 18, color = "currentColor", sw = 2 }: { d: SvgPath; size?: number; color?: string; sw?: number }) {
+  const paths = Array.isArray(d) ? d : [d];
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+      {paths.map((p, i) => <path key={i} d={p} />)}
+    </svg>
+  );
+}
+
+// ─── StepDots ─────────────────────────────────────────────────────────────────
+function StepDots({ step, total }: { step: number; total: number }) {
+  return (
+    <div style={{ display: "flex", gap: 6, alignItems: "center", justifyContent: "center" }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: i === step ? 20 : 6,
+            height: 6,
+            borderRadius: 3,
+            background: i === step ? T.white : i < step ? T.green : "rgba(255,255,255,0.2)",
+            transition: "all 0.3s",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── FloatBar ─────────────────────────────────────────────────────────────────
+function FloatBar({ items, total, onContinue, onReset }: { items: { svcLabel: string }[]; total: number; onContinue: () => void; onReset: () => void }) {
+  if (!items.length) return null;
+  return (
+    <div className="pi" style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 28px)", maxWidth: 362, zIndex: 200 }}>
+      <div style={{ background: T.navyLight, borderRadius: 18, padding: "12px 14px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 10px 36px rgba(0,0,0,0.55)", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 38, height: 38, borderRadius: 11, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <span style={{ color: T.white, fontSize: 15, fontWeight: 900 }}>{items.length}</span>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {items.map(b => b.svcLabel).join(", ")}
+          </p>
+          <p style={{ color: T.white, fontSize: 17, fontWeight: 900 }}>{fmtPEN(total)}</p>
+        </div>
+        <button onClick={onReset} style={{ background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer", borderRadius: 9, padding: "7px 10px", color: T.textLight, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>✕</button>
+        <button onClick={onContinue} style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})`, border: "none", cursor: "pointer", borderRadius: 13, padding: "11px 18px", color: T.white, fontSize: 14, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}50`, flexShrink: 0 }}>
+          Continuar →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Presets de cantidad por tipo ──────────────────────────────────────────────
+const PRESETS: Record<string, number[]> = { m2: [5, 10, 15, 20, 30, 50, 80], unit: [1, 2, 3, 4, 5, 8, 10], hour: [1, 2, 4, 6, 8], fixed: [] };
+function tipoToCalcType(tipo: string): string {
+  if (tipo === "unidad") return "unit";
+  if (tipo === "hora")   return "hour";
+  if (tipo === "fijo")   return "fixed";
+  return "m2";
+}
+
+// ─── Tipos locales ─────────────────────────────────────────────────────────────
+interface BasketItem {
+  svcId: string;
+  catLabel: string;
+  svcLabel: string;
+  calcType: LineaPresupuesto["calcType"];
+  basePrice: number;
+  unit: string;
+  qty: string;
+  catColor: string;
+  catEmoji: string;
+}
+
+// ─── Wizard principal ──────────────────────────────────────────────────────────
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,354 +104,525 @@ export function NuevoPresupuestoWizard() {
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
-  const [paso, setPaso] = useState(0);
+  type Phase = "cats" | "input" | "result";
+  const [phase, setPhase] = useState<Phase>("cats");
+  const [selCat, setSelCat] = useState<string | null>(null);
+  const [basket, setBasket] = useState<BasketItem[]>([]);
+  const [inputIdx, setInputIdx] = useState(0);
+  const [margin, setMargin] = useState(40);
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
-  const [capituloActivo, setCapituloActivo] = useState(CATALOGO[0].id);
-  const [items, setItems] = useState<LineaPresupuesto[]>([]);
-  const [qtyRaw, setQtyRaw] = useState<Record<string, string>>({});
-  const [margin, setMargin] = useState(40);
   const [notes, setNotes] = useState("");
-  const [errorPaso, setErrorPaso] = useState<string | null>(null);
-  const [modalPartida, setModalPartida] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const draft = { clientName, phone, city, items, margin, notes, iaResult: null };
-  const { cargar, limpiar } = usePresupuestoDraft(draft);
+  // Draft restore
+  const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
+  const { limpiar } = usePresupuestoDraft(draftState);
 
-  useEffect(() => {
-    const saved = cargar();
-    if (saved && saved.items.length > 0) {
-      setClientName(saved.clientName);
-      setPhone(saved.phone);
-      setCity(saved.city);
-      setItems(saved.items);
-      setMargin(saved.margin);
-      setNotes(saved.notes);
-    }
-  }, [cargar]);
-
+  // Deep-link ?cat= from dashboard
   useEffect(() => {
     const cat = searchParams.get("cat");
-    if (cat && CATALOGO.some((c) => c.id === cat)) {
-      setCapituloActivo(cat);
-    }
-  }, [searchParams]);
+    if (cat && catalogo.some((c) => c.id === cat)) setSelCat(cat);
+  }, [searchParams, catalogo]);
 
-  const totalBase  = useMemo(() => items.reduce((s, it) => s + it.subtotal, 0), [items]);
+  // Auto-focus quantity input
+  useEffect(() => {
+    if (phase === "input") {
+      const t = setTimeout(() => inputRef.current?.focus(), 80);
+      return () => clearTimeout(t);
+    }
+  }, [phase, inputIdx]);
+
+  // Totals
+  const calcItem = (it: BasketItem) => {
+    const q = it.calcType === "fixed" ? 1 : parseFloat(it.qty) || 0;
+    return { qty: q, unitPrice: it.basePrice, subtotal: q * it.basePrice };
+  };
+  const totalBase  = basket.reduce((a, it) => a + calcItem(it).subtotal, 0);
   const totalLabor = Math.round(totalBase * margin) / 100;
   const totalFinal = totalBase + totalLabor;
 
-  const agregar = (capId: string, svcId: string) => {
-    const cap = catalogo.find((c) => c.id === capId);
-    const partida = cap?.partidas.find((p) => p.id === svcId);
-    if (!cap || !partida) return;
-    setItems((prev) =>
-      prev.some((it) => it.svcId === svcId)
-        ? prev.filter((it) => it.svcId !== svcId)
-        : [...prev, partidaALinea(cap, partida)]
-    );
-  };
+  // Basket helpers
+  const isSelected = (id: string) => basket.some((b) => b.svcId === id);
+  const catForSvc  = (id: string) => catalogo.find((c) => c.partidas.some((p) => p.id === id));
 
-  /** Solo dígitos y UN separador decimal (coma o punto) — igual que NuevaPartidaModal */
-  const sanitizeQty = (raw: string): string => {
-    const v = raw.replace(/[^\d.,]/g, "");
-    if (!v) return "";
-    const sep = v.search(/[.,]/);
-    if (sep === -1) return v;
-    return v.slice(0, sep) + v[sep] + v.slice(sep + 1).replace(/[.,]/g, "");
-  };
-
-  const parseQty = (raw: string): number => {
-    if (!raw.trim()) return 0;
-    const n = parseFloat(raw.replace(",", "."));
-    return Number.isFinite(n) && n > 0 ? n : 0;
-  };
-
-  const cambiarQtyRaw = (svcId: string, raw: string) => {
-    const sanitized = sanitizeQty(raw);
-    setQtyRaw((prev) => ({ ...prev, [svcId]: sanitized }));
-    const qty = parseQty(sanitized);
-    setItems((prev) =>
-      prev.map((it) =>
-        it.svcId === svcId
-          ? { ...it, qty: qty || it.qty, subtotal: Math.round(it.unitPrice * (qty || it.qty) * 100) / 100 }
-          : it
-      )
-    );
-  };
-
-  const cambiarQty = (svcId: string, qty: number) => {
-    setItems((prev) =>
-      prev.map((it) =>
-        it.svcId === svcId
-          ? { ...it, qty, subtotal: Math.round(it.unitPrice * qty * 100) / 100 }
-          : it
-      )
-    );
-  };
-
-  const avanzar = () => {
-    setErrorPaso(null);
-    if (paso === 0 && items.length === 0) {
-      setErrorPaso("Agrega al menos una partida");
+  const toggleSvc = (cap: Capitulo, partida: Partida) => {
+    if (isSelected(partida.id)) {
+      setBasket((b) => b.filter((x) => x.svcId !== partida.id));
       return;
     }
-    if (paso === 1 && clientName.trim().length < 2) {
-      setErrorPaso("Ingresa el nombre del cliente");
-      return;
-    }
-    setPaso((p) => p + 1);
+    const calcType = tipoToCalcType(partida.tipo) as LineaPresupuesto["calcType"];
+    setBasket((b) => [...b, {
+      svcId: partida.id,
+      catLabel: cap.nombre,
+      svcLabel: partida.nombre,
+      calcType,
+      basePrice: partida.precio,
+      unit: partida.unidad,
+      qty: calcType === "fixed" ? "1" : "",
+      catColor: cap.color,
+      catEmoji: cap.emoji,
+    }]);
   };
 
-  const guardar = async () => {
-    const payload = {
-      clientName: clientName.trim(),
-      phone: phone.trim() || undefined,
-      city: city.trim() || undefined,
-      items,
-      margin,
-      totalBase,
-      totalLabor,
-      totalFinal,
-      status: "Borrador" as const,
-      notes: notes.trim() || undefined,
-    };
+  const goToInput = () => {
+    const firstNF = basket.findIndex((b) => b.calcType !== "fixed");
+    if (firstNF === -1) { setPhase("result"); return; }
+    setInputIdx(firstNF);
+    setPhase("input");
+  };
+
+  const advanceInput = (idx: number) => {
+    let next = idx + 1;
+    while (next < basket.length && basket[next].calcType === "fixed") next++;
+    if (next >= basket.length) setPhase("result");
+    else setInputIdx(next);
+  };
+
+  const updateQty = (idx: number, val: string) =>
+    setBasket((b) => b.map((it, i) => i === idx ? { ...it, qty: val } : it));
+
+  // Save
+  const doSave = async () => {
+    const items: LineaPresupuesto[] = basket.map((it) => {
+      const { qty, unitPrice, subtotal } = calcItem(it);
+      return { svcId: it.svcId, catLabel: it.catLabel, svcLabel: it.svcLabel, calcType: it.calcType, basePrice: it.basePrice, unit: it.unit, qty, unitPrice, subtotal };
+    });
+    const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
     const valido = presupuestoSchema.safeParse(payload);
-    if (!valido.success) {
-      setErrorPaso(valido.error.errors[0]?.message ?? "Revisa los datos");
-      return;
-    }
+    if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
     const creado = await crear(payload, mostrarUpgrade);
     if (creado) {
       limpiar();
+      setSaved(true);
       mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
-      router.push("/presupuestos");
-      router.refresh();
     } else {
       mostrarToast("No se pudo guardar la cotización", "error");
     }
   };
 
-  const capitulo = catalogo.find((c) => c.id === capituloActivo) ?? catalogo[0];
+  const reset = () => {
+    setPhase("cats"); setSelCat(null); setBasket([]); setInputIdx(0); setMargin(40);
+    setClientName(""); setPhone(""); setCity(""); setNotes(""); setSaved(false);
+  };
+
+  // Group basket by category for result view
+  const groupedItems = basket.reduce<Record<string, BasketItem[]>>((g, it) => {
+    (g[it.catLabel] = g[it.catLabel] || []).push(it);
+    return g;
+  }, {});
+
+  const phaseStep = phase === "cats" ? 0 : phase === "input" ? 1 : 2;
 
   return (
-    <div className="px-4 py-4">
-      {/* Indicador de pasos */}
-      <div className="mb-5 flex items-center gap-2">
-        {PASOS.map((nombre, i) => (
-          <div key={nombre} className="flex flex-1 flex-col items-center gap-1">
-            <div
-              className="h-1.5 w-full rounded-full transition-colors"
-              style={{ background: i <= paso ? T.blue : T.slateD }}
-            />
-            <span className="text-[10px] font-bold" style={{ color: i <= paso ? T.blue : T.textLight }}>
-              {nombre}
-            </span>
+    <div style={{ minHeight: "100vh", background: T.slate, paddingBottom: 40 }}>
+      {/* DarkHeader */}
+      <div style={{ background: `linear-gradient(160deg,${T.navy} 0%,${T.navyLight} 100%)`, padding: "50px 18px 22px", borderBottomLeftRadius: 26, borderBottomRightRadius: 26 }}>
+        {/* Back */}
+        <Link href="/presupuestos" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+          <Ic d={["M19 12H5","M12 19l-7-7 7-7"]} color={T.textLight} size={18} />
+          <span style={{ color: T.textLight, fontSize: 13, fontWeight: 600 }}>Volver</span>
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Ic d={zapPath} color={T.white} size={22} />
           </div>
-        ))}
+          <div style={{ flex: 1 }}>
+            <h2 style={{ color: T.white, fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>Nueva cotización</h2>
+            <p style={{ color: T.textLight, fontSize: 12, marginTop: 2 }}>
+              {phase === "cats"  && "Abre capítulos y marca partidas"}
+              {phase === "input" && "Introduce las cantidades"}
+              {phase === "result"&& "Cotización generada"}
+            </p>
+          </div>
+          {basket.length > 0 && phase !== "result" && (
+            <div className="pi" style={{ width: 30, height: 30, borderRadius: 15, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: T.white, fontSize: 13, fontWeight: 900 }}>{basket.length}</span>
+            </div>
+          )}
+        </div>
+        <StepDots step={phaseStep} total={3} />
       </div>
 
-      {/* Paso 1: Partidas */}
-      {paso === 0 && (
-        <div className="su">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3">
-            {catalogo.map((cap) => (
-              <button
-                key={cap.id}
-                type="button"
-                onClick={() => setCapituloActivo(cap.id)}
-                className="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-transform active:scale-95"
-                style={
-                  cap.id === capituloActivo
-                    ? { background: cap.color, color: T.white }
-                    : { background: T.white, color: T.textMid, border: `1.5px solid ${T.slateD}` }
-                }
-              >
-                <span>{cap.emoji}</span>
-                {cap.nombre}
-              </button>
-            ))}
-          </div>
+      <div style={{ padding: "18px 16px 100px" }}>
 
-          <div className="flex flex-col gap-2">
-            {capitulo.partidas.map((p) => {
-              const linea = items.find((it) => it.svcId === p.id);
+        {/* ══ FASE 1: ACORDEÓN ══ */}
+        {phase === "cats" && (
+          <div className="su">
+
+            {/* Basket mini-summary */}
+            {basket.length > 0 && (
+              <div className="pi" style={{ background: T.navyLight, borderRadius: 16, padding: "12px 16px", marginBottom: 16, border: "1px solid rgba(255,255,255,0.1)" }}>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                  Partidas seleccionadas ({basket.length})
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                  {basket.map((it) => {
+                    const cap = catForSvc(it.svcId);
+                    return (
+                      <div key={it.svcId} style={{ display: "flex", alignItems: "center", gap: 5, background: (cap?.color || T.blue) + "20", borderRadius: 20, padding: "4px 10px 4px 7px", border: `1px solid ${(cap?.color || T.blue)}30` }}>
+                        <span style={{ fontSize: 12 }}>{cap?.emoji}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: cap?.color || T.blue }}>{it.svcLabel}</span>
+                        <button onClick={() => setBasket((b) => b.filter((x) => x.svcId !== it.svcId))} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, fontSize: 14, lineHeight: 1, padding: "0 2px", marginLeft: 2 }}>×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={goToInput} style={{ width: "100%", padding: 13, borderRadius: 12, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: `0 3px 14px ${T.blue}40` }}>
+                  Calcular cotización →
+                </button>
+              </div>
+            )}
+
+            <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+              Toca un capítulo para ver sus partidas
+            </p>
+
+            {/* Acordeón */}
+            {catalogo.map((cap) => {
+              const isOpen = selCat === cap.id;
+              const selCount = basket.filter((b) => cap.partidas.some((p) => p.id === b.svcId)).length;
               return (
-                <div
-                  key={p.id}
-                  className="rounded-2xl shadow-sm transition-colors"
-                  style={{
-                    background: T.white,
-                    border: `1.5px solid ${linea ? capitulo.color : "transparent"}`,
-                  }}
-                >
-                  {/* Tap target cubre todo el padding de la card */}
+                <div key={cap.id} style={{ marginBottom: 8, borderRadius: 16, overflow: "hidden", border: `2px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : T.slateD}`, transition: "border-color 0.2s" }}>
                   <button
                     type="button"
-                    onClick={() => agregar(capitulo.id, p.id)}
-                    className="flex w-full items-center justify-between p-3.5 text-left"
+                    onClick={() => setSelCat(isOpen ? null : cap.id)}
+                    style={{ width: "100%", padding: "14px 16px", background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : T.white, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
                   >
-                    <div>
-                      <div className="text-sm font-bold" style={{ color: T.text }}>{p.nombre}</div>
-                      <div className="text-xs" style={{ color: T.textMid }}>
-                        {fmtPEN(p.precio)} / {p.unidad}
-                      </div>
+                    <span style={{ fontSize: 26, lineHeight: 1 }}>{cap.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 15, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
+                      <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>
+                        {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""} añadida${selCount !== 1 ? "s" : ""}` : `${cap.partidas.length} partidas disponibles`}
+                      </p>
                     </div>
-                    <div
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-base font-black"
-                      style={
-                        linea
-                          ? { background: capitulo.color, color: T.white }
-                          : { background: T.slate, color: T.textMid }
-                      }
-                    >
-                      {linea ? "✓" : "+"}
+                    {selCount > 0 && (
+                      <div style={{ width: 22, height: 22, borderRadius: 11, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Ic d={checkPath} color={T.white} size={12} />
+                      </div>
+                    )}
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: isOpen ? cap.color + "15" : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
+                      <Ic d={chevronPath} color={isOpen ? cap.color : T.textMid} size={16} sw={2.5}
+                        // @ts-expect-error style prop on custom component
+                        style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}
+                      />
                     </div>
                   </button>
 
-                  {linea && (
-                    <div
-                      className="fi flex items-center justify-between gap-3 border-t px-3.5 pb-3.5 pt-3"
-                      style={{ borderColor: T.slateD }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase" style={{ color: T.textMid }}>
-                          Cant. ({p.unidad})
-                        </span>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={qtyRaw[p.id] ?? String(linea.qty)}
-                          onChange={(e) => cambiarQtyRaw(p.id, e.target.value)}
-                          placeholder="1"
-                          className="w-20 rounded-lg px-2.5 py-1.5 text-center text-sm font-bold outline-none"
-                          style={{ background: T.slate, color: T.text }}
-                        />
-                      </div>
-                      <span className="text-sm font-black" style={{ color: T.navy }}>{fmtPEN(linea.subtotal)}</span>
+                  {isOpen && (
+                    <div className="su" style={{ background: T.white, borderTop: `1px solid ${cap.color}20` }}>
+                      {cap.partidas.map((p, si) => {
+                        const sel = isSelected(p.id);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => toggleSvc(cap, p)}
+                            style={{
+                              width: "100%", padding: "12px 16px 12px 20px",
+                              borderBottom: si < cap.partidas.length - 1 ? `1px solid ${T.slate}` : "none",
+                              border: "none", background: sel ? cap.color + "0A" : T.white,
+                              cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, textAlign: "left",
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 14, fontWeight: sel ? 800 : 600, color: sel ? cap.color : T.text, lineHeight: 1.3 }}>{p.nombre}</p>
+                              <p style={{ fontSize: 12, color: T.textMid, marginTop: 1 }}>
+                                {p.tipo === "fijo" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
+                              </p>
+                            </div>
+                            <div style={{ width: 32, height: 32, borderRadius: 10, background: sel ? cap.color : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s", boxShadow: sel ? `0 2px 8px ${cap.color}40` : "none" }}>
+                              <Ic d={sel ? checkPath : plusPath} color={sel ? T.white : T.textMid} size={15} />
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
               );
             })}
-          </div>
 
-          {items.length > 0 && (
-            <div className="mt-4 flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: T.navy }}>
-              <span className="text-xs font-bold" style={{ color: T.slateDD }}>
-                {items.length} partida{items.length === 1 ? "" : "s"} seleccionada{items.length === 1 ? "" : "s"}
-              </span>
-              <span className="text-sm font-black" style={{ color: T.white }}>{fmtPEN(totalBase)}</span>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setModalPartida(true)}
-            className="mt-4 w-full rounded-2xl py-3.5 text-sm font-bold text-white"
-            style={{
-              background: `linear-gradient(135deg, ${T.amber} 0%, ${T.blue} 100%)`,
-            }}
-          >
-            + Nueva cotización personalizada
-          </button>
-        </div>
-      )}
-
-      <NuevaPartidaModal
-        open={modalPartida}
-        categoria={capitulo}
-        onClose={() => setModalPartida(false)}
-        onAdd={(linea) => setItems((prev) => [...prev, linea])}
-      />
-
-      {/* Paso 2: Cliente */}
-      {paso === 1 && (
-        <div className="su flex flex-col gap-4">
-          <Input label="Nombre del cliente *" placeholder="Ej: Juan Pérez" value={clientName} onChange={(e) => setClientName(e.target.value)} autoFocus />
-          <Input label="Teléfono (WhatsApp)" placeholder="51 999 999 999" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          <Input label="Ciudad" placeholder="Ej: Lima" value={city} onChange={(e) => setCity(e.target.value)} />
-        </div>
-      )}
-
-      {/* Paso 3: Resumen */}
-      {paso === 2 && (
-        <div className="su flex flex-col gap-4">
-          <div className="rounded-2xl p-4 shadow-sm" style={{ background: T.white }}>
-            <div className="text-sm font-extrabold" style={{ color: T.text }}>{clientName}</div>
-            {(city || phone) && (
-              <div className="text-xs" style={{ color: T.textMid }}>
-                {[city, phone].filter(Boolean).join(" · ")}
-              </div>
+            {basket.length > 0 && (
+              <button
+                type="button"
+                onClick={goToInput}
+                style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}40` }}
+              >
+                Calcular cotización · {basket.length} partida{basket.length !== 1 ? "s" : ""} →
+              </button>
             )}
-            <div className="mt-3 flex flex-col gap-1.5 border-t pt-3" style={{ borderColor: T.slateD }}>
-              {items.map((it) => (
-                <div key={it.svcId} className="flex justify-between text-xs">
-                  <span style={{ color: T.textMid }}>
-                    {it.svcLabel} × {it.qty} {it.unit}
-                  </span>
-                  <span className="font-bold" style={{ color: T.text }}>{fmtPEN(it.subtotal)}</span>
+          </div>
+        )}
+
+        {/* ══ FASE 2: MEDICIONES ══ */}
+        {phase === "input" && (
+          <div className="su">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Introduce las cantidades</p>
+              <button
+                type="button"
+                onClick={() => { setSelCat(null); setPhase("cats"); }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue }}
+              >
+                + Añadir más
+              </button>
+            </div>
+
+            {basket.map((it, idx) => {
+              const isCurr = idx === inputIdx;
+              const cap = catForSvc(it.svcId);
+              const q = parseFloat(it.qty) || 0;
+              const sub = it.calcType === "fixed" ? it.basePrice : q * it.basePrice;
+              const done = !!it.qty && q > 0 && idx < inputIdx;
+              const calcTypeKey = it.calcType === "m2" ? "m2" : it.calcType === "unit" ? "unit" : it.calcType === "hour" ? "hour" : "fixed";
+
+              if (it.calcType === "fixed") return (
+                <div key={it.svcId} style={{ background: T.greenPale, borderRadius: 14, border: `1.5px solid ${T.green}30`, padding: "12px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: T.greenD }}>{it.svcLabel}</p>
+                    <p style={{ fontSize: 11, color: T.greenD, opacity: 0.7 }}>Precio fijo · auto-incluido</p>
+                  </div>
+                  <p style={{ fontSize: 15, fontWeight: 900, color: T.greenD }}>{fmtPEN(it.basePrice)}</p>
+                </div>
+              );
+
+              if (!isCurr && done) return (
+                <button key={it.svcId} type="button" onClick={() => setInputIdx(idx)} style={{ width: "100%", background: T.white, borderRadius: 14, border: `1.5px solid ${T.slateD}`, padding: "12px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: 13, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Ic d={checkPath} color={T.white} size={13} />
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{it.svcLabel}</p>
+                      <p style={{ fontSize: 11, color: T.textMid }}>{it.qty} {it.unit} × S/ {it.basePrice}</p>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 800, color: T.blue }}>{fmtPEN(sub)}</p>
+                </button>
+              );
+
+              if (!isCurr) return (
+                <div key={it.svcId} style={{ background: T.white, borderRadius: 14, border: `1.5px solid ${T.slateD}`, padding: "12px 16px", marginBottom: 8, opacity: 0.45 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: T.textMid }}>{it.svcLabel}</p>
+                  <p style={{ fontSize: 11, color: T.textLight }}>Pendiente…</p>
+                </div>
+              );
+
+              return (
+                <div key={it.svcId} className="pi" style={{ background: T.white, borderRadius: 20, border: `2.5px solid ${cap?.color || T.blue}`, padding: "18px 16px", marginBottom: 10, boxShadow: `0 6px 22px ${cap?.color || T.blue}20` }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: cap?.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{it.catLabel}</p>
+                      <p style={{ fontSize: 16, fontWeight: 900, color: T.text, marginTop: 2, lineHeight: 1.25 }}>{it.svcLabel}</p>
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0, marginLeft: 8 }}>
+                      <p style={{ fontSize: 13, color: T.textMid, fontWeight: 600 }}>S/ {it.basePrice}/{it.unit}</p>
+                      {q > 0 && <p style={{ fontSize: 12, color: T.blue, fontWeight: 700, marginTop: 2 }}>{fmtPEN(sub)}</p>}
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                    {it.calcType === "m2" ? "Dimensiones (m²)" : it.calcType === "hour" ? "Horas estimadas" : "Cantidad (unidades)"}
+                  </p>
+                  <div style={{ position: "relative", marginBottom: 12 }}>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      inputMode="decimal"
+                      value={it.qty}
+                      onChange={(e) => updateQty(idx, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && it.qty) advanceInput(idx); }}
+                      placeholder="0"
+                      style={{ width: "100%", padding: "18px 60px 18px 22px", borderRadius: 16, fontSize: 50, fontWeight: 900, border: `2px solid ${q > 0 ? cap?.color || T.blue : T.slateD}`, outline: "none", color: T.text, background: T.slate, textAlign: "center", transition: "border-color 0.15s", fontFamily: "inherit" }}
+                    />
+                    <span style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", fontSize: 14, fontWeight: 700, color: T.textMid }}>{it.unit}</span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 14 }}>
+                    {(PRESETS[calcTypeKey] || []).map((n) => {
+                      const active = String(it.qty) === String(n);
+                      return (
+                        <button key={n} type="button" onClick={() => { updateQty(idx, String(n)); setTimeout(() => advanceInput(idx), 160); }}
+                          style={{ padding: "10px 16px", borderRadius: 24, border: `2px solid ${active ? cap?.color || T.blue : T.slateD}`, background: active ? (cap?.color || T.blue) + "12" : T.white, cursor: "pointer", fontSize: 15, fontWeight: 800, color: active ? cap?.color || T.blue : T.textMid }}>
+                          {n}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => { if (it.qty) advanceInput(idx); }}
+                    disabled={!it.qty}
+                    style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", cursor: it.qty ? "pointer" : "default", background: it.qty ? `linear-gradient(135deg,${cap?.color || T.blue},${T.blueL})` : T.slateD, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: it.qty ? `0 4px 14px ${cap?.color || T.blue}35` : "none" }}
+                  >
+                    {basket.slice(idx + 1).every((b) => b.calcType === "fixed") ? "Ver cotización →" : "Siguiente →"}
+                  </button>
+                </div>
+              );
+            })}
+
+            <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginTop: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Mano de obra / beneficio</span>
+                <span style={{ fontSize: 14, fontWeight: 900, color: T.blue }}>{margin}%</span>
+              </div>
+              <input type="range" min={0} max={120} step={5} value={margin} onChange={(e) => setMargin(parseInt(e.target.value))} style={{ accentColor: T.blue, width: "100%" }} />
+            </div>
+          </div>
+        )}
+
+        {/* ══ FASE 3: RESULTADO ══ */}
+        {phase === "result" && (
+          <div className="su">
+            {/* Hero card */}
+            <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 22, padding: "26px 22px 22px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: 90, background: "rgba(255,255,255,0.06)" }} />
+              <div style={{ position: "absolute", bottom: -30, left: -20, width: 130, height: 130, borderRadius: 65, background: "rgba(255,255,255,0.04)" }} />
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, position: "relative" }}>Total cotización</p>
+              <p style={{ color: T.white, fontSize: 54, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
+              <div style={{ display: "flex", gap: 20, marginTop: 14, position: "relative" }}>
+                <div>
+                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Materiales</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalBase)}</p>
+                </div>
+                <div style={{ width: 1, background: "rgba(255,255,255,0.15)" }} />
+                <div>
+                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>M. obra ({margin}%)</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalLabor)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Grouped breakdown */}
+            <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 12 }}>
+              {Object.entries(groupedItems).map(([catLabel, its], gi) => {
+                const cap = catalogo.find((c) => c.nombre === catLabel);
+                const chapTotal = its.reduce((a, it) => a + calcItem(it).subtotal, 0);
+                return (
+                  <div key={catLabel}>
+                    <div style={{ background: (cap?.color || T.blue) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${T.slateD}` : "none" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 15 }}>{cap?.emoji || "📋"}</span>
+                        <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || T.blue, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
+                      </div>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || T.blue }}>{fmtPEN(chapTotal)}</p>
+                    </div>
+                    {its.map((it) => {
+                      const { qty, unitPrice, subtotal } = calcItem(it);
+                      return (
+                        <div key={it.svcId} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 8, alignItems: "center", padding: "11px 16px", borderBottom: `1px solid ${T.slate}` }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1.3 }}>{it.svcLabel}</p>
+                          <p style={{ fontSize: 11, color: T.textMid, textAlign: "right", whiteSpace: "nowrap" }}>
+                            {it.calcType === "fixed" ? "1 und" : `${qty} ${it.unit} × S/${unitPrice}`}
+                          </p>
+                          <p style={{ fontSize: 13, fontWeight: 800, color: T.text, textAlign: "right", minWidth: 60 }}>{fmtPEN(subtotal)}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+              <div style={{ padding: "12px 16px", borderTop: `1px solid ${T.slateD}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: T.textMid }}>Materiales</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{fmtPEN(totalBase)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 12, color: T.textMid }}>Mano de obra ({margin}%)</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{fmtPEN(totalLabor)}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: T.bluePale }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>TOTAL COTIZACIÓN</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: T.blue }}>{fmtPEN(totalFinal)}</span>
+              </div>
+            </div>
+
+            {/* Margin adjust */}
+            <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Ajustar mano de obra</span>
+                <span style={{ fontSize: 15, fontWeight: 900, color: T.blue }}>{margin}% · {fmtPEN(totalLabor)}</span>
+              </div>
+              <input type="range" min={0} max={120} step={5} value={margin} onChange={(e) => setMargin(parseInt(e.target.value))} style={{ accentColor: T.blue, width: "100%", marginBottom: 8 }} />
+              <div style={{ display: "flex", gap: 6 }}>
+                {[0, 25, 40, 60, 80, 100].map((v) => (
+                  <button key={v} type="button" onClick={() => setMargin(v)} style={{ flex: 1, padding: "7px 2px", borderRadius: 10, border: `1.5px solid ${margin === v ? T.blue : T.slateD}`, background: margin === v ? T.bluePale : "none", cursor: "pointer", fontSize: 11, fontWeight: 800, color: margin === v ? T.blue : T.textMid }}>
+                    {v}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Client */}
+            <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Cliente</p>
+              {[
+                { k: "name",  ph: "Nombre del cliente",      val: clientName, set: setClientName },
+                { k: "phone", ph: "Teléfono / WhatsApp",     val: phone,      set: setPhone },
+                { k: "city",  ph: "Ciudad / Dirección obra",  val: city,       set: setCity },
+              ].map((f, i) => (
+                <div key={f.k} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: i < 2 ? `1px solid ${T.slateD}` : "none" }}>
+                  <input
+                    value={f.val}
+                    onChange={(e) => f.set(e.target.value)}
+                    placeholder={f.ph}
+                    style={{ flex: 1, border: "none", outline: "none", fontSize: 14, color: T.text, background: "transparent", fontFamily: "inherit" }}
+                  />
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="rounded-2xl p-4 shadow-sm" style={{ background: T.white }}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase" style={{ color: T.textMid }}>Mano de obra</span>
-              <span className="text-sm font-black" style={{ color: T.blue }}>{margin}%</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={5}
-              value={margin}
-              onChange={(e) => setMargin(Number(e.target.value))}
-              className="mt-2 w-full"
-              style={{ accentColor: T.blue }}
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="📝 Condiciones, plazos, exclusiones… (aparece en el PDF)"
+              style={{ width: "100%", padding: "13px 16px", borderRadius: 12, fontSize: 14, border: `1.5px solid ${T.slateD}`, outline: "none", color: T.text, background: T.white, resize: "none", minHeight: 72, marginBottom: 12, fontFamily: "inherit" }}
             />
-            <div className="mt-3 flex flex-col gap-1.5 border-t pt-3 text-sm" style={{ borderColor: T.slateD }}>
-              <div className="flex justify-between">
-                <span style={{ color: T.textMid }}>Partidas</span>
-                <span className="font-bold" style={{ color: T.text }}>{fmtPEN(totalBase)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span style={{ color: T.textMid }}>Mano de obra ({margin}%)</span>
-                <span className="font-bold" style={{ color: T.text }}>{fmtPEN(totalLabor)}</span>
-              </div>
-              <div className="flex justify-between border-t pt-2 text-base font-black" style={{ borderColor: T.slateD, color: T.navy }}>
-                <span>TOTAL</span>
-                <span>{fmtPEN(totalFinal)}</span>
-              </div>
-            </div>
+
+            {/* Actions */}
+            <button
+              type="button"
+              onClick={doSave}
+              disabled={loading}
+              style={{ width: "100%", padding: 16, borderRadius: 14, border: saved ? `1.5px solid ${T.green}30` : "none", cursor: "pointer", background: saved ? T.greenPale : `linear-gradient(135deg,${T.green},${T.greenD})`, color: saved ? T.green : T.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: saved ? "none" : `0 4px 16px ${T.green}35`, marginBottom: 10 }}
+            >
+              {loading ? "Guardando…" : saved ? (
+                <><Ic d={checkPath} color={T.green} size={16} /> Guardada</>
+              ) : (
+                <><Ic d={savePath} color={T.white} size={15} /> Guardar cotización · {fmtPEN(totalFinal)}</>
+              )}
+            </button>
+
+            {saved && (
+              <button
+                type="button"
+                onClick={() => { router.push("/presupuestos"); router.refresh(); }}
+                style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10, boxShadow: `0 4px 16px ${T.blue}35` }}
+              >
+                Ver mis cotizaciones →
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={reset}
+              style={{ width: "100%", padding: 13, borderRadius: 14, border: `1.5px dashed ${T.slateD}`, background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: T.textMid }}
+            >
+              + Nueva cotización
+            </button>
           </div>
-
-          <Input label="Notas (opcional)" placeholder="Ej: incluye materiales" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </div>
-      )}
-
-      {errorPaso && (
-        <p className="pi mt-3 text-center text-sm font-semibold" style={{ color: T.red }}>{errorPaso}</p>
-      )}
-
-      {/* Navegación */}
-      <div className="mt-6 flex gap-3">
-        {paso > 0 && (
-          <Button variant="ghost" onClick={() => { setErrorPaso(null); setPaso((p) => p - 1); }}>
-            ← Atrás
-          </Button>
-        )}
-        {paso < PASOS.length - 1 ? (
-          <Button full onClick={avanzar}>Continuar →</Button>
-        ) : (
-          <Button full variant="success" disabled={loading} onClick={guardar}>
-            {loading ? "Guardando…" : `Guardar cotización · ${fmtPEN(totalFinal)}`}
-          </Button>
         )}
       </div>
+
+      {phase === "input" && basket.length > 0 && (
+        <FloatBar items={basket} total={totalFinal} onContinue={goToInput} onReset={() => setBasket([])} />
+      )}
     </div>
   );
 }
