@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { PresupuestoCard } from "@/components/presupuesto/PresupuestoCard";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
+import { useFactura } from "@/hooks/useFactura";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
@@ -26,7 +27,9 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
   const [abierto, setAbierto] = useState<string | null>(null);
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(presupuestos);
   const { actualizarEstado, eliminar, generarPDF } = usePresupuesto();
+  const { convertirDesdePresupuesto } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
   useEffect(() => {
     if (iniciales.length > 0) {
@@ -73,6 +76,16 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     }
   };
 
+  const hacerFactura = async (p: Presupuesto) => {
+    mostrarToast("Creando factura…");
+    const factura = await convertirDesdePresupuesto(p, mostrarUpgrade);
+    if (factura) {
+      mostrarToast(`${factura.invNum} creada ✓`);
+    } else {
+      mostrarToast("No se pudo crear la factura", "error");
+    }
+  };
+
   const descargarPDF = async (id: string) => {
     mostrarToast("Generando PDF…");
     const url = await generarPDF(id);
@@ -112,6 +125,13 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
                   >
                     Re-cotizar
                   </Link>
+                  <button
+                    className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                    style={{ background: "#F0FDF4", color: "#15803D" }}
+                    onClick={() => hacerFactura(p)}
+                  >
+                    → Factura
+                  </button>
                   <Button
                     variant="ghost"
                     className="flex-1 !px-2 !py-2.5 !text-xs"
