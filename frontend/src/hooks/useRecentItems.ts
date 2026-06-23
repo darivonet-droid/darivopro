@@ -1,9 +1,11 @@
-// DARIVO PRO — Historial de uso local (partidas recientes + último cliente)
+// DARIVO PRO — Historial de uso local (partidas recientes + último cliente + historial por cliente)
 "use client";
 
-const RECENT_KEY  = "darivo_recent_items";
-const CLIENT_KEY  = "darivo_last_client";
-const MAX_ITEMS   = 30;
+const RECENT_KEY         = "darivo_recent_items";
+const CLIENT_KEY         = "darivo_last_client";
+const CLIENT_HISTORY_KEY = "darivo_client_history_v1";
+const MAX_ITEMS          = 30;
+const MAX_CLIENTS        = 60;
 
 export interface RecentItem {
   svcId: string;
@@ -18,6 +20,23 @@ export interface LastClient {
   city:  string;
 }
 
+/**
+ * Historial de cotizaciones por cliente (almacenado en localStorage).
+ * Permite reutilizar condiciones comerciales, observaciones, partidas y margen.
+ */
+export interface ClientHistoryEntry {
+  key:         string;    // nombre normalizado (lowercase+trim) — clave de búsqueda
+  displayName: string;    // nombre tal como lo escribió el usuario
+  phone:       string;
+  city:        string;
+  margin:      number;    // último margen de beneficio usado con este cliente
+  notes:       string;    // últimas observaciones usadas con este cliente
+  svcIds:      string[];  // partidas del último presupuesto
+  catIds:      string[];  // capítulos correspondientes (mismo orden que svcIds)
+  lastUsedAt:  number;    // timestamp de la última cotización
+  count:       number;    // número total de cotizaciones para este cliente
+}
+
 function safeRead<T>(key: string): T | null {
   try {
     if (typeof window === "undefined") return null;
@@ -27,6 +46,15 @@ function safeRead<T>(key: string): T | null {
 }
 function safeWrite(key: string, value: unknown) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota */ }
+}
+
+/** Normaliza un nombre de cliente para búsquedas insensibles a mayúsculas/tildes. */
+function normalizeClientKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // remove diacritics
 }
 
 export function useRecentItems() {
@@ -68,6 +96,84 @@ export function useRecentItems() {
     if (client.name.trim()) safeWrite(CLIENT_KEY, client);
   };
 
+  // ── Historial por cliente ──────────────────────────────────────
+
+  const getAllClientHistory = (): ClientHistoryEntry[] =>
+    safeRead<ClientHistoryEntry[]>(CLIENT_HISTORY_KEY) ?? [];
+
+  /**
+   * Guarda o actualiza el historial de un cliente tras crear una cotización.
+   * Conserva: margen, observaciones, partidas, capítulos, teléfono, ciudad.
+   */
+  const saveClientHistory = (
+    name: string,
+    data: { phone: string; city: string; margin: number; notes: string; svcIds: string[]; catIds: string[] }
+  ) => {
+    if (!name.trim()) return;
+    const key  = normalizeClientKey(name);
+    const list = getAllClientHistory();
+    const idx  = list.findIndex((e) => e.key === key);
+    if (idx >= 0) {
+      list[idx] = {
+        ...list[idx],
+        displayName: name,
+        phone:       data.phone,
+        city:        data.city,
+        margin:      data.margin,
+        notes:       data.notes,
+        svcIds:      data.svcIds,
+        catIds:      data.catIds,
+        lastUsedAt:  Date.now(),
+        count:       list[idx].count + 1,
+      };
+    } else {
+      list.unshift({
+        key,
+        displayName: name,
+        phone:       data.phone,
+        city:        data.city,
+        margin:      data.margin,
+        notes:       data.notes,
+        svcIds:      data.svcIds,
+        catIds:      data.catIds,
+        lastUsedAt:  Date.now(),
+        count:       1,
+      });
+    }
+    list.sort((a, b) => b.lastUsedAt - a.lastUsedAt);
+    safeWrite(CLIENT_HISTORY_KEY, list.slice(0, MAX_CLIENTS));
+  };
+
+  /**
+   * Devuelve el historial de un cliente por nombre exacto (normalizado).
+   * Retorna null si el cliente no tiene historial.
+   */
+  const getClientHistory = (name: string): ClientHistoryEntry | null => {
+    if (!name.trim()) return null;
+    const key = normalizeClientKey(name);
+    return getAllClientHistory().find((e) => e.key === key) ?? null;
+  };
+
+  /**
+   * Mapa catId → frecuencia de uso específica de un cliente.
+   * Permite ordenar capítulos según lo que ese cliente suele pedir.
+   */
+  const getClientCatFrequency = (name: string): Record<string, number> => {
+    const history = getClientHistory(name);
+    if (!history) return {};
+    const map: Record<string, number> = {};
+    history.catIds.forEach((catId) => {
+      map[catId] = (map[catId] ?? 0) + 1;
+    });
+    return map;
+  };
+
+  /**
+   * Devuelve los N clientes más recientes (para sugerencias futuras).
+   */
+  const getTopClients = (n = 10): ClientHistoryEntry[] =>
+    getAllClientHistory().slice(0, n);
+
   return {
     trackItems,
     getRecentSvcIds,
@@ -75,5 +181,9 @@ export function useRecentItems() {
     getCatFrequency,
     getLastClient,
     saveLastClient,
+    saveClientHistory,
+    getClientHistory,
+    getClientCatFrequency,
+    getTopClients,
   };
 }

@@ -103,7 +103,11 @@ export function NuevoPresupuestoWizard() {
   const searchParams = useSearchParams();
   const { crear, loading, generarPDF, registrarEnvioWA } = usePresupuesto();
   const { catalogo } = useCatalogo();
-  const { trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency, getLastClient, saveLastClient } = useRecentItems();
+  const {
+    trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
+    getLastClient, saveLastClient,
+    saveClientHistory, getClientHistory, getClientCatFrequency,
+  } = useRecentItems();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
   const supabase = createClient();
@@ -126,22 +130,37 @@ export function NuevoPresupuestoWizard() {
   const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
   const { limpiar } = usePresupuestoDraft(draftState);
 
-  // ── Catálogo ordenado por frecuencia de uso reciente ──────────────────────
+  // ── Catálogo ordenado por frecuencia global + boost por cliente ──────────
   const sortedCatalogo = useMemo(() => {
     if (!catalogo.length) return catalogo;
-    const freq = getCatFrequency();
+
+    const globalFreq = getCatFrequency();
     const recentSvcs = new Set(getRecentSvcIds().slice(0, 10));
+
+    // Client-specific boost: categories this client usually requests rank higher
+    const clientFreq = clientName.trim() ? getClientCatFrequency(clientName.trim()) : {};
+    const clientHistory = clientName.trim() ? getClientHistory(clientName.trim()) : null;
+    const clientSvcs   = new Set(clientHistory?.svcIds ?? []);
+
+    // Merge global + client-specific frequencies (client boost weighted ×3)
+    const mergedFreq: Record<string, number> = { ...globalFreq };
+    Object.entries(clientFreq).forEach(([catId, n]) => {
+      mergedFreq[catId] = (mergedFreq[catId] ?? 0) + n * 3;
+    });
+
+    // Priority set: client's last items first, then global recents
+    const prioritySvcs = new Set([...clientSvcs, ...recentSvcs]);
+
     return [...catalogo]
-      .sort((a, b) => (freq[b.id] ?? 0) - (freq[a.id] ?? 0))
+      .sort((a, b) => (mergedFreq[b.id] ?? 0) - (mergedFreq[a.id] ?? 0))
       .map((cap) => ({
         ...cap,
-        // Within each category, move recently-used partidas to the top
         partidas: [
-          ...cap.partidas.filter((p) => recentSvcs.has(p.id)),
-          ...cap.partidas.filter((p) => !recentSvcs.has(p.id)),
+          ...cap.partidas.filter((p) => prioritySvcs.has(p.id)),
+          ...cap.partidas.filter((p) => !prioritySvcs.has(p.id)),
         ],
       }));
-  }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [catalogo, clientName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Inicialización: ?cat=, ?from=<id>, o pre-abrir categoría reciente ────
   useEffect(() => {
@@ -208,6 +227,27 @@ export function NuevoPresupuestoWizard() {
       setCity(lastClient.city);
     }
   }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Auto-apply client history when clientName matches a known client ───────
+  // Silently restores: margin, notes, phone, city from the client's last quote.
+  // Debounced 600ms so it doesn't trigger while the user is still typing.
+  useEffect(() => {
+    if (phase !== "result" || saved) return;
+    const name = clientName.trim();
+    if (name.length < 2) return;
+    const timer = setTimeout(() => {
+      const history = getClientHistory(name);
+      if (!history) return;
+      // Reutilizar porcentaje de beneficio (solo si aún está en el valor por defecto)
+      setMargin((prev) => prev === 40 ? history.margin : prev);
+      // Reutilizar condiciones comerciales (phone/city si estaban vacíos)
+      setPhone((prev) => prev.trim() ? prev : history.phone);
+      setCity((prev) => prev.trim() ? prev : history.city);
+      // Reutilizar observaciones (si no se han introducido)
+      setNotes((prev) => prev.trim() ? prev : history.notes);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [clientName, phase, saved]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-focus quantity input
   useEffect(() => {
@@ -278,9 +318,25 @@ export function NuevoPresupuestoWizard() {
     const creado = await crear(payload, mostrarUpgrade);
     if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
 
-    // Track recents & client autocomplete
-    trackItems(basket.map((b) => ({ svcId: b.svcId, catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "" })));
+    // Build per-item catId list (needed for client history + catalog sorting)
+    const itemsWithCat = basket.map((b) => ({
+      svcId: b.svcId,
+      catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "",
+    }));
+
+    // Track global recents & last client (existing fast-fill)
+    trackItems(itemsWithCat);
     saveLastClient({ name: clientName.trim(), phone: phone.trim(), city: city.trim() });
+
+    // Save per-client history: margin, notes, partidas, condiciones comerciales
+    saveClientHistory(clientName.trim(), {
+      phone:   phone.trim(),
+      city:    city.trim(),
+      margin,
+      notes:   notes.trim(),
+      svcIds:  itemsWithCat.map((i) => i.svcId),
+      catIds:  itemsWithCat.map((i) => i.catId),
+    });
     limpiar();
     setSaved(true);
     mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
