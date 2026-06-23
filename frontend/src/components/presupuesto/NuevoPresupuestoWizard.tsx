@@ -10,6 +10,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase/client";
 import { presupuestoSchema } from "@/lib/validations";
 import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
+import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
 import { T } from "@/lib/theme";
 import type { LineaPresupuesto, Capitulo, Partida } from "@/types";
 import Link from "next/link";
@@ -101,7 +102,7 @@ interface BasketItem {
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, loading, generarPDF, registrarEnvioWA } = usePresupuesto();
+  const { crear, loading, generarPDF, registrarCalculo, registrarEnvioWA } = usePresupuesto();
   const { catalogo } = useCatalogo();
   const {
     trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
@@ -257,14 +258,31 @@ export function NuevoPresupuestoWizard() {
     }
   }, [phase, inputIdx]);
 
-  // Totals
+  // ── Motor de cálculo robusto ───────────────────────────────────────────────
+  // Convierte el basket al formato CalcInput y delega al motor centralizado.
+  const buildCalcInputs = (items: BasketItem[]): CalcInput[] =>
+    items.map((it) => ({
+      svcId:     it.svcId,
+      svcLabel:  it.svcLabel,
+      catLabel:  it.catLabel,
+      calcType:  it.calcType,
+      basePrice: it.basePrice,
+      qty:       it.calcType === "fixed" ? 1 : parseFloat(it.qty) || 0,
+      unit:      it.unit,
+    }));
+
+  const calcResult     = calcBasket(buildCalcInputs(basket), margin);
+  const totalMateriales = calcResult.totalMateriales;   // m2/unit items
+  const totalManoDeObra = calcResult.totalManoDeObra;   // hour/fixed items
+  const totalBase       = calcResult.totalBase;
+  const totalLabor      = calcResult.totalMargen;       // alias for DB compat
+  const totalFinal      = calcResult.totalFinal;
+
+  // Compatibility shim: calcItem still used in a few JSX renders below
   const calcItem = (it: BasketItem) => {
-    const q = it.calcType === "fixed" ? 1 : parseFloat(it.qty) || 0;
-    return { qty: q, unitPrice: it.basePrice, subtotal: q * it.basePrice };
+    const qty = it.calcType === "fixed" ? 1 : parseFloat(it.qty) || 0;
+    return { qty, unitPrice: it.basePrice, subtotal: calcResult.items.find(ci => ci.svcId === it.svcId)?.subtotal ?? (qty * it.basePrice) };
   };
-  const totalBase  = basket.reduce((a, it) => a + calcItem(it).subtotal, 0);
-  const totalLabor = Math.round(totalBase * margin) / 100;
-  const totalFinal = totalBase + totalLabor;
 
   // Basket helpers
   const isSelected = (id: string) => basket.some((b) => b.svcId === id);
@@ -308,15 +326,42 @@ export function NuevoPresupuestoWizard() {
 
   // Save
   const doSave = async () => {
-    const items: LineaPresupuesto[] = basket.map((it) => {
-      const { qty, unitPrice, subtotal } = calcItem(it);
-      return { svcId: it.svcId, catLabel: it.catLabel, svcLabel: it.svcLabel, calcType: it.calcType, basePrice: it.basePrice, unit: it.unit, qty, unitPrice, subtotal };
+    // Build LineaPresupuesto[] from engine results (precise, validated)
+    const calcInputs = buildCalcInputs(basket);
+    const engineResult = calcBasket(calcInputs, margin);
+    const items: LineaPresupuesto[] = basket.map((it, idx) => {
+      const ci = engineResult.items[idx];
+      return {
+        svcId:     it.svcId,
+        catLabel:  it.catLabel,
+        svcLabel:  it.svcLabel,
+        calcType:  it.calcType,
+        basePrice: it.basePrice,
+        unit:      it.unit,
+        qty:       ci.qty,
+        unitPrice: ci.unitPrice,
+        subtotal:  ci.subtotal,
+      };
     });
     const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
     const valido = presupuestoSchema.safeParse(payload);
     if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
     const creado = await crear(payload, mostrarUpgrade);
     if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
+
+    // Save calculation snapshot to localStorage history
+    saveCalcSnapshot(engineResult);
+
+    // Register detailed calc breakdown in Supabase (fire-and-forget)
+    void registrarCalculo(creado.id, {
+      totalMateriales: engineResult.totalMateriales,
+      totalManoDeObra: engineResult.totalManoDeObra,
+      totalBase:       engineResult.totalBase,
+      totalMargen:     engineResult.totalMargen,
+      margin:          engineResult.margin,
+      totalFinal:      engineResult.totalFinal,
+      itemCount:       engineResult.items.length,
+    });
 
     // Build per-item catId list (needed for client history + catalog sorting)
     const itemsWithCat = basket.map((b) => ({

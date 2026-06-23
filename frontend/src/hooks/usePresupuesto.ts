@@ -162,6 +162,41 @@ export function usePresupuesto() {
   }, []);
 
   /**
+   * Registra el snapshot de cálculo en la tabla calculos_log (Supabase).
+   * Silencioso — nunca bloquea el guardado principal.
+   */
+  const registrarCalculo = useCallback(async (
+    presupuestoId: string,
+    calc: {
+      totalMateriales: number;
+      totalManoDeObra: number;
+      totalBase:       number;
+      totalMargen:     number;
+      margin:          number;
+      totalFinal:      number;
+      itemCount:       number;
+    }
+  ): Promise<void> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("calculos_log").insert({
+        user_id:          user.id,
+        presupuesto_id:   presupuestoId,
+        total_materiales: calc.totalMateriales,
+        total_mano_obra:  calc.totalManoDeObra,
+        total_base:       calc.totalBase,
+        total_margen:     calc.totalMargen,
+        margin_pct:       calc.margin,
+        total_final:      calc.totalFinal,
+        items_count:      calc.itemCount,
+      });
+    } catch (e) {
+      console.warn("[registrarCalculo] no disponible aún:", e);
+    }
+  }, [supabase]);
+
+  /**
    * Registra la fecha de apertura del enlace WhatsApp y guarda la URL del PDF.
    * Silencioso — no propaga errores (puede fallar si la migración aún no está aplicada).
    */
@@ -182,5 +217,5 @@ export function usePresupuesto() {
     }
   }, [supabase]);
 
-  return { loading, error, listar, crear, actualizarEstado, eliminar, generarPDF, registrarEnvioWA };
+  return { loading, error, listar, crear, actualizarEstado, eliminar, generarPDF, registrarCalculo, registrarEnvioWA };
 }
