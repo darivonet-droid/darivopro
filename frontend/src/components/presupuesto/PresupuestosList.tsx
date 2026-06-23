@@ -105,6 +105,13 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
                       → {SIGUIENTE_ESTADO[p.status]}
                     </Button>
                   )}
+                  <Link
+                    href={`/presupuestos/nuevo?from=${p.id}`}
+                    className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                    style={{ background: T.bluePale, color: T.blue }}
+                  >
+                    Re-cotizar
+                  </Link>
                   <Button
                     variant="ghost"
                     className="flex-1 !px-2 !py-2.5 !text-xs"

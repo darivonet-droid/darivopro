@@ -1,11 +1,13 @@
 "use client";
 // DARIVO PRO — Wizard de cotización (diseño Fable 5 exacto)
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
 import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
 import { useCatalogo } from "@/hooks/useCatalogo";
+import { useRecentItems } from "@/hooks/useRecentItems";
 import { useAppStore } from "@/store/useAppStore";
+import { createClient } from "@/lib/supabase/client";
 import { presupuestoSchema } from "@/lib/validations";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
@@ -101,8 +103,10 @@ export function NuevoPresupuestoWizard() {
   const searchParams = useSearchParams();
   const { crear, loading } = usePresupuesto();
   const { catalogo } = useCatalogo();
+  const { trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency, getLastClient, saveLastClient } = useRecentItems();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
+  const supabase = createClient();
 
   type Phase = "cats" | "input" | "result";
   const [phase, setPhase] = useState<Phase>("cats");
@@ -115,17 +119,95 @@ export function NuevoPresupuestoWizard() {
   const [city, setCity] = useState("");
   const [notes, setNotes] = useState("");
   const [saved, setSaved] = useState(false);
+  const [populated, setPopulated] = useState(false); // guard: run init logic only once
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Draft restore
   const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
   const { limpiar } = usePresupuestoDraft(draftState);
 
-  // Deep-link ?cat= from dashboard
+  // ── Catálogo ordenado por frecuencia de uso reciente ──────────────────────
+  const sortedCatalogo = useMemo(() => {
+    if (!catalogo.length) return catalogo;
+    const freq = getCatFrequency();
+    const recentSvcs = new Set(getRecentSvcIds().slice(0, 10));
+    return [...catalogo]
+      .sort((a, b) => (freq[b.id] ?? 0) - (freq[a.id] ?? 0))
+      .map((cap) => ({
+        ...cap,
+        // Within each category, move recently-used partidas to the top
+        partidas: [
+          ...cap.partidas.filter((p) => recentSvcs.has(p.id)),
+          ...cap.partidas.filter((p) => !recentSvcs.has(p.id)),
+        ],
+      }));
+  }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Inicialización: ?cat=, ?from=<id>, o pre-abrir categoría reciente ────
   useEffect(() => {
-    const cat = searchParams.get("cat");
-    if (cat && catalogo.some((c) => c.id === cat)) setSelCat(cat);
-  }, [searchParams, catalogo]);
+    if (!catalogo.length || populated) return;
+    setPopulated(true);
+
+    const catParam  = searchParams.get("cat");
+    const fromParam = searchParams.get("from");
+
+    // 1. Deep-link ?cat= (desde dashboard)
+    if (catParam && catalogo.some((c) => c.id === catParam)) {
+      setSelCat(catParam);
+      return;
+    }
+
+    // 2. Re-usar cotización anterior (?from=<id>)
+    if (fromParam) {
+      void (async () => {
+        const { data } = await supabase
+          .from("presupuestos")
+          .select("*, items:presupuesto_items(*)")
+          .eq("id", fromParam)
+          .single();
+        if (!data) return;
+        // Build basket from previous items, resolving catColor/catEmoji from current catalog
+        const newBasket: BasketItem[] = (data.items ?? []).map((it: Record<string, unknown>) => {
+          const cap = catalogo.find((c) => c.nombre === String(it.cat_label ?? ""))
+            ?? catalogo.find((c) => c.partidas.some((p) => p.id === String(it.svc_id)));
+          return {
+            svcId:     String(it.svc_id),
+            catLabel:  String(it.cat_label ?? ""),
+            svcLabel:  String(it.svc_label ?? ""),
+            calcType:  (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+            basePrice: Number(it.base_price ?? 0),
+            unit:      String(it.unit ?? ""),
+            qty:       String(it.qty ?? (it.calc_type === "fixed" ? 1 : "")),
+            catColor:  cap?.color ?? T.blue,
+            catEmoji:  cap?.emoji ?? "📋",
+          };
+        });
+        setBasket(newBasket);
+        setMargin(Number(data.margin ?? 40));
+        setClientName(String(data.client_name ?? ""));
+        setPhone(String(data.phone ?? ""));
+        setCity(String(data.city ?? ""));
+        setNotes(String(data.notes ?? ""));
+        // Skip straight to result — all quantities already filled
+        setPhase("result");
+      })();
+      return;
+    }
+
+    // 3. Pre-abrir la categoría usada más recientemente
+    const recentCat = getMostRecentCatId();
+    if (recentCat && catalogo.some((c) => c.id === recentCat)) {
+      setSelCat(recentCat);
+    }
+
+    // 4. Pre-rellenar datos del último cliente
+    const lastClient = getLastClient();
+    if (lastClient) {
+      setClientName(lastClient.name);
+      setPhone(lastClient.phone);
+      setCity(lastClient.city);
+    }
+  }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-focus quantity input
   useEffect(() => {
@@ -146,7 +228,7 @@ export function NuevoPresupuestoWizard() {
 
   // Basket helpers
   const isSelected = (id: string) => basket.some((b) => b.svcId === id);
-  const catForSvc  = (id: string) => catalogo.find((c) => c.partidas.some((p) => p.id === id));
+  const catForSvc  = (id: string) => sortedCatalogo.find((c) => c.partidas.some((p) => p.id === id));
 
   const toggleSvc = (cap: Capitulo, partida: Partida) => {
     if (isSelected(partida.id)) {
@@ -195,6 +277,9 @@ export function NuevoPresupuestoWizard() {
     if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
     const creado = await crear(payload, mostrarUpgrade);
     if (creado) {
+      // Registrar partidas usadas y guardar cliente para autocompletado futuro
+      trackItems(basket.map((b) => ({ svcId: b.svcId, catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "" })));
+      saveLastClient({ name: clientName.trim(), phone: phone.trim(), city: city.trim() });
       limpiar();
       setSaved(true);
       mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
@@ -281,8 +366,8 @@ export function NuevoPresupuestoWizard() {
               Toca un capítulo para ver sus partidas
             </p>
 
-            {/* Acordeón */}
-            {catalogo.map((cap) => {
+            {/* Acordeón — ordenado por uso reciente */}
+            {sortedCatalogo.map((cap) => {
               const isOpen = selCat === cap.id;
               const selCount = basket.filter((b) => cap.partidas.some((p) => p.id === b.svcId)).length;
               return (
@@ -501,7 +586,7 @@ export function NuevoPresupuestoWizard() {
             {/* Grouped breakdown */}
             <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 12 }}>
               {Object.entries(groupedItems).map(([catLabel, its], gi) => {
-                const cap = catalogo.find((c) => c.nombre === catLabel);
+                const cap = sortedCatalogo.find((c) => c.nombre === catLabel);
                 const chapTotal = its.reduce((a, it) => a + calcItem(it).subtotal, 0);
                 return (
                   <div key={catLabel}>
