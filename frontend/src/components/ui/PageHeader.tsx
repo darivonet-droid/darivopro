@@ -11,7 +11,14 @@ interface PageHeaderProps {
 
 export function PageHeader({ titulo, subtitulo, backHref, accion }: PageHeaderProps) {
   return (
-    <header className="fi sticky top-0 z-30 px-4 pb-4 pt-5" style={{ background: T.navy }}>
+    <header
+      className="fi sticky top-0 z-30 px-4 pb-4 pt-5"
+      style={{
+        background: `linear-gradient(160deg, ${T.navy} 0%, ${T.navyLight} 100%)`,
+        borderBottomLeftRadius: 26,
+        borderBottomRightRadius: 26,
+      }}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           {backHref && (

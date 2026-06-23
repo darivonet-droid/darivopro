@@ -14,9 +14,22 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
   const router = useRouter();
   const supabase = createClient();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
+  const modoOffline = useAppStore((s) => s.modoOffline);
   const [form, setForm] = useState<EmpresaForm>(inicial);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  // Estado real de conexión: la página cargó datos desde Supabase, así que
+  // el backend responde salvo que estemos en modo offline detectado por la PWA.
+  const conectado = !modoOffline;
+  const MODULOS = [
+    ["perfiles", "Empresa"],
+    ["presupuestos", "Cotizaciones"],
+    ["facturas", "Facturas"],
+    ["clientes", "Clientes"],
+    ["categorias", "Catálogo"],
+    ["documentos", "PDF / Docs"],
+  ];
 
   const guardar = async () => {
     setError(null);
@@ -57,6 +70,58 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Resumen navy: datos reales de la empresa + estado real de Supabase */}
+      <div className="su rounded-2xl px-5 py-4" style={{ background: T.navy }}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-base font-black" style={{ color: T.white }}>
+              {form.razonSocial || "Sin razón social"}
+            </p>
+            <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+              RUC {form.ruc || "—"} · {form.simbolo} {form.moneda}
+            </p>
+          </div>
+          <span
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold"
+            style={{
+              background: conectado ? `${T.green}22` : `${T.amber}22`,
+              color: conectado ? T.green : T.amber,
+            }}
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: conectado ? T.green : T.amber }}
+            />
+            {conectado ? "Conectado" : "Sin conexión"}
+          </span>
+        </div>
+
+        <p
+          className="mb-3 mt-4 text-[11px] font-bold uppercase tracking-wide"
+          style={{ color: "rgba(255,255,255,0.4)" }}
+        >
+          Backend · Supabase
+        </p>
+        <div className="grid grid-cols-2 gap-2.5">
+          {MODULOS.map(([id, label]) => (
+            <div key={id} className="flex items-center gap-2">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: conectado ? T.green : "rgba(255,255,255,0.25)" }}
+              />
+              <div className="min-w-0">
+                <p className="truncate font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  {id}
+                </p>
+                <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  {label}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <Card>
         <h2 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>Mi empresa</h2>
         <div className="flex flex-col gap-3">

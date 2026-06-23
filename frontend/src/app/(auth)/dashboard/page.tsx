@@ -60,7 +60,12 @@ export default async function DashboardPage() {
       {/* ══ HEADER NAVY ═══════════════════════════════════════ */}
       <header
         className="relative px-5 pb-20 pt-6"
-        style={{ background: T.navy, zIndex: 0 }}
+        style={{
+          background: `linear-gradient(160deg, ${T.navy} 0%, ${T.navyLight} 100%)`,
+          borderBottomLeftRadius: 26,
+          borderBottomRightRadius: 26,
+          zIndex: 0,
+        }}
       >
         {/* Badge esquina derecha */}
         <div className="absolute right-5 top-6">

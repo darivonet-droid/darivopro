@@ -33,10 +33,10 @@ export function BottomNav() {
       {/* ── Botón IA central circular elevado ────────────── */}
       <Link
         href="/ia"
-        className="relative -top-5 flex h-[56px] w-[56px] shrink-0 flex-col items-center justify-center rounded-full"
+        className="relative -top-5 flex h-[58px] w-[58px] shrink-0 flex-col items-center justify-center rounded-full"
         style={{
-          background:  T.blue,
-          boxShadow:   `0 4px 20px rgba(37,99,235,0.50)`,
+          background:  `linear-gradient(135deg, ${T.blue}, ${T.blueL})`,
+          boxShadow:   `0 4px 20px ${T.blue}55`,
         }}
         aria-label="Asistente IA"
       >
