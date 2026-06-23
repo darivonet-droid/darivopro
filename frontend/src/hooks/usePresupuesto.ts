@@ -159,5 +159,26 @@ export function usePresupuesto() {
     return json.data?.data?.url ?? json.data?.url ?? null;
   }, []);
 
-  return { loading, error, listar, crear, actualizarEstado, eliminar, generarPDF };
+  /**
+   * Registra la fecha de apertura del enlace WhatsApp y guarda la URL del PDF.
+   * Silencioso — no propaga errores (puede fallar si la migración aún no está aplicada).
+   */
+  const registrarEnvioWA = useCallback(async (
+    id:      string,
+    pdfUrl?: string
+  ): Promise<void> => {
+    try {
+      await supabase
+        .from("presupuestos")
+        .update({
+          wa_enviado_at: new Date().toISOString(),
+          ...(pdfUrl ? { pdf_url: pdfUrl } : {}),
+        })
+        .eq("id", id);
+    } catch (e) {
+      console.warn("[registrarEnvioWA] no disponible aún:", e);
+    }
+  }, [supabase]);
+
+  return { loading, error, listar, crear, actualizarEstado, eliminar, generarPDF, registrarEnvioWA };
 }

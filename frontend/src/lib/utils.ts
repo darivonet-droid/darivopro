@@ -33,6 +33,56 @@ export const validarRUC = (ruc: string) => /^\d{11}$/.test(ruc);
 let _counter = 1;
 export const nextInvoiceNum = () => `F001-${String(_counter++).padStart(6, "0")}`;
 
+/** Construye mensaje WhatsApp para cotización */
+export function buildWAMsgCotizacion(params: {
+  cotNum?:     string;
+  clientName:  string;
+  groupedItems: Record<string, { svcLabel: string; calcType: string; qty: number; unitPrice: number; subtotal: number; unit: string }[]>;
+  totalBase:   number;
+  totalLabor:  number;
+  margin:      number;
+  totalFinal:  number;
+  pdfUrl?:     string;
+  sym?:        string;
+}): string {
+  const sym = params.sym ?? "S/";
+  const fmt = (n: number) =>
+    `${sym} ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const desglose = Object.entries(params.groupedItems)
+    .map(([cat, its]) => {
+      const lineas = its
+        .map((it) =>
+          it.calcType === "fixed"
+            ? `  • ${it.svcLabel}: ${fmt(it.subtotal)}`
+            : `  • ${it.svcLabel}: ${it.qty} ${it.unit} × ${fmt(it.unitPrice)} = ${fmt(it.subtotal)}`
+        )
+        .join("\n");
+      return `▸ ${cat.toUpperCase()}\n${lineas}`;
+    })
+    .join("\n\n");
+
+  const saludo = params.clientName && params.clientName !== "Sin cliente"
+    ? `Hola ${params.clientName},`
+    : "Hola,";
+
+  const ref = params.cotNum ? ` ${params.cotNum}` : "";
+  const pdfLine = params.pdfUrl ? `\n\n📄 PDF: ${params.pdfUrl}` : "";
+
+  return `${saludo}
+
+Te envío la cotización${ref}:
+
+${desglose}
+
+━━━━━━━━━━━━━━━━
+Materiales:        ${fmt(params.totalBase)}
+Mano de obra (${params.margin}%): ${fmt(params.totalLabor)}
+*TOTAL: ${fmt(params.totalFinal)}*${pdfLine}
+
+Generado con DARIVO PRO`;
+}
+
 /** Construye mensaje WhatsApp para factura */
 export const buildWAMessage = (
   clientName: string,

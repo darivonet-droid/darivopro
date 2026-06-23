@@ -9,7 +9,7 @@ import { useRecentItems } from "@/hooks/useRecentItems";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase/client";
 import { presupuestoSchema } from "@/lib/validations";
-import { fmtPEN } from "@/lib/utils";
+import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { LineaPresupuesto, Capitulo, Partida } from "@/types";
 import Link from "next/link";
@@ -101,7 +101,7 @@ interface BasketItem {
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, loading } = usePresupuesto();
+  const { crear, loading, generarPDF, registrarEnvioWA } = usePresupuesto();
   const { catalogo } = useCatalogo();
   const { trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency, getLastClient, saveLastClient } = useRecentItems();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -276,16 +276,48 @@ export function NuevoPresupuestoWizard() {
     const valido = presupuestoSchema.safeParse(payload);
     if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
     const creado = await crear(payload, mostrarUpgrade);
-    if (creado) {
-      // Registrar partidas usadas y guardar cliente para autocompletado futuro
-      trackItems(basket.map((b) => ({ svcId: b.svcId, catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "" })));
-      saveLastClient({ name: clientName.trim(), phone: phone.trim(), city: city.trim() });
-      limpiar();
-      setSaved(true);
-      mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
-    } else {
-      mostrarToast("No se pudo guardar la cotización", "error");
+    if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
+
+    // Track recents & client autocomplete
+    trackItems(basket.map((b) => ({ svcId: b.svcId, catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "" })));
+    saveLastClient({ name: clientName.trim(), phone: phone.trim(), city: city.trim() });
+    limpiar();
+    setSaved(true);
+    mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
+
+    // ── Auto PDF + WhatsApp (pure logic, no UI changes) ──────────────────
+    // 1. Generate PDF automatically
+    const pdfUrl = await generarPDF(creado.id).catch(() => null);
+
+    // 2. Build WhatsApp message if a phone number exists
+    const cleanPhone = phone.trim().replace(/\D/g, "");
+    if (cleanPhone.length >= 7) {
+      const groupedForWA = basket.reduce<Record<string, { svcLabel: string; calcType: string; qty: number; unitPrice: number; subtotal: number; unit: string }[]>>(
+        (g, it) => {
+          const calc = calcItem(it);
+          (g[it.catLabel] = g[it.catLabel] || []).push({ svcLabel: it.svcLabel, calcType: it.calcType, qty: calc.qty, unitPrice: calc.unitPrice, subtotal: calc.subtotal, unit: it.unit });
+          return g;
+        },
+        {}
+      );
+      const msg = buildWAMsgCotizacion({
+        cotNum:      creado.cotNum,
+        clientName:  clientName.trim() || "Sin cliente",
+        groupedItems: groupedForWA,
+        totalBase,
+        totalLabor,
+        margin,
+        totalFinal,
+        pdfUrl:      pdfUrl ?? undefined,
+      });
+      const numero = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
+      const waUrl  = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+      // 3. Open WhatsApp ready to send
+      window.open(waUrl, "_blank", "noopener,noreferrer");
     }
+
+    // 4. Record WA send date and PDF URL in Supabase
+    await registrarEnvioWA(creado.id, pdfUrl ?? undefined);
   };
 
   const reset = () => {
