@@ -5,6 +5,28 @@ import { createClient } from "@/lib/supabase/client";
 import { CATALOGO } from "@/lib/catalog";
 import type { Capitulo, Partida } from "@/types";
 
+// ─── Module-level cache ───────────────────────────────────────────────────────
+// Shared across ALL useCatalogo() instances in the same browser tab.
+// Prevents N×3 Supabase queries and N Realtime subscriptions when multiple
+// components consume the catalog simultaneously or on repeated navigation.
+const _catalogCache = new Map<string, { data: Capitulo[]; ts: number }>();
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+function _getCached(uid: string): Capitulo[] | null {
+  const entry = _catalogCache.get(uid);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) { _catalogCache.delete(uid); return null; }
+  return entry.data;
+}
+
+function _setCache(uid: string, data: Capitulo[]): void {
+  _catalogCache.set(uid, { data, ts: Date.now() });
+}
+
+function _invalidate(uid: string): void {
+  _catalogCache.delete(uid);
+}
+
 interface CategoriaRow {
   cat_id: string;
   nombre: string;
@@ -61,6 +83,14 @@ export function useCatalogo() {
       return;
     }
 
+    // Return from module-level cache if still fresh (avoids N×3 Supabase queries)
+    const cached = _getCached(user.id);
+    if (cached) {
+      setCatalogo(cached);
+      setLoading(false);
+      return;
+    }
+
     const [{ data: cats }, { data: precios }, { data: propias }] = await Promise.all([
       supabase.from("categorias").select("cat_id, nombre, emoji, color, es_base, activa").eq("activa", true),
       supabase.from("precios_usuario").select("svc_id, precio"),
@@ -101,18 +131,28 @@ export function useCatalogo() {
         partidas: propiasRows.filter((pp) => pp.cap_id === c.cat_id).map(propiaALinea),
       }));
 
-    setCatalogo([...merged, ...nuevas]);
+    const result = [...merged, ...nuevas];
+    _setCache(user.id, result);   // store for sibling hook instances
+    setCatalogo(result);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     cargar();
     const supabase = createClient();
+
+    // Invalidate module cache then re-fetch so all active hook instances get fresh data
+    const onDbChange = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) _invalidate(user.id);
+      cargar();
+    };
+
     const channel = supabase
       .channel("catalogo-cambios")
-      .on("postgres_changes", { event: "*", schema: "public", table: "categorias" }, () => cargar())
-      .on("postgres_changes", { event: "*", schema: "public", table: "precios_usuario" }, () => cargar())
-      .on("postgres_changes", { event: "*", schema: "public", table: "partidas_propias" }, () => cargar())
+      .on("postgres_changes", { event: "*", schema: "public", table: "categorias" }, onDbChange)
+      .on("postgres_changes", { event: "*", schema: "public", table: "precios_usuario" }, onDbChange)
+      .on("postgres_changes", { event: "*", schema: "public", table: "partidas_propias" }, onDbChange)
       .subscribe();
     return () => {
       supabase.removeChannel(channel);

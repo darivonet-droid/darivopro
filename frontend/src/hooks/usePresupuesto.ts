@@ -31,6 +31,7 @@ interface PresupuestoRow {
   status: Presupuesto["status"];
   notes: string | null;
   created_at: string;
+  pdf_url: string | null;
   items?: ItemRow[];
 }
 
@@ -61,6 +62,7 @@ const mapRow = (row: PresupuestoRow): Presupuesto => ({
   status: row.status,
   createdAt: row.created_at,
   notes: row.notes ?? undefined,
+  pdfUrl: row.pdf_url ?? undefined,
 });
 
 export function usePresupuesto() {
@@ -72,7 +74,7 @@ export function usePresupuesto() {
     setLoading(true);
     const { data, error } = await supabase
       .from("presupuestos")
-      .select("*, items:presupuesto_items(*)")
+      .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) { setError(error.message); return []; }

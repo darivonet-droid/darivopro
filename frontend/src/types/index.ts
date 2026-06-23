@@ -27,6 +27,7 @@ export interface Presupuesto {
   status: "Borrador" | "Pendiente de firma" | "Aprobado";
   createdAt: string;
   notes?: string;
+  pdfUrl?: string;   // cached after first generation
 }
 
 export interface LineaFactura {

@@ -21,6 +21,11 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "No encontrada" }, { status: 404 });
     }
 
+    // Return cached PDF URL if already generated (avoids re-render + re-upload)
+    if (factura.pdf_url) {
+      return NextResponse.json({ data: { url: factura.pdf_url } });
+    }
+
     const detraccion: Detraccion | undefined = factura.detraccion_tipo
       ? {
           tipo: factura.detraccion_tipo as TipoDetraccion,
@@ -48,6 +53,15 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       detraccion,
       biz_data: (factura.biz_data ?? null) as EmpresaData | null,
     });
+
+    // Persist URL for future requests (fire-and-forget)
+    supabase
+      .from("facturas")
+      .update({ pdf_url: url })
+      .eq("inv_id", params.id)
+      .then(({ error: updErr }) => {
+        if (updErr) console.warn("factura pdf_url cache save:", updErr.message);
+      });
 
     return NextResponse.json({ data: { url } });
   } catch (e) {

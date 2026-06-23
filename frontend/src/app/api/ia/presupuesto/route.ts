@@ -20,7 +20,18 @@ interface CategoriaRow  { cat_id: string; nombre: string; emoji: string | null; 
 interface PartidaRow    { id: string; cap_id: string; nombre: string; tipo: Partida["tipo"]; precio: number | string; unidad: string | null; activa: boolean; }
 interface PrecioRow     { svc_id: string; precio: number | string; }
 
-async function getMergedCatalog(supabase: ReturnType<typeof createServerClient>): Promise<Capitulo[]> {
+// Module-level cache: avoids 3 Supabase queries per AI request.
+// Lives in the Node.js worker process; TTL ensures price changes propagate within 5 min.
+const _serverCatalogCache = new Map<string, { data: Capitulo[]; ts: number }>();
+const SERVER_CATALOG_TTL  = 5 * 60 * 1000; // 5 minutes
+
+async function getMergedCatalog(
+  supabase: ReturnType<typeof createServerClient>,
+  userId:  string
+): Promise<Capitulo[]> {
+  const cached = _serverCatalogCache.get(userId);
+  if (cached && Date.now() - cached.ts < SERVER_CATALOG_TTL) return cached.data;
+
   const [{ data: cats }, { data: precios }, { data: propias }] = await Promise.all([
     supabase.from("categorias").select("cat_id, nombre, emoji, color, es_base, activa").eq("activa", true),
     supabase.from("precios_usuario").select("svc_id, precio"),
@@ -63,7 +74,9 @@ async function getMergedCatalog(supabase: ReturnType<typeof createServerClient>)
         .map((pp) => ({ id: pp.id, nombre: pp.nombre, tipo: pp.tipo, precio: Number(pp.precio), unidad: pp.unidad ?? "", esPropia: true as const })),
     }));
 
-  return [...merged, ...nuevas];
+  const result = [...merged, ...nuevas];
+  _serverCatalogCache.set(userId, { data: result, ts: Date.now() });
+  return result;
 }
 
 // ─── Claude response shape ────────────────────────────────────────────────────
@@ -109,14 +122,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const limite = await verificarLimiteIA(supabase);
-  if (!limite.ok) {
-    return NextResponse.json(
-      { error: "Límite diario de IA alcanzado (3/día)", razon: limite.razon },
-      { status: 429 }
-    );
-  }
-
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY no configurada" }, { status: 503 });
@@ -128,14 +133,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Descripción vacía" }, { status: 400 });
   }
 
-  // 1. Load user catalog (base + price overrides + custom categories)
-  const catalog = await getMergedCatalog(supabase);
+  // 1. Run limit check + catalog merge in parallel (saves ~100-200ms)
+  const [limite, catalog] = await Promise.all([
+    verificarLimiteIA(supabase),
+    getMergedCatalog(supabase, user.id),
+  ]);
+
+  if (!limite.ok) {
+    return NextResponse.json(
+      { error: "Límite diario de IA alcanzado (3/día)", razon: limite.razon },
+      { status: 429 }
+    );
+  }
 
   // 2. Build system prompt with embedded catalog
   const systemPrompt = buildSystemPrompt(catalog);
 
   try {
-    // 3. Call Claude
+    // 3. Call Claude (catalog is already loaded from cache or fresh fetch)
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {

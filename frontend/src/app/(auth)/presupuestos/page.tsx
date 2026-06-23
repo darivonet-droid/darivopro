@@ -7,9 +7,10 @@ import type { Presupuesto, LineaPresupuesto } from "@/types";
 
 export default async function PresupuestosPage() {
   const supabase = createServerClient();
+  // Select only columns used by UI + card expansion; skip presupuesto_items.id/created_at
   const { data } = await supabase
     .from("presupuestos")
-    .select("*, items:presupuesto_items(*)")
+    .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
     .order("created_at", { ascending: false });
 
   const presupuestos: Presupuesto[] = (data ?? []).map((row) => ({
@@ -37,6 +38,7 @@ export default async function PresupuestosPage() {
     status: row.status,
     createdAt: row.created_at,
     notes: row.notes ?? undefined,
+    pdfUrl: row.pdf_url ?? undefined,
   }));
 
   return (

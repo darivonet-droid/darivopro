@@ -86,9 +86,11 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     }
   };
 
-  const descargarPDF = async (id: string) => {
+  const descargarPDF = async (p: Presupuesto) => {
+    // Use cached PDF URL if available (avoids re-render + re-upload)
+    if (p.pdfUrl) { window.open(p.pdfUrl, "_blank"); return; }
     mostrarToast("Generando PDF…");
-    const url = await generarPDF(id);
+    const url = await generarPDF(p.id);
     if (url) window.open(url, "_blank");
     else mostrarToast("No se pudo generar el PDF", "error");
   };
@@ -135,7 +137,7 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
                   <Button
                     variant="ghost"
                     className="flex-1 !px-2 !py-2.5 !text-xs"
-                    onClick={() => descargarPDF(p.id)}
+                    onClick={() => descargarPDF(p)}
                   >
                     PDF
                   </Button>

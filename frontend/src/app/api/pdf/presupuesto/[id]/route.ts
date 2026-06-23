@@ -11,13 +11,18 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
     const { data: presupuesto, error } = await supabase
       .from("presupuestos")
-      .select("*, items:presupuesto_items(*)")
+      .select("*, items:presupuesto_items(cat_label, svc_label, qty, unit, unit_price, subtotal)")
       .eq("id", params.id)
       .eq("user_id", user.id)
       .single();
 
     if (error || !presupuesto) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    // Return cached PDF URL if already generated (avoids re-render + re-upload)
+    if (presupuesto.pdf_url) {
+      return NextResponse.json({ data: { url: presupuesto.pdf_url } });
     }
 
     const url = await generarPdfPresupuesto({
@@ -34,6 +39,15 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       notes: presupuesto.notes,
       items: presupuesto.items ?? [],
     });
+
+    // Persist URL so subsequent requests return instantly
+    supabase
+      .from("presupuestos")
+      .update({ pdf_url: url })
+      .eq("id", params.id)
+      .then(({ error: updErr }) => {
+        if (updErr) console.warn("pdf_url cache save:", updErr.message);
+      });
 
     return NextResponse.json({ data: { url } });
   } catch (e) {
