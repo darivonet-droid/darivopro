@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { CATEGORIAS } from "@/lib/catalog";
 import { T } from "@/lib/theme";
 import { AjustesForm } from "./AjustesForm";
+import { CategoriasManager } from "./CategoriasManager";
 import { InformesTab } from "@/components/informes/InformesTab";
 import type { EmpresaForm } from "@/lib/validations";
 
@@ -50,7 +50,7 @@ export function ConfigTabs({ email, inicial, tarifas }: ConfigTabsProps) {
       {/* Contenido */}
       {tab === "empresa"    && <EmpresaTab email={email} inicial={inicial} />}
       {tab === "tarifas"    && <TarifasTab tarifas={tarifas} />}
-      {tab === "categorias" && <CategoriasTab />}
+      {tab === "categorias" && <CategoriasManager />}
       {tab === "informes"   && <InformesTab />}
     </div>
   );
@@ -100,34 +100,3 @@ function TarifasTab({ tarifas }: { tarifas: { svc_id: string; precio: number }[]
   );
 }
 
-/* ─── Tab: Categorías ──────────────────────────────────────── */
-function CategoriasTab() {
-  return (
-    <div className="flex flex-col gap-2">
-      {CATEGORIAS.map((c) => (
-        <div
-          key={c.id}
-          className="flex items-center gap-3 rounded-xl px-4 py-3.5"
-          style={{ background: T.navyLight }}
-        >
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-base"
-            style={{ background: `${c.color}22` }}
-          >
-            {c.emoji}
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold" style={{ color: T.white }}>{c.nombre}</p>
-          </div>
-          <div
-            className="h-2.5 w-2.5 rounded-full"
-            style={{ background: c.color }}
-          />
-        </div>
-      ))}
-      <p className="mt-2 text-center text-xs" style={{ color: T.textLight }}>
-        Gestión de categorías personalizadas — próximamente
-      </p>
-    </div>
-  );
-}

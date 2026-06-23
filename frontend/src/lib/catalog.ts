@@ -63,6 +63,36 @@ export const CATALOGO: Capitulo[] = [
   },
 ];
 
+/** Paleta fija de colores de categorías (Fable 5) — reutilizada al crear categorías nuevas */
+export const PALETA_CATEGORIAS = [
+  "#F59E0B", // naranja
+  "#0D9488", // verde azulado
+  "#D97706", // naranja oscuro
+  "#2563EB", // azul
+  "#92400E", // marrón
+  "#7C3AED", // morado
+] as const;
+
+/** Emoji por defecto al crear una categoría nueva (no hay selector de ícono en esta fase) */
+export const EMOJI_CATEGORIA_DEFAULT = "🔧";
+
+/** Elige el primer color de la paleta que no esté ya usado; si todos están usados, cicla */
+export function colorParaNuevaCategoria(coloresUsados: string[]): string {
+  const libre = PALETA_CATEGORIAS.find((c) => !coloresUsados.includes(c));
+  return libre ?? PALETA_CATEGORIAS[coloresUsados.length % PALETA_CATEGORIAS.length];
+}
+
+/** Convierte un nombre en un cat_id estable (slug ascii) */
+export function slugCategoria(nombre: string): string {
+  const base = nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return `cat-${base || "nueva"}-${Date.now().toString(36)}`;
+}
+
 /** Metadatos de categoría para UI — nombres y emojis desde CATALOGO (fuente única) */
 export type CategoriaMeta = Pick<Capitulo, "id" | "nombre" | "emoji" | "color">;
 

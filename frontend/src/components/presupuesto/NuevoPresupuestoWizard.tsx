@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { NuevaPartidaModal } from "@/components/presupuesto/NuevaPartidaModal";
 import { usePresupuesto } from "@/hooks/usePresupuesto";
 import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
+import { useCatalogo } from "@/hooks/useCatalogo";
 import { useAppStore } from "@/store/useAppStore";
 import { CATALOGO, partidaALinea } from "@/lib/catalog";
 import { presupuestoSchema } from "@/lib/validations";
@@ -20,6 +21,7 @@ export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { crear, loading } = usePresupuesto();
+  const { catalogo } = useCatalogo();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
@@ -62,7 +64,7 @@ export function NuevoPresupuestoWizard() {
   const totalFinal = totalBase + totalLabor;
 
   const agregar = (capId: string, svcId: string) => {
-    const cap = CATALOGO.find((c) => c.id === capId);
+    const cap = catalogo.find((c) => c.id === capId);
     const partida = cap?.partidas.find((p) => p.id === svcId);
     if (!cap || !partida) return;
     setItems((prev) =>
@@ -152,7 +154,7 @@ export function NuevoPresupuestoWizard() {
     }
   };
 
-  const capitulo = CATALOGO.find((c) => c.id === capituloActivo) ?? CATALOGO[0];
+  const capitulo = catalogo.find((c) => c.id === capituloActivo) ?? catalogo[0];
 
   return (
     <div className="px-4 py-4">
@@ -175,7 +177,7 @@ export function NuevoPresupuestoWizard() {
       {paso === 0 && (
         <div className="su">
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3">
-            {CATALOGO.map((cap) => (
+            {catalogo.map((cap) => (
               <button
                 key={cap.id}
                 type="button"
@@ -274,7 +276,7 @@ export function NuevoPresupuestoWizard() {
               background: `linear-gradient(135deg, ${T.amber} 0%, ${T.blue} 100%)`,
             }}
           >
-            + Nueva partida personalizada
+            + Nueva cotización personalizada
           </button>
         </div>
       )}
