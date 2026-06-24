@@ -139,6 +139,66 @@ export function usePresupuesto() {
     return mapRow({ ...(data as PresupuestoRow), items: [] });
   }, [supabase]);
 
+  /**
+   * Actualiza una cotización existente: reemplaza campos y partidas.
+   * El cot_num se preserva (el trigger solo asigna en INSERT).
+   * Invalida el PDF cacheado (pdf_url → null) porque el contenido cambió.
+   */
+  const actualizar = useCallback(async (
+    id: string,
+    presupuesto: Omit<Presupuesto, "id" | "tenant_id" | "createdAt" | "cotNum">
+  ): Promise<Presupuesto | null> => {
+    setLoading(true);
+    setError(null);
+
+    const { error: updErr } = await supabase
+      .from("presupuestos")
+      .update({
+        client_name: presupuesto.clientName,
+        phone:       presupuesto.phone       ?? null,
+        city:        presupuesto.city        ?? null,
+        margin:      presupuesto.margin,
+        total_base:  presupuesto.totalBase,
+        total_labor: presupuesto.totalLabor,
+        total_final: presupuesto.totalFinal,
+        status:      presupuesto.status,
+        notes:       presupuesto.notes       ?? null,
+        pdf_url:     null,
+      })
+      .eq("id", id);
+
+    if (updErr) { setLoading(false); setError(updErr.message); return null; }
+
+    await supabase.from("presupuesto_items").delete().eq("presupuesto_id", id);
+
+    if (presupuesto.items.length > 0) {
+      const { error: itemsErr } = await supabase.from("presupuesto_items").insert(
+        presupuesto.items.map((it) => ({
+          presupuesto_id: id,
+          svc_id:     it.svcId,
+          cat_label:  it.catLabel,
+          svc_label:  it.svcLabel,
+          calc_type:  it.calcType,
+          base_price: it.basePrice,
+          unit:       it.unit,
+          qty:        it.qty,
+          unit_price: it.unitPrice,
+          subtotal:   it.subtotal,
+        }))
+      );
+      if (itemsErr) { setLoading(false); setError(itemsErr.message); return null; }
+    }
+
+    const { data } = await supabase
+      .from("presupuestos")
+      .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url")
+      .eq("id", id)
+      .single();
+
+    setLoading(false);
+    return data ? mapRow({ ...(data as PresupuestoRow), items: [] }) : null;
+  }, [supabase]);
+
   const actualizarEstado = useCallback(async (id: string, status: Presupuesto["status"]) => {
     const { error } = await supabase
       .from("presupuestos")
@@ -217,5 +277,5 @@ export function usePresupuesto() {
     }
   }, [supabase]);
 
-  return { loading, error, listar, crear, actualizarEstado, eliminar, generarPDF, registrarCalculo, registrarEnvioWA };
+  return { loading, error, listar, crear, actualizar, actualizarEstado, eliminar, generarPDF, registrarCalculo, registrarEnvioWA };
 }

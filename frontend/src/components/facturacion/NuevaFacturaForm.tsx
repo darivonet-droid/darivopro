@@ -220,6 +220,19 @@ export function NuevaFacturaForm({
 
   /* ── Pantalla de éxito ─────────────────────────────────── */
   if (guardada) {
+    const waUrl = buildFacturaWhatsAppUrl(clientPhone, guardada.invNum, total, sym);
+
+    const doCompartir = async () => {
+      if (!pdfUrl) { if (clientPhone) window.open(waUrl, "_blank", "noopener,noreferrer"); return; }
+      const titulo = `${guardada.invNum} — ${guardada.clientName}`;
+      const r = await import("@/lib/share").then((m) => m.compartirPDF(pdfUrl, titulo));
+      if (r.method === "clipboard") {
+        mostrarToast("Enlace copiado al portapapeles ✓");
+      } else if (r.method === "error") {
+        window.open(pdfUrl, "_blank");
+      }
+    };
+
     return (
       <div className="flex flex-col gap-4 px-4 py-4">
         <div
@@ -241,15 +254,20 @@ export function NuevaFacturaForm({
             </div>
           )}
         </div>
+        {/* Botón Compartir único — usa Web Share API nativa, o descarga PDF como fallback */}
         {pdfUrl && (
-          <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-            className="block rounded-2xl py-3.5 text-center text-sm font-bold text-white"
-            style={{ background: T.navy }}>
-            📄 Descargar PDF
-          </a>
+          <button
+            type="button"
+            onClick={doCompartir}
+            className="block w-full rounded-2xl py-3.5 text-center text-sm font-bold text-white"
+            style={{ background: T.navy }}
+          >
+            📤 Compartir PDF
+          </button>
         )}
-        {clientPhone && (
-          <a href={buildFacturaWhatsAppUrl(clientPhone, guardada.invNum, total, sym)}
+        {/* Fallback visible solo cuando no hay PDF y hay teléfono */}
+        {!pdfUrl && clientPhone && (
+          <a href={waUrl}
             target="_blank" rel="noopener noreferrer"
             className="block rounded-2xl py-3.5 text-center text-sm font-bold text-white"
             style={{ background: "#25D366" }}>

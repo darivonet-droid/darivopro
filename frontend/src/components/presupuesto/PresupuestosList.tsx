@@ -10,6 +10,7 @@ import { useFactura } from "@/hooks/useFactura";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
+import { compartirPDF } from "@/lib/share";
 import { T } from "@/lib/theme";
 import type { Presupuesto } from "@/types";
 
@@ -86,13 +87,14 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
     }
   };
 
-  const descargarPDF = async (p: Presupuesto) => {
-    // Use cached PDF URL if available (avoids re-render + re-upload)
-    if (p.pdfUrl) { window.open(p.pdfUrl, "_blank"); return; }
-    mostrarToast("Generando PDF…");
-    const url = await generarPDF(p.id);
-    if (url) window.open(url, "_blank");
-    else mostrarToast("No se pudo generar el PDF", "error");
+  const compartir = async (p: Presupuesto) => {
+    mostrarToast("Preparando PDF…");
+    const url = p.pdfUrl || (await generarPDF(p.id));
+    if (!url) { mostrarToast("No se pudo generar el PDF", "error"); return; }
+    const titulo = `Cotización ${p.cotNum ?? ""} — ${p.clientName}`;
+    const r = await compartirPDF(url, titulo);
+    if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
+    else if (r.method === "error") window.open(url, "_blank");
   };
 
   return (
@@ -107,47 +109,60 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
             footer={
               expandido ? (
                 <div
-                  className="fi mt-3 flex gap-2 border-t pt-3"
+                  className="mt-3 flex flex-col gap-2 border-t pt-3"
                   style={{ borderColor: T.slateD }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {SIGUIENTE_ESTADO[p.status] && (
-                    <Button
-                      variant="success"
-                      className="flex-1 !px-2 !py-2.5 !text-xs"
-                      onClick={() => avanzarEstado(p)}
+                  {/* Fila 1: Editar · Re-cotizar · → Factura */}
+                  <div className="flex w-full gap-2">
+                    <Link
+                      href={`/presupuestos/nuevo?editar=${p.id}`}
+                      className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                      style={{ background: T.amberPale, color: T.amberD }}
                     >
-                      → {SIGUIENTE_ESTADO[p.status]}
+                      ✏️ Editar
+                    </Link>
+                    <Link
+                      href={`/presupuestos/nuevo?from=${p.id}`}
+                      className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                      style={{ background: T.bluePale, color: T.blue }}
+                    >
+                      Re-cotizar
+                    </Link>
+                    <button
+                      className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                      style={{ background: "#F0FDF4", color: "#15803D" }}
+                      onClick={() => hacerFactura(p)}
+                    >
+                      → Factura
+                    </button>
+                  </div>
+                  {/* Fila 2: → Estado · Compartir · Eliminar */}
+                  <div className="flex w-full gap-2">
+                    {SIGUIENTE_ESTADO[p.status] && (
+                      <Button
+                        variant="success"
+                        className="flex-1 !px-2 !py-2.5 !text-xs"
+                        onClick={() => avanzarEstado(p)}
+                      >
+                        → {SIGUIENTE_ESTADO[p.status]}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      className="flex-1 !px-2 !py-2.5 !text-xs"
+                      onClick={() => compartir(p)}
+                    >
+                      📤 Compartir
                     </Button>
-                  )}
-                  <Link
-                    href={`/presupuestos/nuevo?from=${p.id}`}
-                    className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
-                    style={{ background: T.bluePale, color: T.blue }}
-                  >
-                    Re-cotizar
-                  </Link>
-                  <button
-                    className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
-                    style={{ background: "#F0FDF4", color: "#15803D" }}
-                    onClick={() => hacerFactura(p)}
-                  >
-                    → Factura
-                  </button>
-                  <Button
-                    variant="ghost"
-                    className="flex-1 !px-2 !py-2.5 !text-xs"
-                    onClick={() => descargarPDF(p)}
-                  >
-                    PDF
-                  </Button>
-                  <Button
-                    variant="danger"
-                    className="!px-3 !py-2.5 !text-xs"
-                    onClick={() => borrar(p.id)}
-                  >
-                    Eliminar
-                  </Button>
+                    <Button
+                      variant="danger"
+                      className="!px-3 !py-2.5 !text-xs"
+                      onClick={() => borrar(p.id)}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               ) : undefined
             }

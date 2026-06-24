@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { presupuestoSchema } from "@/lib/validations";
 import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
+import { compartirPDF } from "@/lib/share";
 import { T } from "@/lib/theme";
 import type { LineaPresupuesto, Capitulo, Partida } from "@/types";
 import Link from "next/link";
@@ -102,7 +103,7 @@ interface BasketItem {
 export function NuevoPresupuestoWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, loading, generarPDF, registrarCalculo, registrarEnvioWA } = usePresupuesto();
+  const { crear, actualizar, loading, generarPDF, registrarCalculo, registrarEnvioWA } = usePresupuesto();
   const { catalogo } = useCatalogo();
   const {
     trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
@@ -124,6 +125,8 @@ export function NuevoPresupuestoWizard() {
   const [city, setCity] = useState("");
   const [notes, setNotes] = useState("");
   const [saved, setSaved] = useState(false);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [pdfUrlGuardado, setPdfUrlGuardado] = useState<string | null>(null);
   const [populated, setPopulated] = useState(false); // guard: run init logic only once
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -168,8 +171,9 @@ export function NuevoPresupuestoWizard() {
     if (!catalogo.length || populated) return;
     setPopulated(true);
 
-    const catParam  = searchParams.get("cat");
-    const fromParam = searchParams.get("from");
+    const catParam   = searchParams.get("cat");
+    const fromParam  = searchParams.get("from");
+    const editarParam = searchParams.get("editar");
 
     // 1. Deep-link ?cat= (desde dashboard)
     if (catParam && catalogo.some((c) => c.id === catParam)) {
@@ -177,40 +181,48 @@ export function NuevoPresupuestoWizard() {
       return;
     }
 
-    // 2. Re-usar cotización anterior (?from=<id>)
+    // Helper: cargar presupuesto en el wizard (usado por ?from= y ?editar=)
+    const cargarPresupuesto = async (id: string, esEdicion: boolean) => {
+      const { data } = await supabase
+        .from("presupuestos")
+        .select("*, items:presupuesto_items(*)")
+        .eq("id", id)
+        .single();
+      if (!data) return;
+      const newBasket: BasketItem[] = (data.items ?? []).map((it: Record<string, unknown>) => {
+        const cap = catalogo.find((c) => c.nombre === String(it.cat_label ?? ""))
+          ?? catalogo.find((c) => c.partidas.some((p) => p.id === String(it.svc_id)));
+        return {
+          svcId:     String(it.svc_id),
+          catLabel:  String(it.cat_label ?? ""),
+          svcLabel:  String(it.svc_label ?? ""),
+          calcType:  (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+          basePrice: Number(it.base_price ?? 0),
+          unit:      String(it.unit ?? ""),
+          qty:       String(it.qty ?? (it.calc_type === "fixed" ? 1 : "")),
+          catColor:  cap?.color ?? T.blue,
+          catEmoji:  cap?.emoji ?? "📋",
+        };
+      });
+      setBasket(newBasket);
+      setMargin(Number(data.margin ?? 40));
+      setClientName(String(data.client_name ?? ""));
+      setPhone(String(data.phone ?? ""));
+      setCity(String(data.city ?? ""));
+      setNotes(String(data.notes ?? ""));
+      if (esEdicion) setEditandoId(id);
+      setPhase("result");
+    };
+
+    // 2. Editar cotización existente (?editar=<id>) — actualiza el registro original
+    if (editarParam) {
+      void cargarPresupuesto(editarParam, true);
+      return;
+    }
+
+    // 3. Re-usar cotización anterior (?from=<id>) — crea una nueva
     if (fromParam) {
-      void (async () => {
-        const { data } = await supabase
-          .from("presupuestos")
-          .select("*, items:presupuesto_items(*)")
-          .eq("id", fromParam)
-          .single();
-        if (!data) return;
-        // Build basket from previous items, resolving catColor/catEmoji from current catalog
-        const newBasket: BasketItem[] = (data.items ?? []).map((it: Record<string, unknown>) => {
-          const cap = catalogo.find((c) => c.nombre === String(it.cat_label ?? ""))
-            ?? catalogo.find((c) => c.partidas.some((p) => p.id === String(it.svc_id)));
-          return {
-            svcId:     String(it.svc_id),
-            catLabel:  String(it.cat_label ?? ""),
-            svcLabel:  String(it.svc_label ?? ""),
-            calcType:  (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
-            basePrice: Number(it.base_price ?? 0),
-            unit:      String(it.unit ?? ""),
-            qty:       String(it.qty ?? (it.calc_type === "fixed" ? 1 : "")),
-            catColor:  cap?.color ?? T.blue,
-            catEmoji:  cap?.emoji ?? "📋",
-          };
-        });
-        setBasket(newBasket);
-        setMargin(Number(data.margin ?? 40));
-        setClientName(String(data.client_name ?? ""));
-        setPhone(String(data.phone ?? ""));
-        setCity(String(data.city ?? ""));
-        setNotes(String(data.notes ?? ""));
-        // Skip straight to result — all quantities already filled
-        setPhase("result");
-      })();
+      void cargarPresupuesto(fromParam, false);
       return;
     }
 
@@ -324,9 +336,8 @@ export function NuevoPresupuestoWizard() {
   const updateQty = (idx: number, val: string) =>
     setBasket((b) => b.map((it, i) => i === idx ? { ...it, qty: val } : it));
 
-  // Save
+  // Save (crea nueva o actualiza existente según editandoId)
   const doSave = async () => {
-    // Build LineaPresupuesto[] from engine results (precise, validated)
     const calcInputs = buildCalcInputs(basket);
     const engineResult = calcBasket(calcInputs, margin);
     const items: LineaPresupuesto[] = basket.map((it, idx) => {
@@ -346,13 +357,33 @@ export function NuevoPresupuestoWizard() {
     const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
     const valido = presupuestoSchema.safeParse(payload);
     if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
+
+    // ── MODO EDICIÓN: actualizar registro existente ────────────────────────
+    if (editandoId) {
+      const actualizado = await actualizar(editandoId, payload);
+      if (!actualizado) { mostrarToast("No se pudo actualizar la cotización", "error"); return; }
+      saveCalcSnapshot(engineResult);
+      void registrarCalculo(editandoId, {
+        totalMateriales: engineResult.totalMateriales,
+        totalManoDeObra: engineResult.totalManoDeObra,
+        totalBase:       engineResult.totalBase,
+        totalMargen:     engineResult.totalMargen,
+        margin:          engineResult.margin,
+        totalFinal:      engineResult.totalFinal,
+        itemCount:       engineResult.items.length,
+      });
+      setSaved(true);
+      mostrarToast(`${actualizado.cotNum ?? "Cotización"} actualizada ✓`);
+      const url = await generarPDF(editandoId).catch(() => null);
+      setPdfUrlGuardado(url);
+      return;
+    }
+
+    // ── MODO CREACIÓN: crear nueva cotización ──────────────────────────────
     const creado = await crear(payload, mostrarUpgrade);
     if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
 
-    // Save calculation snapshot to localStorage history
     saveCalcSnapshot(engineResult);
-
-    // Register detailed calc breakdown in Supabase (fire-and-forget)
     void registrarCalculo(creado.id, {
       totalMateriales: engineResult.totalMateriales,
       totalManoDeObra: engineResult.totalManoDeObra,
@@ -363,17 +394,12 @@ export function NuevoPresupuestoWizard() {
       itemCount:       engineResult.items.length,
     });
 
-    // Build per-item catId list (needed for client history + catalog sorting)
     const itemsWithCat = basket.map((b) => ({
       svcId: b.svcId,
       catId: catalogo.find((c) => c.partidas.some((p) => p.id === b.svcId))?.id ?? "",
     }));
-
-    // Track global recents & last client (existing fast-fill)
     trackItems(itemsWithCat);
     saveLastClient({ name: clientName.trim(), phone: phone.trim(), city: city.trim() });
-
-    // Save per-client history: margin, notes, partidas, condiciones comerciales
     saveClientHistory(clientName.trim(), {
       phone:   phone.trim(),
       city:    city.trim(),
@@ -386,11 +412,10 @@ export function NuevoPresupuestoWizard() {
     setSaved(true);
     mostrarToast(`${creado.cotNum ?? "Cotización"} creada ✓`);
 
-    // ── Auto PDF + WhatsApp (pure logic, no UI changes) ──────────────────
-    // 1. Generate PDF automatically
     const pdfUrl = await generarPDF(creado.id).catch(() => null);
+    setPdfUrlGuardado(pdfUrl);
 
-    // 2. Build WhatsApp message if a phone number exists
+    // Auto-WhatsApp al crear (con PDF link incluido)
     const cleanPhone = phone.trim().replace(/\D/g, "");
     if (cleanPhone.length >= 7) {
       const groupedForWA = basket.reduce<Record<string, { svcLabel: string; calcType: string; qty: number; unitPrice: number; subtotal: number; unit: string }[]>>(
@@ -402,22 +427,15 @@ export function NuevoPresupuestoWizard() {
         {}
       );
       const msg = buildWAMsgCotizacion({
-        cotNum:      creado.cotNum,
-        clientName:  clientName.trim() || "Sin cliente",
+        cotNum:       creado.cotNum,
+        clientName:   clientName.trim() || "Sin cliente",
         groupedItems: groupedForWA,
-        totalBase,
-        totalLabor,
-        margin,
-        totalFinal,
-        pdfUrl:      pdfUrl ?? undefined,
+        totalBase, totalLabor, margin, totalFinal,
+        pdfUrl:       pdfUrl ?? undefined,
       });
       const numero = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
-      const waUrl  = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
-      // 3. Open WhatsApp ready to send
-      window.open(waUrl, "_blank", "noopener,noreferrer");
+      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
     }
-
-    // 4. Record WA send date and PDF URL in Supabase
     await registrarEnvioWA(creado.id, pdfUrl ?? undefined);
   };
 
@@ -449,11 +467,13 @@ export function NuevoPresupuestoWizard() {
             <Ic d={zapPath} color={T.white} size={22} />
           </div>
           <div style={{ flex: 1 }}>
-            <h2 style={{ color: T.white, fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>Nueva cotización</h2>
+            <h2 style={{ color: T.white, fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>
+              {editandoId ? "Editar cotización" : "Nueva cotización"}
+            </h2>
             <p style={{ color: T.textLight, fontSize: 12, marginTop: 2 }}>
               {phase === "cats"  && "Abre capítulos y marca partidas"}
               {phase === "input" && "Introduce las cantidades"}
-              {phase === "result"&& "Cotización generada"}
+              {phase === "result" && (editandoId ? "Modificando cotización existente" : "Cotización generada")}
             </p>
           </div>
           {basket.length > 0 && phase !== "result" && (
@@ -811,11 +831,25 @@ export function NuevoPresupuestoWizard() {
               style={{ width: "100%", padding: 16, borderRadius: 14, border: saved ? `1.5px solid ${T.green}30` : "none", cursor: "pointer", background: saved ? T.greenPale : `linear-gradient(135deg,${T.green},${T.greenD})`, color: saved ? T.green : T.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: saved ? "none" : `0 4px 16px ${T.green}35`, marginBottom: 10 }}
             >
               {loading ? "Guardando…" : saved ? (
-                <><Ic d={checkPath} color={T.green} size={16} /> Guardada</>
+                <><Ic d={checkPath} color={T.green} size={16} /> {editandoId ? "Actualizada" : "Guardada"}</>
               ) : (
-                <><Ic d={savePath} color={T.white} size={15} /> Guardar cotización · {fmtPEN(totalFinal)}</>
+                <><Ic d={savePath} color={T.white} size={15} /> {editandoId ? `Actualizar · ${fmtPEN(totalFinal)}` : `Guardar cotización · ${fmtPEN(totalFinal)}`}</>
               )}
             </button>
+
+            {saved && pdfUrlGuardado && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const r = await compartirPDF(pdfUrlGuardado, `Cotización — ${clientName.trim() || "Sin cliente"}`);
+                  if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
+                  else if (r.method === "error") window.open(pdfUrlGuardado, "_blank");
+                }}
+                style={{ width: "100%", padding: 13, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.navy},${T.navyLight})`, color: T.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10, boxShadow: `0 4px 14px ${T.navy}30` }}
+              >
+                📤 Compartir PDF
+              </button>
+            )}
 
             {saved && (
               <button

@@ -7,7 +7,7 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { filtrarFacturas, type FiltroFactura } from "@/lib/factura-utils";
-import { buildWhatsAppUrl } from "@/lib/presupuesto-ia";
+import { compartirPDF } from "@/lib/share";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { fmtPEN } from "@/lib/utils";
 import { INV_STATUS_COLORS, T } from "@/lib/theme";
@@ -28,7 +28,6 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
     return leerListaCache<Factura>("facturas") ?? iniciales;
   });
   const [filtro, setFiltro] = useState<FiltroFactura>("Todas");
-  const [telefonoWA, setTelefonoWA] = useState("");
   const { generarPDF } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
 
@@ -42,21 +41,14 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
   const filtradas = useMemo(() => filtrarFacturas(facturas, filtro), [facturas, filtro]);
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(filtradas);
 
-  const descargarPDF = async (invId: string) => {
-    mostrarToast("Generando PDF…");
-    const url = await generarPDF(invId);
-    if (url) window.open(url, "_blank");
-    else mostrarToast("No se pudo generar el PDF", "error");
-  };
-
-  const compartirWA = (f: Factura) => {
-    const tel = telefonoWA.trim() || "";
-    if (tel.length < 9) {
-      mostrarToast("Ingresa teléfono del cliente", "error");
-      return;
-    }
-    const msg = `Hola ${f.clientName}, te envío ${f.invNum} por ${f.sym} ${f.totalFinal.toFixed(2)}.`;
-    window.open(buildWhatsAppUrl(tel, msg), "_blank");
+  const compartirFactura = async (f: Factura) => {
+    mostrarToast("Preparando PDF…");
+    const url = await generarPDF(f.invId);
+    if (!url) { mostrarToast("No se pudo generar el PDF", "error"); return; }
+    const titulo = `${f.invNum} — ${f.clientName}`;
+    const r = await compartirPDF(url, titulo);
+    if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
+    else if (r.method === "error") window.open(url, "_blank");
   };
 
   return (
@@ -220,31 +212,18 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
                   </span>
                 </div>
               </div>
-              <div className="mt-3 flex gap-2 border-t pt-3" style={{ borderColor: T.slateD }}>
+              <div className="mt-3 flex flex-col gap-2 border-t pt-3" style={{ borderColor: T.slateD }}>
                 <button
                   type="button"
-                  onClick={() => descargarPDF(f.invId)}
-                  className="flex-1 rounded-xl py-2 text-xs font-bold"
+                  onClick={() => compartirFactura(f)}
+                  className="w-full rounded-xl py-2.5 text-xs font-bold"
                   style={{ background: T.navy, color: T.white }}
                 >
-                  PDF
+                  📤 Compartir PDF
                 </button>
-                <input
-                  placeholder="WhatsApp"
-                  inputMode="tel"
-                  value={telefonoWA}
-                  onChange={(e) => setTelefonoWA(e.target.value)}
-                  className="min-w-0 flex-1 rounded-xl px-3 py-2 text-xs outline-none"
-                  style={{ background: T.slate, border: `1px solid ${T.slateD}` }}
-                />
-                <button
-                  type="button"
-                  onClick={() => compartirWA(f)}
-                  className="rounded-xl px-3 py-2 text-xs font-bold text-white"
-                  style={{ background: "#25D366" }}
-                >
-                  WA
-                </button>
+                <p className="text-center text-[10px] leading-snug" style={{ color: T.textMid }}>
+                  Las facturas emitidas no se pueden eliminar. Si hay un error, contacta soporte para anular o corregir.
+                </p>
               </div>
             </div>
           ))
