@@ -2,15 +2,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFactura } from "@/hooks/useFactura";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { useAppStore } from "@/store/useAppStore";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
+import { FacturaCard } from "@/components/facturacion/FacturaCard";
 import { filtrarFacturas, type FiltroFactura } from "@/lib/factura-utils";
-import { compartirPDF } from "@/lib/share";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { fmtPEN } from "@/lib/utils";
-import { INV_STATUS_COLORS, T } from "@/lib/theme";
+import { T } from "@/lib/theme";
 import type { Factura, Presupuesto } from "@/types";
 
 const FILTROS: FiltroFactura[] = ["Todas", "Emitidas", "Cobradas", "Pendientes"];
@@ -28,8 +26,6 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
     return leerListaCache<Factura>("facturas") ?? iniciales;
   });
   const [filtro, setFiltro] = useState<FiltroFactura>("Todas");
-  const { generarPDF } = useFactura();
-  const mostrarToast = useAppStore((s) => s.mostrarToast);
 
   useEffect(() => {
     if (iniciales.length > 0) {
@@ -40,16 +36,6 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
 
   const filtradas = useMemo(() => filtrarFacturas(facturas, filtro), [facturas, filtro]);
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(filtradas);
-
-  const compartirFactura = async (f: Factura) => {
-    mostrarToast("Preparando PDF…");
-    const url = await generarPDF(f.invId);
-    if (!url) { mostrarToast("No se pudo generar el PDF", "error"); return; }
-    const titulo = `${f.invNum} — ${f.clientName}`;
-    const r = await compartirPDF(url, titulo);
-    if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
-    else if (r.method === "error") window.open(url, "_blank");
-  };
 
   return (
     <div className="min-h-screen pb-4" style={{ background: "#F8FAFF" }}>
@@ -180,53 +166,7 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
             </p>
           </div>
         ) : (
-          slice.map((f) => (
-            <div key={f.invId} className="rounded-2xl bg-white px-4 py-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black" style={{ color: T.blue }}>{f.invNum}</p>
-                  <p className="text-sm font-bold" style={{ color: T.text }}>{f.clientName}</p>
-                  <p className="text-xs" style={{ color: T.textMid }}>{f.invDate}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-extrabold" style={{ color: T.blue }}>
-                    {fmtPEN(f.totalFinal, f.sym)}
-                  </p>
-                  <span
-                    className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold"
-                    style={{
-                      background:
-                        f.invStatus === "Cobrada"
-                          ? T.greenPale
-                          : f.invStatus === "Emitida" || f.invStatus === "Pendiente"
-                          ? T.amberPale
-                          : T.bluePale,
-                      color: INV_STATUS_COLORS[f.invStatus] ?? T.textMid,
-                    }}
-                  >
-                    {f.invStatus === "Cobrada"
-                      ? "Pagado"
-                      : f.invStatus === "Emitida" || f.invStatus === "Pendiente"
-                      ? "Pendiente"
-                      : f.invStatus}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-col gap-2 border-t pt-3" style={{ borderColor: T.slateD }}>
-                <button
-                  type="button"
-                  onClick={() => compartirFactura(f)}
-                  className="w-full rounded-xl py-2.5 text-xs font-bold"
-                  style={{ background: T.navy, color: T.white }}
-                >
-                  📤 Compartir PDF
-                </button>
-                <p className="text-center text-[10px] leading-snug" style={{ color: T.textMid }}>
-                  Las facturas emitidas no se pueden eliminar. Si hay un error, contacta soporte para anular o corregir.
-                </p>
-              </div>
-            </div>
-          ))
+          slice.map((f) => <FacturaCard key={f.invId} factura={f} />)
         )}
         <PaginacionLista visible={visible} total={total} hayMas={hayMas} onCargarMas={cargarMas} />
       </main>

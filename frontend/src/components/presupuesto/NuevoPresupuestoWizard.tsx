@@ -171,9 +171,27 @@ export function NuevoPresupuestoWizard() {
     if (!catalogo.length || populated) return;
     setPopulated(true);
 
-    const catParam   = searchParams.get("cat");
-    const fromParam  = searchParams.get("from");
+    const catParam    = searchParams.get("cat");
+    const fromParam   = searchParams.get("from");
     const editarParam = searchParams.get("editar");
+    const clienteParam = searchParams.get("cliente");
+
+    // 0. Preseleccionar cliente (?cliente=<id> desde la ficha de cliente)
+    //    Prefijamos nombre/teléfono/ciudad; el usuario elige partidas con normalidad.
+    if (clienteParam) {
+      void (async () => {
+        const { data } = await supabase
+          .from("clientes")
+          .select("nombre, telefono, ciudad")
+          .eq("id", clienteParam)
+          .single();
+        if (!data) return;
+        setClientName(String(data.nombre ?? ""));
+        setPhone(String(data.telefono ?? ""));
+        setCity(String(data.ciudad ?? ""));
+      })();
+      // No hacemos return: continúa el flujo normal (elegir capítulos)
+    }
 
     // 1. Deep-link ?cat= (desde dashboard)
     if (catParam && catalogo.some((c) => c.id === catParam)) {

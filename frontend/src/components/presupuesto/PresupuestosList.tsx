@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
@@ -20,7 +21,17 @@ const SIGUIENTE_ESTADO: Record<Presupuesto["status"], Presupuesto["status"] | nu
   Aprobado: null,
 };
 
-export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
+interface PresupuestosListProps {
+  iniciales: Presupuesto[];
+  /**
+   * "directo"   → convierte la cotización en boleta al instante (comportamiento por defecto).
+   * "preguntar" → abre el formulario de factura para elegir Empresa (RUC) o Particular (DNI).
+   */
+  facturarMode?: "directo" | "preguntar";
+}
+
+export function PresupuestosList({ iniciales, facturarMode = "directo" }: PresupuestosListProps) {
+  const router = useRouter();
   const [presupuestos, setPresupuestos] = useState(() => {
     if (iniciales.length > 0) return iniciales;
     return leerListaCache<Presupuesto>("presupuestos") ?? iniciales;
@@ -78,6 +89,11 @@ export function PresupuestosList({ iniciales }: { iniciales: Presupuesto[] }) {
   };
 
   const hacerFactura = async (p: Presupuesto) => {
+    // Modo "preguntar": el usuario elige Empresa (RUC) o Particular (DNI) en el formulario
+    if (facturarMode === "preguntar") {
+      router.push(`/facturas/nueva?presupuesto=${p.id}`);
+      return;
+    }
     mostrarToast("Creando factura…");
     const factura = await convertirDesdePresupuesto(p, mostrarUpgrade);
     if (factura) {

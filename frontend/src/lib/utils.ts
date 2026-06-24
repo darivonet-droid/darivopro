@@ -7,6 +7,9 @@ export const fmtPEN = (n: number, sym = "S/") =>
 /** Fecha hoy YYYY-MM-DD */
 export const hoy = () => new Date().toISOString().slice(0, 10);
 
+/** Normaliza un teléfono a SOLO dígitos (sin espacios, +, guiones). "" → "" */
+export const soloDigitos = (s?: string | null) => (s ?? "").replace(/\D/g, "");
+
 /** Calcula IGV 18% Perú — siempre subtotal × 0.18 */
 export const calcIGV = (subtotal: number) => {
   const igv = Math.round(subtotal * 0.18 * 100) / 100;

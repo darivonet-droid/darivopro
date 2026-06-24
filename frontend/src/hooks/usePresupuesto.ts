@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { verificarLimitePresupuesto } from "@/lib/plan-limits";
+import { soloDigitos } from "@/lib/utils";
 import type { Presupuesto, LineaPresupuesto } from "@/types";
 
 interface ItemRow {
@@ -70,6 +71,48 @@ export function usePresupuesto() {
   const [error, setError]     = useState<string | null>(null);
   const supabase = createClient();
 
+  /**
+   * Busca un cliente por teléfono normalizado (solo dígitos) y, si no existe,
+   * lo crea con nombre + teléfono. Devuelve el id del cliente o null si no hay
+   * teléfono con el que deduplicar. Invisible para el usuario.
+   */
+  const findOrCreateCliente = useCallback(async (
+    userId:     string,
+    clientName: string,
+    phone?:     string,
+  ): Promise<string | null> => {
+    const tel = soloDigitos(phone);
+    if (tel.length < 6) return null; // sin teléfono fiable no deduplicamos
+
+    const { data: existente } = await supabase
+      .from("clientes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("telefono", tel)
+      .limit(1)
+      .maybeSingle();
+    if (existente?.id) return existente.id as string;
+
+    const { data: creado, error: insErr } = await supabase
+      .from("clientes")
+      .insert({ user_id: userId, nombre: clientName.trim() || "Cliente", telefono: tel })
+      .select("id")
+      .single();
+
+    // Si otro proceso lo creó a la vez (índice único), re-consultamos
+    if (insErr) {
+      const { data: reintento } = await supabase
+        .from("clientes")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("telefono", tel)
+        .limit(1)
+        .maybeSingle();
+      return (reintento?.id as string) ?? null;
+    }
+    return (creado?.id as string) ?? null;
+  }, [supabase]);
+
   const listar = useCallback(async (): Promise<Presupuesto[]> => {
     setLoading(true);
     const { data, error } = await supabase
@@ -98,10 +141,14 @@ export function usePresupuesto() {
       return null;
     }
 
+    // Auto-vinculación cotización → cliente (invisible)
+    const clienteId = await findOrCreateCliente(user.id, presupuesto.clientName, presupuesto.phone);
+
     const { data, error } = await supabase
       .from("presupuestos")
       .insert({
         user_id: user.id,
+        cliente_id: clienteId,
         client_name: presupuesto.clientName,
         phone: presupuesto.phone ?? null,
         city: presupuesto.city ?? null,
@@ -151,9 +198,15 @@ export function usePresupuesto() {
     setLoading(true);
     setError(null);
 
+    const { data: { user } } = await supabase.auth.getUser();
+    const clienteId = user
+      ? await findOrCreateCliente(user.id, presupuesto.clientName, presupuesto.phone)
+      : null;
+
     const { error: updErr } = await supabase
       .from("presupuestos")
       .update({
+        ...(clienteId ? { cliente_id: clienteId } : {}),
         client_name: presupuesto.clientName,
         phone:       presupuesto.phone       ?? null,
         city:        presupuesto.city        ?? null,

@@ -2,6 +2,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { soloDigitos } from "@/lib/utils";
 import type { Cliente } from "@/types";
 
 interface ClienteRow {
@@ -48,17 +49,43 @@ export function useClientes() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); setError("Sesión expirada"); return null; }
 
+    const tel = soloDigitos(cliente.telefono) || null;
     const { data, error } = await supabase
       .from("clientes")
       .insert({
         user_id: user.id,
         nombre: cliente.nombre,
-        telefono: cliente.telefono ?? null,
+        telefono: tel,
         ruc: cliente.ruc ?? null,
         direccion: cliente.direccion ?? null,
         ciudad: cliente.ciudad ?? null,
         notas: cliente.notas ?? null,
       })
+      .select()
+      .single();
+    setLoading(false);
+    if (error || !data) { setError(error?.message ?? "Error"); return null; }
+    return mapRow(data as ClienteRow);
+  }, [supabase]);
+
+  const actualizar = useCallback(async (
+    id: string,
+    cliente: Partial<Omit<Cliente, "id" | "createdAt">>,
+  ): Promise<Cliente | null> => {
+    setLoading(true);
+    setError(null);
+    const patch: Record<string, unknown> = {};
+    if (cliente.nombre    !== undefined) patch.nombre    = cliente.nombre;
+    if (cliente.telefono  !== undefined) patch.telefono  = soloDigitos(cliente.telefono) || null;
+    if (cliente.ruc       !== undefined) patch.ruc       = cliente.ruc       || null;
+    if (cliente.direccion !== undefined) patch.direccion = cliente.direccion || null;
+    if (cliente.ciudad    !== undefined) patch.ciudad    = cliente.ciudad    || null;
+    if (cliente.notas     !== undefined) patch.notas     = cliente.notas     || null;
+
+    const { data, error } = await supabase
+      .from("clientes")
+      .update(patch)
+      .eq("id", id)
       .select()
       .single();
     setLoading(false);
@@ -72,5 +99,5 @@ export function useClientes() {
     return !error;
   }, [supabase]);
 
-  return { loading, error, listar, crear, eliminar };
+  return { loading, error, listar, crear, actualizar, eliminar };
 }

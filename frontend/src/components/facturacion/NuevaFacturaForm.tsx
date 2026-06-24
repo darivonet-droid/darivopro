@@ -173,11 +173,9 @@ export function NuevaFacturaForm({
       const valido = facturaSchema.safeParse({ clientName, clientRuc, clientDir, items });
       if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
     } else {
-      // Boleta: DNI obligatorio si total > 700
-      if (total > DETRACCION_UMBRAL && !clientDni) {
-        setError(`Para boletas mayores a S/700 debes ingresar el DNI del cliente`);
-        return;
-      }
+      // Boleta (Particular): DNI obligatorio
+      if (!clientDni) { setError("Ingresa el DNI del cliente"); return; }
+      if (!/^\d{8}$/.test(clientDni)) { setError("El DNI debe tener 8 dígitos"); return; }
       const valido = boletaSchema.safeParse({ clientName, clientDni, clientDir, items });
       if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
     }
@@ -378,7 +376,7 @@ export function NuevaFacturaForm({
       {tipo === "boleta" && (
         <>
           <Input
-            label={`DNI del cliente${total > DETRACCION_UMBRAL ? " * (obligatorio > S/700)" : " (opcional)"}`}
+            label="DNI del cliente * (8 dígitos)"
             inputMode="numeric"
             value={clientDni}
             onChange={(e) => setClientDni(e.target.value)}
