@@ -1,4 +1,8 @@
 # DARIVO PRO — Endpoint WhatsApp
+#
+# DEPRECATED — Meta Cloud API excluida del producto (AM §6.3).
+# Patrón oficial: frontend/src/app/api/whatsapp/enviar/route.ts (wa.me).
+# Mantener solo por compatibilidad legacy; no extender.
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from services.whatsapp.sender import enviar_texto, enviar_documento
 from models.schemas import ApiResponse, WhatsAppPayload

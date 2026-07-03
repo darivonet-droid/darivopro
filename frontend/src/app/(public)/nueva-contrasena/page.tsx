@@ -70,8 +70,8 @@ function NuevaContrasenaForm() {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener mínimo 6 caracteres");
+    if (password.length < 8) {
+      setError("La contraseña debe tener mínimo 8 caracteres");
       return;
     }
     if (password !== confirmar) {
@@ -179,7 +179,7 @@ function NuevaContrasenaForm() {
         <form onSubmit={guardar} className="flex flex-col gap-4">
           <PasswordInput
             label="Nueva contraseña"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             visible={verPassword}

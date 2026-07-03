@@ -1,6 +1,11 @@
 // DARIVO PRO — Middleware: refresca la sesión Supabase y protege rutas
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  esAdministradorDarivo,
+  esPartnerAutorizado,
+  puedeAccederEmpresa,
+} from "@/lib/acceso-producto";
 
 interface CookieASetear {
   name: string;
@@ -43,6 +48,29 @@ export async function middleware(req: NextRequest) {
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
+
+  const path = req.nextUrl.pathname;
+  if (user) {
+    if (path.startsWith("/admin") && !esAdministradorDarivo(user.email)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.searchParams.set("acceso", "admin_denegado");
+      return NextResponse.redirect(url);
+    }
+    if (path.startsWith("/partner") && !esPartnerAutorizado(user.email)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.searchParams.set("acceso", "partner_denegado");
+      return NextResponse.redirect(url);
+    }
+    if (path.startsWith("/empresa") && !puedeAccederEmpresa(user)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.searchParams.set("acceso", "empresa_denegado");
+      return NextResponse.redirect(url);
+    }
+  }
+
   return res;
 }
 

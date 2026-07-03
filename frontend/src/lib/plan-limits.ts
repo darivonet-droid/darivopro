@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  LIMITES_PLAN,
+  type PlanTipoPersistido,
+  planTieneLimitesIlimitados,
+} from "@/lib/roles-planes-oficial";
 
-export type PlanTipo = "gratis" | "basico" | "pro" | "empresa";
+export type PlanTipo = PlanTipoPersistido;
 
 export type UpgradeRazon =
   | "presupuestos_gratis"
@@ -8,16 +13,9 @@ export type UpgradeRazon =
   | "facturas_basico"
   | "ia_limite";
 
-export const LIMITES = {
-  gratis: { presupuestosTotal: 5, iaDia: 3 },
-  basico: { presupuestosMes: 20, facturasMes: 10, iaDia: 3 },
-  pro: { presupuestosMes: Infinity, facturasMes: Infinity, iaDia: Infinity },
-  empresa: { presupuestosMes: Infinity, facturasMes: Infinity, iaDia: Infinity },
-} as const;
-
 export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo: string }> = {
   presupuestos_gratis: {
-    titulo: "Límite de plan gratis",
+    titulo: "Límite de prueba gratuita",
     subtitulo: "Ya usaste tus 5 cotizaciones. Pásate a Pro para seguir trabajando.",
   },
   presupuestos_basico: {
@@ -30,7 +28,7 @@ export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo:
   },
   ia_limite: {
     titulo: "Límite de IA diario",
-    subtitulo: "3 llamadas/día en plan gratis y Básico. Pro: IA ilimitada.",
+    subtitulo: "3 llamadas/día en prueba gratuita y plan Básico. Pro: IA ilimitada.",
   },
 };
 
@@ -62,14 +60,14 @@ export async function verificarLimitePresupuesto(
   if (!user) return { ok: false, razon: "presupuestos_gratis" };
 
   const plan = await obtenerPlanTipo(supabase);
-  if (plan === "pro" || plan === "empresa") return { ok: true };
+  if (planTieneLimitesIlimitados(plan)) return { ok: true };
 
   if (plan === "gratis") {
     const { count } = await supabase
       .from("presupuestos")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
-    if ((count ?? 0) >= LIMITES.gratis.presupuestosTotal) {
+    if ((count ?? 0) >= LIMITES_PLAN.gratis.presupuestosTotal) {
       return { ok: false, razon: "presupuestos_gratis" };
     }
     return { ok: true };
@@ -81,7 +79,7 @@ export async function verificarLimitePresupuesto(
     .eq("user_id", user.id)
     .gte("created_at", inicioMesISO());
 
-  if ((count ?? 0) >= LIMITES.basico.presupuestosMes) {
+  if ((count ?? 0) >= LIMITES_PLAN.basico.presupuestosMes) {
     return { ok: false, razon: "presupuestos_basico" };
   }
   return { ok: true };
@@ -94,7 +92,7 @@ export async function verificarLimiteFactura(
   if (!user) return { ok: false, razon: "facturas_basico" };
 
   const plan = await obtenerPlanTipo(supabase);
-  if (plan === "pro" || plan === "empresa") return { ok: true };
+  if (planTieneLimitesIlimitados(plan)) return { ok: true };
 
   if (plan === "gratis") return { ok: true };
 
@@ -104,7 +102,7 @@ export async function verificarLimiteFactura(
     .eq("user_id", user.id)
     .gte("created_at", inicioMesISO());
 
-  if ((count ?? 0) >= LIMITES.basico.facturasMes) {
+  if ((count ?? 0) >= LIMITES_PLAN.basico.facturasMes) {
     return { ok: false, razon: "facturas_basico" };
   }
   return { ok: true };
@@ -117,9 +115,10 @@ export async function verificarLimiteIA(
   if (!user) return { ok: false, razon: "ia_limite" };
 
   const plan = await obtenerPlanTipo(supabase);
-  if (plan === "pro" || plan === "empresa") return { ok: true };
+  if (planTieneLimitesIlimitados(plan)) return { ok: true };
 
-  const limite = LIMITES.gratis.iaDia;
+  const limite =
+    plan === "basico" ? LIMITES_PLAN.basico.iaDia : LIMITES_PLAN.gratis.iaDia;
   const hoy = new Date().toISOString().slice(0, 10);
 
   const { data } = await supabase

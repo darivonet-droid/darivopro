@@ -1,7 +1,7 @@
 ---
 description: DARIVO PRO — Reglas Maestras Finales (5 Cerebros + Stack + Datos + Seguridad)
 globs: ["**/*.ts","**/*.tsx","**/*.sql","**/*.json","**/*.env*","**/*.mdc"]
-alwaysApply: true
+alwaysApply: false
 ---
 
 # ╔═══════════════════════════════════════════════════════════════╗
@@ -56,15 +56,15 @@ alwaysApply: true
 # ⚙️ STACK EXACTO — nunca proponer alternativas
 # ══════════════════════════════════════════════════════
 # Frontend  → Next.js 14 App Router + TypeScript → Vercel
-# Backend   → Route Handlers (Vercel Functions, operaciones <5s)
-# Pesado    → Supabase Edge Functions (PDF y audio >5s)
+# Backend   → Route Handlers (Vercel Functions, operaciones <5s) — patrón oficial AM §6.3
+# Pesado    → Supabase Edge Functions (PDF y audio >5s) — si aplica
 # Datos     → Supabase PostgreSQL + Auth + Storage + RLS
-# WhatsApp  → Meta Cloud API (solo texto/audio transcrito)
-# IA        → gpt-4o-mini o claude-3-5-haiku (contexto cerrado)
+# WhatsApp  → Enlace wa.me (AM §6.3) — NO Meta Cloud API
+# IA        → OpenAI API (registro oficial 08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md §5.2)
 # CI/CD     → GitHub Actions → Vercel auto-deploy
-# SIN Railway. SIN FastAPI. SIN servidor propio.
+# Legacy    → backend/ FastAPI + Railway existe pero está DEPRECADO; no extender ni usar en producto nuevo
 # PROHIBIDO: voz en tiempo real, WebRTC, telefonía, activar plan desde frontend,
-#            SQL directo de IA, WA_TOKEN o SERVICE_KEY en el frontend.
+#            SQL directo de IA, WA_TOKEN o SERVICE_KEY en el frontend, Meta Cloud API.
 
 # PATRÓN ROUTE HANDLER (todos los endpoints):
 # import { NextRequest, NextResponse } from "next/server";

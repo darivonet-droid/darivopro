@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { MobileShell } from "@/components/design-system/MobileShell";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { Toast } from "@/components/ui/Toast";
 import { UpgradeModal } from "@/components/plan/UpgradeModal";
@@ -10,13 +11,22 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: perfil } = await supabase
+    .from("perfiles")
+    .select("onboarding_done")
+    .single();
+
+  if (!perfil?.onboarding_done) redirect("/onboarding/1");
+
   return (
-    <div className="min-h-screen pb-20">
-      <PwaShell />
-      <Toast />
-      <UpgradeModal />
-      {children}
-      <BottomNav />
-    </div>
+    <MobileShell>
+      <div className="min-h-screen pb-20">
+        <PwaShell />
+        <Toast />
+        <UpgradeModal />
+        {children}
+        <BottomNav />
+      </div>
+    </MobileShell>
   );
 }

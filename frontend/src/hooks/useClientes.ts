@@ -94,9 +94,14 @@ export function useClientes() {
   }, [supabase]);
 
   const eliminar = useCallback(async (id: string): Promise<boolean> => {
-    const { error } = await supabase.from("clientes").delete().eq("id", id);
-    if (error) setError(error.message);
-    return !error;
+    const { error, count } = await supabase
+      .from("clientes")
+      .delete({ count: "exact" })
+      .eq("id", id);
+    if (error) { setError(error.message); return false; }
+    // count === 0 means RLS blocked the delete silently — treat as failure
+    if (count === 0) { setError("No tienes permiso para eliminar este cliente"); return false; }
+    return true;
   }, [supabase]);
 
   return { loading, error, listar, crear, actualizar, eliminar };

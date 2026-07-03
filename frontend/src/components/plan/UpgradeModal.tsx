@@ -1,7 +1,7 @@
 "use client";
-import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
 import { UPGRADE_MENSAJES, type UpgradeRazon } from "@/lib/plan-limits";
+import { CheckoutPlanButton } from "@/components/pagos/CheckoutPlanButton";
 import { T } from "@/lib/theme";
 
 const PRO_FEATURES = [
@@ -58,14 +58,12 @@ export function UpgradeModal() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/precios"
-            className="mt-4 block rounded-xl py-3 text-center text-sm font-bold"
-            style={{ background: T.white, color: T.blue }}
-            onClick={cerrarUpgrade}
-          >
-            Ver planes
-          </Link>
+          <CheckoutPlanButton
+            plan="pro"
+            label="Suscribirme a Pro"
+            invertido
+            onIniciar={cerrarUpgrade}
+          />
         </div>
 
         <button

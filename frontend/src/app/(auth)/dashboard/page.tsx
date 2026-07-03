@@ -4,10 +4,16 @@ import { redirect } from "next/navigation";
 import { fmtPEN } from "@/lib/utils";
 import { CATEGORIAS } from "@/lib/catalog";
 import { createServerClient } from "@/lib/supabase/server";
+import { AccesoDenegadoBanner } from "@/components/acceso/AccesoDenegadoBanner";
+import { ProductosEcosistemaLinks } from "@/components/frontend/ProductosEcosistemaLinks";
 import { T } from "@/lib/theme";
 
 /* ─── Datos ─────────────────────────────────────────────────── */
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: { acceso?: string };
+}) {
   const supabase = createServerClient();
 
   // Primer día del mes actual para filtrar ingresos del mes
@@ -29,15 +35,15 @@ export default async function DashboardPage() {
       .from("presupuestos")
       .select("id, status, total_final, client_name, created_at, presupuesto_items(count)")
       .order("created_at", { ascending: false })
-      .limit(5),
+      .limit(4),
     supabase
       .from("facturas")
       .select("inv_status, total_final")
       .gte("created_at", inicioMes.toISOString()),
   ]);
 
-  // Redirigir a onboarding si no lo completó
-  if (perfil && perfil.onboarding_done === false) redirect("/onboarding/1");
+  // Redirigir a onboarding si no lo completó (layout (auth) también lo aplica)
+  if (!perfil?.onboarding_done) redirect("/onboarding/1");
 
   const stats     = statsRaw ?? [];
   const pres      = presRaw  ?? [];
@@ -89,6 +95,8 @@ export default async function DashboardPage() {
 
       {/* ══ CONTENIDO ═════════════════════════════════════════ */}
       <div className="relative -mt-10 px-4" style={{ zIndex: 10 }}>
+        <AccesoDenegadoBanner codigo={searchParams?.acceso} />
+        <ProductosEcosistemaLinks email={user?.email} />
 
         {/* ── 3 tarjetas oscuras ─────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
@@ -138,9 +146,33 @@ export default async function DashboardPage() {
           </svg>
         </Link>
 
-        {/* ── Chips de categoría (2 columnas) ────────────────── */}
+        {/* Accesos rápidos — 02-MODULO-INICIO.md §2 */}
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          <Link
+            href="/clientes"
+            className="flex items-center gap-3 rounded-2xl px-4 py-4"
+            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
+          >
+            <span className="text-xl">👥</span>
+            <span className="text-sm font-extrabold" style={{ color: T.text }}>
+              Clientes
+            </span>
+          </Link>
+          <Link
+            href="/presupuestos"
+            className="flex items-center gap-3 rounded-2xl px-4 py-4"
+            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
+          >
+            <span className="text-xl">📋</span>
+            <span className="text-sm font-extrabold" style={{ color: T.text }}>
+              Presupuestos
+            </span>
+          </Link>
+        </div>
+
+        {/* Capítulos de obra */}
         <h2 className="mb-3 mt-6 text-sm font-extrabold" style={{ color: T.text }}>
-          Categorías
+          Capítulos de obra
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
           {CATEGORIAS.map((cat) => {

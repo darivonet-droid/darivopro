@@ -1,4 +1,8 @@
 # DARIVO PRO — Servicio WhatsApp Meta Cloud API
+#
+# DEPRECATED — Excluido del producto oficial (DARIVO-PRO-ARQUITECTURA-MAESTRA.md §6.3).
+# El patrón aprobado es enlace wa.me vía frontend/src/app/api/whatsapp/enviar/route.ts.
+# Este módulo se mantiene solo por compatibilidad legacy; no usar en nuevas implementaciones.
 import httpx
 from config.settings import settings
 
@@ -9,8 +13,9 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
+
 async def enviar_texto(to: str, mensaje: str) -> dict:
-    """Envía mensaje de texto por WhatsApp"""
+    """Envía mensaje de texto por WhatsApp (DEPRECATED — usar wa.me en frontend)."""
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -23,8 +28,9 @@ async def enviar_texto(to: str, mensaje: str) -> dict:
         res.raise_for_status()
         return res.json()
 
+
 async def enviar_documento(to: str, mensaje: str, url_documento: str, nombre: str = "Documento DARIVO PRO.pdf") -> dict:
-    """Envía PDF como documento adjunto por WhatsApp"""
+    """Envía PDF como documento adjunto por WhatsApp (DEPRECATED — usar wa.me en frontend)."""
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -41,8 +47,9 @@ async def enviar_documento(to: str, mensaje: str, url_documento: str, nombre: st
         res.raise_for_status()
         return res.json()
 
+
 async def enviar_plantilla(to: str, template_name: str, params: list[str]) -> dict:
-    """Envía mensaje con plantilla aprobada por Meta"""
+    """Envía mensaje con plantilla aprobada por Meta (DEPRECATED)."""
     payload = {
         "messaging_product": "whatsapp",
         "to": to,

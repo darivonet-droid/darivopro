@@ -30,11 +30,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={inter.variable}>
-      <body>
-        <div className="mx-auto min-h-screen" style={{ maxWidth: 390 }}>
-          {children}
-        </div>
-      </body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

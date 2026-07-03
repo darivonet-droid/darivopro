@@ -1,3 +1,5 @@
+import { PRECIOS_OFICIALES, type PlanSuscripcionOficial } from "@/lib/roles-planes-oficial";
+
 export type CicloPrecio = "mensual" | "anual";
 
 export interface FeaturePlan {
@@ -6,7 +8,7 @@ export interface FeaturePlan {
 }
 
 export interface Plan {
-  id: "basico" | "pro" | "empresa";
+  id: PlanSuscripcionOficial;
   nombre: string;
   precioMensual: number;
   precioAnual: number;
@@ -18,12 +20,13 @@ export interface Plan {
   ctaOutline?: boolean;
 }
 
+/** Catálogo oficial de suscripción — 04-PANEL-ADMIN-SUSCRIPCIONES.md §6 */
 export const PLANES: Plan[] = [
   {
     id: "basico",
-    nombre: "BÁSICO",
-    precioMensual: 39,
-    precioAnual: 390,
+    nombre: PRECIOS_OFICIALES.basico.nombre,
+    precioMensual: PRECIOS_OFICIALES.basico.mensual,
+    precioAnual: PRECIOS_OFICIALES.basico.anual,
     features: [
       { texto: "20 cotizaciones/mes", incluido: true },
       { texto: "10 facturas/mes", incluido: true },
@@ -39,9 +42,9 @@ export const PLANES: Plan[] = [
   },
   {
     id: "pro",
-    nombre: "PRO",
-    precioMensual: 79,
-    precioAnual: 790,
+    nombre: PRECIOS_OFICIALES.pro.nombre,
+    precioMensual: PRECIOS_OFICIALES.pro.mensual,
+    precioAnual: PRECIOS_OFICIALES.pro.anual,
     destacado: true,
     badge: "MÁS USADO",
     features: [
@@ -55,22 +58,16 @@ export const PLANES: Plan[] = [
     cta: "Empezar",
     ctaHref: "/registro",
   },
-  {
-    id: "empresa",
-    nombre: "EMPRESA",
-    precioMensual: 129,
-    precioAnual: 1290,
-    features: [
-      { texto: "Todo lo de Pro", incluido: true },
-      { texto: "Facturación SUNAT", incluido: true },
-      { texto: "Múltiples usuarios", incluido: true },
-      { texto: "Soporte prioritario", incluido: true },
-    ],
-    cta: "Contactar",
-    ctaHref: "mailto:hola@darivo.pro?subject=Plan%20Empresa%20DARIVO%20PRO",
-    ctaOutline: true,
-  },
 ];
+
+/** Darivo Pro Empresa es producto del ecosistema, NO plan de suscripción (04 §6) */
+export const CONTACTO_PRODUCTO_EMPRESA = {
+  titulo: "Darivo Pro Empresa",
+  descripcion:
+    "Entorno de escritorio para gestionar empleados, roles y permisos. Reutiliza la misma lógica de Móvil.",
+  cta: "Contactar",
+  ctaHref: "mailto:hola@darivo.pro?subject=Darivo%20Pro%20Empresa",
+} as const;
 
 export function fmtPrecio(n: number): string {
   return n.toLocaleString("es-PE");

@@ -28,9 +28,14 @@ interface PresupuestosListProps {
    * "preguntar" → abre el formulario de factura para elegir Empresa (RUC) o Particular (DNI).
    */
   facturarMode?: "directo" | "preguntar";
+  /**
+   * true → modo ficha de cliente: oculta Eliminar y el EmptyState con botón "Nueva cotización"
+   * (el padre ya tiene su propio botón "+ Nueva cotización para este cliente").
+   */
+  soloHistorial?: boolean;
 }
 
-export function PresupuestosList({ iniciales, facturarMode = "directo" }: PresupuestosListProps) {
+export function PresupuestosList({ iniciales, facturarMode = "directo", soloHistorial = false }: PresupuestosListProps) {
   const router = useRouter();
   const [presupuestos, setPresupuestos] = useState(() => {
     if (iniciales.length > 0) return iniciales;
@@ -51,6 +56,13 @@ export function PresupuestosList({ iniciales, facturarMode = "directo" }: Presup
   }, [iniciales]);
 
   if (presupuestos.length === 0) {
+    if (soloHistorial) {
+      return (
+        <div className="rounded-2xl bg-white py-6 text-center shadow-sm">
+          <p className="text-sm font-semibold" style={{ color: T.textMid }}>Sin cotizaciones todavía</p>
+        </div>
+      );
+    }
     return (
       <EmptyState
         emoji="📋"
@@ -171,13 +183,15 @@ export function PresupuestosList({ iniciales, facturarMode = "directo" }: Presup
                     >
                       📤 Compartir
                     </Button>
-                    <Button
-                      variant="danger"
-                      className="!px-3 !py-2.5 !text-xs"
-                      onClick={() => borrar(p.id)}
-                    >
-                      Eliminar
-                    </Button>
+                    {!soloHistorial && (
+                      <Button
+                        variant="danger"
+                        className="!px-3 !py-2.5 !text-xs"
+                        onClick={() => borrar(p.id)}
+                      >
+                        Eliminar
+                      </Button>
+                    )}
                   </div>
                 </div>
               ) : undefined

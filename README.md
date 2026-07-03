@@ -9,7 +9,7 @@
 | Backend   | FastAPI (Python 3.11)             | **Railway**   |
 | Base datos| PostgreSQL + Auth + Storage       | **Supabase**  |
 | CI/CD     | GitHub Actions                    | **GitHub**    |
-| WhatsApp  | Meta Cloud API                    |               |
+| WhatsApp  | Enlace `wa.me` (patrón aprobado — §6.3 AM) | Next.js Route Handler |
 | PDF       | WeasyPrint + Jinja2               |               |
 
 ## Setup en 5 minutos
@@ -22,7 +22,7 @@ cd darivo-pro
 # 2. Variables de entorno
 cp frontend/.env.example frontend/.env.local   # frontend
 cp backend/.env.example backend/.env            # backend
-# Editar con tus keys de Supabase, WhatsApp, etc.
+# Editar con tus keys de Supabase, etc.
 
 # 3. Supabase — ejecutar migración
 # Ir a supabase.com > SQL Editor > pegar supabase/migrations/001_initial.sql
@@ -53,7 +53,7 @@ uvicorn main:app --reload --port 8000
 3. Variables en Railway Dashboard (mínimo para arrancar):
    - `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`
    - `SERVICE_KEY` (legacy)
-   - `WA_PHONE_NUMBER_ID`, `WA_ACCESS_TOKEN` (solo si usas WhatsApp Meta API)
+   - ~~`WA_PHONE_NUMBER_ID`, `WA_ACCESS_TOKEN`~~ — **no requeridos** (WhatsApp producto usa `wa.me` en frontend; ver §6.3 Arquitectura Maestra)
 4. GitHub Secret: `RAILWAY_TOKEN` (Account → Tokens → crear token)
 5. El servicio debe llamarse **`darivo-pro-api`** o cambiar el nombre en `.github/workflows/deploy.yml`
 
@@ -64,7 +64,7 @@ railway link
 railway up
 ```
 
-> **Nota:** PDF y WhatsApp ya funcionan en Next.js (Vercel). El backend FastAPI es **opcional/legacy**.
+> **Nota:** WhatsApp y PDF funcionan en Next.js (Vercel) con enlace `wa.me`. El backend FastAPI es **opcional/legacy**; el módulo `services/whatsapp/` (Meta Cloud API) está **deprecado** y excluido del producto oficial.
 
 ### Supabase
 ```bash
@@ -87,7 +87,13 @@ Project ref producción: `kyckjapprmtfahnkuucz`
 ## Estructura del proyecto
 ```
 darivo-pro/
-├── .cursor/rules/          # Reglas Cursor AI por capa
+├── .cursor/rules/          # Reglas Cursor AI por capa + documentación oficial MD
+│   ├── 01-darivo-pro-movil/
+│   ├── 02-darivo-pro-admin/
+│   ├── 03-darivo-pro-empresa/
+│   ├── 05-darivo-pro-partner/
+│   └── informes/           # Informes de implementación (Tarea 01+)
+├── docs/                   # Prototipos de diseño (referencia; no producción)
 ├── .github/workflows/      # CI/CD — tests + deploy automático
 ├── frontend/               # Next.js 14 App Router + TypeScript
 │   └── src/
@@ -101,7 +107,7 @@ darivo-pro/
 │   ├── api/v1/             # Endpoints REST (presupuestos, facturas, clientes, catálogo, pdf, whatsapp)
 │   ├── core/               # Auth (JWT Supabase) + cliente Supabase service-role
 │   ├── services/pdf/       # WeasyPrint PDF generator + plantillas Jinja2
-│   ├── services/whatsapp/  # Meta Cloud API sender
+│   ├── services/whatsapp/  # DEPRECATED — Meta Cloud API (excluido §6.3 AM; usar frontend wa.me)
 │   ├── models/             # Pydantic schemas
 │   ├── config/             # Settings (Pydantic Settings v2)
 │   ├── tests/              # Pytest
@@ -114,7 +120,8 @@ darivo-pro/
 │       ├── 003_clientes_rls.sql
 │       ├── 004_onboarding.sql
 │       ├── 005_plan_limits.sql
-│       └── 006_registro_perfil.sql
+│       ├── 006_registro_perfil.sql
+│       └── … (001–016 — ver supabase/migrations/)
 ├── frontend/.env.example   # Template → copiar a frontend/.env.local
 ├── backend/.env.example    # Template → copiar a backend/.env
 ├── .env.example            # Índice de dónde va cada variable
@@ -130,9 +137,7 @@ SUPABASE_SERVICE_KEY
 SUPABASE_ACCESS_TOKEN
 SUPABASE_DB_PASSWORD
 SUPABASE_PROJECT_REF   # opcional; CI usa kyckjapprmtfahnkuucz
-WA_PHONE_NUMBER_ID
-WA_ACCESS_TOKEN
-WA_VERIFY_TOKEN
+# WA_PHONE_NUMBER_ID, WA_ACCESS_TOKEN, WA_VERIFY_TOKEN — solo legacy backend (deprecado)
 SERVICE_KEY
 RAILWAY_TOKEN
 ```

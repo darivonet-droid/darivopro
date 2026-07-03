@@ -6,7 +6,7 @@ import { calcIGV } from "@/lib/utils";
 /**
  * Partida en el resultado IA.
  * svcId/catLabel vienen del catálogo real cuando la IA los mapea correctamente.
- * precio_unit SIEMPRE proviene del catálogo — nunca inventado por Claude.
+ * precio_unit SIEMPRE proviene del catálogo — nunca inventado por la IA.
  */
 export interface IAPresupuestoItem {
   descripcion: string;
@@ -94,7 +94,7 @@ export function parseIAResponse(text: string): IAPresupuestoResult {
 // ─── Prompt ───────────────────────────────────────────────────────────────────
 
 /**
- * Genera un prompt compacto del catálogo para incluir en el system prompt de Claude.
+ * Genera un prompt compacto del catálogo para el system prompt de OpenAI.
  * Formato: CAPÍTULO [id]: id_partida | nombre | unidad | precio
  */
 export function buildCatalogPrompt(catalogo: Capitulo[]): string {

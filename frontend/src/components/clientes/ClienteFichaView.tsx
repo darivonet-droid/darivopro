@@ -130,7 +130,7 @@ export function ClienteFichaView({ cliente, presupuestos, facturas }: Props) {
             </p>
           </div>
         ) : (
-          <PresupuestosList iniciales={presupuestos} facturarMode="preguntar" />
+          <PresupuestosList iniciales={presupuestos} facturarMode="preguntar" soloHistorial />
         )}
       </div>
 

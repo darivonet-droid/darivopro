@@ -1,7 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { PLANES, fmtPrecio, type CicloPrecio, type Plan } from "@/lib/planes";
+import {
+  PLANES,
+  CONTACTO_PRODUCTO_EMPRESA,
+  fmtPrecio,
+  type CicloPrecio,
+  type Plan,
+} from "@/lib/planes";
+import { CheckoutPlanButton } from "@/components/pagos/CheckoutPlanButton";
 import { T } from "@/lib/theme";
 
 function FeatureRow({ texto, incluido, invertido }: { texto: string; incluido: boolean; invertido?: boolean }) {
@@ -99,9 +106,15 @@ function PlanCard({ plan, ciclo, extraTop }: { plan: Plan; ciclo: CicloPrecio; e
           {ctaInner}
         </a>
       ) : (
-        <Link href={plan.ctaHref} className={btnClass} style={btnStyle}>
-          {ctaInner}
-        </Link>
+        <CheckoutPlanButton
+          plan={plan.id}
+          ciclo={ciclo}
+          label={ctaInner}
+          className={btnClass.replace("block ", "")}
+          style={btnStyle}
+          outline={plan.ctaOutline}
+          invertido={invertido}
+        />
       )}
     </article>
   );
@@ -116,8 +129,8 @@ export function PreciosView() {
         <h1 className="text-2xl font-black" style={{ color: T.text }}>
           Elige tu plan
         </h1>
-        <p className="mt-1 text-sm" style={{ color: T.textMid }}>
-          Cotizaciones y facturas para maestros de obra
+        <p className="mt-1 text-sm leading-relaxed" style={{ color: T.textMid }}>
+          Cotizaciones y facturas para maestros de obra · Pagos seguros con dLocal
         </p>
       </div>
 
@@ -163,13 +176,33 @@ export function PreciosView() {
         ))}
       </div>
 
-      {/* Plan gratis onboarding */}
+      {/* Producto Empresa — no es plan de suscripción (04 §6) */}
+      <div
+        className="rounded-2xl px-4 py-4 text-center"
+        style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
+      >
+        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
+          {CONTACTO_PRODUCTO_EMPRESA.titulo}
+        </p>
+        <p className="mt-1 text-sm leading-relaxed" style={{ color: T.text }}>
+          {CONTACTO_PRODUCTO_EMPRESA.descripcion}
+        </p>
+        <a
+          href={CONTACTO_PRODUCTO_EMPRESA.ctaHref}
+          className="mt-3 inline-block text-sm font-bold"
+          style={{ color: T.blue }}
+        >
+          {CONTACTO_PRODUCTO_EMPRESA.cta} →
+        </a>
+      </div>
+
+      {/* Prueba gratuita al registrarse — no es plan comercial oficial */}
       <div
         className="rounded-2xl px-4 py-4 text-center"
         style={{ background: T.amberPale, border: `1.5px solid ${T.amber}44` }}
       >
         <p className="text-xs font-bold uppercase tracking-wide" style={{ color: T.amberD }}>
-          Plan gratis
+          Prueba gratuita
         </p>
         <p className="mt-1 text-sm leading-relaxed" style={{ color: T.text }}>
           Solo al registrarte:{" "}

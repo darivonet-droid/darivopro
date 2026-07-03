@@ -1,19 +1,24 @@
 "use client";
-// DARIVO PRO — Toast global (lee del store Zustand)
 import { useAppStore } from "@/store/useAppStore";
-import { T } from "@/lib/theme";
+import { RADII, SHADOWS, T } from "@/lib/design-system/tokens";
 
+/** Fable 5 §6.6 — Toast */
 export function Toast() {
   const toast = useAppStore((s) => s.toast);
   if (!toast) return null;
 
   return (
     <div
-      className="pi fixed left-1/2 top-5 z-50 -translate-x-1/2 rounded-full px-5 py-3 text-sm font-bold shadow-lg"
+      className="pi fixed left-1/2 z-50 -translate-x-1/2 text-[13px] font-bold"
       style={{
-        background: toast.tipo === "ok" ? T.navy : T.red,
+        top: 22,
+        background: T.navyLight,
         color: T.white,
         maxWidth: 360,
+        borderRadius: RADII.modal,
+        padding: "12px 20px",
+        boxShadow: SHADOWS.toast,
+        border: "1px solid rgba(255,255,255,0.1)",
       }}
     >
       {toast.mensaje}

@@ -1,0 +1,342 @@
+# 06 – MÓDULO FACTURAS – DARIVO PRO EMPRESA
+
+**Versión:** 1.0
+
+**Estado:** ✅ Producción completada — imagen oficial (fase global §7 — 02/07/2026).
+
+**Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §6, §9 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.4 · `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`
+
+⚠️ Este documento es la **única fuente autorizada** para la adaptación a escritorio del **Módulo Facturas** en Darivo Pro Empresa.
+
+> **Lógica de negocio:** exclusivamente `01-darivo-pro-movil/06-MODULO-FACTURAS.md`. Este MD documenta diseño, navegación y presentación escritorio.
+
+---
+
+# 0. Fuentes consultadas (Reglas §7.2 · §15 FASE 1)
+
+| Fuente | Documento | Uso en este MD |
+|--------|-----------|----------------|
+| Lógica de negocio | `01-darivo-pro-movil/06-MODULO-FACTURAS.md` v1.2 | Estados, SUNAT, flujos, reglas, PDF, relaciones |
+| Referencia diseño escritorio | `02-darivo-pro-admin/03-PANEL-ADMIN-USUARIOS.md` v1.1 | Tabla principal + toolbar + panel lateral |
+| Referencia filtros | `02-darivo-pro-admin/04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.3 | Chips de filtro horizontales (Sistema Diseño §5.3) |
+| Sistema de Diseño Empresa | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.4 | Sidebar, header, tablas, modales, §6.4 |
+| Cotizaciones Empresa | `05-MODULO-COTIZACIONES-EMPRESA.md` v1.0 | Entrada «Convertir en Factura →» |
+| Clientes Empresa | `03-MODULO-CLIENTES-EMPRESA.md` v1.0 | Facturar desde historial · sincronización estado |
+
+> **Sin MD Admin equivalente** de Facturación cliente. Admin no documenta facturas de empresa cliente.
+
+**Informe módulo anterior (Cotizaciones):** ✅ Producción completada — sin incidencias abiertas (§10 `05-MODULO-COTIZACIONES-EMPRESA.md`).
+
+---
+
+# 1. Objetivo
+
+Módulo de **facturación interna** (comprobantes F001 / B001) en escritorio para el **Gerente**.
+
+Equivalente funcional Móvil: `InvoicesScreen` + `InvoiceEditor` + `InvoiceModal` (Móvil §2–§6).
+
+**Acceso:** sidebar posición **Facturas** (4) · equivalente Móvil bottom nav posición 4 (`01-VISION-DEL-PRODUCTO.md` §5).
+
+No define Base de Datos, APIs, permisos granulares ni arquitectura técnica.
+
+---
+
+# 2. Imagen oficial
+
+**Archivo:** `06 - MODULO FACTURAS - DARIVO PRO EMPRESA.png`
+
+![Módulo Facturas — Darivo Pro Empresa](./06%20-%20MODULO%20FACTURAS%20-%20DARIVO%20PRO%20EMPRESA.png)
+
+**Estado:** ✅ Imagen oficial generada (fase global §7 — 02/07/2026).
+
+Cuando exista, prevalecerá siempre este MD ante cualquier diferencia con la imagen.
+
+---
+
+# 3. Navegación
+
+| Elemento | Valor |
+|----------|-------|
+| Sidebar | Posición **Facturas** (4) |
+| Vistas | **Lista** (por defecto) · **Editor** (crear/editar) · **Modal PDF** |
+| Equivalente Móvil | `InvoicesScreen` → editor / modal (Móvil §2–§6) |
+
+### Accesos al módulo
+
+| Origen | Acción |
+|--------|--------|
+| Sidebar | Ítem Facturas (4) |
+| Clientes (03) | «Facturar» en cotización **Aprobada** (ficha cliente §6.5) |
+| Cotizaciones (05) | «Convertir en Factura →» en Paso 3 Resumen (cotización guardada y aprobada) |
+| Lista Facturas | Banner «Cotizaciones aprobadas» → botón **Facturar** por fila |
+
+---
+
+# 4. Layout general
+
+## 4.1 Vista lista
+
+```
+┌─────────────┬──────────────────────────────────────────────────┐
+│  SIDEBAR    │  HEADER — Facturación · subtítulo · badge RUC    │
+│  240px      ├──────────────────────────────────────────────────┤
+│             │  CHIPS FILTRO: Todas | Emitidas | Cobradas | Pend.│
+│  Facturas ● ├──────────────────────────────────────────────────┤
+│             │  BANNER ámbar (si hay cotiz. aprobadas sin fact.) │
+│             ├──────────────────────────────────────────────────┤
+│             │  TOOLBAR — [+ Nueva factura]                       │
+│             ├──────────────────────────────────────────────────┤
+│             │  TABLA PRINCIPAL (§5)                            │
+└─────────────┴──────────────────────────────────────────────────┘
+```
+
+* Fondo área contenido `slate`, padding 24–32px (Sistema Diseño §5.3).
+* Sin panel lateral en lista; selección de fila abre editor o modal según acción.
+
+## 4.2 Vista editor (crear / editar)
+
+Vista a pantalla completa dentro del área de contenido (sidebar visible):
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Header: «Nueva factura» / «Editar factura» · [← Volver]        │
+├──────────────────────────────┬──────────────────────────────────┤
+│  COLUMNA IZQUIERDA ~60%      │  COLUMNA DERECHA ~40%            │
+│  Tipo comprobante (§6.1)     │  Resumen totales                 │
+│  Datos cliente / RUC-DNI     │  Detracción (si aplica)          │
+│  Tabla líneas (§6.3)         │  Forma de pago                   │
+│  Acciones guardar            │  Botones PDF / WhatsApp (§6.5)   │
+└──────────────────────────────┴──────────────────────────────────┘
+```
+
+Equivalente Móvil `InvoiceEditor` — formulario ampliado a dos columnas (Sistema Diseño §5.3 formularios amplios).
+
+## 4.3 Modal PDF
+
+Modal centrado escritorio (Sistema Diseño §6 · Fable 5 §6.10 adaptado):
+
+* Vista previa / resumen del comprobante.
+* Botones: `[I.wa WhatsApp]` · `[I.pdf Descargar PDF]` · `[Cerrar]`.
+
+---
+
+# 5. Vista — Lista de facturas
+
+Equivalente funcional `InvoicesScreen` (Móvil §2). Presentación: tabla + chips (Clientes Empresa §5 + Admin Usuarios §6).
+
+## 5.1 Header
+
+| Elemento | Descripción | Origen |
+|----------|-------------|--------|
+| Título | «Facturación» | Móvil §2 |
+| Subtítulo | «[N] facturas · S/ [total]» | Móvil §2 |
+| Badge RUC | RUC de la empresa del usuario (verde) | Móvil §2 |
+| Notificaciones / usuario | Patrón header Empresa (Sistema Diseño §5.2) | Sistema Diseño |
+
+## 5.2 Filtros (chips horizontales)
+
+Scroll horizontal bajo el header (Móvil §2 · Sistema Diseño §5.3):
+
+| Chip | Filtra por estado de pago |
+|------|---------------------------|
+| Todas | Sin filtro |
+| Emitidas | Estado Emitida |
+| Cobradas | Estado Cobrada |
+| Pendientes | Estado Pendiente |
+
+## 5.3 Banner cotizaciones aprobadas
+
+Visible solo si existen cotizaciones **Aprobadas** sin facturar (Móvil §2):
+
+* Fondo ámbar claro, borde ámbar.
+* Texto: «⚡ Cotizaciones aprobadas — convertir en factura».
+* Por cada cotización: nombre cliente · fecha · importe + botón verde **Facturar** (`I.convert`).
+
+## 5.4 Barra de herramientas
+
+| Botón | Acción | Origen |
+|-------|--------|--------|
+| **+ Nueva factura** | Abre editor «desde cero» (Móvil §2 · §5) | Móvil §2 |
+
+Subtítulo opcional en botón: «Crear desde cero en 60 seg» (Móvil §2).
+
+## 5.5 Tabla principal
+
+Sustituye las cards móviles (Móvil §2):
+
+| Columna | Contenido |
+|---------|-----------|
+| Número | F001-… / B001-… (monospace, `T.textMid`) |
+| Cliente | Nombre (bold) |
+| Doc. | RUC o DNI del cliente (si existe) |
+| Fecha | Fecha emisión |
+| Total | Importe (`T.blue`, bold) |
+| Estado | Chips tocables: **Pendiente** · **Emitida** · **Cobrada** (Móvil §2 · Fable 5 §6.5) |
+| Acciones | `[I.pdf Ver factura]` (secundario) |
+
+**Estado vacío:** icono 🧾 + «Sin facturas todavía» (Móvil §2).
+
+**Orden:** más reciente primero.
+
+---
+
+# 6. Crear y editar factura
+
+Flujo funcional idéntico a Móvil §3–§5. Solo cambia la presentación escritorio.
+
+## 6.1 Paso 0 — Tipo de comprobante
+
+Antes de cualquier otro dato (Móvil §3):
+
+| Respuesta | Comprobante | Datos obligatorios |
+|-----------|-------------|-------------------|
+| Cliente **sin RUC** | BOLETA B001-… | Nombre + DNI (8 dígitos) |
+| Cliente **con RUC** | FACTURA F001-… | Razón social + RUC (11 dígitos, empieza 10 o 20) |
+
+* BOLETA: IGV incluido, no desglosado.
+* FACTURA: desglose Subtotal + IGV 18% + Total.
+
+**Regla:** RUC/DNI **solo aquí**, nunca al crear Cliente ni Cotización (Móvil §3).
+
+Presentación escritorio: card selector o modal inicial equivalente al paso móvil.
+
+## 6.2 Detracción SUNAT
+
+Solo si **Factura** y total **> S/700** (Móvil §4):
+
+| Opción | Código SUNAT | Tasa |
+|--------|--------------|------|
+| Reparación / Mantenimiento | 022 / 037 | 12% |
+| Construcción / Remodelación | 030 | 4% |
+
+Mostrar cálculo: Total con IGV · Detracción · **NETO A COBRAR** · leyenda SPOT para PDF (Móvil §4).
+
+Si total ≤ S/700: **no** mostrar selector.
+
+## 6.3 Líneas y forma de pago
+
+| Origen | Comportamiento |
+|--------|----------------|
+| Desde cotización aprobada | Copia automática líneas, cliente y totales (Móvil §5) |
+| Desde cero | Añadir líneas manualmente: descripción, cantidad, precio unitario (calculadora libre — misma regla Cotizaciones) |
+
+**Forma de pago:** Efectivo / Yape / Transferencia / Crédito (Móvil §5).
+
+**Estado inicial al emitir:** Emitida o Pendiente según cobro (Móvil §5).
+
+Tabla de líneas en columna izquierda del editor (§4.2): Descripción | Cant | P.Unit | Total.
+
+## 6.4 Estados de factura (verificación API)
+
+| Estado arquitectónico | Editar | Eliminar | Cambiar estado pago |
+|----------------------|--------|----------|---------------------|
+| **NO verificada** | ✅ | ✅ | ✅ |
+| **Verificada** | ❌ | ❌ | ✅ (solo Pendiente / Emitida / Cobrada) |
+
+(Móvil §1 · §12)
+
+## 6.5 PDF y compartir
+
+Diseño PDF según `17-DISEÑO-OFICIAL-PDF-DARIVO-PRO.md` y Móvil §6 (FACTURA/BOLETA, emisor, receptor, líneas, totales, pie Darivo Pro).
+
+| Botón | Acción |
+|-------|--------|
+| `[I.wa WhatsApp]` | Secundario borde #25D366 |
+| `[I.pdf Descargar PDF]` | Secundario borde `T.slateD` |
+| `[Cerrar]` | Secundario ancho completo (modal §4.3) |
+
+---
+
+# 7. Funcionalidad — Estado de pago
+
+Los chips **Pendiente · Emitida · Cobrada** son **siempre funcionales** (Móvil §2):
+
+```
+Pendiente → Emitida → Cobrada
+```
+
+Al cambiar estado:
+
+* Actualización **inmediata** en base de datos.
+* Reflejo en lista Facturas **y** ficha Cliente (sección facturas / historial) **sin desincronización** — siempre valor real BD, nunca cache aparte (Móvil §2).
+
+**No existe** estado «Rechazada» (limitación BD actual — Móvil §2).
+
+---
+
+# 8. Validez legal SUNAT
+
+Documentos **internos** válidos para el negocio del usuario. **Sin validez tributaria oficial** ante SUNAT en la fase actual (Móvil §7).
+
+Integración OSE/PSE autorizado: pendiente de documentación funcional futura. No bloquea uso actual según planes documentados en `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
+
+---
+
+# 9. Reglas de negocio (referencia Móvil §8)
+
+* Boleta automática sin RUC; Factura automática con RUC.
+* RUC/DNI obligatorio **solo al facturar**.
+* Detracción obligatoria si Factura y total > S/700.
+* Numeración F001-00000001 / B001-00000001 (8 dígitos, no reutilizable).
+* Una única factura por número; Clientes y Facturas comparten la misma entidad (Móvil §10).
+* Eliminar factura NO verificada desde cualquier módulo → desaparece en ambos.
+* Factura Verificada → no editar ni eliminar.
+
+---
+
+# 10. Relaciones con otros módulos
+
+| Módulo | Relación |
+|--------|----------|
+| Clientes (03) | Facturar desde historial · consulta y sync estado pago |
+| Cotizaciones (05) | Origen principal · banner y «Convertir en Factura →» |
+| Inicio (02) | Sin acceso directo a lista (KPIs pueden referenciar totales — Móvil Inicio) |
+| IA (08) | Sin acceso directo |
+| Cierre (09) | Sin acceso directo |
+| Más (07) | Datos empresa / SUNAT configuración — no duplicar aquí |
+
+Flujos oficiales: Móvil §11.
+
+---
+
+# 11. Permisos
+
+Usuario principal en Darivo Pro Empresa: **Gerente** (`01-VISION-DEL-PRODUCTO.md` §6).
+
+Detalle granular: `11-ROLES-PLANES-PERMISOS-EMPRESA.md` — **matriz detallada pendiente aprobación propietario** (no bloquea diseño del módulo).
+
+Limitaciones por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referencia única — no duplicar límites).
+
+---
+
+# 12. Referencias oficiales
+
+| Documento | Uso |
+|-----------|-----|
+| `01-darivo-pro-movil/06-MODULO-FACTURAS.md` | Lógica de negocio |
+| `01-darivo-pro-movil/03-MODULO-CLIENTES.md` | Relación cliente ↔ factura |
+| `01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` | Origen cotización aprobada |
+| `01-darivo-pro-movil/17-DISEÑO-OFICIAL-PDF-DARIVO-PRO.md` | PDF comprobante |
+| `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` §7 | Tablas `facturas`, `comprobante_series` (snapshot) |
+| `01-VISION-DEL-PRODUCTO.md` §14 | Principios BD (sin inventar esquema) |
+| `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.4 | Facturación electrónica (SUNAT o proveedor) — **pendiente decisión propietario** |
+| `INDICE-OFICIAL-DARIVO-PRO-EMPRESA.md` §8 | Referencia APIs aprobadas y pendientes |
+
+---
+
+# 13. Validación (Reglas §9 · §15)
+
+* [x] Lógica ↔ Móvil `06-MODULO-FACTURAS.md` v1.2
+* [x] Diseño ↔ Admin Usuarios (tabla) + Sistema Diseño §6.4
+* [x] Módulo anterior (Cotizaciones) sin incidencias abiertas
+* [x] Sin inventar tablas, APIs ni permisos no documentados
+* [x] Diseño documental aprobado por el propietario (02/07/2026)
+* [x] Imagen oficial ↔ MD (fase global §7 — 02/07/2026)
+
+---
+
+# 14. Estado
+
+✅ **Producción completada** — diseño aprobado · imagen oficial (Reglas §15 — 02/07/2026).
+
+**Fin del documento.**

@@ -216,7 +216,7 @@ export function IAPresupuestoFlow() {
           <span className="text-3xl">✏️</span>
           <div className="text-left">
             <p className="font-extrabold" style={{ color: T.text }}>Escribir descripción</p>
-            <p className="text-xs" style={{ color: T.textMid }}>Textarea → Claude</p>
+            <p className="text-xs" style={{ color: T.textMid }}>Texto → OpenAI</p>
           </div>
         </button>
         <button
@@ -227,7 +227,7 @@ export function IAPresupuestoFlow() {
           <span className="text-3xl">🎤</span>
           <div className="text-left">
             <p className="font-extrabold" style={{ color: T.text }}>Hablar</p>
-            <p className="text-xs" style={{ color: T.textMid }}>Web Speech → Claude</p>
+            <p className="text-xs" style={{ color: T.textMid }}>Web Speech → OpenAI</p>
           </div>
         </button>
       </div>

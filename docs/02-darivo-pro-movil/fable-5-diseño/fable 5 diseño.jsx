@@ -68,10 +68,12 @@ const I = {
   receipt:   ["M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2","M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2","M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2","M9 12h6","M9 16h4"],
   convert:   ["M17 1l4 4-4 4","M3 11V9a4 4 0 0 1 4-4h14","M7 23l-4-4 4-4","M21 13v2a4 4 0 0 1-4 4H3"],
   building:  ["M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18","M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2","M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2","M10 6h4","M10 10h4","M10 14h4","M10 18h4"],
+  folder:    ["M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"],
+  bell:      ["M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9","M13.73 21a2 2 0 0 1-3.46 0"],
 };
 
 // ─── CATÁLOGO PROFESIONAL DE REFORMAS INTEGRALES ─────────────────────────────
-// Partidas reales de presupuesto de obra con precios de mercado (€, España 2026)
+// Partidas reales de presupuesto de obra con precios de mercado (S/, Perú 2026)
 const BASE_CATALOG = [
   { id:"albanileria", label:"Albañilería", emoji:"🧱", color:T.amber,
     services:[
@@ -135,7 +137,7 @@ const BASE_CATALOG = [
 
 const PRESETS = {m2:[5,10,15,20,30,50,80],unit:[1,2,3,4,5,8,10],hour:[1,2,4,6,8],fixed:[]};
 const CALC_LABEL = {m2:"m²",unit:"ud",hour:"hora",fixed:"fijo"};
-const fmt = n => (n||0).toLocaleString("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+const fmt = n => "S/ "+(n||0).toLocaleString("es-PE",{minimumFractionDigits:0,maximumFractionDigits:0});
 const today = () => new Date().toISOString().slice(0,10);
 
 const defaultPrices = {};
@@ -506,7 +508,7 @@ function QuoteScreen({onBack,onSave,prices,activeCats,catalog}){
                     </div>
                     <div style={{textAlign:"left"}}>
                       <p style={{fontSize:13,fontWeight:700,color:T.text}}>{it.svcLabel}</p>
-                      <p style={{fontSize:11,color:T.textMid}}>{it.qty} {it.unit} × {p}€</p>
+                      <p style={{fontSize:11,color:T.textMid}}>{it.qty} {it.unit} × S/ {p}</p>
                     </div>
                   </div>
                   <p style={{fontSize:14,fontWeight:800,color:T.blue}}>{fmt(sub)}</p>
@@ -528,7 +530,7 @@ function QuoteScreen({onBack,onSave,prices,activeCats,catalog}){
                       <p style={{fontSize:16,fontWeight:900,color:T.text,marginTop:2,lineHeight:1.25}}>{it.svcLabel}</p>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-                      <p style={{fontSize:13,color:T.textMid,fontWeight:600}}>{p}€/{it.unit}</p>
+                      <p style={{fontSize:13,color:T.textMid,fontWeight:600}}>S/ {p}/{it.unit}</p>
                       {q>0&&<p style={{fontSize:12,color:T.blue,fontWeight:700,marginTop:2}}>{fmt(sub)}</p>}
                     </div>
                   </div>
@@ -620,7 +622,7 @@ function QuoteScreen({onBack,onSave,prices,activeCats,catalog}){
                         <div key={it.svcId} style={{display:"grid",gridTemplateColumns:"1fr auto auto",gap:8,alignItems:"center",padding:"11px 16px",borderBottom:`1px solid ${T.slate}`}}>
                           <p style={{fontSize:13,fontWeight:600,color:T.text,lineHeight:1.3}}>{it.svcLabel}</p>
                           <p style={{fontSize:11,color:T.textMid,textAlign:"right",whiteSpace:"nowrap"}}>
-                            {it.calcType==="fixed"?"1 ud":`${qty} ${it.unit} × ${unitPrice}€`}
+                            {it.calcType==="fixed"?"1 ud":`${qty} ${it.unit} × S/ ${unitPrice}`}
                           </p>
                           <p style={{fontSize:13,fontWeight:800,color:T.text,textAlign:"right",minWidth:60}}>{fmt(subtotal)}</p>
                         </div>
@@ -845,7 +847,7 @@ function PDFModal({q,onClose,onToast,catalog}){
 }
 
 // ─── CLIENT DETAIL ────────────────────────────────────────────────────────────
-function ClientDetail({client,quotes,onBack,onNewQuote,onViewPDF,onChangeStatus,onToast}){
+function ClientDetail({client,quotes,onBack,onNewQuote,onViewPDF,onChangeStatus,onToast,onEditQuote,onDuplicateQuote,onDeleteQuote,onConvertQuote,onShareQuote}){
   const clientQuotes = quotes.filter(q=>q.clientName===client.name);
   const total = clientQuotes.reduce((a,q)=>a+q.totalFinal,0);
   const approved = clientQuotes.filter(q=>q.status==="Aprobado");
@@ -882,7 +884,7 @@ function ClientDetail({client,quotes,onBack,onNewQuote,onViewPDF,onChangeStatus,
           {[
             {l:"Presupuestos",v:clientQuotes.length,c:T.blue},
             {l:"Aprobados",   v:approved.length,    c:T.green},
-            {l:"Total €",     v:fmt(total),         c:T.amber,sm:true},
+            {l:"Total S/",    v:fmt(total),         c:T.amber,sm:true},
           ].map(s=>(
             <div key={s.l} style={{background:T.white,borderRadius:13,padding:"12px",border:`1px solid ${T.slateD}`,textAlign:"center"}}>
               <p style={{fontSize:s.sm?13:22,fontWeight:900,color:s.c}}>{s.v}</p>
@@ -920,7 +922,8 @@ function ClientDetail({client,quotes,onBack,onNewQuote,onViewPDF,onChangeStatus,
                 </div>
                 <p style={{fontSize:16,fontWeight:900,color:T.blue,marginLeft:10,flexShrink:0}}>{fmt(q.totalFinal)}</p>
               </div>
-              <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+              {/* Estado + PDF */}
+              <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap",marginBottom:10}}>
                 {["Borrador","Pendiente","Aprobado"].map(s=>(
                   <button key={s} onClick={()=>onChangeStatus(q.id,s)} style={{padding:"4px 10px",borderRadius:14,border:`1.5px solid ${s===q.status?sc:T.slateD}`,background:s===q.status?sc+"12":"none",cursor:"pointer",fontSize:10,fontWeight:700,color:s===q.status?sc:T.textLight}}>
                     {s}
@@ -929,6 +932,26 @@ function ClientDetail({client,quotes,onBack,onNewQuote,onViewPDF,onChangeStatus,
                 <button onClick={()=>onViewPDF(q)} style={{marginLeft:"auto",padding:"5px 11px",borderRadius:14,border:`1.5px solid ${T.slateD}`,background:T.white,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   <SVG d={I.pdf} color={T.red} size={13}/>
                   <span style={{fontSize:10,fontWeight:700,color:T.textMid}}>PDF</span>
+                </button>
+              </div>
+              {/* Acciones */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",paddingTop:10,borderTop:`1px solid ${T.slateD}`}}>
+                <button onClick={()=>onEditQuote&&onEditQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.slateD}`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.textMid}}>
+                  <SVG d={I.edit} color={T.textMid} size={12}/>Editar
+                </button>
+                <button onClick={()=>onDuplicateQuote&&onDuplicateQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.blue}30`,background:`${T.blue}08`,cursor:"pointer",fontSize:11,fontWeight:700,color:T.blue}}>
+                  <SVG d={I.layers} color={T.blue} size={12}/>Re-cotizar
+                </button>
+                <button onClick={()=>onShareQuote&&onShareQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.slateD}`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.textMid}}>
+                  <SVG d={I.share} color={T.textMid} size={12}/>Compartir
+                </button>
+                {q.status==="Aprobado"&&(
+                  <button onClick={()=>onConvertQuote&&onConvertQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.green}35`,background:`${T.green}08`,cursor:"pointer",fontSize:11,fontWeight:700,color:T.green}}>
+                    <SVG d={I.receipt} color={T.green} size={12}/>Facturar
+                  </button>
+                )}
+                <button onClick={()=>onDeleteQuote&&onDeleteQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.red}30`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.red,marginLeft:"auto"}}>
+                  <SVG d={I.trash} color={T.red} size={12}/>Eliminar
                 </button>
               </div>
             </div>
@@ -1083,7 +1106,7 @@ function ClientsScreen({quotes,onNew,onSelect}){
 }
 
 // ─── QUOTES LIST ─────────────────────────────────────────────────────────────
-function QuotesScreen({quotes,onNew,onChangeStatus,onViewPDF}){
+function QuotesScreen({quotes,onNew,onChangeStatus,onViewPDF,onEditQuote,onDuplicateQuote,onDeleteQuote,onConvertQuote,onShareQuote}){
   const [filter,setFilter] = useState("Todos");
   const [q,setQ] = useState("");
   const MAP = {Todos:null,Aprobados:"Aprobado",Pendientes:"Pendiente",Borradores:"Borrador"};
@@ -1121,7 +1144,8 @@ function QuotesScreen({quotes,onNew,onChangeStatus,onViewPDF}){
                 </div>
                 <p style={{fontSize:17,fontWeight:900,color:T.blue,flexShrink:0,marginLeft:10}}>{fmt(q.totalFinal)}</p>
               </div>
-              <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+              {/* Estado + PDF */}
+              <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:10}}>
                 {["Borrador","Pendiente","Aprobado"].map(s=>(
                   <button key={s} onClick={()=>onChangeStatus(q.id,s)} style={{padding:"5px 10px",borderRadius:14,border:`1.5px solid ${s===q.status?sc:T.slateD}`,background:s===q.status?sc+"12":"none",cursor:"pointer",fontSize:11,fontWeight:700,color:s===q.status?sc:T.textLight}}>
                     {s}
@@ -1130,6 +1154,26 @@ function QuotesScreen({quotes,onNew,onChangeStatus,onViewPDF}){
                 <button onClick={()=>onViewPDF(q)} style={{marginLeft:"auto",padding:"5px 12px",borderRadius:14,border:`1.5px solid ${T.slateD}`,background:T.white,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   <SVG d={I.pdf} color={T.red} size={13}/>
                   <span style={{fontSize:11,fontWeight:700,color:T.textMid}}>PDF</span>
+                </button>
+              </div>
+              {/* Acciones */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",paddingTop:10,borderTop:`1px solid ${T.slateD}`}}>
+                <button onClick={()=>onEditQuote&&onEditQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.slateD}`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.textMid}}>
+                  <SVG d={I.edit} color={T.textMid} size={12}/>Editar
+                </button>
+                <button onClick={()=>onDuplicateQuote&&onDuplicateQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.blue}30`,background:`${T.blue}08`,cursor:"pointer",fontSize:11,fontWeight:700,color:T.blue}}>
+                  <SVG d={I.layers} color={T.blue} size={12}/>Re-cotizar
+                </button>
+                <button onClick={()=>onShareQuote&&onShareQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.slateD}`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.textMid}}>
+                  <SVG d={I.share} color={T.textMid} size={12}/>Compartir
+                </button>
+                {q.status==="Aprobado"&&(
+                  <button onClick={()=>onConvertQuote&&onConvertQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.green}35`,background:`${T.green}08`,cursor:"pointer",fontSize:11,fontWeight:700,color:T.green}}>
+                    <SVG d={I.receipt} color={T.green} size={12}/>Facturar
+                  </button>
+                )}
+                <button onClick={()=>onDeleteQuote&&onDeleteQuote(q)} style={{display:"flex",alignItems:"center",gap:4,padding:"5px 10px",borderRadius:12,border:`1.5px solid ${T.red}30`,background:"none",cursor:"pointer",fontSize:11,fontWeight:700,color:T.red,marginLeft:"auto"}}>
+                  <SVG d={I.trash} color={T.red} size={12}/>Eliminar
                 </button>
               </div>
             </div>
@@ -1205,7 +1249,7 @@ function SettingsScreen({activeCats,setActiveCats,prices,setPrices,catalog,custo
               <input autoFocus type="number" value={tempVal} onChange={e=>setTempVal(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&savePrice()}
                 style={{width:"100%",padding:"16px 52px 16px 18px",borderRadius:14,fontSize:32,fontWeight:900,border:`2.5px solid ${cat?.color||T.blue}`,outline:"none",color:T.text}}/>
-              <span style={{position:"absolute",right:17,top:"50%",transform:"translateY(-50%)",fontSize:20,fontWeight:800,color:T.textMid}}>€</span>
+              <span style={{position:"absolute",right:17,top:"50%",transform:"translateY(-50%)",fontSize:14,fontWeight:800,color:T.textMid}}>S/</span>
             </div>
             <div style={{display:"flex",gap:10}}>
               <button onClick={()=>{setEditing(null);setTempVal("");}} style={{flex:1,padding:"14px",borderRadius:13,border:`1.5px solid ${T.slateD}`,background:T.white,cursor:"pointer",fontSize:15,fontWeight:700,color:T.textMid}}>Cancelar</button>
@@ -1243,14 +1287,14 @@ function SettingsScreen({activeCats,setActiveCats,prices,setPrices,catalog,custo
             </div>
 
             <p style={{fontSize:11,fontWeight:700,color:T.textMid,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>
-              Precio {newSvc.calcType==="fixed"?"cerrado":newSvc.calcType==="m2"?"€/m²":newSvc.calcType==="unit"?"€/ud":"€/hora"}
+              Precio {newSvc.calcType==="fixed"?"fijo":newSvc.calcType==="m2"?"por m²":newSvc.calcType==="unit"?"por unidad":"por hora"}
             </p>
             <div style={{position:"relative",marginBottom:20}}>
               <input type="number" value={newSvc.price} onChange={e=>setNewSvc(s=>({...s,price:e.target.value}))}
                 onKeyDown={e=>e.key==="Enter"&&saveNewService()}
                 placeholder="0"
                 style={{width:"100%",padding:"14px 52px 14px 18px",borderRadius:14,fontSize:28,fontWeight:900,border:`2.5px solid ${addCat?.color||T.blue}`,outline:"none",color:T.text}}/>
-              <span style={{position:"absolute",right:17,top:"50%",transform:"translateY(-50%)",fontSize:18,fontWeight:800,color:T.textMid}}>€</span>
+              <span style={{position:"absolute",right:17,top:"50%",transform:"translateY(-50%)",fontSize:14,fontWeight:800,color:T.textMid}}>S/</span>
             </div>
 
             {newSvc.label&&newSvc.price&&(
@@ -1260,7 +1304,7 @@ function SettingsScreen({activeCats,setActiveCats,prices,setPrices,catalog,custo
                   <p style={{fontSize:11,color:T.textMid}}>{addCat?.label}</p>
                 </div>
                 <p style={{fontSize:15,fontWeight:900,color:addCat?.color||T.blue}}>
-                  {newSvc.price}€{newSvc.calcType!=="fixed"?`/${({m2:"m²",unit:"ud",hour:"hora"})[newSvc.calcType]}`:""}
+                  S/ {newSvc.price}{newSvc.calcType!=="fixed"?`/${({m2:"m²",unit:"ud",hour:"hora"})[newSvc.calcType]}`:""}
                 </p>
               </div>
             )}
@@ -1306,7 +1350,7 @@ function SettingsScreen({activeCats,setActiveCats,prices,setPrices,catalog,custo
                           </div>
                           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
                             <span style={{fontSize:12,color:cat.color,fontWeight:800}}>
-                              {s.calcType==="fixed"?`${p}€`:`${p}€/${s.unit}`}
+                              {s.calcType==="fixed"?`S/ ${p}`:`S/ ${p}/${s.unit}`}
                             </span>
                             {s.custom&&(
                               <button onClick={()=>deleteCustom(cat.id,s.id)} style={{background:T.redPale,border:"none",cursor:"pointer",borderRadius:7,padding:"4px 6px",display:"flex"}}>
@@ -1355,7 +1399,7 @@ function SettingsScreen({activeCats,setActiveCats,prices,setPrices,catalog,custo
                           <p style={{fontSize:11,color:T.textMid,marginTop:1}}>{s.calcType==="fixed"?"Precio cerrado":`Por ${s.unit}`}</p>
                         </div>
                         <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-                          <span style={{fontSize:17,fontWeight:900,color:cat.color}}>{p}€</span>
+                          <span style={{fontSize:17,fontWeight:900,color:cat.color}}>S/ {p}</span>
                           <div style={{width:28,height:28,borderRadius:8,background:T.slate,display:"flex",alignItems:"center",justifyContent:"center"}}>
                             <SVG d={I.edit} color={T.textMid} size={13}/>
                           </div>
@@ -1862,29 +1906,215 @@ function InvoiceModal({inv,bizData,onClose,onToast}){
   );
 }
 
+// ─── MÓDULO IA (nav posición 3) ─────────────────────────────────────────────
+function IAMenuScreen({onNav,onToast}){
+  return (
+    <div style={{paddingBottom:90}}>
+      <DarkHeader pt="50px">
+        <p style={{color:T.white,fontSize:20,fontWeight:900}}>IA</p>
+        <p style={{color:T.textLight,fontSize:13,marginTop:4}}>Crea cotizaciones con asistencia inteligente</p>
+      </DarkHeader>
+      <div style={{padding:"20px 16px"}}>
+        {[
+          {l:"Escribir con IA",sub:"Describe el trabajo en texto",icon:I.edit,action:()=>onNav("quote")},
+          {l:"Hablar con IA",sub:"Dicta el trabajo con tu voz",icon:I.phone,action:()=>onToast("🎤 Modo voz — próximamente")},
+        ].map(o=>(
+          <button key={o.l} onClick={o.action} style={{width:"100%",padding:"18px 16px",borderRadius:16,border:`1.5px solid ${T.slateD}`,background:T.white,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,marginBottom:12}}>
+            <div style={{width:44,height:44,borderRadius:12,background:T.purplePale,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <SVG d={o.icon} color={T.purple} size={22}/>
+            </div>
+            <div>
+              <p style={{fontSize:15,fontWeight:800,color:T.text}}>{o.l}</p>
+              <p style={{fontSize:12,color:T.textMid,marginTop:2}}>{o.sub}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── MÓDULO CIERRE (nav posición 5) — ref. imagen oficial 09 ────────────────
+const CIERRE_PURPLE = "#6D28D9";
+const CIERRE_PURPLE_L = "#7C3AED";
+const SAMPLE_GASTOS = [
+  {id:1,cat:"Alimentación",prov:"Supermercado La Plaza",fecha:"15 May 2024",total:45.80,status:"Aprobado"},
+  {id:2,cat:"Combustible",prov:"Estación Repsol",fecha:"14 May 2024",total:38.60,status:"Aprobado"},
+  {id:3,cat:"Materiales",prov:"Librería El Mundo",fecha:"13 May 2024",total:23.15,status:"Aprobado"},
+];
+
+function CierreScreen({onToast}){
+  const [tab,setTab] = useState("gastos");
+  const [mes,setMes] = useState("Mayo");
+  const [anio,setAnio] = useState("2024");
+  const [expedienteListo,setExpedienteListo] = useState(false);
+
+  const TabBtn = ({id,label}) => {
+    const on = tab===id;
+    return (
+      <button onClick={()=>{setTab(id);setExpedienteListo(false);}} style={{flex:1,padding:"10px 0",background:"none",border:"none",cursor:"pointer",fontSize:14,fontWeight:on?800:600,color:on?CIERRE_PURPLE:T.textMid,borderBottom:on?`2px solid ${CIERRE_PURPLE}`:"2px solid transparent"}}>
+        {label}
+      </button>
+    );
+  };
+
+  return (
+    <div style={{paddingBottom:90}}>
+      <div style={{background:T.white,padding:"12px 16px 0",borderBottom:`1px solid ${T.slateD}`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <p style={{fontSize:13,fontWeight:800,color:T.text}}>Darivo Pro</p>
+          <div style={{position:"relative"}}>
+            <SVG d={I.bell} color={T.textMid} size={22}/>
+            <span style={{position:"absolute",top:-4,right:-4,minWidth:16,height:16,borderRadius:8,background:T.red,color:T.white,fontSize:10,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>2</span>
+          </div>
+        </div>
+        <p style={{fontSize:22,fontWeight:900,color:T.text}}>Gastos</p>
+        <p style={{fontSize:13,color:T.textMid,marginBottom:14}}>Registra y gestiona todos tus gastos</p>
+        <div style={{display:"flex",borderBottom:`1px solid ${T.slateD}`}}>
+          <TabBtn id="gastos" label="Gastos"/>
+          <TabBtn id="expediente" label="Expediente Mensual"/>
+        </div>
+      </div>
+
+      <div style={{padding:"16px"}}>
+        {tab==="gastos"&&(
+          <>
+            <div style={{background:`linear-gradient(135deg,${CIERRE_PURPLE},${CIERRE_PURPLE_L})`,borderRadius:18,padding:"18px 16px",marginBottom:14,color:T.white}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <SVG d={I.camera} color={T.white} size={22}/>
+                <p style={{fontSize:17,fontWeight:900}}>Registrar gasto</p>
+                <span style={{marginLeft:"auto",fontSize:11,fontWeight:700,background:"rgba(255,255,255,0.2)",padding:"4px 8px",borderRadius:8}}>IA</span>
+              </div>
+              <p style={{fontSize:12,opacity:0.85,marginBottom:14}}>La IA analizará tu documento automáticamente</p>
+              {["Tomar fotografía","Seleccionar imagen","Subir documento PDF","Registro manual"].map(a=>(
+                <button key={a} onClick={()=>onToast("📷 "+a+" — flujo completo en MD 09")} style={{width:"100%",textAlign:"left",padding:"12px 14px",marginBottom:8,borderRadius:12,border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.08)",color:T.white,cursor:"pointer",fontSize:13,fontWeight:600}}>{a}</button>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <p style={{fontSize:14,fontWeight:800,color:T.text}}>Gastos recientes</p>
+              <button style={{background:"none",border:"none",color:CIERRE_PURPLE,fontSize:12,fontWeight:700,cursor:"pointer"}}>Ver todos</button>
+            </div>
+            {SAMPLE_GASTOS.map(g=>(
+              <div key={g.id} style={{background:T.white,borderRadius:14,padding:"14px 16px",border:`1px solid ${T.slateD}`,marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div>
+                    <p style={{fontSize:11,fontWeight:700,color:CIERRE_PURPLE}}>{g.cat}</p>
+                    <p style={{fontSize:14,fontWeight:800,color:T.text,marginTop:2}}>{g.prov}</p>
+                    <p style={{fontSize:11,color:T.textMid,marginTop:4}}>{g.fecha}</p>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <p style={{fontSize:15,fontWeight:900,color:T.text}}>S/ {g.total.toFixed(2)}</p>
+                    <Pill label={g.status} sm color={T.green}/>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {tab==="expediente"&&!expedienteListo&&(
+          <>
+            <div style={{background:`linear-gradient(135deg,${CIERRE_PURPLE},${CIERRE_PURPLE_L})`,borderRadius:18,padding:"18px 16px",marginBottom:16,color:T.white}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+                <SVG d={I.folder} color={T.white} size={22}/>
+                <p style={{fontSize:17,fontWeight:900}}>Expediente mensual</p>
+                <span style={{marginLeft:"auto",fontSize:11,fontWeight:700,background:"rgba(255,255,255,0.2)",padding:"4px 8px",borderRadius:8}}>IA</span>
+              </div>
+              <p style={{fontSize:12,opacity:0.85}}>Genera automáticamente toda la documentación de tu actividad</p>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+              <div>
+                <p style={{fontSize:11,fontWeight:700,color:T.textMid,marginBottom:6}}>Mes</p>
+                <select value={mes} onChange={e=>setMes(e.target.value)} style={{width:"100%",padding:"12px",borderRadius:12,border:`1.5px solid ${T.slateD}`,fontSize:14,fontWeight:600}}>
+                  {["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].map(m=><option key={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <p style={{fontSize:11,fontWeight:700,color:T.textMid,marginBottom:6}}>Año</p>
+                <select value={anio} onChange={e=>setAnio(e.target.value)} style={{width:"100%",padding:"12px",borderRadius:12,border:`1.5px solid ${T.slateD}`,fontSize:14,fontWeight:600}}>
+                  {["2024","2025","2026"].map(y=><option key={y}>{y}</option>)}
+                </select>
+              </div>
+            </div>
+            <button onClick={()=>setExpedienteListo(true)} style={{width:"100%",padding:"16px",borderRadius:14,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${CIERRE_PURPLE},${CIERRE_PURPLE_L})`,color:T.white,fontSize:16,fontWeight:900,marginBottom:20}}>
+              Generar expediente
+            </button>
+            <div style={{background:T.white,borderRadius:14,padding:"16px",border:`1px solid ${T.slateD}`,marginBottom:16}}>
+              <p style={{fontSize:14,fontWeight:800,color:T.text,marginBottom:12}}>¿Qué incluye tu expediente?</p>
+              {["Facturas del período","Gastos del período","Comprobantes asociados","Resumen del período"].map(t=>(
+                <p key={t} style={{fontSize:13,color:T.textMid,marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
+                  <SVG d={I.check} color={T.green} size={16}/>{t}
+                </p>
+              ))}
+            </div>
+            <p style={{fontSize:13,fontWeight:800,color:T.text,marginBottom:10}}>Formatos disponibles</p>
+            {[
+              {l:"Exportar en PDF",sub:"Documento PDF completo"},
+              {l:"Descargar ZIP",sub:"Archivo comprimido"},
+              {l:"Carpeta organizada",sub:"Carpeta estructurada"},
+            ].map(f=>(
+              <button key={f.l} onClick={()=>onToast("📦 "+f.l)} style={{width:"100%",textAlign:"left",padding:"14px 16px",borderRadius:14,border:`1.5px solid ${T.slateD}`,background:T.white,cursor:"pointer",marginBottom:8}}>
+                <p style={{fontSize:14,fontWeight:700,color:T.text}}>{f.l}</p>
+                <p style={{fontSize:11,color:T.textMid,marginTop:2}}>{f.sub}</p>
+              </button>
+            ))}
+          </>
+        )}
+
+        {tab==="expediente"&&expedienteListo&&(
+          <div style={{textAlign:"center",padding:"24px 8px"}}>
+            <div style={{width:72,height:72,borderRadius:36,background:T.greenPale,margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <SVG d={I.folder} color={T.green} size={36}/>
+            </div>
+            <p style={{fontSize:22,fontWeight:900,color:T.text}}>¡Expediente listo!</p>
+            <p style={{fontSize:14,color:T.textMid,marginTop:6,marginBottom:20}}>{mes} {anio}</p>
+            <div style={{background:T.white,borderRadius:14,padding:"16px",border:`1px solid ${T.slateD}`,textAlign:"left",marginBottom:20}}>
+              <p style={{fontSize:13,fontWeight:800,color:T.text,marginBottom:12}}>Resumen del período</p>
+              {[["Facturas","24"],["Gastos","15"],["Comprobantes","39"]].map(([k,v])=>(
+                <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+                  <span style={{fontSize:13,color:T.textMid}}>{k}</span>
+                  <span style={{fontSize:13,fontWeight:700,color:T.text}}>{v}</span>
+                </div>
+              ))}
+              <div style={{display:"flex",justifyContent:"space-between",paddingTop:10,borderTop:`1px solid ${T.slateD}`}}>
+                <span style={{fontSize:14,fontWeight:800,color:T.text}}>Total período</span>
+                <span style={{fontSize:16,fontWeight:900,color:CIERRE_PURPLE}}>S/ 2,458.60</span>
+              </div>
+            </div>
+            <button onClick={()=>onToast("📂 Ver expediente")} style={{width:"100%",padding:"16px",borderRadius:14,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${CIERRE_PURPLE},${CIERRE_PURPLE_L})`,color:T.white,fontSize:16,fontWeight:900,marginBottom:10}}>Ver expediente</button>
+            <button onClick={()=>setExpedienteListo(false)} style={{background:"none",border:"none",color:CIERRE_PURPLE,fontSize:13,fontWeight:700,cursor:"pointer"}}>Generar otro expediente</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function BottomNav({active,onNav}){
   const TABS=[
-    {k:"home",    d:I.home,    l:"Inicio"},
-    {k:"clients", d:I.users,   l:"Clientes"},
-    null,
-    {k:"invoices",d:I.receipt, l:"Facturas"},
-    {k:"settings",d:I.gear,    l:"Config."},
+    {k:"home",     d:I.home,     l:"Inicio"},
+    {k:"clients",  d:I.users,    l:"Clientes"},
+    {k:"ia",       d:I.sparkle,  l:"IA", central:true},
+    {k:"invoices", d:I.receipt,  l:"Facturas"},
+    {k:"cierre",   d:I.folder,   l:"Cierre"},
+    {k:"settings", d:I.gear,     l:"Más"},
   ];
+  const accent = active==="cierre" ? CIERRE_PURPLE : T.blue;
   return (
     <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:390,background:T.white,borderTop:`1px solid ${T.slateD}`,display:"flex",alignItems:"center",justifyContent:"space-around",padding:"8px 0 20px",zIndex:50,boxShadow:"0 -4px 20px rgba(0,0,0,0.06)"}}>
-      {TABS.map((tab)=>{
-        if(!tab) return (
-          <button key="fab" onClick={()=>onNav("quote")} style={{width:58,height:58,borderRadius:29,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.blue},${T.blueL})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 20px ${T.blue}55`,marginTop:-18,flexShrink:0}}>
-            <SVG d={I.plus} color={T.white} size={28}/>
+      {TABS.map(tab=>{
+        if(tab.central) return (
+          <button key={tab.k} onClick={()=>onNav(tab.k)} style={{width:52,height:52,borderRadius:26,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.purple},${CIERRE_PURPLE_L})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 20px ${T.purple}55`,marginTop:-16,flexShrink:0}}>
+            <SVG d={tab.d} color={T.white} size={24}/>
           </button>
         );
         const on=active===tab.k;
         return (
-          <button key={tab.k} onClick={()=>onNav(tab.k)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",padding:"4px 8px",flex:1,position:"relative"}}>
-            {on&&<div style={{position:"absolute",top:-8,width:28,height:3,borderRadius:2,background:T.blue}}/>}
-            <SVG d={tab.d} color={on?T.blue:T.textLight} size={22}/>
-            <span style={{fontSize:10,fontWeight:on?800:500,color:on?T.blue:T.textLight}}>{tab.l}</span>
+          <button key={tab.k} onClick={()=>onNav(tab.k)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,background:"none",border:"none",cursor:"pointer",padding:"4px 4px",flex:1,position:"relative",minWidth:0}}>
+            {on&&<div style={{position:"absolute",top:-8,width:28,height:3,borderRadius:2,background:accent}}/>}
+            <SVG d={tab.d} color={on?accent:T.textLight} size={20}/>
+            <span style={{fontSize:9,fontWeight:on?800:500,color:on?accent:T.textLight,whiteSpace:"nowrap"}}>{tab.l}</span>
           </button>
         );
       })}
@@ -1918,7 +2148,7 @@ export default function App(){
 
   const go = s => {
     setScreen(s);
-    if(["home","clients","quotes","settings","invoices"].includes(s)) setActiveTab(s);
+    if(["home","clients","ia","invoices","cierre","settings"].includes(s)) setActiveTab(s);
   };
   const toast = m => setGlobalToast(m);
 
@@ -1929,6 +2159,12 @@ export default function App(){
   const handleSaveInvoice  = inv => { setInvoices(p=>[inv,...p]); };
   const handleInvStatus    = (invId,s) => setInvoices(p=>p.map(i=>i.invId===invId?{...i,invStatus:s}:i));
   const handleConvert      = q => { setInvoiceCtx(q); setScreen("invoiceEditor"); };
+
+  // ── Acciones de historial ──
+  const handleEditQuote      = q => toast("✏️ Editar «"+q.clientName+"» — próximamente");
+  const handleDuplicateQuote = q => { const dup={...q,id:Date.now(),status:"Borrador",createdAt:today()}; setQuotes(p=>[dup,...p]); toast("✅ Re-cotización creada para "+q.clientName); };
+  const handleDeleteQuote    = q => { setQuotes(p=>p.filter(x=>x.id!==q.id)); toast("🗑️ Cotización eliminada"); };
+  const handleShareQuote     = q => { if(typeof navigator!=="undefined"&&navigator.share){navigator.share({title:"Cotización "+q.clientName,text:"Presupuesto "+fmt(q.totalFinal)}).catch(()=>{});}else{toast("📋 Compartir: "+q.clientName+" · "+fmt(q.totalFinal));} };
 
   // Listen for "Convertir en Factura" button from QuoteScreen
   useEffect(()=>{
@@ -1950,15 +2186,29 @@ export default function App(){
           <ClientDetail client={selClient} quotes={quotes}
             onBack={()=>{setSelClient(null);go("clients");}}
             onNewQuote={()=>go("quote")} onViewPDF={handleViewPDF}
-            onChangeStatus={handleStatus} onToast={toast}/>
+            onChangeStatus={handleStatus} onToast={toast}
+            onEditQuote={handleEditQuote}
+            onDuplicateQuote={handleDuplicateQuote}
+            onDeleteQuote={handleDeleteQuote}
+            onConvertQuote={handleConvert}
+            onShareQuote={handleShareQuote}/>
         )}
-        {screen==="quotes"&&<QuotesScreen quotes={quotes} onNew={()=>go("quote")} onChangeStatus={handleStatus} onViewPDF={handleViewPDF}/>}
+        {screen==="quotes"&&(
+          <QuotesScreen quotes={quotes} onNew={()=>go("quote")} onChangeStatus={handleStatus} onViewPDF={handleViewPDF}
+            onEditQuote={handleEditQuote}
+            onDuplicateQuote={handleDuplicateQuote}
+            onDeleteQuote={handleDeleteQuote}
+            onConvertQuote={handleConvert}
+            onShareQuote={handleShareQuote}/>
+        )}
         {screen==="settings"&&(
           <SettingsScreen activeCats={activeCats} setActiveCats={setActiveCats}
             prices={prices} setPrices={setPrices}
             catalog={catalog} customServices={customServices} setCustomServices={setCustomServices}
             onToast={toast} bizData={bizData} setBizData={setBizData}/>
         )}
+        {screen==="ia"&&<IAMenuScreen onNav={go} onToast={toast}/>}
+        {screen==="cierre"&&<CierreScreen onToast={toast}/>}
 
         {/* ── Módulo Facturación ── */}
         {screen==="invoices"&&(
