@@ -2,9 +2,9 @@
 
 # DARIVO PRO — SISTEMA DE DISEÑO OFICIAL (FABLE 5)
 
-Versión: 1.7
+Versión: 1.8
 
-Última actualización: 01/07/2026
+Última actualización: 04/07/2026
 
 Fuente técnica autorizada: `docs/02-darivo-pro-movil/fable-5-diseño.jsx`
 
@@ -345,6 +345,9 @@ Tamaño por defecto del componente `SVG`: **22px** (configurable con prop `size`
 | Facturar (desde cotización) | `I.receipt` | Borde verde suave | "Facturar" | Ficha Cliente · Lista cotizaciones (solo Aprobado) |
 | Compartir cotización | `I.share` | Borde `T.slateD` | "Compartir" | Ficha Cliente · Lista cotizaciones |
 | Acceso IA (nav principal, posición 3) | `I.sparkle` | Gradiente morado | — (botón central) | BottomNav · IAMenuScreen |
+| Escribir con IA | `I.edit` | `T.purple` · fondo card `T.purplePale` | "Escribir con IA" | IAMenuScreen (Agente IA 1) |
+| Hablar con IA | `I.phone` | `T.purple` · fondo card `T.purplePale` | "Hablar con IA" | IAMenuScreen (Agente IA 1) |
+| Soporte con IA | `I.phone` | `T.teal` · fondo card `T.tealPale` | "Soporte con IA" | IAMenuScreen (Agente IA 2) · Más → Soporte |
 
 ### Acciones aprobadas — Pendiente de diseño en Fable 5
 
@@ -499,6 +502,68 @@ Este botón central **no sustituye** la lógica del módulo IA documentada en `0
 
 El FAB heredado del prototipo Fable 5 (`I.plus`, §6.8 anterior) queda **obsoleto**. Sustituido por el botón central de **IA** en posición 3 (implementado en `BottomNav`).
 
+## 6.8.2 IAMenuScreen — cards oficiales del módulo IA
+
+Pantalla de referencia: **`IAMenuScreen`** (nav posición 3 · `08-MODULO-IA.md` §6).
+
+### Header
+
+* Componente: `DarkHeader` (§6.1)
+* Título: **«IA»** — blanco, bold 20px
+* Subtítulo: guía breve (ej. *Elige cómo quieres que te ayude*) — `textLight` 13px
+
+### Layout de cards
+
+* Contenedor: padding horizontal **18px**, gap vertical **12px** bajo el header
+* Patrón card: §6.3 (fondo `T.white` o fondo tintado según agente, radius **14px**, borde `1px solid T.slateD`)
+* Cards apiladas **verticalmente** (scroll si el viewport es bajo)
+
+### Card 1 — Agente IA 1 · Escribir con IA
+
+| Propiedad | Valor |
+|-----------|-------|
+| Agente | **Agente IA 1 — Presupuestos y Facturas** |
+| Icono | `I.edit` · color `T.purple` · tamaño 22px |
+| Emoji guía (opcional en card) | ✏️ |
+| Fondo de card | `T.purplePale` (`#F5F3FF`) |
+| Título | **Escribir con IA** — `T.text`, peso 700, 15px |
+| Subtítulo | *Describe tu trabajo en texto* — `T.textMid`, 13px |
+| Acción al tocar | Abre flujo **Escribir con IA** → cotización (Agente IA 1) |
+
+### Card 2 — Agente IA 1 · Hablar con IA
+
+| Propiedad | Valor |
+|-----------|-------|
+| Agente | **Agente IA 1 — Presupuestos y Facturas** |
+| Icono | `I.phone` · color `T.purple` |
+| Emoji guía (opcional) | 🎤 |
+| Fondo de card | `T.purplePale` |
+| Título | **Hablar con IA** |
+| Subtítulo | *Dicta tu trabajo con el micrófono* |
+| Acción al tocar | Abre flujo **Hablar con IA** → cotización (Agente IA 1) |
+
+### Card 3 — Agente IA 2 · Soporte con IA
+
+| Propiedad | Valor |
+|-----------|-------|
+| Agente | **Agente IA 2 — Soporte y Tickets** |
+| Icono | `I.phone` · color `T.teal` (`#0D9488`) |
+| Emoji guía (opcional) | 🎧 |
+| Fondo de card | `T.tealPale` (`#F0FDFA`) |
+| Título | **Soporte con IA** |
+| Subtítulo | *Dudas, errores y tickets de soporte* |
+| Acción al tocar | Abre conversación **Soporte con IA** (Agente IA 2) |
+| Acceso equivalente | **Más → Soporte** (`07-MODULO-MAS.md` §6) — misma lógica funcional |
+
+### Reglas visuales
+
+* Cards 1 y 2 comparten identidad **morada** (Agente IA 1).
+* Card 3 usa identidad **teal** (Agente IA 2) para diferenciar soporte de presupuestos/facturas.
+* No mezclar gradiente morado del botón central nav (§6.8) con el fondo teal de la card 3.
+* Cualquier botón o card nueva en este menú requiere entrada en §5.2 y aprobación del propietario (§9.5).
+
+> **Estado prototipo:** `fable-5-diseño.jsx` implementa cards 1 y 2. La card 3 **Soporte con IA** queda documentada aquí como diseño oficial aprobado — pendiente de implementación en el prototipo.
+
 ## 6.8.1 FAB heredado — obsoleto
 
 La navegación anterior incluía un FAB central (`I.plus`, 58×58px, gradiente azul, `marginTop: -18`) en `BottomNav`. **Ya no forma parte de la navegación oficial.** Sustituido por el botón central del módulo **IA** en posición 3 (§7.1). El prototipo Fable 5 (`fable-5-diseño.jsx`) implementa el botón central de IA; el FAB `I.plus` fue eliminado.
@@ -610,7 +675,7 @@ Estas pantallas están implementadas en Fable 5 y definen el lenguaje visual del
 | `PDFModal` | Vista previa PDF cotización |
 | `InvoiceModal` | Vista previa PDF factura |
 | `CierreScreen` | Módulo Cierre — Gastos + Expediente Mensual — nav posición 5; ref. imagen `09 – MÓDULO CIERRE – DARIVO PRO MÓVIL.png` |
-| `IAMenuScreen` | Módulo IA — menú Escribir / Hablar — nav posición 3 (botón central) |
+| `IAMenuScreen` | Módulo IA — menú Escribir / Hablar / Soporte con IA — nav posición 3 (botón central) |
 
 ---
 
@@ -822,7 +887,7 @@ Pantallas existentes en el prototipo (sincronizadas con nav oficial §7.1):
 
 * Inicio (`HomeScreen` — nav posición 1; ver `02-MODULO-INICIO.md`)
 * Clientes (lista + ficha — nav posición 2)
-* IA (`IAMenuScreen` — nav posición 3, botón central destacado)
+* IA (`IAMenuScreen` — nav posición 3, botón central destacado · §6.8.2)
 * Cotizaciones (lista + wizard — flujo secundario sin tab en nav)
 * Facturas (lista + editor + modal — nav posición 4)
 * Cierre (`CierreScreen` — nav posición 5; imagen oficial `09 – MÓDULO CIERRE – DARIVO PRO MÓVIL.png`)
@@ -834,7 +899,7 @@ Pantallas existentes en el prototipo (sincronizadas con nav oficial §7.1):
 |--------|-----|---------------------|
 | Inicio | 1 | `HomeScreen` implementado — ver `02-MODULO-INICIO.md` |
 | Clientes | 2 | Implementado |
-| IA | 3 | `IAMenuScreen` implementado (menú Escribir / Hablar) |
+| IA | 3 | `IAMenuScreen` — cards Escribir / Hablar / Soporte con IA (§6.8.2) |
 | Facturas | 4 | Implementado |
 | Cierre | 5 | `CierreScreen` implementado conforme a imagen oficial |
 | Más | 6 | `SettingsScreen` — 3 pestañas + secciones adicionales (ver `07-MODULO-MAS.md` §6) |
@@ -889,7 +954,8 @@ Análisis basado únicamente en las cuatro fuentes permitidas.
 | Botones Editar/Re-cotizar/Eliminar en ficha Cliente | ✅ Implementado | Fila de acciones en `ClientDetail` — §5.2 |
 | Botones Editar/Re-cotizar/Eliminar/Compartir en lista Cotizaciones | ✅ Implementado | Mismo patrón en `ClientDetail` y `QuotesScreen` — §5.2 |
 | Botón Compartir en lista Facturas | ✅ Resuelto | Este MD y MD 06 documentan "Ver factura" con `I.pdf` como acción real de Fable 5 |
-| Acceso IA (posición 3 nav principal) | ✅ Implementado | `IAMenuScreen` en prototipo; botón central destacado en `BottomNav` |
+| Acceso IA (posición 3 nav principal) | ✅ Implementado | `IAMenuScreen` cards 1–2 en prototipo; card 3 Soporte con IA documentada §6.8.2 |
+| Soporte con IA (IAMenuScreen card 3) | ⏳ Pendiente prototipo | Diseño oficial §6.8.2 · lógica `08-MODULO-IA.md` §11 |
 | Botones no documentados (Guardar, Email, Cancelar, Cerrar, etc.) | ✅ Resuelto | Este MD los documenta en §5.2 |
 
 ## 11.2 Entre `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` y la jerarquía documental

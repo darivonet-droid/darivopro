@@ -47,14 +47,15 @@ Spec: `09-MODULO-CIERRE-EMPRESA.md` v1.0 · imagen `09 - MODULO CIERRE - DARIVO 
 
 ## 6.6 Patrón IA
 
-Spec: `08-MODULO-IA-EMPRESA.md` v1.0 · imagen `08 - MODULO IA - DARIVO PRO EMPRESA.png` ✅.
+Spec: `08-MODULO-IA-EMPRESA.md` v1.1 · imagen `08 - MODULO IA - DARIVO PRO EMPRESA.png` ✅ (⏳ card Soporte con IA pendiente imagen).
 
 | Lógica (Móvil) | Presentación (Empresa) |
 |----------------|------------------------|
 | Botón central elevado bottom nav | Ítem sidebar posición 3 |
-| `IAMenuScreen` dos cards verticales | Dos cards horizontales área central |
-| Flujos Escribir / Hablar | Misma lógica · formulario/modal escritorio |
-| Destino wizard cotización | `05-MODULO-COTIZACIONES-EMPRESA.md` |
+| `IAMenuScreen` tres cards (§6.8.2 Fable 5) | Dos cards horizontales Agente IA 1 + card ancho completo Agente IA 2 |
+| Agente IA 1 — Escribir / Hablar | Misma lógica · formulario/modal escritorio |
+| Agente IA 2 — Soporte con IA | Card teal + Más → Soporte |
+| Destino wizard cotización / factura | `05-MODULO-COTIZACIONES-EMPRESA.md` · `06-MODULO-FACTURAS-EMPRESA.md` |
 
 **Producción §15:** §6.1–§6.9 completos (doc + imágenes — fase global §7 completada 02/07/2026)
 

@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.6
+**Versión:** 2.9
 
 **Estado:** Visión oficial aprobada
 
@@ -26,7 +26,7 @@ Este documento **no define**:
 * características comerciales
 * precios
 
-Toda esa información pertenece exclusivamente al documento oficial de **Suscripciones** (sección 18) y es administrada desde el **Panel Administrador**.
+Toda esa información pertenece exclusivamente al documento oficial de **Suscripciones** (sección 19) y es administrada desde el **Panel Administrador**.
 
 La **jerarquía documental oficial** del ecosistema se define en la sección 12.
 
@@ -198,7 +198,7 @@ Funcionalidades
 
 Determina qué producto o productos tiene contratados el cliente.
 
-El ecosistema utiliza un **sistema de planes de suscripción**. Este documento no define ningún plan concreto (ver sección 18).
+El ecosistema utiliza un **sistema de planes de suscripción**. Este documento no define ningún plan concreto (ver sección 19).
 
 ## 2. Producto
 
@@ -260,7 +260,7 @@ No dependen del Rol.
 
 No dependen de los Permisos.
 
-Los límites concretos de cada plan se documentan en la sección 18.
+Los límites concretos de cada plan se documentan en la sección 19.
 
 ## 6. Funcionalidades
 
@@ -514,17 +514,33 @@ En ese caso deberá informar al propietario y esperar instrucciones antes de con
 
 # 13. Inteligencia Artificial en el ecosistema
 
-El ecosistema Darivo Pro contempla **dos IA oficiales** con funciones distintas.
+El ecosistema Darivo Pro contempla **dos tipos de IA oficiales** con funciones distintas: la **IA conversacional del producto** y la **IA de desarrollo**.
 
-## IA de Darivo Pro Móvil
+## IA conversacional de Darivo Pro Móvil
 
-Asistente integrado en el producto, orientado a asistir al usuario en la creación y gestión de **cotizaciones, facturas** y en el **Módulo Cierre** (registro de gastos) dentro del flujo normal del producto.
+Darivo Pro Móvil dispone de **dos agentes oficiales de Inteligencia Artificial** con responsabilidades exclusivas:
 
-* Es un atajo dentro del flujo de trabajo del usuario.
-* No sustituye la lógica de negocio ni genera documentos paralelos al sistema.
-* Permite registrar gastos manualmente o mediante análisis automático de fotografías y documentos, sin configuración por parte del usuario.
-* Trabaja de forma automática para reducir tiempo; el usuario no configura la IA.
-* Su comportamiento se documenta en los MD específicos del módulo correspondiente.
+| Agente | Responsabilidad |
+|--------|-----------------|
+| **Agente IA 1 — Presupuestos y Facturas** | Crear y editar cotizaciones, crear facturas, convertir cotizaciones en facturas y asistir en esos procesos. |
+| **Agente IA 2 — Soporte y Tickets** | Primer nivel de soporte: preguntas frecuentes, uso de la app, incidencias comunes y tickets. Escala automáticamente al **Soporte Humano** cuando no tiene certeza (`08-MODULO-IA.md` §3). |
+
+Principios:
+
+* Son un **atajo** dentro del flujo de trabajo del usuario; no sustituyen la lógica de negocio ni generan documentos paralelos al sistema.
+* Solo responden sobre **presupuestos, cotizaciones, facturas, soporte y tickets** de Darivo Pro Móvil.
+* El **soporte al usuario** sigue un modelo de **dos niveles**: IA de Soporte (primer nivel) y Soporte Humano en Darivo Pro Admin (segundo nivel, vía escalado automático).
+* La IA de Soporte **nunca inventa soluciones sin certeza**; deriva al soporte humano mediante ticket.
+* Incluyen **protección frente a robots** (detección de uso automatizado, registro, suspensión temporal e informe al usuario).
+* Su comportamiento se documenta en `01-darivo-pro-movil/08-MODULO-IA.md`.
+
+## IA automática del Módulo Cierre
+
+Además de los dos agentes conversacionales, el **Módulo Cierre** incorpora IA **automática y transparente** para el análisis de fotografías y documentos en el registro de gastos.
+
+* **No** es un tercer agente conversacional.
+* El usuario no conversa con ella; actúa dentro del flujo de registro de gastos.
+* Su comportamiento se documenta en `01-darivo-pro-movil/09-MODULO-CIERRE.md` §14.
 
 ## IA de desarrollo
 
@@ -765,7 +781,53 @@ Los límites de almacenamiento, el sistema técnico de almacenamiento y las rest
 
 ---
 
-# 18. Gestión de planes y límites
+# 18. Facturación electrónica — flujo oficial
+
+Darivo Pro incorporará **facturación electrónica** como parte del módulo compartido de **Facturación** (sección 9), con el mismo flujo funcional en Darivo Pro Móvil y Darivo Pro Empresa.
+
+> **La API de facturación electrónica oficial todavía no ha sido seleccionada por el propietario. La implementación se realizará una vez se apruebe el proveedor oficial.**
+
+Este apartado define **únicamente el flujo funcional**. No define proveedor, integraciones técnicas, endpoints ni arquitectura de implementación.
+
+## Principio
+
+1. El usuario crea la factura en Darivo Pro.
+2. Darivo Pro valida toda la información requerida.
+3. Darivo Pro enviará la factura a la **API oficial de facturación electrónica** que el propietario apruebe en el futuro.
+4. Mientras se procesa el envío, la factura queda en estado **En proceso**.
+5. Darivo Pro interpreta la respuesta de la API y actualiza el estado correspondiente.
+
+## Respuestas oficiales de la API
+
+| Resultado | Comportamiento en Darivo Pro |
+|-----------|------------------------------|
+| **Emitida** | Factura aceptada. Mostrar estado **Emitida**. |
+| **Rechazada** | Mostrar el motivo del rechazo. Permitir corregir la factura. Permitir reenviar. |
+| **Error de comunicación** | Guardar como **Pendiente de envío**. Permitir **Reintentar**. |
+
+## Estados oficiales de facturación electrónica
+
+| Estado | Significado funcional |
+|--------|------------------------|
+| **Borrador** | Factura creada o en edición; aún no enviada a la API. |
+| **En proceso** | Enviada a la API; esperando respuesta. |
+| **Emitida** | Aceptada por la API oficial. |
+| **Rechazada** | Rechazada por la API; el usuario puede corregir y reenviar. |
+| **Pendiente de envío** | Error de comunicación; pendiente de reintento. |
+
+## Reglas funcionales
+
+* Una factura **Emitida** no puede editarse ni eliminarse; su información queda protegida.
+* Una factura **Borrador**, **Rechazada** o **Pendiente de envío** puede corregirse según las reglas del módulo Facturas.
+* Darivo Pro **no sustituye** el cumplimiento tributario del usuario ni el trabajo de su gestoría; facilita la emisión electrónica cuando el proveedor oficial esté aprobado.
+
+## Documentación funcional detallada
+
+`01-darivo-pro-movil/06-MODULO-FACTURAS.md` (y su equivalente en Darivo Pro Empresa).
+
+---
+
+# 19. Gestión de planes y límites
 
 ## Sistema de suscripción
 
@@ -797,7 +859,7 @@ Nunca duplican nombres de planes, límites, precios, almacenamiento ni restricci
 
 ---
 
-# 19. Alcance del documento
+# 20. Alcance del documento
 
 Este documento define exclusivamente la visión del producto y los principios estratégicos del ecosistema.
 
@@ -808,7 +870,7 @@ No define el detalle de:
 * APIs.
 * Diseño visual detallado de interfaces, pantallas y componentes (ver sección 10 y documentación de diseño de cada producto).
 * Implementación y código.
-* Nombres de planes, límites, precios ni características comerciales (ver sección 18 y `04-PANEL-ADMIN-SUSCRIPCIONES.md`).
+* Nombres de planes, límites, precios ni características comerciales (ver sección 19 y `04-PANEL-ADMIN-SUSCRIPCIONES.md`).
 * Reglas funcionales detalladas de módulos (ver MD específicos oficiales de cada ámbito, sección 12).
 
 Este documento **sí define** la estructura estratégica de la navegación oficial de Darivo Pro Móvil (sección 5), los principios de diseño y funcionalidad compartida (sección 10) y los principios estratégicos de arquitectura y base de datos (sección 14).
@@ -817,11 +879,17 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 ---
 
-# 20. Estado del documento
+# 21. Estado del documento
 
-**Versión:** 2.6
+**Versión:** 2.9
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.9):** §13 — modelo oficial de soporte IA + humano (dos niveles), escalado automático y regla de no inventar soluciones.
+
+**Cambio principal (v2.8):** actualización de §13 — dos agentes conversacionales oficiales de IA Móvil (Presupuestos y Facturas · Soporte y Tickets), ámbito, protección anti-robots e IA automática del Módulo Cierre diferenciada.
+
+**Cambio principal (v2.7):** incorporación de la sección 18 — flujo oficial de facturación electrónica (estados, validación, envío a API futura y respuestas); renumeración de §19–§21.
 
 **Cambio principal (v2.6):** incorporación de la sección 14 — principios estratégicos de arquitectura y base de datos; actualización de §1, §12 y §19.
 

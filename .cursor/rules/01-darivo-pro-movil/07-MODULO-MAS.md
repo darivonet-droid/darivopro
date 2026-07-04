@@ -1,6 +1,6 @@
 # DARIVO PRO — MÓDULO MÁS
 ## Diseño + Funcionalidad
-### Versión: 1.9 — 01/07/2026
+### Versión: 2.1 — 04/07/2026
 ### Fuente: diseño Fable 5 (SettingsScreen) + jerarquía de precios (`21 – ARQUITECTURA DEL CATÁLOGO MAESTRO...`) + funcionalidad real + decisión arquitectónica 29/06/2026
 ### Relacionado: ver `04-PANEL-ADMIN-SUSCRIPCIONES.md`, `09-PANEL-ADMIN-SOPORTE.md`, `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`, `10-PANEL-ADMIN-CATALOGO-MAESTRO.md` (Darivo Pro Admin) · ver `01-VISION-DEL-PRODUCTO.md` · ver `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO` (arquitectura oficial)
 
@@ -185,17 +185,23 @@ subtítulo 12px T.textMid, chevron I.chevron a la derecha.
    Pasarela oficial: **dLocal API** (`08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.3 · producto dLocal Go)
 
 🤖 IA — Preferencias (I.sparkle, T.purple)
-   Ajustes de uso del asistente de Inteligencia Artificial
-   El asistente IA (creación de cotizaciones por voz/texto) 
-   se accede desde el módulo **IA** de la navegación principal — 
-   ver `08-MODULO-IA.md` y `01-VISION-DEL-PRODUCTO.md` §5
+   Ajustes de uso de los agentes de Inteligencia Artificial
+   Los agentes IA (Presupuestos y Facturas · Soporte y Tickets) 
+   se acceden desde el módulo **IA** de la navegación principal 
+   y desde **Soporte** en este módulo — ver `08-MODULO-IA.md` 
+   y `01-VISION-DEL-PRODUCTO.md` §13
 
 🎧 Soporte (I.phone, T.teal)
-   Creación y consulta de tickets de soporte (Asunto + Descripción)
+   Sistema de soporte oficial: IA de Soporte (primer nivel) 
+   + Soporte Humano (escalado automático)
+   Resolver dudas frecuentes, ayudar con el uso y gestionar tickets 
+   (crear, consultar estado; escalado si la IA no tiene certeza)
+   También disponible creación manual: Asunto + Descripción
    Estados: Nuevo / En proceso / Resuelto
    La administración del soporte se realiza desde Darivo Pro Admin.
    Darivo Pro únicamente consume la información autorizada 
-   (ver §8 — Integración con otros módulos y `09-PANEL-ADMIN-SOPORTE.md`).
+   (ver §8 — Integración con otros módulos, `08-MODULO-IA.md` §3 
+   y `09-PANEL-ADMIN-SOPORTE.md`).
 
 ⚙️ Preferencias generales (I.gear, T.textMid)
    Idioma, notificaciones, moneda por defecto y otras 
@@ -256,8 +262,14 @@ El **Módulo Más** actúa como punto de acceso y personalización. No duplica i
 ### Soporte
 
 - Soporte obtiene toda su información desde **Darivo Pro Admin → Soporte** (`09-PANEL-ADMIN-SOPORTE.md`).
-- Desde Darivo Pro el usuario podrá crear incidencias (Asunto + Descripción), consultar incidencias y revisar respuestas.
+- **Modelo oficial de dos niveles** (`08-MODULO-IA.md` §3):
+  - **IA de Soporte** (Agente IA 2): primer nivel — preguntas frecuentes, uso de la app, incidencias comunes, creación y consulta de tickets.
+  - **Soporte Humano** (Admin): segundo nivel — tickets escalados automáticamente cuando la IA no puede resolver con certeza.
+- **Regla obligatoria:** la IA nunca inventa soluciones sin certeza; deriva automáticamente al soporte humano mediante ticket.
+- Desde Darivo Pro el usuario interactúa con el **Agente IA 2** vía esta sección o vía Módulo IA (`08-MODULO-IA.md` §11).
+- También podrá crear incidencias manualmente (Asunto + Descripción), consultar incidencias y revisar respuestas del soporte humano.
 - Estados oficiales del ticket: **Nuevo**, **En proceso**, **Resuelto** (`09` §5).
+- El **cierre** del ticket (estado Resuelto) corresponde al **Soporte Humano** en incidencias escaladas.
 - No existen categorías de incidencia ni prioridades (`09` §5, §13).
 - La administración del soporte se realiza exclusivamente desde Darivo Pro Admin.
 
@@ -302,4 +314,20 @@ El **Módulo Más** actúa como punto de acceso y personalización. No duplica i
 
 ---
 
-*Este documento describe el **Módulo Más** de Darivo Pro únicamente. Para planes, ver `04-PANEL-ADMIN-SUSCRIPCIONES.md`. Para soporte Admin, ver `09-PANEL-ADMIN-SOPORTE.md`. Para roles y permisos, ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`. Para el Catálogo Maestro (precios base), ver `10-PANEL-ADMIN-CATALOGO-MAESTRO.md`. Para el asistente IA, ver `08-MODULO-IA.md`.*
+*Este documento describe el **Módulo Más** de Darivo Pro únicamente. Para planes, ver `04-PANEL-ADMIN-SUSCRIPCIONES.md`. Para soporte Admin, ver `09-PANEL-ADMIN-SOPORTE.md`. Para roles y permisos, ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`. Para el Catálogo Maestro (precios base), ver `10-PANEL-ADMIN-CATALOGO-MAESTRO.md`. Para los agentes IA, ver `08-MODULO-IA.md`.*
+
+---
+
+## 10. Estado del documento
+
+**Versión:** 2.0
+
+**Estado:** Diseño y funcionalidad oficial aprobados.
+
+**Versión:** 2.1
+
+**Estado:** Diseño y funcionalidad oficial aprobados.
+
+**Cambio principal (v2.1):** modelo oficial soporte IA + humano en §6 y §8 — escalado automático, regla de no inventar soluciones, cierre por soporte humano.
+
+**Cambio principal (v2.0):** sincronización con `08-MODULO-IA.md` v1.5 — Agente IA 2 en Soporte e IA — Preferencias actualizado para dos agentes oficiales.

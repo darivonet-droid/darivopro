@@ -1,6 +1,6 @@
 # 09 – PANEL ADMIN – SOPORTE
 
-**Versión:** 1.0
+**Versión:** 1.1
 
 **Estado:** Diseño oficial aprobado
 
@@ -13,6 +13,8 @@ El módulo **Soporte** permite gestionar los tickets de soporte de los usuarios 
 Este módulo pertenece al Panel Administrador.
 
 El equipo Darivo visualiza, responde y gestiona el estado de las solicitudes recibidas desde Darivo Pro.
+
+El **Soporte Humano** es el **segundo nivel** del modelo oficial de soporte (IA de Soporte → Soporte Humano). Documentación del primer nivel: `01-darivo-pro-movil/08-MODULO-IA.md` §3.
 
 ---
 
@@ -97,6 +99,23 @@ No existen prioridades.
 * En proceso
 * Resuelto
 
+## Modelo oficial — Soporte Humano (segundo nivel)
+
+Los tickets llegan al Panel Administrador por:
+
+* **Escalado automático** desde la IA de Soporte cuando no puede resolver con certeza (`08-MODULO-IA.md` §3, §11).
+* **Creación manual** del usuario (Asunto + Descripción) desde Darivo Pro Móvil (`07-MODULO-MAS.md` §8).
+
+El **Soporte Humano** podrá:
+
+* Revisar el ticket.
+* Comunicarse con el usuario.
+* Solicitar información adicional.
+* Resolver incidencias técnicas.
+* Cerrar el ticket una vez solucionado (estado **Resuelto**).
+
+> La IA de Soporte **nunca inventa soluciones sin certeza** y deriva automáticamente al soporte humano mediante ticket cuando no puede resolver.
+
 ## Filtros
 
 * Estado
@@ -168,7 +187,9 @@ No documentar funcionalidades adicionales sin aprobación.
 
 ## Relación con Darivo Pro Móvil
 
-* Los usuarios crean y consultan tickets desde el **Módulo Más** (`07-MODULO-MAS.md` §6 — Soporte).
+* Los usuarios acceden al soporte desde **Más → Soporte** y desde el **Módulo IA** — card Soporte con IA (`07-MODULO-MAS.md` §8 · `08-MODULO-IA.md` §6, §11).
+* **Primer nivel:** IA de Soporte (Agente IA 2) — preguntas frecuentes, uso de la app, incidencias comunes, creación y consulta de tickets.
+* **Segundo nivel:** este módulo (Soporte Humano) — tickets escalados o creados manualmente.
 * Estados oficiales del ticket: **Nuevo**, **En proceso**, **Resuelto** (§5 de este documento).
 
 ## Otras relaciones
@@ -221,7 +242,11 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 
 # 14. Estado del documento
 
+**Versión:** 1.1
+
 🟡 Documento de diseño oficial.
+
+**Cambio principal (v1.1):** modelo oficial Soporte Humano (segundo nivel), escalado desde IA de Soporte, regla de no inventar soluciones y relación actualizada con Móvil v1.6.
 
 La documentación funcional se completará cuando el resto de documentos oficiales del proyecto estén finalizados y aprobados.
 
