@@ -1,4 +1,4 @@
-# DARIVO PRO — CI/CD GitHub Actions
+DARIVO PRO — CI/CD GitHub Actions
 # Frontend → Vercel automático (integración nativa)
 # Backend → Railway al hacer push a main (opcional si hay RAILWAY_TOKEN)
 # Supabase → db push con supabase link en CI
