@@ -1,6 +1,6 @@
 # 22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Documento Oficial
 
@@ -284,6 +284,42 @@ Toda decisión deberá preservar la calidad de la documentación oficial y evita
 
 ---
 
+# Metodología Git oficial del repositorio
+
+Darivo Pro utiliza un flujo Git simple, estable y fácil de mantener para todo el ecosistema.
+
+## Ramas oficiales
+
+Darivo Pro utilizará **únicamente dos ramas oficiales**:
+
+* **main**
+* **develop**
+
+No se crearán ramas permanentes adicionales.
+
+Las ramas feature, hotfix, debug o similares **no forman parte** de la metodología oficial salvo autorización expresa del propietario.
+
+## Flujo oficial
+
+```
+develop
+   ↓
+Validación
+   ↓
+main
+```
+
+Una vez aprobados los cambios:
+
+* **main** y **develop** deberán mantenerse sincronizadas.
+* No deberá existir divergencia permanente entre ambas ramas.
+
+## Objetivo
+
+Mantener un flujo Git simple, estable y fácil de mantener para todo el ecosistema Darivo Pro.
+
+---
+
 # Metodología de las auditorías documentales
 
 ## Principios generales
@@ -414,7 +450,7 @@ No deberá incluir propuestas de diseño, arquitectura o funcionalidad, salvo qu
 
 # Estado del documento
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Documento Oficial.
 
@@ -423,6 +459,8 @@ Metodología obligatoria para cualquier IA que participe en el desarrollo de Dar
 Sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.6 §12.
 
 **Documento relacionado:** `25 – CATÁLOGO OFICIAL DE TAREAS – IMPLEMENTACIÓN DARIVO PRO.md` v1.0 · `24 – PROMPT OFICIAL – PRODUCCIÓN E IMPLEMENTACIÓN – DARIVO PRO.md` v1.0 · `23 – METODOLOGÍA OFICIAL – UNA TAREA, DOS AGENTES – DARIVO PRO.md` v2.1 · `23-A` y `23-B`.
+
+**Cambio principal (v1.3):** incorporación de la Metodología Git oficial del repositorio — ramas `main` y `develop`, flujo develop → validación → main y sincronización obligatoria.
 
 **Cambio principal (v1.2):** incorporación de la Metodología de las auditorías documentales.
 
