@@ -27,7 +27,7 @@ const env = { ...feEnv, ...sbEnv };
 
 const url = env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL;
 const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
-const ref = env.SUPABASE_PROJECT_REF || "kyckjapprmtfahnkuucz";
+const ref = env.SUPABASE_PROJECT_REF || "vyrtokggypcmpforglch";
 const dbPassword = env.SUPABASE_DB_PASSWORD;
 
 const results = [];

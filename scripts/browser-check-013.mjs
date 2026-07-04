@@ -94,7 +94,7 @@ async function main() {
     if (!pdfOk) {
       // Validar el PDF almacenado (mismo que abriría el botón con pdf_url cacheado)
       const cachedUrl =
-        "https://kyckjapprmtfahnkuucz.supabase.co/storage/v1/object/public/documentos/pdfs/presupuesto-eab34581-f60e-49b9-95a5-080078ba7a40-20260623.pdf";
+        "https://vyrtokggypcmpforglch.supabase.co/storage/v1/object/public/documentos/pdfs/presupuesto-eab34581-f60e-49b9-95a5-080078ba7a40-20260623.pdf";
       const pdfFetch = await fetch(cachedUrl);
       const buf = Buffer.from(await pdfFetch.arrayBuffer());
       if (buf.subarray(0, 5).toString() === "%PDF-") {
@@ -108,7 +108,7 @@ async function main() {
     // Validación adicional del contenido PDF
     if (pdfOk) {
       const cachedUrl =
-        "https://kyckjapprmtfahnkuucz.supabase.co/storage/v1/object/public/documentos/pdfs/presupuesto-eab34581-f60e-49b9-95a5-080078ba7a40-20260623.pdf";
+        "https://vyrtokggypcmpforglch.supabase.co/storage/v1/object/public/documentos/pdfs/presupuesto-eab34581-f60e-49b9-95a5-080078ba7a40-20260623.pdf";
       const buf = Buffer.from(await (await fetch(cachedUrl)).arrayBuffer());
       if (buf.subarray(0, 5).toString() === "%PDF-")
         pass("PDF se ve bien", `COT-001, cliente y totales en PDF (${buf.length} bytes)`);

@@ -30,7 +30,7 @@ if (-not $env:SUPABASE_ACCESS_TOKEN) {
     exit 1
 }
 
-$ref = if ($env:SUPABASE_PROJECT_REF) { $env:SUPABASE_PROJECT_REF } else { "kyckjapprmtfahnkuucz" }
+$ref = if ($env:SUPABASE_PROJECT_REF) { $env:SUPABASE_PROJECT_REF } else { "vyrtokggypcmpforglch" }
 
 Set-Location $root
 Write-Host "Vinculando proyecto $ref..." -ForegroundColor Cyan

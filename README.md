@@ -70,19 +70,19 @@ railway up
 ```bash
 # Local (opcional)
 npx supabase login
-npx supabase link --project-ref kyckjapprmtfahnkuucz
+npx supabase link --project-ref vyrtokggypcmpforglch
 npx supabase db push
 ```
 
 En **CI (GitHub Actions)**, el job `supabase-migrate` ejecuta:
-1. `supabase link --project-ref kyckjapprmtfahnkuucz`
+1. `supabase link --project-ref vyrtokggypcmpforglch`
 2. `supabase db push`
 
 Secrets requeridos en GitHub:
 - `SUPABASE_ACCESS_TOKEN` — [Account Tokens](https://supabase.com/dashboard/account/tokens)
 - `SUPABASE_DB_PASSWORD` — Project → Settings → Database
 
-Project ref producción: `kyckjapprmtfahnkuucz`
+Project ref producción: `vyrtokggypcmpforglch`
 
 ## Estructura del proyecto
 ```
@@ -136,7 +136,7 @@ SUPABASE_URL
 SUPABASE_SERVICE_KEY
 SUPABASE_ACCESS_TOKEN
 SUPABASE_DB_PASSWORD
-SUPABASE_PROJECT_REF   # opcional; CI usa kyckjapprmtfahnkuucz
+SUPABASE_PROJECT_REF   # opcional; CI usa vyrtokggypcmpforglch
 # WA_PHONE_NUMBER_ID, WA_ACCESS_TOKEN, WA_VERIFY_TOKEN — solo legacy backend (deprecado)
 SERVICE_KEY
 RAILWAY_TOKEN

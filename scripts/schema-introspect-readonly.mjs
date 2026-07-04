@@ -27,7 +27,7 @@ const env = {
   ...process.env,
 };
 
-const ref = env.SUPABASE_PROJECT_REF || "kyckjapprmtfahnkuucz";
+const ref = env.SUPABASE_PROJECT_REF || "vyrtokggypcmpforglch";
 const pwd = env.SUPABASE_DB_PASSWORD;
 
 if (!pwd) {
