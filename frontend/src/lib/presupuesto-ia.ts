@@ -39,6 +39,8 @@ export interface PresupuestoDraft {
 }
 
 export const DRAFT_STORAGE_KEY = "darivo_presupuesto_draft";
+/** Handoff IA → wizard Resumen (08-MODULO-IA.md §9) */
+export const WIZARD_IA_SESSION_KEY = "darivo_wizard_ia_handoff";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
