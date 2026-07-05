@@ -125,7 +125,7 @@ Copia en `frontend/public/design/` — pendiente despliegue de assets binarios a
 |----|-------------|-------|
 | DT-06-01 | Assets PNG oficiales en `/public/design/` | Propietario |
 | DT-06-02 | FloatBar, PDFModal, InvoiceModal bottom-sheet | Iteración UI |
-| DT-06-03 | StepDots integrado en wizard cotización (Selección → Resumen → Cliente — `05` v1.5) | Frontend |
+| DT-06-03 | StepDots integrado en wizard cotización (Selección → Cantidades → Resumen → Cliente — `05` v1.6) | Frontend |
 | DT-06-04 | Toggle en CategoriasManager | Frontend |
 | DT-06-05 | UI Admin/Empresa módulo a módulo | Post-06 |
 

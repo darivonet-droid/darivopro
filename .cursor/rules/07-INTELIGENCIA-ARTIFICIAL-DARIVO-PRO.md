@@ -71,7 +71,7 @@ frontend/src/app/(auth)/ia/page.tsx — Pantalla Módulo IA
 5. Mapeo `svcId` → partidas reales; precios **siempre del catálogo**.
 6. `registrarUsoIA` si el plan no es ilimitado (Pro).
 
-**UI:** `IAPresupuestoFlow` — texto, voz (Web Speech API), revisión en **Paso 2 Resumen** del wizard y confirmación (Reglas 5–10 — `08-MODULO-IA.md` §9).
+**UI:** `IAPresupuestoFlow` — texto, voz (Web Speech API), revisión en **Paso 2 Cantidades** del wizard y confirmación (Reglas 4–10 — `08-MODULO-IA.md` §9).
 
 ---
 

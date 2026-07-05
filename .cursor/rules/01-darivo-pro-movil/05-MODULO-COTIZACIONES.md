@@ -1,6 +1,6 @@
 # DARIVO PRO — MÓDULO COTIZACIONES
 ## Diseño + Funcionalidad
-### Versión: 1.5 — 05/07/2026
+### Versión: 1.6 — 05/07/2026
 ### Fuente: diseño Fable 5 (QuoteScreen/FloatBar/PDFModal) + flujo manual oficial aprobado por el propietario
 ### Relacionado: ver 21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO (arquitectura oficial)
 
@@ -18,6 +18,12 @@ Es un documento de TRABAJO: se puede editar, eliminar, duplicar libremente. No t
 
 **Navegación:** Cotizaciones **no** forman parte de la navegación principal de Darivo Pro Móvil (`01-VISION-DEL-PRODUCTO.md` §5). Las cotizaciones guardadas se consultan dentro de la ficha de cada Cliente (§3).
 
+### Wizard único (decisión oficial)
+
+Existe **un único wizard** para todas las categorías. **No** existen wizards distintos para Construcción y para el resto de categorías.
+
+Todos los usuarios utilizan exactamente los **mismos StepDots** (4 pasos). La **única diferencia** entre Construcción y el resto de categorías es la **navegación inicial del Paso 1** hasta llegar a la pantalla de Partidas. Una vez en Partidas, el flujo es **exactamente igual** para todas las categorías.
+
 ### Accesos al wizard (Regla 1)
 
 Existen **dos entradas independientes**. El diseño de la pantalla principal (`02-MODULO-INICIO.md`) **no cambia**:
@@ -25,19 +31,20 @@ Existen **dos entradas independientes**. El diseño de la pantalla principal (`0
 | Entrada | Origen | Flujo |
 |---------|--------|-------|
 | **Nueva cotización** | Inicio → «Nuevo presupuesto» · pills capítulos obra | Flujo **manual** (§2) |
-| **IA** | Nav central → módulo IA (`08-MODULO-IA.md`) | Flujo **IA** → converge al mismo wizard desde el Resumen (§2 Paso 2) |
+| **IA** | Nav central → módulo IA (`08-MODULO-IA.md`) | Flujo **IA** → converge al mismo wizard desde **Cantidades** (§2 Paso 2) |
 
 ---
 
-## 2. FLUJO DE CREACIÓN MANUAL — 3 PASOS (wizard)
+## 2. FLUJO DE CREACIÓN MANUAL — 4 PASOS (wizard)
 
 ```
 PASO 1 — SELECCIÓN (Categorías / Partidas)
-PASO 2 — RESUMEN
-PASO 3 — CLIENTE → CONFIRMACIÓN
+PASO 2 — CANTIDADES
+PASO 3 — RESUMEN
+PASO 4 — CLIENTE → CONFIRMACIÓN
 ```
 
-Tras el Paso 3 (Cliente), el usuario confirma la cotización:
+Tras el Paso 4 (Cliente), el usuario confirma la cotización:
 
 ```
 Guardar → Generar PDF → Asociar al cliente → Compartir → Conversión posterior a factura
@@ -82,12 +89,14 @@ Techos / Pisos / Acabados / ...)
 
 ↓
 
-Partidas de la subcategoría seleccionada
+Pantalla de partidas de la subcategoría seleccionada
 
 Nota: estas subcategorías son únicamente de navegación.
 No crean un nuevo nivel en la base de datos ni modifican
 la arquitectura del Catálogo Maestro.
 ```
+
+**Pantalla de Partidas:** muestra **únicamente las partidas**. No se muestran categorías ni subcategorías en esta pantalla.
 
 #### Selección de partidas (Regla 3)
 
@@ -99,44 +108,45 @@ En esta pantalla:
 * **No** existe calculadora.
 * **No** existen controles numéricos.
 
-Su única finalidad es construir la lista de partidas que alimentará el Resumen dinámico (Regla 5).
+Su única finalidad es construir la lista de partidas que alimentará el Paso Cantidades (Regla 5).
 
 #### Diseño de pantalla — Selección (Fable 5)
 
 ```
 DISEÑO:
 - Header navy: texto visible usuario: "Nueva cotización"
-- StepDots: 3 puntos, paso actual resaltado en blanco,
-  completados en verde
+- StepDots: 4 puntos, paso actual resaltado en blanco,
+  completados en verde (idénticos para todos los usuarios)
 - Lista de categorías habilitadas (card por categoría —
   borde de color según categoría, emoji grande 26px,
   nombre, contador de partidas)
 - Al pulsar una categoría: se abre pantalla de partidas
-  (mismo diseño Fable 5, solo cambia el contenido)
+  (mismo diseño Fable 5, solo cambia el contenido;
+  únicamente partidas visibles)
 
 FUNCIONALIDAD:
 - Selección MÚLTIPLE: se pueden marcar partidas de
   VARIAS categorías distintas en la misma cotización
 - Tocar una partida la activa/desactiva (toggle)
 - FloatBar (cuando hay ≥1 partida seleccionada):
-  contador de partidas + botón "Continuar → Resumen"
+  contador de partidas + botón "Continuar → Cantidades"
   (sin total calculado, sin controles numéricos)
-- El usuario puede volver atrás desde el Resumen a esta
-  pantalla (Regla 6): las selecciones y mediciones del
-  Resumen se conservan según las reglas oficiales
+- El usuario puede volver atrás desde Cantidades a esta
+  pantalla (Regla 6): las selecciones y mediciones de
+  Cantidades se conservan según las reglas oficiales
 ```
 
 ---
 
-### Paso 2 — Resumen
+### Paso 2 — Cantidades
 
-El **Resumen** es el centro del flujo manual (Reglas 4–9).
+El **Paso Cantidades** es el **único punto de cálculo** del flujo manual (Reglas 4–8).
 
-Toda la lógica de cálculo se realiza **exclusivamente** aquí.
+Toda la lógica de mediciones e importes por partida se realiza **exclusivamente** aquí.
 
 #### Motor Inteligente de Precios (ver Doc 21 §11 y §14)
 
-Al calcular cada partida en el Resumen, Darivo Pro resuelve automáticamente el precio:
+Al calcular cada partida en Cantidades, Darivo Pro resuelve automáticamente el precio:
 
 ```
 1. Mis Tarifas (precio personalizado de la empresa)
@@ -166,13 +176,13 @@ La entrada numérica de cada control acepta enteros o decimales, con coma o punt
 
 Darivo Pro calcula automáticamente el importe de cada partida. La lógica permanece oculta al usuario.
 
-#### Resumen dinámico (Reglas 5–7)
+#### Lista dinámica (Reglas 5–7)
 
-* El Resumen se construye **dinámicamente** a partir de las partidas seleccionadas.
+* Cantidades se construye **dinámicamente** a partir de las partidas seleccionadas.
 * Solo aparecen las partidas que forman parte de la cotización.
 * Cada partida conserva automáticamente el tipo de cálculo del Catálogo Maestro.
 * Cada modificación recalcula automáticamente: importe de la partida, subtotales y total general.
-* El Resumen representa en todo momento el **estado actual** de la cotización (Regla 7).
+* Cantidades representa en todo momento el **estado actual** de las mediciones (Regla 7).
 * No puede existir información desactualizada ni cálculos pendientes.
 
 #### Orden de partidas (Regla 9)
@@ -184,20 +194,43 @@ Darivo Pro calcula automáticamente el importe de cada partida. La lógica perma
 
 #### Validación de completitud (Regla 8)
 
-El botón **«Continuar → Cliente»** solo está disponible cuando el Resumen está **completo**:
+El botón **«Continuar → Resumen»** solo está disponible cuando Cantidades está **completo**:
 
 * Todas las partidas que requieren medición deben tenerla cumplimentada.
 * Las partidas de **Precio fijo** no requieren acción del usuario.
 
 #### Navegación atrás (Regla 6)
 
-Si el usuario vuelve desde el Resumen a la pantalla de selección:
+Si el usuario vuelve desde Cantidades a la pantalla de selección:
 
 * Las mediciones ya introducidas se **mantienen** para todas las partidas que continúen seleccionadas.
-* Si elimina una partida de la selección, desaparece automáticamente del Resumen.
+* Si elimina una partida de la selección, desaparece automáticamente de Cantidades.
 * Si posteriormente vuelve a seleccionarla, se trata como una **nueva incorporación** (sin mediciones previas).
 
-#### Diseño de pantalla — Resumen (Fable 5)
+#### Diseño de pantalla — Cantidades (Fable 5)
+
+```
+DISEÑO:
+- Header navy + StepDots (paso 2 de 4)
+- Lista de partidas seleccionadas agrupadas por categoría
+  (orden Regla 9)
+- Por cada partida: control según tipo (Regla 5) + importe
+  calculado
+- FloatBar: total parcial visible al modificar mediciones
+
+FUNCIONALIDAD:
+- Recálculo automático en cascada al modificar cualquier control
+- Persistencia automática del estado del wizard en sesión (Regla 10)
+- Sin numeración COT- ni guardado en BD hasta la confirmación (§2 Paso 4)
+```
+
+---
+
+### Paso 3 — Resumen
+
+El **Resumen** es una pantalla de **presentación**. **No realiza cálculos nuevos** ni introduce controles de medición por partida.
+
+Muestra el resultado ya calculado en Cantidades:
 
 ```
 DISEÑO:
@@ -205,25 +238,27 @@ DISEÑO:
   (54px) y desglose: Ejecución material / Mano de obra
 - Tabla agrupada por categoría con sus partidas y subtotales
   (orden Regla 9)
-- Por cada partida: control según tipo (Regla 5) + importe
 - Slider de margen de mano de obra (0-120%) + botones
   preset (0/25/40/60/80/100%)
 - Campo de notas (aparecen en el PDF)
-- Botón "Continuar → Cliente" (habilitado solo si Regla 8)
+- Selector de estado: Borrador / Pendiente / Aprobado
+- Acciones: PDF · WhatsApp (previsualización / envío)
+- Botón "Continuar → Cliente"
 
 FUNCIONALIDAD:
-- Recálculo automático en cascada al modificar cualquier control
+- Solo visualización de partidas, subtotales y total
+- Ajuste de margen y notas para el documento final
 - Persistencia automática del estado del wizard en sesión (Regla 10)
-- Sin numeración COT- ni guardado en BD hasta la confirmación (§2 Paso 3)
+- Sin numeración COT- ni guardado en BD hasta la confirmación (§2 Paso 4)
 ```
 
 ---
 
-### Paso 3 — Cliente y confirmación
+### Paso 4 — Cliente y confirmación
 
 #### Cliente
 
-Una vez finalizado el Resumen (Regla 8):
+Una vez revisado el Resumen:
 
 ```
 DISEÑO:
@@ -243,8 +278,6 @@ FUNCIONALIDAD:
 #### Confirmación (tras Cliente)
 
 ```
-Selector de estado: Borrador / Pendiente / Aprobado (colores fijos)
-
 Botones de acción (según Fable 5):
 [I.save  Guardar]                      (primario verde)
 [I.wa    WhatsApp]                     (secundario)
@@ -270,7 +303,7 @@ FUNCIONALIDAD — Guardar (Regla 10):
 
 ```
 CREACIÓN DE COTIZACIÓN:
-Wizard de 3 pasos (Selección → Resumen → Cliente) accesible desde:
+Wizard de 4 pasos (Selección → Cantidades → Resumen → Cliente) accesible desde:
 · Inicio → «Nuevo presupuesto» (flujo manual — Regla 1)
 · Nav IA → flujos Escribir / Hablar (flujo IA — 08-MODULO-IA.md)
 
@@ -296,7 +329,7 @@ Fila de acciones:
 
 FUNCIONALIDAD:
 - "Editar": abre el wizard con TODOS los datos precargados
-  (Regla 10 — sesión); mediciones en Resumen (Reglas 5–7)
+  (Regla 10 — sesión); mediciones en Cantidades (Reglas 5–7)
 - "Re-cotizar": wizard precargado pero crea cotización NUEVA
 - "Eliminar": borrado real e inmediato
 - "→ Factura": solo si Aprobado (ver 06-MODULO-FACTURAS.md)
@@ -308,35 +341,35 @@ FUNCIONALIDAD:
 
 ### Regla 1 — Accesos duales
 
-Existen dos accesos independientes: **Nueva cotización** (flujo manual) e **IA** (flujo IA). El diseño de la pantalla principal no cambia.
+Existen dos accesos independientes: **Nueva cotización** (flujo manual) e **IA** (flujo IA). El diseño de la pantalla principal no cambia. Ambos convergen al **mismo wizard único** (4 pasos).
 
-### Regla 2 — Navegación catálogo
+### Regla 2 — Navegación catálogo y wizard único
 
-Construcción utiliza subcategorías de navegación. El resto de categorías entra directamente a partidas. Las subcategorías no modifican la arquitectura del Catálogo Maestro.
+Existe un único wizard para todas las categorías. Construcción utiliza subcategorías de navegación; el resto de categorías entra directamente a partidas. La pantalla de Partidas muestra únicamente partidas. Las subcategorías no modifican la arquitectura del Catálogo Maestro.
 
 ### Regla 3 — Selección sin cálculo
 
 La selección de partidas nunca realiza cálculos. No existen cantidades, calculadora ni controles numéricos en el Paso 1.
 
-### Regla 4 — Resumen único punto de cálculo
+### Regla 4 — Cantidades único punto de cálculo
 
-El Resumen es el único punto de cálculo del flujo manual.
+Cantidades es el único punto de cálculo del flujo manual. El usuario introduce mediciones; Darivo Pro calcula importes, subtotales y total.
 
-### Regla 5 — Resumen dinámico
+### Regla 5 — Motor por tipo en Cantidades
 
-El Resumen se construye dinámicamente a partir de las partidas seleccionadas. Solo aparecen las partidas que forman parte de la cotización. Cada partida conserva automáticamente el tipo de cálculo definido en el Catálogo Maestro. El usuario nunca selecciona el tipo de cálculo. Darivo Pro determina automáticamente el comportamiento de cada partida. Cada partida muestra únicamente el control correspondiente a su tipo. No debe existir una calculadora genérica. No deben mostrarse controles pertenecientes a otros tipos. Cada modificación recalcula automáticamente el importe de la partida, los subtotales y el total general.
+Cantidades se construye dinámicamente a partir de las partidas seleccionadas. Solo aparecen las partidas que forman parte de la cotización. Cada partida conserva automáticamente el tipo de cálculo definido en el Catálogo Maestro. El usuario nunca selecciona el tipo de cálculo. Darivo Pro determina automáticamente el comportamiento de cada partida. Cada partida muestra únicamente el control correspondiente a su tipo. No debe existir una calculadora genérica. No deben mostrarse controles pertenecientes a otros tipos. Cada modificación recalcula automáticamente el importe de la partida, los subtotales y el total general.
 
 ### Regla 6 — Conservación de mediciones
 
-Las mediciones introducidas en el Resumen deben conservarse mientras la partida permanezca seleccionada. Si el usuario vuelve desde el Resumen a la pantalla de selección: las mediciones se mantienen para partidas aún seleccionadas; eliminar una partida de la selección la elimina del Resumen; volver a seleccionarla la incorpora como partida nueva.
+Las mediciones introducidas en Cantidades deben conservarse mientras la partida permanezca seleccionada. Si el usuario vuelve desde Cantidades a la pantalla de selección: las mediciones se mantienen para partidas aún seleccionadas; eliminar una partida de la selección la elimina de Cantidades; volver a seleccionarla la incorpora como partida nueva.
 
-### Regla 7 — Resumen sincronizado
+### Regla 7 — Estado sincronizado
 
-El Resumen representa en todo momento el estado actual de la cotización. Debe mantenerse sincronizado automáticamente con las partidas seleccionadas. Cualquier modificación se refleja inmediatamente en la partida, los subtotales y el total general. No puede existir información desactualizada ni cálculos pendientes.
+Cantidades y Resumen representan en todo momento el estado actual de la cotización. Cualquier modificación en Cantidades se refleja inmediatamente en importes y totales. No puede existir información desactualizada ni cálculos pendientes al avanzar al Resumen.
 
-### Regla 8 — Completitud del Resumen
+### Regla 8 — Completitud de Cantidades
 
-El usuario solo puede continuar al paso Cliente cuando el Resumen esté completo. Todas las partidas que requieran medición deben tenerla cumplimentada. Las partidas de Precio fijo no requieren acción.
+El usuario solo puede continuar al paso Resumen cuando Cantidades esté completo. Todas las partidas que requieran medición deben tenerla cumplimentada. Las partidas de Precio fijo no requieren acción.
 
 ### Regla 9 — Orden estable
 
@@ -344,7 +377,7 @@ Las partidas mantienen un orden estable, se agrupan por categoría, respetan el 
 
 ### Regla 10 — Persistencia en sesión
 
-Toda la información del wizard se conserva automáticamente durante la sesión. No existe guardado definitivo (numeración COT-, persistencia en BD) hasta confirmar la cotización en el Paso 3.
+Toda la información del wizard se conserva automáticamente durante la sesión. No existe guardado definitivo (numeración COT-, persistencia en BD) hasta confirmar la cotización en el Paso 4.
 
 ### Reglas generales (invariantes)
 
@@ -355,6 +388,7 @@ Toda la información del wizard se conserva automáticamente durante la sesión.
 ✅ Multi-categoría: SÍ permitido en una misma cotización
 ✅ Moneda: SIEMPRE S/ (soles), nunca €
 ✅ Al confirmar: auto-vincula o crea Cliente (03-MODULO-CLIENTES.md)
+✅ Wizard único: mismos StepDots para todos los usuarios
 ```
 
 ---

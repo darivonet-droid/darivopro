@@ -57,7 +57,7 @@ Capítulos de obra:
 
 ```
 ✅ Muestra resumen de cotizaciones aprobadas, pendientes e ingresos
-✅ Acceso rápido al wizard manual de cotización (Selección → Resumen → Cliente — Regla 1)
+✅ Acceso rápido al wizard manual de cotización (Selección → Cantidades → Resumen → Cliente — Regla 1)
 ✅ Acceso independiente al flujo IA desde nav central (posición 3)
 ✅ Acceso rápido al módulo Clientes
 ✅ No duplica la gestión de clientes, facturas ni cierre

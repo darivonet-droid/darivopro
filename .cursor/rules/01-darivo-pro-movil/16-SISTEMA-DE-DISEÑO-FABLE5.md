@@ -115,17 +115,18 @@ Documentado en `01-VISION-DEL-PRODUCTO.md`:
 
 La promesa de valor del producto es: *una cotización en un minuto* y *una factura en un minuto*.
 
-## 2.4 Máximo 3 pasos
+## 2.4 Wizard de 4 pasos
 
-En el wizard de cotización (`QuoteScreen`), el componente `StepDots` usa **`total={3}`** para indicar el progreso del flujo:
+En el wizard de cotización (`QuoteScreen`), el componente `StepDots` usa **`total={4}`** para indicar el progreso del flujo. **Todos los usuarios** utilizan exactamente los mismos StepDots; la única diferencia entre Construcción y el resto de categorías es la navegación inicial del Paso 1 hasta Partidas.
 
-| Paso visual | Fases internas en Fable 5 | Wizard oficial (`05-MODULO-COTIZACIONES.md` v1.5) |
+| Paso visual | Fases internas en Fable 5 | Wizard oficial (`05-MODULO-COTIZACIONES.md` v1.6) |
 |-------------|---------------------------|--------------------------------------------------|
 | 0 | Selección de categorías y partidas (`cats` / `services`) | **Paso 1 — Selección** (sin controles numéricos) |
-| 1 | Introducción de mediciones (`input`) | **Paso 2 — Resumen** (controles por tipo · Reglas 5–9) |
-| 2 | Resultado y confirmación (`result`) | **Paso 3 — Cliente** + confirmación (Guardar · PDF) |
+| 1 | Introducción de mediciones (`input`) | **Paso 2 — Cantidades** (controles por tipo · Reglas 4–8) |
+| 2 | Resultado (`result`) | **Paso 3 — Resumen** (solo presentación · sin cálculos nuevos) |
+| 3 | Confirmación cliente | **Paso 4 — Cliente** + confirmación (Guardar · PDF) |
 
-> El mapeo funcional anterior (`input` = mediciones, `result` = totales) se concentra ahora en el **Paso 2 Resumen**. No implica calculadora genérica ni inputs numéricos en la fase de selección. Ver Reglas 1–10 en `05-MODULO-COTIZACIONES.md` §4.
+> No implica calculadora genérica ni inputs numéricos en la fase de selección. Ver Reglas 1–10 en `05-MODULO-COTIZACIONES.md` §4.
 
 ## 2.5 Consistencia visual
 
@@ -588,7 +589,7 @@ Patrones observados en Fable 5:
 * Border radius: 14px
 * Texto blanco
 
-### Input numérico destacado (wizard — Paso 2 Resumen)
+### Input numérico destacado (wizard — Paso 2 Cantidades)
 
 * Aplica a cada control de partida según tipo de cálculo (Regla 5)
 * Tamaño: 50px, peso 900
@@ -635,7 +636,7 @@ Patrón bottom-sheet usado en `PDFModal`, `InvoiceModal`, y modales del **Módul
 
 Componente: `StepDots`
 
-* Total de puntos: configurable (en cotización: **3**)
+* Total de puntos: configurable (en cotización: **4**)
 * Punto activo: ancho 20px, altura 6px, blanco
 * Punto completado: 6×6px, verde
 * Punto pendiente: 6×6px, blanco al 20% de opacidad
@@ -651,8 +652,9 @@ Componente: `FloatBar`
 * Contador de partidas en cuadrado azul 38×38
 * Botón "Continuar →" con gradiente azul
 * Animación de entrada: clase `pi`
-* Visible en fase de **selección** del wizard cuando hay ≥1 partida: contador + «Continuar → Resumen» (**sin total calculado**)
-* En **Paso 2 Resumen**: totales y acción «Continuar → Cliente» (Regla 8 — `05-MODULO-COTIZACIONES.md`)
+* Visible en fase de **selección** del wizard cuando hay ≥1 partida: contador + «Continuar → Cantidades» (**sin total calculado**)
+* En **Paso 2 Cantidades**: total parcial visible + acción «Continuar → Resumen» (Regla 8 — `05-MODULO-COTIZACIONES.md`)
+* En **Paso 3 Resumen**: acción «Continuar → Cliente»
 
 ## 6.13 Componente SVG (`SVG`)
 

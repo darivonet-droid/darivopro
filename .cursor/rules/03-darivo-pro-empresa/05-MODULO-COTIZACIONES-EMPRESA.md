@@ -1,8 +1,8 @@
 # 05 – MÓDULO COTIZACIONES – DARIVO PRO EMPRESA
 
-**Versión:** 1.1
+**Versión:** 1.2
 
-**Estado:** ✅ Sincronizado con Móvil v1.5 (05/07/2026)
+**Estado:** ✅ Sincronizado con Móvil v1.6 (05/07/2026)
 
 **Relacionado:** `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO…` · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.3
 
@@ -14,7 +14,7 @@
 
 | Fuente | Documento | Uso |
 |--------|-----------|-----|
-| Lógica de negocio | `01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` v1.5 | Wizard 3 pasos, Reglas 1–10 |
+| Lógica de negocio | `01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` v1.6 | Wizard 4 pasos, wizard único, Reglas 1–10 |
 | Referencia diseño escritorio | — | *Sin MD Admin equivalente* — layout multi-panel (Sistema Diseño §5.3) |
 | Sistema de Diseño Empresa | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.4 | Paneles, tablas, formularios amplios |
 | Maestro | `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO…` | Catálogo, Tarifa Pro, motor cotización |
@@ -23,7 +23,9 @@
 
 # 1. Objetivo
 
-Flujo de **cotización** (presupuesto de trabajo) en escritorio — wizard **Selección → Resumen → Cliente** (Móvil §2 · Reglas 1–10).
+Flujo de **cotización** (presupuesto de trabajo) en escritorio — wizard **Selección → Cantidades → Resumen → Cliente** (Móvil §2 · Reglas 1–10).
+
+**Wizard único:** un solo wizard para todas las categorías; mismos StepDots (4 pasos) para todos los usuarios. La única diferencia es la navegación inicial del Paso 1 hasta Partidas (Construcción → subcategorías).
 
 No tiene validez fiscal. Numeración COT-001, COT-002… al confirmar (Móvil §4 Regla 10).
 
@@ -37,7 +39,7 @@ No tiene validez fiscal. Numeración COT-001, COT-002… al confirmar (Móvil §
 
 ![Módulo Cotizaciones — Darivo Pro Empresa](./05%20-%20MODULO%20COTIZACIONES%20-%20DARIVO%20PRO%20EMPRESA.png)
 
-Prevalece siempre este MD ante cualquier diferencia funcional. La imagen puede reflejar layout anterior; la lógica vigente es la de Móvil v1.5.
+Prevalece siempre este MD ante cualquier diferencia funcional. La imagen puede reflejar layout anterior; la lógica vigente es la de Móvil v1.6.
 
 ---
 
@@ -47,7 +49,7 @@ Prevalece siempre este MD ante cualquier diferencia funcional. La imagen puede r
 |--------|--------|
 | Inicio (02) | CTA «Nuevo presupuesto» · pills capítulos obra → **flujo manual** |
 | Clientes (03) | «+ Nuevo» en ficha · Editar / Re-cotizar en historial |
-| IA (08) | Flujos Escribir / Hablar con IA → converge al Resumen (Móvil §2) |
+| IA (08) | Flujos Escribir / Hablar con IA → converge a **Cantidades** (Móvil §2) |
 
 **Consulta de cotizaciones guardadas:** únicamente en ficha de Cliente (Móvil §3 — **no** existe lista global).
 
@@ -61,7 +63,7 @@ Vista a pantalla completa dentro del área de contenido (sin sidebar oculto).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Header: «Nueva cotización» · StepDots (1·2·3)              │
+│  Header: «Nueva cotización» · StepDots (1·2·3·4)            │
 ├──────────────┬──────────────────────────┬───────────────────┤
 │  PANEL CAT.  │  PANEL PARTIDAS          │  (sin total calc.)│
 │  ~240px      │  central flexible        │                   │
@@ -69,11 +71,13 @@ Vista a pantalla completa dentro del área de contenido (sin sidebar oculto).
 └──────────────┴──────────────────────────┴───────────────────┘
 ```
 
-**Paso 2 — Resumen:** panel central o expandido con tabla dinámica, controles por tipo y totales (§5.2).
+**Paso 2 — Cantidades:** panel central con controles por tipo y totales parciales (§5.2).
 
-**Paso 3 — Cliente:** formulario cliente + confirmación (§5.3).
+**Paso 3 — Resumen:** panel central con tabla, hero total, margen, notas y acciones (§5.3).
 
-En Pasos 2 y 3 el panel categorías puede colapsar o mostrar contexto.
+**Paso 4 — Cliente:** formulario cliente + confirmación (§5.4).
+
+En Pasos 2–4 el panel categorías puede colapsar o mostrar contexto.
 
 ---
 
@@ -85,32 +89,43 @@ Equivalente Móvil §2 Paso 1 · Doc 21 · Reglas 2–3.
 
 **Panel categorías (izquierda):** cards por categoría habilitada. Flujo Construcción → subcategorías navegación.
 
-**Panel partidas (centro):** lista partidas · toggle multi-selección · **sin cantidades, sin calculadora, sin controles numéricos**.
+**Panel partidas (centro):** lista partidas · toggle multi-selección · **solo partidas visibles** · **sin cantidades, sin calculadora, sin controles numéricos**.
 
-**FloatBar / acción:** contador de partidas seleccionadas + **Continuar → Resumen** (sin total calculado).
+**FloatBar / acción:** contador de partidas seleccionadas + **Continuar → Cantidades** (sin total calculado).
 
-## 5.2 Paso 2 — Resumen
+## 5.2 Paso 2 — Cantidades
 
 Equivalente Móvil §2 Paso 2 · Reglas 4–9.
 
 | Bloque | Contenido |
 |--------|-----------|
-| Hero total | Gradiente azul · TOTAL · desglose material / mano de obra |
-| Tabla dinámica | Partidas seleccionadas · agrupadas por categoría · orden Catálogo Maestro |
+| Lista dinámica | Partidas seleccionadas · agrupadas por categoría · orden Catálogo Maestro |
 | Controles | Un control por partida según tipo (Regla 5) · sin calculadora genérica |
-| Margen MO | Slider 0–120% + presets |
-| Notas | Campo texto (PDF) |
-| Validación | «Continuar → Cliente» solo si Resumen completo (Regla 8) |
+| Totales | Recálculo automático: importe · subtotales · total parcial |
+| Validación | «Continuar → Resumen» solo si Cantidades completo (Regla 8) |
 
-Motor de precios: Mis Tarifas → Tarifa Pro al calcular en Resumen (Doc 21).
-
-Recálculo automático: importe · subtotales · total (Reglas 5–7).
+Motor de precios: Mis Tarifas → Tarifa Pro al calcular en Cantidades (Doc 21).
 
 Navegación atrás: conservación de mediciones (Regla 6).
 
-## 5.3 Paso 3 — Cliente y confirmación
+## 5.3 Paso 3 — Resumen
 
-Equivalente Móvil §2 Paso 3 · Regla 10.
+Equivalente Móvil §2 Paso 3 · solo presentación.
+
+| Bloque | Contenido |
+|--------|-----------|
+| Hero total | Gradiente azul · TOTAL · desglose material / mano de obra |
+| Tabla | Partidas · subtotales · agrupadas por categoría |
+| Margen MO | Slider 0–120% + presets |
+| Notas | Campo texto (PDF) |
+| Estado / acciones | Borrador/Pendiente/Aprobado · PDF · WhatsApp |
+| Acción | «Continuar → Cliente» |
+
+**No realiza cálculos nuevos** ni controles de medición por partida.
+
+## 5.4 Paso 4 — Cliente y confirmación
+
+Equivalente Móvil §2 Paso 4 · Regla 10.
 
 Card formulario (nombre · teléfono · ciudad opcional). Auto-vinculación / creación cliente.
 
@@ -132,7 +147,7 @@ Selector estado: Borrador / Pendiente / Aprobado (en confirmación).
 
 Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 
-* **Editar** — wizard precargado · mediciones en Resumen · actualiza misma COT-
+* **Editar** — wizard precargado · mediciones en Cantidades · actualiza misma COT-
 * **Re-cotizar** — wizard precargado · nueva COT-
 * **Eliminar** — borrado inmediato
 * **Facturar** — solo Aprobado → `06-MODULO-FACTURAS-EMPRESA.md`
@@ -142,7 +157,7 @@ Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 # 7. Funcionalidad (referencia Móvil §4)
 
 * Multi-categoría permitida.
-* Entrada numérica libre (coma/punto) **por control de partida en Resumen**.
+* Entrada numérica libre (coma/punto) **por control de partida en Cantidades**.
 * Moneda **S/**.
 * PDF en segundo plano al guardar definitivo.
 * Reglas 1–10: ver `05-MODULO-COTIZACIONES.md` §4.
@@ -155,7 +170,7 @@ Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 |--------|----------|
 | Clientes (03) | Destino post-guardado · edición historial |
 | Facturas (06) | Convertir en factura |
-| IA (08) | Entrada al wizard → Resumen |
+| IA (08) | Entrada al wizard → Cantidades |
 | Inicio (02) | CTA manual |
 | Más (07) | Mis Tarifas afecta precios (Doc 21) |
 
@@ -169,7 +184,7 @@ Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 
 # 10. Validación · Estado
 
-* [x] Lógica ↔ Móvil `05-MODULO-COTIZACIONES.md` v1.5 + Doc 21
+* [x] Lógica ↔ Móvil `05-MODULO-COTIZACIONES.md` v1.6 + Doc 21
 * [x] Diseño ↔ Sistema Diseño §5.3 multi-panel
 * [x] Sin lista global (coherente con Móvil §3)
 * [ ] Imagen ↔ MD (layout puede requerir actualización visual en fase posterior)
