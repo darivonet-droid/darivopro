@@ -57,7 +57,8 @@ Capítulos de obra:
 
 ```
 ✅ Muestra resumen de cotizaciones aprobadas, pendientes e ingresos
-✅ Acceso rápido al wizard de cotización (Partidas → Cliente → Resumen)
+✅ Acceso rápido al wizard manual de cotización (Selección → Resumen → Cliente — Regla 1)
+✅ Acceso independiente al flujo IA desde nav central (posición 3)
 ✅ Acceso rápido al módulo Clientes
 ✅ No duplica la gestión de clientes, facturas ni cierre
 ✅ Las cotizaciones guardadas se consultan en la ficha de cada Cliente 
@@ -72,8 +73,8 @@ Capítulos de obra:
 | Módulo | Relación |
 |--------|----------|
 | Clientes | Acceso directo desde acceso rápido |
-| IA | El wizard también puede iniciarse desde el módulo IA (posición 3) |
-| Cotizaciones | Wizard compartido — ver `05-MODULO-COTIZACIONES.md` |
+| IA | Entrada **independiente** al wizard (posición 3) — flujo IA |
+| Cotizaciones | Wizard manual desde Inicio + wizard IA — ver `05-MODULO-COTIZACIONES.md` Regla 1 |
 | Facturas | Sin acceso directo desde Inicio |
 | Cierre | Sin acceso directo desde Inicio |
 | Más | Sin acceso directo desde Inicio |

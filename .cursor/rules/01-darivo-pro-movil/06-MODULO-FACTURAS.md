@@ -155,8 +155,7 @@ se copian automáticamente (importar desde cotización
 aprobada).
 
 Si es nueva desde cero: añadir líneas manualmente 
-(descripción, cantidad, precio unitario — misma regla 
-de calculadora libre que en Cotizaciones).
+(descripción, cantidad, precio unitario — entrada libre por línea; el wizard de Cotizaciones usa controles por tipo en el Resumen — `05-MODULO-COTIZACIONES.md` Regla 5).
 
 Forma de pago: Efectivo / Yape / Transferencia / Crédito
 Estado inicial al crear: Borrador
@@ -300,25 +299,9 @@ Estado Pendiente de envío:
 ### Flujo 1 — Creación desde cliente
 
 ```
-Cliente
+Cliente → Nueva Cotización → Selección → Resumen → Cliente → Guardar
 
-↓
-
-Nueva Cotización
-
-↓
-
-Categoría
-
-↓
-
-Partida
-
-↓
-
-Resumen
-
-↓
+↓ (posterior, si Aprobado)
 
 Factura (Borrador)
 ```
@@ -326,21 +309,9 @@ Factura (Borrador)
 ### Flujo 2 (alternativo)
 
 ```
-Cotización
+Cotización (Inicio o IA) → Selección → Resumen → Cliente → Guardar
 
-↓
-
-Resumen
-
-↓
-
-Crear cliente (si no existe)
-
-↓
-
-Guardar cotización
-
-↓
+↓ (posterior)
 
 Crear factura (Borrador)
 ```

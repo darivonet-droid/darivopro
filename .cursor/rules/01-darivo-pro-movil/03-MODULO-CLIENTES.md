@@ -207,10 +207,9 @@ borde superior T.slateD, gap 6px, flexWrap):
 ## 7. Relación con Cotizaciones
 
 - Se puede crear un cliente directamente desde el módulo Clientes.
-- Se puede crear un cliente desde el Resumen de una cotización.
-- Se puede seleccionar un cliente existente durante una cotización.
+- Durante el wizard de cotización, el paso **Cliente** (Paso 3) asocia o crea el cliente automáticamente (`05-MODULO-COTIZACIONES.md` §2).
 - Un cliente puede tener múltiples cotizaciones.
-- Todas las cotizaciones quedan asociadas al cliente.
+- Todas las cotizaciones quedan asociadas al cliente tras confirmar (Guardar).
 
 ---
 
@@ -240,11 +239,7 @@ Nueva Cotización
 
 ↓
 
-Categoría
-
-↓
-
-Partida
+Categoría → Partida (selección)
 
 ↓
 
@@ -252,21 +247,21 @@ Resumen
 
 ↓
 
-Factura
+Cliente (Paso 3)
+
+↓
+
+Guardar → Factura (posterior, si Aprobado)
 ```
 
 ### Flujo 2 (alternativo)
 
 ```
-Cotización
+Cotización (desde Inicio o IA)
 
 ↓
 
-Resumen
-
-↓
-
-Crear cliente (si no existe)
+Selección → Resumen → Cliente
 
 ↓
 
@@ -274,7 +269,7 @@ Guardar cotización
 
 ↓
 
-Crear factura
+Crear factura (posterior)
 ```
 
 ---

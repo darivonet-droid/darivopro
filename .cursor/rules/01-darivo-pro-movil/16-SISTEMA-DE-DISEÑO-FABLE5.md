@@ -119,11 +119,13 @@ La promesa de valor del producto es: *una cotización en un minuto* y *una factu
 
 En el wizard de cotización (`QuoteScreen`), el componente `StepDots` usa **`total={3}`** para indicar el progreso del flujo:
 
-| Paso visual | Fases internas en Fable 5 |
-|-------------|---------------------------|
-| 0 | Selección de categorías y partidas (`cats` / `services`) |
-| 1 | Introducción de mediciones (`input`) |
-| 2 | Resultado y resumen (`result`) |
+| Paso visual | Fases internas en Fable 5 | Wizard oficial (`05-MODULO-COTIZACIONES.md` v1.5) |
+|-------------|---------------------------|--------------------------------------------------|
+| 0 | Selección de categorías y partidas (`cats` / `services`) | **Paso 1 — Selección** (sin controles numéricos) |
+| 1 | Introducción de mediciones (`input`) | **Paso 2 — Resumen** (controles por tipo · Reglas 5–9) |
+| 2 | Resultado y confirmación (`result`) | **Paso 3 — Cliente** + confirmación (Guardar · PDF) |
+
+> El mapeo funcional anterior (`input` = mediciones, `result` = totales) se concentra ahora en el **Paso 2 Resumen**. No implica calculadora genérica ni inputs numéricos en la fase de selección. Ver Reglas 1–10 en `05-MODULO-COTIZACIONES.md` §4.
 
 ## 2.5 Consistencia visual
 
@@ -586,8 +588,9 @@ Patrones observados en Fable 5:
 * Border radius: 14px
 * Texto blanco
 
-### Input numérico destacado (wizard)
+### Input numérico destacado (wizard — Paso 2 Resumen)
 
+* Aplica a cada control de partida según tipo de cálculo (Regla 5)
 * Tamaño: 50px, peso 900
 * Centrado
 * Fondo: `slate`
@@ -648,7 +651,8 @@ Componente: `FloatBar`
 * Contador de partidas en cuadrado azul 38×38
 * Botón "Continuar →" con gradiente azul
 * Animación de entrada: clase `pi`
-* Visible solo en fase `input` del wizard cuando hay partidas
+* Visible en fase de **selección** del wizard cuando hay ≥1 partida: contador + «Continuar → Resumen» (**sin total calculado**)
+* En **Paso 2 Resumen**: totales y acción «Continuar → Cliente» (Regla 8 — `05-MODULO-COTIZACIONES.md`)
 
 ## 6.13 Componente SVG (`SVG`)
 

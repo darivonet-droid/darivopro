@@ -245,19 +245,15 @@ FUNCIONALIDAD:
 
 ```
 Los items generados por la IA:
-1. Se muestran al usuario como una lista EDITABLE 
-   (puede corregir cantidades, precios, eliminar 
-   o añadir líneas) — usando la MISMA calculadora 
-   libre que el wizard manual (ver 05-MODULO-COTIZACIONES.md)
-2. El usuario pasa al Paso 2 (Cliente) del wizard normal — 
-   MISMO flujo que la creación manual desde este punto
-3. Al guardar, recibe su número COT- normal, igual que 
-   cualquier otra cotización
-4. NO existe un "tipo de documento IA" distinto — es una 
-   cotización idéntica a las creadas manualmente, solo 
-   que su origen fue IA
-5. El Agente IA 1 puede ayudar a editar la cotización 
-   mientras permanezca editable según 05-MODULO-COTIZACIONES.md
+1. Se incorporan al Paso 2 (Resumen) del wizard normal como
+   partidas editables — controles por tipo según Catálogo Maestro
+   (Reglas 5–7 de 05-MODULO-COTIZACIONES.md §4)
+2. El usuario completa el Resumen (Regla 8) y pasa al
+   Paso 3 (Cliente) — MISMO flujo que la creación manual
+3. Al confirmar (Guardar), recibe su número COT- normal
+4. NO existe un "tipo de documento IA" distinto
+5. Reglas 6–10 del módulo Cotizaciones aplican igualmente
+   (conservación mediciones, sincronización, sesión wizard)
 ```
 
 ---

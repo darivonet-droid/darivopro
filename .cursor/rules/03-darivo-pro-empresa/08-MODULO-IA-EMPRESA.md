@@ -164,7 +164,7 @@ Equivalente Móvil §10.
 
 Regla fundamental (Móvil §9 · Cotizaciones §1):
 
-1. Lista de ítems **editable** (calculadora libre — `05-MODULO-COTIZACIONES-EMPRESA.md`).
+1. Ítems IA incorporados al **Paso 2 Resumen** — controles por tipo (Reglas 5–7 · `05-MODULO-COTIZACIONES-EMPRESA.md` §5.2).
 2. Usuario continúa **Paso 2 Cliente** del wizard normal.
 3. Al guardar → numeración **COT-** estándar.
 4. **No** existe tipo «documento IA» — cotización idéntica a la manual.

@@ -277,7 +277,7 @@ No existen otros tipos de cálculo.
 
 Cada partida conoce internamente su tipo de cálculo.
 
-Cuando el usuario añade una partida:
+Cuando el usuario completa el control correspondiente en el **Resumen** del wizard de cotización (`05-MODULO-COTIZACIONES.md` §2 Paso 2 · Reglas 4–7):
 
 Darivo Pro calcula automáticamente el importe.
 
@@ -482,19 +482,35 @@ Resumen
 - La diferencia entre categorías es únicamente el contenido mostrado.
 - Solo Construcción incorpora un nivel adicional de subcategorías debido al volumen de partidas.
 
-## Pasos comunes tras añadir partidas al Resumen
+## Pasos comunes tras seleccionar partidas
 
-Una vez las partidas están en el Resumen, el flujo continúa igual para todos los sectores:
+Una vez las partidas están seleccionadas, el usuario accede al **Resumen** (Paso 2 del wizard — `05-MODULO-COTIZACIONES.md`). El flujo continúa igual para todos los sectores:
 
-1. Introducir únicamente el dato necesario
+1. Introducir únicamente el dato necesario por partida (control según tipo)
 
 ↓
 
-2. Darivo calcula automáticamente el importe
+2. Darivo calcula automáticamente el importe, subtotales y total
+
+↓
+
+3. Validar completitud del Resumen (Regla 8)
+
+↓
+
+4. Cliente → confirmación y guardado definitivo (Regla 10)
 
 ---
 
 # 16. Flujo Inteligente del Resumen
+
+El Resumen se construye **dinámicamente** únicamente con las partidas seleccionadas por el usuario (`05-MODULO-COTIZACIONES.md` Reglas 5–7). Solo aparecen las partidas que forman parte de la cotización. No existe calculadora genérica: cada fila adapta sus controles al tipo de cálculo del Catálogo Maestro.
+
+Las partidas se **agrupan por categoría** y respetan el **orden del Catálogo Maestro** (`orden`). El usuario no puede reordenarlas manualmente (Regla 9).
+
+El Resumen representa en todo momento el **estado actual** de la cotización: cualquier modificación recalcula importe de partida, subtotales y total general sin información desactualizada (Reglas 7–8).
+
+Si el usuario vuelve atrás a la selección de partidas, las mediciones se conservan mientras la partida permanezca seleccionada (Regla 6).
 
 El Resumen adapta automáticamente la interfaz.
 
@@ -579,6 +595,8 @@ Darivo Pro nunca muestra al usuario:
 - Fórmulas
 
 Solo muestra los campos que necesita completar.
+
+No existe calculadora genérica en el Resumen: cada partida expone únicamente el control de su tipo (Regla 5 — `05-MODULO-COTIZACIONES.md` §4).
 
 Toda la lógica permanece oculta.
 
@@ -735,6 +753,7 @@ Todos estos documentos deberán respetar la arquitectura definida en este docume
 
 - El Documento 21 es la arquitectura oficial del Catálogo Maestro, Tarifa Pro, Mis Tarifas y Motor de Cotización.
 - Los documentos 03, 05, 06, 07 y 10 implementan esa arquitectura en sus respectivos módulos.
+- El documento 05 define las **Reglas 1–10** del flujo manual de cotizaciones (v1.5).
 - El Documento 22 define la metodología oficial que deberán seguir todas las IA al analizar o implementar esta arquitectura.
 
 ---

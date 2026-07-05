@@ -52,7 +52,7 @@ Inicio · Clientes · IA · Facturas · Cierre · Más
 Implementación: `frontend/src/components/ui/BottomNav.tsx`
 
 * Botón IA central: gradiente **morado** (`T.purple`) — Fable 5 §7
-* Cotizaciones: flujo secundario `/presupuestos` (no en nav)
+* Cotizaciones: flujo secundario wizard (Selección → Resumen → Cliente — `05-MODULO-COTIZACIONES.md` v1.5; no en nav)
 
 ## 3.2 Módulos
 

@@ -129,7 +129,7 @@ Card de acción principal a ancho completo del área de contenido:
 | Subtítulo | «Combina partidas · menos de 60 seg» |
 | Jerarquía | Botón primario (Sistema Diseño §6) |
 
-**Acción:** abre el wizard de cotización — Partidas → Cliente → Resumen (`05-MODULO-COTIZACIONES.md` §2 · Empresa pendiente).
+**Acción:** abre el wizard manual de cotización — Selección → Resumen → Cliente (`05-MODULO-COTIZACIONES.md` v1.5 §2).
 
 ## 5.4 Accesos rápidos
 
@@ -190,7 +190,7 @@ Cabecera de tabla: fondo `T.navyLight`, texto claro (patrón Admin tablas).
 # 7. Funcionalidad (referencia Móvil §3)
 
 * Muestra resumen de cotizaciones aprobadas, pendientes e ingresos.
-* Acceso rápido al wizard de cotización (Partidas → Cliente → Resumen).
+* Acceso rápido al wizard manual (Selección → Resumen → Cliente — Regla 1).
 * Acceso rápido al módulo Clientes.
 * No duplica gestión de clientes, facturas ni cierre.
 * Las cotizaciones guardadas se consultan en la ficha de cada Cliente (Móvil §3).

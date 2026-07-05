@@ -109,10 +109,10 @@ Debe ser perfectamente legible tanto en **móvil** como en **papel** (incluida i
 
 | Canal | Origen en Darivo Pro |
 | ----- | -------------------- |
-| WhatsApp | Wizard cotización paso Resumen (`05-MODULO-COTIZACIONES.md` § Paso 3) · `PDFModal` / `InvoiceModal` (`06-MODULO-FACTURAS.md` §6) |
-| Compartir (WhatsApp, Telegram, Email, etc.) | `PDFModal` — Web Share API (`05-MODULO-COTIZACIONES.md` § Paso 3) |
+| WhatsApp | Wizard cotización confirmación post-Cliente (`05-MODULO-COTIZACIONES.md` § Paso 3) · `PDFModal` / `InvoiceModal` (`06-MODULO-FACTURAS.md` §6) |
+| Compartir (WhatsApp, Telegram, Email, etc.) | `PDFModal` — Web Share API (`05-MODULO-COTIZACIONES.md` § Paso 3 confirmación) |
 | Descargar PDF | `InvoiceModal` (`06-MODULO-FACTURAS.md` §6) |
-| Generación automática | Al guardar cotización, se genera el PDF en segundo plano (`05-MODULO-COTIZACIONES.md` § Paso 3) |
+| Generación automática | Al guardar definitivo (Paso 3), PDF en segundo plano |
 
 ---
 
@@ -123,11 +123,11 @@ Cada campo del PDF proviene exclusivamente de los módulos oficiales. No se inve
 | Bloque PDF | Fuente oficial |
 | ---------- | -------------- |
 | Datos de la empresa (Emisor) | `07-MODULO-MAS.md` §5 — Empresa |
-| Datos del cliente | `05-MODULO-COTIZACIONES.md` § Paso 2 |
-| Partidas y categorías | `05-MODULO-COTIZACIONES.md` § Paso 1 y § Paso 3 · `21` (Catálogo Maestro, tipos de cálculo §12) |
-| Desglose material / mano de obra | `05-MODULO-COTIZACIONES.md` § Paso 3 — Resumen |
-| Notas | `05-MODULO-COTIZACIONES.md` § Paso 3 — campo de notas |
-| Numeración COT- | `05-MODULO-COTIZACIONES.md` § Paso 3 |
+| Datos del cliente | `05-MODULO-COTIZACIONES.md` § Paso 3 |
+| Partidas y categorías | `05-MODULO-COTIZACIONES.md` § Paso 1–2 · `21` (Catálogo Maestro · orden Regla 9) |
+| Desglose material / mano de obra | `05-MODULO-COTIZACIONES.md` § Paso 2 — Resumen |
+| Notas | `05-MODULO-COTIZACIONES.md` § Paso 2 — campo de notas |
+| Numeración COT- | `05-MODULO-COTIZACIONES.md` § Paso 3 confirmación · Regla 10 |
 | Tipo, numeración y totales de factura | `06-MODULO-FACTURAS.md` §3, §4, §5, §6 |
 | Cuenta Banco de la Nación (leyenda detracción) | `07-MODULO-MAS.md` §5 · `06-MODULO-FACTURAS.md` §4 |
 
@@ -139,7 +139,7 @@ Cada campo del PDF proviene exclusivamente de los módulos oficiales. No se inve
 
 - Documento de **trabajo**, sin validez fiscal (`05-MODULO-COTIZACIONES.md` §4).
 - El usuario siempre ve **"Cotización"** en pantalla, nunca "presupuesto" (`05-MODULO-COTIZACIONES.md` §1).
-- Numeración correlativa: **COT-001, COT-002...** — nunca se reutiliza (`05-MODULO-COTIZACIONES.md` § Paso 3 y §4).
+- Numeración correlativa: **COT-001, COT-002...** — al confirmar (Paso 3 · Regla 10).
 
 ### 7.2 Estructura oficial del PDF
 
@@ -212,8 +212,8 @@ Estos datos aparecen en el encabezado de **todas** las cotizaciones y facturas d
 | Campo | Fuente |
 | ----- | ------ |
 | Título "COTIZACIÓN" | Decisión de diseño alineada con `05-MODULO-COTIZACIONES.md` §1 |
-| Número COT-XXX | `05-MODULO-COTIZACIONES.md` § Paso 3 |
-| Fecha | Fecha de guardado de la cotización (`05-MODULO-COTIZACIONES.md` § Paso 3) |
+| Número COT-XXX | Confirmación Paso 3 (`05-MODULO-COTIZACIONES.md` · Regla 10) |
+| Fecha | Fecha de guardado definitivo (Paso 3) |
 
 #### Bloque Cliente
 
@@ -231,7 +231,7 @@ Datos del **Paso 2 — Cliente** del wizard (`05-MODULO-COTIZACIONES.md`):
 
 Alineado con:
 
-- Resumen del wizard: **tabla agrupada por categoría con sus partidas y subtotales** (`05-MODULO-COTIZACIONES.md` § Paso 3).
+- Resumen del wizard: **tabla agrupada por categoría con sus partidas y subtotales**, orden Catálogo Maestro (`05-MODULO-COTIZACIONES.md` § Paso 2 · Regla 9).
 - Arquitectura del Catálogo Maestro: las partidas pertenecen a categorías del sector habilitado (`21` §7, §15).
 - Cotización multi-categoría permitida (`05-MODULO-COTIZACIONES.md` §4).
 
@@ -240,7 +240,7 @@ Alineado con:
 | Columna | Contenido |
 | ------- | --------- |
 | Descripción | Nombre de la partida |
-| Cant | Cantidad introducida por el usuario (calculadora libre — `05` §4) |
+| Cant | Medición capturada en el Resumen dinámico según tipo de cálculo de la partida (`05` §4 Reglas 5–9) |
 | P.Unit | Precio unitario resuelto por el Motor de Cotización (`21` §11: Mis Tarifas → Tarifa Pro) |
 | Total | Importe calculado automáticamente (`21` §13) |
 
@@ -250,7 +250,7 @@ Los tipos de cálculo oficiales (Unidad, m², ml, m³, Hora, Día, Precio fijo) 
 
 #### Bloque Totales
 
-Refleja el desglose del **Resumen** (`05-MODULO-COTIZACIONES.md` § Paso 3):
+Refleja el desglose del **Resumen** (`05-MODULO-COTIZACIONES.md` § Paso 2):
 
 | Línea | Descripción |
 | ----- | ----------- |
@@ -262,7 +262,7 @@ Moneda: **S/** siempre (`05-MODULO-COTIZACIONES.md` §4).
 
 #### Notas
 
-- Contenido del **campo de notas** del Resumen (`05-MODULO-COTIZACIONES.md` § Paso 3).
+- Contenido del **campo de notas** del Resumen (`05-MODULO-COTIZACIONES.md` § Paso 2).
 - Si el campo está vacío, la sección Notas no se muestra.
 
 #### Pie de página
@@ -410,7 +410,7 @@ La cuenta del Banco de la Nación se obtiene de **Más → Empresa** (`07-MODULO
 
 ## 9.1 ESTADOS DE COTIZACIÓN EN PDF
 
-Los estados internos de cotización (**Borrador**, **Pendiente**, **Aprobado**) se gestionan en pantalla conforme a `05-MODULO-COTIZACIONES.md` § Paso 3.
+Los estados internos de cotización (**Borrador**, **Pendiente**, **Aprobado**) se asignan en la confirmación del wizard (Paso 3 — `05-MODULO-COTIZACIONES.md`).
 
 **Decisión oficial de diseño PDF:** el PDF de cotización **no muestra** chips ni etiquetas de estado. El estado es metadato interno del sistema; el PDF presenta únicamente la propuesta comercial (partidas, totales, notas y datos de cliente).
 
@@ -445,7 +445,7 @@ Este documento se apoya en los módulos oficiales de Darivo Pro. Cada documento 
 
 **Responsabilidad respecto al PDF:**
 
-- Define el flujo de creación (Partidas → Cliente → Resumen) del que provienen los datos del PDF de cotización.
+- Define el flujo de creación (Selección → Resumen → Cliente → Guardar) del que provienen los datos del PDF de cotización.
 - Establece qué datos del cliente aparecen en cotización (nombre, teléfono, ciudad) y que RUC/DNI no se incluye.
 - Define la numeración **COT-XXX**, la generación automática del PDF al guardar y los canales de envío (WhatsApp, Compartir).
 - Especifica el desglose del Resumen: partidas agrupadas por categoría, subtotales, Ejecución material, Mano de obra, TOTAL y notas.

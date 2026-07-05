@@ -199,7 +199,7 @@ Cuando una empresa crea una cotización, el motor resuelve automáticamente el p
 2. Tarifa Pro (precio oficial del Catálogo Maestro)
 ```
 
-El usuario nunca decide qué precio utilizar. El motor calcula el importe automáticamente según el tipo de cálculo de cada partida (Doc 21 §12 y §13).
+El usuario nunca decide qué precio utilizar. El motor calcula el importe automáticamente según el tipo de cálculo de cada partida en el **Resumen** del wizard (Doc 21 §12–§16 · `05-MODULO-COTIZACIONES.md` Reglas 4–5).
 
 ## Subcategorías (Doc 21 §15)
 

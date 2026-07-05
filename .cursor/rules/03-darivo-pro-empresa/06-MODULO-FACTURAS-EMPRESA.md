@@ -67,7 +67,7 @@ Cuando exista, prevalecerá siempre este MD ante cualquier diferencia con la ima
 |--------|--------|
 | Sidebar | Ítem Facturas (4) |
 | Clientes (03) | «Facturar» en cotización **Aprobada** (ficha cliente §6.5) |
-| Cotizaciones (05) | «Convertir en Factura →» en Paso 3 Resumen (cotización guardada y aprobada) |
+| Cotizaciones (05) | «Convertir en Factura →» tras confirmación (cotización guardada y aprobada) |
 | Lista Facturas | Banner «Cotizaciones aprobadas» → botón **Facturar** por fila |
 
 ---
@@ -218,7 +218,7 @@ Si total ≤ S/700: **no** mostrar selector.
 | Origen | Comportamiento |
 |--------|----------------|
 | Desde cotización aprobada | Copia automática líneas, cliente y totales (Móvil §5) |
-| Desde cero | Añadir líneas manualmente: descripción, cantidad, precio unitario (calculadora libre — misma regla Cotizaciones) |
+| Desde cero | Añadir líneas manualmente: descripción, cantidad, precio unitario (entrada libre por línea — distinto del wizard Cotizaciones, que usa controles por tipo en Resumen) |
 
 **Forma de pago:** Efectivo / Yape / Transferencia / Crédito (Móvil §5).
 
