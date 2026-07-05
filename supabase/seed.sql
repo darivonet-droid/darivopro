@@ -1,6 +1,6 @@
 -- ════════════════════════════════════════════════════════════════════════════
--- DARIVO PRO — Base de Datos Oficial V2
--- Migración 002: seed (datos iniciales únicamente — sin DDL estructural)
+-- DARIVO PRO — Seed oficial (datos iniciales — sin DDL)
+-- Ejecutado automáticamente por: supabase db reset
 -- ════════════════════════════════════════════════════════════════════════════
 
 BEGIN;
@@ -149,16 +149,3 @@ JOIN (
 ON CONFLICT (svc_id) DO NOTHING;
 
 COMMIT;
-
--- ────────────────────────────────────────────────────────────────────────────
--- VERIFICACIÓN SEED
--- ────────────────────────────────────────────────────────────────────────────
-SELECT 'productos_master'           AS tabla, COUNT(*) AS filas FROM public.productos_master
-UNION ALL SELECT 'configuracion_regional', COUNT(*) FROM public.configuracion_regional
-UNION ALL SELECT 'planes_catalogo',        COUNT(*) FROM public.planes_catalogo
-UNION ALL SELECT 'comprobante_series',     COUNT(*) FROM public.comprobante_series
-UNION ALL SELECT 'partner_comisiones',     COUNT(*) FROM public.partner_comisiones
-UNION ALL SELECT 'catalogo_sectores',      COUNT(*) FROM public.catalogo_sectores
-UNION ALL SELECT 'catalogo_plantillas',     COUNT(*) FROM public.catalogo_plantillas
-UNION ALL SELECT 'catalogo_categorias_maestro', COUNT(*) FROM public.catalogo_categorias_maestro
-UNION ALL SELECT 'catalogo_partidas_maestro',   COUNT(*) FROM public.catalogo_partidas_maestro;

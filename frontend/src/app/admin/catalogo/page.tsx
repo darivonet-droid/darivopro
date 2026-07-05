@@ -18,7 +18,7 @@ export default async function AdminCatalogoPage() {
   return (
     <AdminShell titulo="Catálogo Maestro">
       <p className="mb-4 text-sm" style={{ color: "#64748B" }}>
-        Vista lectura — tablas `productos_master` y `categorias_servicios` (migración 015).
+        Vista lectura — tablas `productos_master` y `catalogo_categorias_maestro`.
         CRUD completo Catálogo Maestro pendiente Doc 21 (DT-02-02).
       </p>
       <p className="mb-2 text-sm font-extrabold">Productos ecosistema</p>

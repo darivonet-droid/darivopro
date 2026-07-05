@@ -1,23 +1,10 @@
 -- ════════════════════════════════════════════════════════════════════════════
--- DARIVO PRO — Base de Datos Oficial
--- Archivo: 001_darivo_pro_base.sql
--- Proyecto destino: darivopro.com (Supabase)
--- Versión esquema: V2 aprobado (auditoría final)
---
--- CONTENIDO: estructura exclusivamente — sin datos seed de negocio
---   · 32 tablas oficiales
---   · Claves primarias y foráneas
---   · Índices
---   · 6 funciones SQL
---   · 11 triggers
---   · Políticas RLS
---   · 2 buckets Storage (configuración infraestructura)
---   · Realtime (3 tablas catálogo usuario)
---
--- PRODUCTOS: Darivo Pro Móvil · Empresa · Admin · Panel Partner
--- REFERENCIA: DARIVO-PRO-ARQUITECTURA-MAESTRA.md §7 · Inventario BD V2
---
--- EJECUCIÓN: proyecto Supabase vacío → SQL Editor → ejecutar completo
+-- DARIVO PRO — Migración oficial baseline (inicio producto)
+-- Archivo: 20260705120000_baseline_v2.sql
+-- Esquema: 32 tablas · 6 funciones · 11 triggers · RLS · Storage · Realtime
+-- Aplicación: supabase db reset (local) · supabase db push (remoto)
+-- Datos iniciales: supabase/seed.sql (no incluidos aquí)
+-- REFERENCIA: 02-BASE-DATOS.md · DARIVO-PRO-ARQUITECTURA-MAESTRA.md §7
 -- ════════════════════════════════════════════════════════════════════════════
 
 BEGIN;
@@ -871,5 +858,5 @@ CREATE POLICY storage_gastos_select ON storage.objects FOR SELECT
 COMMIT;
 
 -- ════════════════════════════════════════════════════════════════════════════
--- FIN 001_darivo_pro_base.sql — 32 tablas · esquema V2 aprobado
+-- FIN baseline_v2 — 32 tablas · esquema oficial Darivo Pro
 -- ════════════════════════════════════════════════════════════════════════════

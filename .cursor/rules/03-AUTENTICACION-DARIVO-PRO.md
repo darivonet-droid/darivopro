@@ -190,9 +190,7 @@ frontend/src/
 │   ├── onboarding/1|2|3/
 │   └── api/*/route.ts              → getUser() obligatorio
 supabase/migrations/
-├── 001_initial.sql                 → perfiles + trigger
-├── 004_onboarding.sql
-├── 006_registro_perfil.sql
+└── 20260705120000_baseline_v2.sql   → 32 tablas, perfiles, triggers auth, RLS
 ```
 
 ---

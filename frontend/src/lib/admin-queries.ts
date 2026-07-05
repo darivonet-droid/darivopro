@@ -160,7 +160,7 @@ export async function fetchAdminCatalogo() {
 
   const [{ data: productos }, { data: categorias }] = await Promise.all([
     admin.from("productos_master").select("slug, nombre, descripcion").order("nombre"),
-    admin.from("categorias_servicios").select("cat_id, nombre").order("nombre"),
+    admin.from("catalogo_categorias_maestro").select("cat_id, nombre").order("nombre"),
   ]);
 
   return { data: { productos: productos ?? [], categorias: categorias ?? [] } };

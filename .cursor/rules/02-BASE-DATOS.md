@@ -1,14 +1,14 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 1.0
+**Versión:** 2.0
 
-**Fecha:** 03/07/2026
+**Fecha:** 05/07/2026
 
-**Estado:** Documento técnico oficial — esquema de implementación vigente
+**Estado:** Documento técnico oficial — esquema V2 (32 tablas) · inicio producto
 
 **Referencia:** `01-VISION-DEL-PRODUCTO.md` v2.6 §14 · `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` §7 · `03-AUTENTICACION-DARIVO-PRO.md` v1.0 · `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.1
 
-**Fuente de verdad del esquema:** migraciones en `supabase/migrations/` (001–016). Ante contradicción con este documento, **prevalecen las migraciones aplicadas**.
+**Fuente de verdad del esquema:** `supabase/migrations/20260705120000_baseline_v2.sql` y migraciones incrementales posteriores. Datos iniciales: `supabase/seed.sql`. Ante contradicción con este documento, **prevalecen las migraciones aplicadas**.
 
 ---
 
@@ -24,15 +24,13 @@ Documentar oficialmente la **estructura de base de datos implementada** en Supab
 
 # 2. Alcance actual
 
-## 2.1 Implementado (migraciones 001–016)
+## 2.1 Implementado (baseline oficial — 32 tablas)
 
-Esquema operativo para **Darivo Pro Móvil** (usuario autenticado individual / tenant = `user_id`).
+Esquema completo del ecosistema Darivo Pro: Móvil, Empresa, Admin y Panel Partner.
 
-## 2.2 Pendiente de implementación
+## 2.2 Evolución del esquema
 
-Dominios definidos funcionalmente pero **sin tablas** en Supabase (ver §8):
-
-* Empresas cliente · Empleados empresa · Suscripciones · Partners · Config APIs Admin · Auditoría global
+Cambios posteriores al baseline mediante migraciones incrementales en `supabase/migrations/` (convención `YYYYMMDDHHMMSS_descripcion.sql`).
 
 ---
 
@@ -229,9 +227,9 @@ Snapshot de totales al guardar cotización (012). FK opcional → `presupuestos`
 
 ---
 
-## 4.7 Tablas de sistema (lookup)
+## 4.7 Catálogo maestro y lookup (baseline)
 
-Migración 015. **Sin `user_id`** — lectura autenticados.
+Tablas globales sin `user_id` salvo políticas RLS de lectura autenticados / admin.
 
 ### `productos_master`
 
@@ -241,9 +239,13 @@ Productos del ecosistema (`darivo-pro`).
 
 País, moneda, IGV, zona horaria (`PE` inicial).
 
-### `categorias_servicios`
+### `catalogo_sectores` · `catalogo_plantillas` · `catalogo_categorias_maestro` · `catalogo_partidas_maestro`
 
-Mapeo `cat_id` → `producto_id`. Sin FK a `categorias` (por diseño 015).
+Catálogo Maestro oficial (Doc 21). Sustituye el lookup prototipo `categorias_servicios`.
+
+### `planes_catalogo` · `partner_comisiones` · `comprobante_series`
+
+Metadata comercial y series globales.
 
 ---
 
@@ -260,9 +262,10 @@ auth.users
     ├── precios_historial / calculos_log / ia_uso_diario (1:N)
     └── cotizacion_series (1:1)
 
-productos_master (1:N) categorias_servicios
-configuracion_regional (independiente)
-comprobante_series (global, no FK a users)
+productos_master → catalogo_categorias_maestro → catalogo_partidas_maestro
+catalogo_sectores → catalogo_plantillas
+configuracion_regional · planes_catalogo · comprobante_series (independientes)
+empresas · partners · soporte_* · suscripciones · gastos (ecosistema multi-producto)
 ```
 
 ---
@@ -306,7 +309,7 @@ comprobante_series (global, no FK a users)
 | perfiles, presupuestos, facturas, partidas_propias, precios_usuario, categorias, precios_historial, calculos_log, ia_uso_diario, cotizacion_series | `auth.uid() = user_id` (o id en perfiles) |
 | presupuesto_items | subquery presupuesto del usuario |
 | clientes | 4 políticas CRUD explícitas |
-| productos_master, configuracion_regional, categorias_servicios | SELECT autenticados |
+| productos_master, configuracion_regional, catalogo_* | SELECT autenticados; admin vía `is_darivo_admin()` |
 | comprobante_series | SELECT autenticados (sin aislamiento por tenant) |
 
 ---
@@ -325,32 +328,20 @@ comprobante_series (global, no FK a users)
 
 # 10. Historial de migraciones
 
-| # | Archivo | Contenido principal |
-|---|---------|---------------------|
-| 001 | initial | perfiles, presupuestos, items, facturas, partidas, precios, storage |
-| 002 | clientes | tabla clientes |
-| 003 | clientes_rls | RLS granular clientes, updated_at |
-| 004 | onboarding | perfiles.categorias, onboarding_done |
-| 005 | plan_limits | plan_tipo, ia_uso_diario |
-| 006 | registro_perfil | trigger handle_new_user |
-| 007 | factura_sunat | campos SUNAT, comprobante_series |
-| 008 | cotizacion_numero | cot_num, cotizacion_series |
-| 009 | categorias | categorias overlay + realtime |
-| 010 | wa_pdf | pdf_url, wa_enviado_at |
-| 011 | precios_historial | auditoría precios |
-| 012 | calculos_log | log cálculos |
-| 013 | align_schema_to_code | recrea presupuestos/facturas/clientes (vacío) |
-| 014 | cliente_central | presupuestos.cliente_id, teléfono único |
-| 015 | lookup_tables | productos_master, configuracion_regional, categorias_servicios |
-| 016 | clientes_restore | restaura updated_at + RLS 003 tras 013 |
+| Versión | Archivo | Contenido |
+|---------|---------|-----------|
+| Baseline oficial | `20260705120000_baseline_v2.sql` | 32 tablas · funciones · triggers · RLS · storage · realtime |
+| Seed | `supabase/seed.sql` | Productos, planes, catálogo maestro, series |
+
+Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase/migrations/`.
 
 ---
 
 # 11. Estado del documento
 
-**Versión:** 1.0
+**Versión:** 2.0
 
-**Estado:** Documento Oficial — esquema implementación Móvil (03/07/2026).
+**Estado:** Documento Oficial — esquema V2 completo · inicio producto (05/07/2026).
 
 ---
 

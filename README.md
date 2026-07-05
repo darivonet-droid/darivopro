@@ -24,8 +24,16 @@ cp frontend/.env.example frontend/.env.local   # frontend
 cp backend/.env.example backend/.env            # backend
 # Editar con tus keys de Supabase, etc.
 
-# 3. Supabase — ejecutar migración
-# Ir a supabase.com > SQL Editor > pegar supabase/migrations/001_initial.sql
+# 3. Supabase — esquema oficial (32 tablas)
+# Requiere Docker para entorno local
+cp supabase/.env.example supabase/.env   # SUPABASE_ACCESS_TOKEN + SUPABASE_DB_PASSWORD
+npx supabase start
+npx supabase db reset   # baseline + seed.sql → esquema completo
+
+# Remoto (proyecto vacío o tras reset en Dashboard)
+npx supabase login
+npx supabase link --project-ref vyrtokggypcmpforglch
+npx supabase db push
 
 # 4. Frontend
 cd frontend
@@ -68,7 +76,11 @@ railway up
 
 ### Supabase
 ```bash
-# Local (opcional)
+# Local (Docker)
+npx supabase start
+npx supabase db reset
+
+# Remoto
 npx supabase login
 npx supabase link --project-ref vyrtokggypcmpforglch
 npx supabase db push
@@ -114,14 +126,9 @@ darivo-pro/
 │   └── Dockerfile          # Deploy Railway (incluye libs de WeasyPrint)
 ├── supabase/
 │   ├── config.toml         # Config CLI (requerido para db push en CI)
-│   └── migrations/         # SQL — tablas, RLS, triggers, storage
-│       ├── 001_initial.sql
-│       ├── 002_clientes.sql
-│       ├── 003_clientes_rls.sql
-│       ├── 004_onboarding.sql
-│       ├── 005_plan_limits.sql
-│       ├── 006_registro_perfil.sql
-│       └── … (001–016 — ver supabase/migrations/)
+│   ├── seed.sql            # Datos iniciales (productos, planes, catálogo)
+│   └── migrations/         # Única fuente de verdad DDL
+│       └── 20260705120000_baseline_v2.sql   # 32 tablas · baseline oficial
 ├── frontend/.env.example   # Template → copiar a frontend/.env.local
 ├── backend/.env.example    # Template → copiar a backend/.env
 ├── .env.example            # Índice de dónde va cada variable

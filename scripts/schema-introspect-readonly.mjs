@@ -24,8 +24,10 @@ function loadEnv(file) {
 const env = {
   ...loadEnv(path.join(root, "frontend", ".env.local")),
   ...loadEnv(path.join(root, "supabase", ".env")),
-  ...process.env,
 };
+for (const [k, v] of Object.entries(process.env)) {
+  if (v) env[k] = v;
+}
 
 const ref = env.SUPABASE_PROJECT_REF || "vyrtokggypcmpforglch";
 const pwd = env.SUPABASE_DB_PASSWORD;
@@ -38,7 +40,7 @@ if (!pwd) {
 const { Client } = await import("pg");
 
 const hosts = [
-  `postgresql://postgres.${ref}:${encodeURIComponent(pwd)}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`,
+  `postgresql://postgres.${ref}:${encodeURIComponent(pwd)}@aws-1-us-west-1.pooler.supabase.com:5432/postgres`,
   `postgresql://postgres:${encodeURIComponent(pwd)}@db.${ref}.supabase.co:5432/postgres`,
 ];
 

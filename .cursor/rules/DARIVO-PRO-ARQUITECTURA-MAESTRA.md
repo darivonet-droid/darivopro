@@ -401,7 +401,7 @@ La configuración, estado y documentación detallada de cada API pertenece exclu
 
 # 7. Modelo de datos
 
-> **Documento canónico de base de datos:** `02-BASE-DATOS.md` v1.0. Este apartado resume el estado; ante contradicción prevalece `02-BASE-DATOS.md` y las migraciones en `supabase/migrations/`.
+> **Documento canónico de base de datos:** `02-BASE-DATOS.md` v2.0. Fuente de verdad: `supabase/migrations/` + `seed.sql`.
 
 No inventar esquemas.
 
@@ -426,7 +426,7 @@ Ver inventario completo en `02-BASE-DATOS.md` §4. Resumen:
 | `calculos_log` | Log de cálculos | `presupuesto_id` → `presupuestos` |
 | `productos_master` | Productos ecosistema (lookup) | — |
 | `configuracion_regional` | Config regional (lookup) | — |
-| `categorias_servicios` | Categorías por producto (lookup) | `producto_id` → `productos_master` |
+| `catalogo_categorias_maestro` | Categorías oficiales por producto/sector | `producto_id` → `productos_master` |
 
 ## 7.2 Dominios pendientes de documentación BD oficial
 
