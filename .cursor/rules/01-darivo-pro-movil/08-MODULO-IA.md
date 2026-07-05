@@ -1,8 +1,10 @@
 # DARIVO PRO — MÓDULO IA
 ## Diseño + Funcionalidad
-### Versión: 1.6 — 04/07/2026
+### Versión: 1.7 — 05/07/2026
 ### Fuente: diseño Fable 5 (`IAMenuScreen`, botón central nav) + regla `05-MODULO-COTIZACIONES.md` + `06-MODULO-FACTURAS.md` + funcionalidad real construida
 ### Relacionado: ver `01-VISION-DEL-PRODUCTO.md` §13 · ver `04-PANEL-ADMIN-SUSCRIPCIONES.md` · ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` · ver `05-MODULO-COTIZACIONES.md` · ver `06-MODULO-FACTURAS.md` · ver `07-MODULO-MAS.md` §6–§8
+
+**Cambio principal (v1.7):** §12 corregido — el modelo binario "Básico sin IA / Pro con IA" se sustituye por la matriz real: Básico tiene IA limitada solo para cotizaciones (sin IA para facturas); Pro y Business tienen IA amplia para ambos. Referencia de sección actualizada a §8.6 tras la reordenación de la Visión v2.13.
 
 ⚠️ Este documento es la ÚNICA fuente autorizada para el diseño y funcionalidad de IA conversacional en Darivo Pro Móvil. Ninguna IA puede modificar esto sin aprobación.
 
@@ -330,18 +332,28 @@ INTEGRACIÓN:
 ## 12. LÍMITES POR PLAN
 
 ```
-El acceso a la IA conversacional depende exclusivamente 
-de las limitaciones del plan contratado (ver 
-`01-VISION-DEL-PRODUCTO.md` §8.5 y 
-`04-PANEL-ADMIN-SUSCRIPCIONES.md`).
+El acceso a la IA conversacional (Agente IA 1) depende 
+exclusivamente de las limitaciones del plan contratado (ver 
+`01-VISION-DEL-PRODUCTO.md` §8.6 y 
+`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 — matriz oficial).
 
-Plan Básico: sin acceso a IA conversacional.
-Plan Pro: acceso a IA según las limitaciones del plan.
+Plan Básico:
+- IA para cotizaciones: SÍ, con uso limitado (límite numérico 
+  pendiente de definir en `12 – ROLES, PLANES Y PERMISOS – 
+  PANEL ADMIN.md`).
+- IA para facturas: NO disponible.
 
-Si el usuario intenta usar IA desde Plan Básico, se 
-muestra mensaje claro invitando a subir a Plan Pro — 
-NUNCA un error técnico confuso.
+Plan Pro y Plan Business:
+- IA para cotizaciones: SÍ, uso amplio.
+- IA para facturas: SÍ.
+
+Si el usuario en Plan Básico intenta usar el Agente IA 1 
+para facturas, o agota su límite de uso en cotizaciones, se 
+muestra mensaje claro invitando a subir de plan — NUNCA un 
+error técnico confuso.
 ```
+
+El Agente IA 2 (Soporte y Tickets, §3) no está sujeto a esta tabla — su disponibilidad no depende del plan salvo que se documente lo contrario en `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
 
 ---
 

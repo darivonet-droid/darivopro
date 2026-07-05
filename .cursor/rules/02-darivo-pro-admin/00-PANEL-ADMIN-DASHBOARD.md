@@ -1,7 +1,9 @@
 # 00 – PANEL ADMIN – DASHBOARD
 
-**Versión:** 1.1  
+**Versión:** 1.2  
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2):** "Distribución de suscripciones" ampliada a 3 planes (Básico, Pro, Empresa) — sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
 
 **Cambio principal (v1.1):** acción "Ver referidos" renombrada a "Ver Partners" — "Referidos" queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2). "Enviar anuncio" queda pendiente de definición funcional (ver `INDICE-OFICIAL-PANEL-ADMIN.md`).
 
@@ -139,6 +141,7 @@ Según el diseño aprobado, el Dashboard muestra:
 
 - Básico
 - Pro
+- Business
 
 > Nomenclatura oficial según `04-PANEL-ADMIN-SUSCRIPCIONES.md` (catálogo de planes).
 

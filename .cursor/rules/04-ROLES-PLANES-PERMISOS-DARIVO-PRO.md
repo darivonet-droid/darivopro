@@ -1,10 +1,12 @@
 # 04 – ROLES, PLANES Y PERMISOS – DARIVO PRO
 
-**Versión:** 1.0
+**Versión:** 1.1
 
-**Fecha:** 03/07/2026
+**Fecha:** 05/07/2026
 
 **Estado:** Documento técnico oficial — implementación Darivo Pro Móvil (capa de límites y catálogo)
+
+**Cambio principal (v1.1):** catálogo oficial ampliado a 3 planes (Básico, Pro, Empresa) — sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
 
 **Referencias:**
 
@@ -58,7 +60,7 @@ Constantes: `frontend/src/lib/roles-planes-oficial.ts` → `ROLES_PLATAFORMA`, `
 | **Básico** | S/39 | S/390 | 20 cotizaciones/mes · 10 facturas/mes · 3 IA/día |
 | **Pro** | S/79 | S/790 | Ilimitado (cotizaciones, facturas, IA) |
 
-**Prohibido** en documentación y UI comercial: Plan Empresa, Premium, Plan Prueba, etc. (04 §6).
+**Prohibido** en documentación y UI comercial: Premium, Plan Prueba, Plan Autónomo, Plan Empresa, etc. (04 §6). Planes oficiales: Básico, Pro y Business.
 
 Fuente única de precios y características comerciales: `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
 

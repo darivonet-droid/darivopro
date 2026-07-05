@@ -1,8 +1,10 @@
 # DARIVO PRO — MÓDULO FACTURAS
 ## Diseño + Funcionalidad
-### Versión: 1.4 — 05/07/2026
+### Versión: 1.5 — 05/07/2026
 ### Fuente: diseño Fable 5 (InvoicesScreen/InvoiceEditor/InvoiceModal) + funcionalidad SUNAT ya construida
 ### Relacionado: ver 03-MODULO-CLIENTES.md, 05-MODULO-COTIZACIONES.md, `01-VISION-DEL-PRODUCTO.md` §18
+
+**Cambio principal (v1.5):** añadida nota de disponibilidad por plan — Facturación no disponible en Plan Básico (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
 
 **Cambio principal (v1.4):** §9 corregido — eliminada la contradicción interna con §1/§2/§5 sobre si la factura requiere cotización previa. Ahora el documento es consistente: la factura puede crearse desde una cotización aprobada o directamente desde cero.
 
@@ -31,6 +33,8 @@ Documento comercial que el usuario crea en Darivo Pro y que, una vez validado, s
 Se llega a una factura SIEMPRE desde una Cotización Aprobada (vía botón "→ Factura" dentro de la ficha de Cliente — ver 05-MODULO-COTIZACIONES.md), o creando una nueva directamente desde cero.
 
 **Acceso en Darivo Pro Móvil:** posición **Facturas** (4) de la navegación principal (`01-VISION-DEL-PRODUCTO.md` §5).
+
+> **Disponibilidad por plan:** el módulo Facturación **no está disponible en Plan Básico** (ver matriz oficial en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6). Disponible en Plan Pro y Plan Business.
 
 ---
 

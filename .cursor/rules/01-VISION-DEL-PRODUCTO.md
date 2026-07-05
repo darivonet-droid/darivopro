@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.11
+**Versión:** 2.13
 
 **Estado:** Visión oficial aprobada
 
@@ -209,9 +209,9 @@ Rol
     ↓
 Permisos
     ↓
-Limitaciones
-    ↓
 Funcionalidades
+    ↓
+Limitaciones
 ```
 
 ## 1. Suscripción
@@ -257,14 +257,25 @@ Estos roles pertenecen exclusivamente a la plataforma Darivo.
 
 Corresponden a la empresa cliente.
 
-Actualmente existen:
+Actualmente existen, por defecto, en Darivo Pro Empresa:
 
 * **Gerente**
 * **Técnico**
 
 Estos roles únicamente gestionan la actividad de la empresa cliente y utilizan Darivo Pro Móvil y, cuando corresponda, Darivo Pro Empresa.
 
-La definición funcional detallada de roles y permisos se documenta en los MD específicos oficiales de cada producto, en sincronía con este documento.
+### Roles personalizados (condicionados al plan)
+
+Cuando el plan contratado lo permita, el **Gerente** podrá crear **roles personalizados** adicionales a Gerente y Técnico, dentro del límite máximo de roles personalizados definido por ese plan (sección 19).
+
+Los roles personalizados:
+
+* Se crean y administran exclusivamente por el Gerente desde Darivo Pro Empresa y Darivo Pro Móvil.
+* Nunca sustituyen ni eliminan los roles base Gerente y Técnico.
+* Están sujetos a las mismas reglas de Permisos (sección 8.4): únicamente activan o desactivan funcionalidades ya existentes, nunca crean funcionalidades nuevas.
+* Su disponibilidad y límite máximo dependen exclusivamente del plan contratado, nunca de una decisión del Gerente por sí sola.
+
+La definición funcional detallada de roles, permisos y roles personalizados se documenta en los MD específicos oficiales de cada producto, en sincronía con este documento.
 
 ## 4. Permisos
 
@@ -272,17 +283,7 @@ La definición funcional detallada de roles y permisos se documenta en los MD es
 
 Nunca crean funcionalidades nuevas.
 
-## 5. Limitaciones
-
-Dependen exclusivamente del plan contratado.
-
-No dependen del Rol.
-
-No dependen de los Permisos.
-
-Los límites concretos de cada plan se documentan en la sección 19.
-
-## 6. Funcionalidades
+## 5. Funcionalidades
 
 El usuario utiliza las funcionalidades permitidas por:
 
@@ -290,9 +291,20 @@ El usuario utiliza las funcionalidades permitidas por:
 * Producto.
 * Rol.
 * Permisos.
-* Limitaciones.
 
-Ningún módulo funcional decide quién puede acceder a él. Esa decisión ya ha sido tomada previamente por la Suscripción, el Producto, el Rol, los Permisos y las Limitaciones.
+Ningún módulo funcional decide quién puede acceder a él. Esa decisión ya ha sido tomada previamente por la Suscripción, el Producto, el Rol y los Permisos.
+
+## 6. Limitaciones
+
+Las Limitaciones se aplican **sobre las funcionalidades ya determinadas**: no deciden qué puede hacer el usuario, sino **cuánto** puede usar de lo que ya tiene disponible (ej. número de cotizaciones, número de empleados, límites de uso de IA).
+
+Dependen exclusivamente del plan contratado.
+
+No dependen del Rol.
+
+No dependen de los Permisos.
+
+Los límites concretos de cada plan (incluyendo el límite de roles personalizados y el límite de empleados/Técnicos, configurable por cuenta) se documentan en la sección 19.
 
 ---
 
@@ -876,6 +888,15 @@ Desde Darivo Pro Admin se administra toda la información relativa a:
 * límites de uso
 * características comerciales
 * precios
+* servicios y módulos del producto disponibles por plan (ej. acceso a IA, Cierre u otras funcionalidades sujetas a plan)
+* límites de roles personalizados por plan (sección 8)
+* límites de empleados/Técnicos por plan
+
+### Principio de control total
+
+**Ningún servicio, módulo, límite o funcionalidad configurable del ecosistema puede quedar fuera del control del módulo Gestión de Suscripciones.**
+
+Si una funcionalidad nueva necesita estar sujeta a un plan, su configuración (activación, límite o disponibilidad) debe incorporarse a este módulo antes de poder documentarse como disponible en cualquier producto. Ningún otro documento ni producto puede definir por su cuenta si una funcionalidad está o no sujeta a un plan.
 
 ## Fuente única de verdad
 
@@ -907,9 +928,13 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.11
+**Versión:** 2.13
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.13):** §8 — invertido el orden oficial de la secuencia: **Funcionalidades antes que Limitaciones** (antes era al revés). Las Limitaciones ahora se definen como restricciones de cantidad/uso aplicadas sobre funcionalidades ya determinadas (ej. número de cotizaciones, empleados), no como filtro previo a su existencia. Referencias sincronizadas en Arquitectura Maestra, `11-ROLES-PLANES-PERMISOS-EMPRESA.md` y `08-MODULO-IA.md`.
+
+**Cambio principal (v2.12):** §8 — añadida la capacidad de roles personalizados creados por el Gerente, condicionada al límite del plan contratado; §19 — reforzado el principio de control total: ningún servicio, módulo, límite o funcionalidad puede quedar fuera del módulo Gestión de Suscripciones. Se mantiene el orden oficial de la secuencia (Limitaciones → Funcionalidades) y el nombre del tercer plan (**Empresa**), ya confirmados por el propietario.
 
 **Cambio principal (v2.11):** §10 — incorporación de la subsección "Programa Partner": diseño propio independiente de Fable 5 y de Admin; sin lógica de negocio propia (solo consulta información administrada por Darivo Pro Admin); no aplica la regla de sincronización funcional entre productos.
 

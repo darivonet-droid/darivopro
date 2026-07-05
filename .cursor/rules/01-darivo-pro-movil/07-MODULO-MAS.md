@@ -179,7 +179,7 @@ subtítulo 12px T.textMid, chevron I.chevron a la derecha.
    Facturas y cotizaciones por período (consulta/historial)
 
 💼 Mi Plan (I.building, T.purple)
-   "Planes que escalan contigo" — plan actual (Básico o Pro), 
+   "Planes que escalan contigo" — plan actual (Básico, Pro o Business), 
    fecha de renovación, botón cambiar plan
    Fuente oficial: `04-PANEL-ADMIN-SUSCRIPCIONES.md`
    Pasarela oficial: **dLocal API** (`08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.3 · producto dLocal Go)
@@ -320,9 +320,11 @@ El **Módulo Más** actúa como punto de acceso y personalización. No duplica i
 
 ## 10. Estado del documento
 
-**Versión:** 2.0
+**Versión:** 2.2
 
 **Estado:** Diseño y funcionalidad oficial aprobados.
+
+**Cambio principal (v2.2):** §6 — plan actual ampliado a Básico, Pro o Business (sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.6).
 
 **Versión:** 2.1
 

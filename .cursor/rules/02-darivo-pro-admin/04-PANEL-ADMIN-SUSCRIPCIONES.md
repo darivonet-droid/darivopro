@@ -1,8 +1,12 @@
 # 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.4
+**Versión:** 1.6
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.6):** tercer plan renombrado de "Empresa" a **"Business"** (decisión del propietario, evita confusión con el producto Darivo Pro Empresa); incorporada la matriz oficial de funcionalidades por plan (Cotizaciones, Clientes, Catálogo, Facturación, IA por tipo, Usuarios); precios marcados explícitamente como provisionales/ejemplo.
+
+**Cambio principal (v1.5):** catálogo oficial ampliado de 2 a **3 planes** (Básico, Pro, **Empresa** — precio pendiente de definir); añadido principio de precio editable (no fijo, editable por Admin en cualquier momento); añadido qué controla un plan (precio, servicios/módulos, roles y límites, acceso a producto); nota de nomenclatura "Plan Empresa" vs "Darivo Pro Empresa".
 
 **Cambio principal (v1.4):** corregida referencia obsoleta a `01-VISION-DEL-PRODUCTO.md` (v2.5 §18 → v2.11 §19, tras la renumeración de la sección de planes en v2.7).
 
@@ -110,18 +114,64 @@ Todos los demás módulos (Dashboard, Usuarios, Empresas, Soporte, Mi Plan) debe
 
 No duplicar la definición de planes en otros documentos MD.
 
-## Catálogo oficial v1
+## Catálogo oficial v3
 
 | Plan | Tipo | Precio mensual | Precio anual |
 |------|------|----------------|--------------|
-| **Básico** | Pago | S/39 | S/390 |
-| **Pro** | Pago | S/79 | S/790 |
+| **Básico** | Pago | S/49 *(ejemplo — precio final no decidido)* | *Pendiente* |
+| **Pro** | Pago | S/79 *(ejemplo — precio final no decidido)* | *Pendiente* |
+| **Business** | Pago | S/115–120 *(rango de ejemplo — precio final no decidido)* | *Pendiente* |
+
+> Todos los precios de esta tabla son **provisionales**. El propietario aún no ha fijado el precio definitivo de ningún plan; se documentan solo como referencia de rango.
 
 > El **Plan Pro** es el plan destacado y recomendado visualmente en Darivo Pro.
 
-> Queda prohibido utilizar cualquier otro nombre de plan en la documentación oficial. No existen Plan Prueba, Plan Autónomo, Plan Empresa, Premium ni ninguna otra denominación.
+> Queda prohibido utilizar cualquier otro nombre de plan en la documentación oficial. No existen Plan Prueba, Plan Autónomo, Premium, Plan Empresa ni ninguna otra denominación fuera de **Básico, Pro y Business**.
 
 No documentar planes adicionales sin aprobación expresa del propietario.
+
+### ⚠️ Nota de nomenclatura — "Plan Business" vs "Darivo Pro Empresa"
+
+**Plan Business** (suscripción, esta sección) y **Darivo Pro Empresa** (producto de escritorio, `01-VISION-DEL-PRODUCTO.md` §6) son conceptos **distintos**, deliberadamente con nombres diferentes para evitar la confusión que existía cuando el plan se llamaba "Empresa":
+
+* El **Plan Business** es el único plan que da acceso al producto **Darivo Pro Empresa** (ver matriz de funcionalidades más abajo — fila "Usuarios").
+* Los planes **Básico** y **Pro** son de un único usuario (la misma persona actúa como Gerente y Técnico, conforme a `01-VISION-DEL-PRODUCTO.md` §5, excepción oficial de usuario único).
+
+## Matriz oficial de funcionalidades por plan
+
+| Funcionalidad | Básico | Pro | Business |
+|---|:---:|:---:|:---:|
+| Cotizaciones | ✅ | ✅ | ✅ |
+| Clientes | ✅ | ✅ | ✅ |
+| Catálogo Maestro (consulta / Mis Tarifas) | ✅ | ✅ | ✅ |
+| Facturación | ❌ | ✅ | ✅ |
+| IA para cotizaciones (Agente IA 1 — ver `08-MODULO-IA.md` §2) | Limitada | Amplia | Amplia |
+| IA para facturas (Agente IA 1 — ver `08-MODULO-IA.md` §10) | ❌ | ✅ | ✅ |
+| IA para cierre/gastos (ver `09-MODULO-CIERRE.md` §14) | ❌ | ✅ | ✅ |
+| Usuarios | 1 (Gerente = Técnico, único usuario) | 1 (Gerente = Técnico, único usuario) | 1 Gerente + hasta 5 Técnicos |
+
+**Notas sobre la matriz:**
+
+* "Limitada" en IA para cotizaciones (Básico) significa un límite de uso menor, no ausencia de la funcionalidad. El límite numérico exacto se documenta en `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` cuando se apruebe.
+* **Técnicos adicionales en Business:** el plan Business permite añadir más de 5 Técnicos como ampliación. El precio de esa ampliación **no está decidido todavía**. Hasta que se defina, no debe documentarse ningún importe concreto para Técnicos adicionales.
+* Esta matriz sustituye y detalla el principio general de "servicios y módulos disponibles por plan" ya establecido en `01-VISION-DEL-PRODUCTO.md` §19.
+
+## Precio editable (no fijo)
+
+El precio de cada plan **no es un valor fijo**. Puede ser modificado por el **Administrador Darivo** en cualquier momento desde este módulo (acción "Nuevo plan" / edición de plan existente — §5).
+
+Todo cambio de precio debe registrarse en la pestaña **Historial de cambios** (§5) y se publica mediante la acción **Publicar cambios**.
+
+## Qué controla un plan
+
+Cada plan de suscripción determina, como mínimo:
+
+* **Precio** (mensual y anual — editable, ver arriba; provisional hasta decisión final).
+* **Servicios/módulos disponibles** (ver matriz de funcionalidades arriba).
+* **Roles y límites de uso**: número de Técnicos (solo Business, ampliable), límites de uso de IA, y demás restricciones cuantitativas (`12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`).
+* **Producto(s) accesibles**: únicamente **Business** da acceso a Darivo Pro Empresa como producto (ver nota de nomenclatura arriba).
+
+El detalle fino de límites numéricos de IA y roles personalizados **no se define en este documento** — pertenece a la matriz de `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`, que deberá sincronizarse con esta sección.
 
 ---
 
