@@ -1,8 +1,10 @@
 # 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.4):** corregida referencia obsoleta a `01-VISION-DEL-PRODUCTO.md` (v2.5 §18 → v2.11 §19, tras la renumeración de la sección de planes en v2.7).
 
 ---
 
@@ -177,7 +179,7 @@ Este módulo forma parte del Panel Administrador.
 
 ## Otras relaciones
 
-* `01-VISION-DEL-PRODUCTO.md` v2.5 §18 (planes, límites y administración oficial).
+* `01-VISION-DEL-PRODUCTO.md` v2.11 §19 (planes, límites y administración oficial).
 * `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` (planes y permisos de plataforma).
 
 Las relaciones técnicas con Base de Datos y Arquitectura Maestra quedan reservadas para la fase final del proyecto.

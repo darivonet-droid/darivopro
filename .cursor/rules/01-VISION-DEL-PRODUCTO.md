@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.9
+**Versión:** 2.11
 
 **Estado:** Visión oficial aprobada
 
@@ -57,6 +57,26 @@ Actualmente el ecosistema está compuesto por los siguientes productos:
 * Darivo Pro Empresa.
 
 Cada uno tiene una función específica dentro del ecosistema.
+
+## 3.1 Productos como criterio de clasificación del Catálogo Maestro
+
+Los productos del ecosistema (Darivo Pro Admin, Darivo Pro Móvil, Darivo Pro Empresa) constituyen también el **primer nivel de clasificación** del Catálogo Maestro (sección 11). Cada categoría del Catálogo Maestro pertenece a uno o varios de estos productos.
+
+El **Programa Partner** (sección 3.2) no es un producto del ecosistema y **no participa** como criterio de clasificación del Catálogo Maestro.
+
+La administración de este nivel de clasificación corresponde exclusivamente a Darivo Pro Admin, conforme al principio de administración exclusiva del Catálogo Maestro (sección 11).
+
+## 3.2 Programa Partner
+
+Darivo Pro dispone de un **Programa Partner**: un sistema de colaboración con personas o cuentas externas (influencers y colaboradores) que promocionan Darivo Pro a cambio de una comisión por resultado.
+
+El Programa Partner **no es un producto** del ecosistema (sección 3) ni forma parte de la clasificación del Catálogo Maestro (sección 3.1).
+
+Su administración —partners, códigos, enlaces y tabla oficial de comisiones— corresponde exclusivamente a **Darivo Pro Admin**.
+
+Cada partner accede a su propio panel de consulta (**Panel Partner**) para ver su actividad y comisiones, sin capacidad de administración.
+
+**Nota terminológica:** "Referidos" es el nombre antiguo de este programa. Toda la documentación oficial y la interfaz deben usar únicamente "Partners" / "Programa Partner". "Referidos" queda eliminado del ecosistema.
 
 ---
 
@@ -346,6 +366,12 @@ El aspecto visual de los botones podrá ser diferente en cada producto para adap
 Sin embargo, su comportamiento, reglas de negocio y funcionamiento deberán ser siempre los mismos en todo el ecosistema Darivo Pro.
 
 Este principio garantiza una única lógica funcional para todos los productos y evita duplicidades o comportamientos diferentes para una misma acción.
+
+## Programa Partner
+
+El **Programa Partner** (sección 3.2) dispone de su propio diseño oficial, independiente de Fable 5 y del diseño de Darivo Pro Admin.
+
+A nivel de funcionalidad, el Programa Partner **no genera lógica de negocio propia**: consulta y refleja la información administrada exclusivamente desde Darivo Pro Admin (partners, comisiones, códigos y enlaces — sección 3.2). No aplica la regla de sincronización funcional entre productos (párrafo anterior), porque no es un producto del ecosistema.
 
 ---
 
@@ -881,9 +907,13 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.9
+**Versión:** 2.11
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.11):** §10 — incorporación de la subsección "Programa Partner": diseño propio independiente de Fable 5 y de Admin; sin lógica de negocio propia (solo consulta información administrada por Darivo Pro Admin); no aplica la regla de sincronización funcional entre productos.
+
+**Cambio principal (v2.10):** incorporación de la sección 3.1 (Productos como criterio de clasificación del Catálogo Maestro) y sección 3.2 (Programa Partner); eliminación oficial del término "Referidos" en favor de "Partners".
 
 **Cambio principal (v2.9):** §13 — modelo oficial de soporte IA + humano (dos niveles), escalado automático y regla de no inventar soluciones.
 

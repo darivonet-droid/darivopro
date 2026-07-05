@@ -1,7 +1,9 @@
 # DARIVO PRO — MÓDULO CLIENTES
 ## Diseño + Funcionalidad
-### Versión: 1.3 — 01/07/2026
+### Versión: 1.4 — 05/07/2026
 ### Fuente: diseño Fable 5 (ClientsScreen + ClientDetail) + código real construido
+
+**Cambio principal (v1.4):** §8 corregido — alineado con los 5 estados oficiales de facturación (`01-VISION-DEL-PRODUCTO.md` §18) y con `06-MODULO-FACTURAS.md` §1; eliminado el estado inexistente "Verificada" y la regla que exigía cotización previa obligatoria.
 
 ⚠️ Este documento es la ÚNICA fuente autorizada para el diseño y funcionalidad de Clientes. Ninguna IA puede modificar esto sin aprobación.
 
@@ -215,14 +217,15 @@ borde superior T.slateD, gap 6px, flexWrap):
 
 ## 8. Relación con Facturación
 
-- Una factura siempre se genera a partir de una cotización.
+- Una factura puede generarse a partir de una cotización Aprobada, o crearse directamente desde cero (ver `06-MODULO-FACTURAS.md` §1).
 - Todas las facturas quedan asociadas al cliente.
 - Desde la ficha del cliente pueden consultarse todas sus facturas.
 - Desde la ficha del cliente puede iniciarse una nueva cotización.
 - Existe una única factura en el sistema, identificada por su número de factura. Los módulos Clientes y Facturación trabajan sobre esa misma factura; no existen copias.
 - Cualquier modificación autorizada realizada en una factura se refleja automáticamente en ambos módulos.
-- Si una factura NO verificada se elimina desde cualquiera de los dos módulos, desaparecerá automáticamente del otro.
-- Si una factura está Verificada, no podrá eliminarse desde ningún módulo.
+- Estados oficiales de facturación electrónica: **Borrador, En proceso, Emitida, Rechazada, Pendiente de envío** (`01-VISION-DEL-PRODUCTO.md` §18; `06-MODULO-FACTURAS.md` §1).
+- Si una factura en estado **Borrador**, **Rechazada** o **Pendiente de envío** se elimina desde cualquiera de los dos módulos, desaparecerá automáticamente del otro.
+- Si una factura está **Emitida**, no podrá eliminarse desde ningún módulo.
 
 ---
 

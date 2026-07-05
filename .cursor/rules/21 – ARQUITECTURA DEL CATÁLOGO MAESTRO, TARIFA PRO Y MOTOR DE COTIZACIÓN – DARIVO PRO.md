@@ -1,8 +1,10 @@
 # 21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Arquitectura oficial propuesta
+
+**Cambio principal (v1.2):** corregida referencia rota a "07 – MÓDULO CONFIGURACIÓN" (archivo inexistente) → "07 – MÓDULO MÁS" (`07-MODULO-MAS.md`), sincronizado con `01-VISION-DEL-PRODUCTO.md` §5 y §16.
 
 ---
 
@@ -741,7 +743,7 @@ Este documento es la referencia oficial para:
 - 03 – MÓDULO CLIENTES – DARIVO PRO.
 - 05 – MÓDULO COTIZACIONES – DARIVO PRO.
 - 06 – MÓDULO FACTURACIÓN – DARIVO PRO.
-- 07 – MÓDULO CONFIGURACIÓN – DARIVO PRO.
+- 07 – MÓDULO MÁS – DARIVO PRO.
 - 10 – PANEL ADMIN – CATÁLOGO MAESTRO – DARIVO PRO ADMIN.
 - 22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.
 
@@ -766,7 +768,7 @@ Este documento será la referencia funcional para:
 
 - Darivo Pro Admin
 - Darivo Pro
-- Configuración
+- Más
 - Cotizaciones
 - Motor de cálculo
 - Tarifa Pro

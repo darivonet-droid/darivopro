@@ -1,8 +1,10 @@
 # DARIVO PRO — MÓDULO FACTURAS
 ## Diseño + Funcionalidad
-### Versión: 1.3 — 04/07/2026
+### Versión: 1.4 — 05/07/2026
 ### Fuente: diseño Fable 5 (InvoicesScreen/InvoiceEditor/InvoiceModal) + funcionalidad SUNAT ya construida
 ### Relacionado: ver 03-MODULO-CLIENTES.md, 05-MODULO-COTIZACIONES.md, `01-VISION-DEL-PRODUCTO.md` §18
+
+**Cambio principal (v1.4):** §9 corregido — eliminada la contradicción interna con §1/§2/§5 sobre si la factura requiere cotización previa. Ahora el documento es consistente: la factura puede crearse desde una cotización aprobada o directamente desde cero.
 
 ⚠️ Este documento es la ÚNICA fuente autorizada para el diseño y funcionalidad de Facturas. Ninguna IA puede modificar esto sin aprobación.
 
@@ -274,9 +276,10 @@ Estado Pendiente de envío:
 
 ## 9. Relación con Cotizaciones
 
-- Toda factura se genera a partir de una cotización.
-- La factura hereda automáticamente la información de la cotización.
-- La factura mantiene la relación con el cliente asociado.
+- Una factura puede generarse a partir de una cotización Aprobada, o crearse directamente desde cero (§1, §2, §5).
+- Si viene de una cotización, la factura hereda automáticamente la información de esta (líneas, cliente y totales — §5).
+- Si se crea desde cero, el usuario introduce cliente y líneas manualmente (§5).
+- La factura mantiene la relación con el cliente asociado en ambos casos.
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Fecha:** 03/07/2026
 
-**Estado:** Documento técnico oficial sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.6
+**Estado:** Documento técnico oficial sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11
 
 ---
 
@@ -212,7 +212,7 @@ Toda modificación técnica o funcional debe respetar la jerarquía y la regla d
 | Clientes | `01-darivo-pro-movil/03-MODULO-CLIENTES.md` |
 | Cotizaciones | `01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` |
 | Facturas | `01-darivo-pro-movil/06-MODULO-FACTURAS.md` |
-| Configuración | `01-darivo-pro-movil/07-MODULO-CONFIGURACION.md` |
+| Configuración / Más | `01-darivo-pro-movil/07-MODULO-MAS.md` |
 | IA (producto) | `01-darivo-pro-movil/08-MODULO-IA.md` |
 | Sistema de Diseño Fable 5 | `01-darivo-pro-movil/16-SISTEMA-DE-DISEÑO-FABLE5.md` |
 | Diseño oficial PDF | `01-darivo-pro-movil/17-DISEÑO-OFICIAL-PDF-DARIVO-PRO.md` |
@@ -315,12 +315,12 @@ El ecosistema está compuesto por **tres productos oficiales** más el **Program
 
 ## 4.5 Programa Partner
 
-El **Programa Partner** es un **componente del ecosistema** administrado desde Darivo Pro Admin (`06-PANEL-ADMIN-PARTNERS.md`).
+El **Programa Partner** es un **componente del ecosistema** administrado desde Darivo Pro Admin (`06-PANEL-ADMIN-PARTNERS.md`), no un producto (`01-VISION-DEL-PRODUCTO.md` §3.2).
 
-**No constituye un producto independiente.**
+**No constituye un producto independiente.** No participa en la clasificación por producto del Catálogo Maestro (`01-VISION-DEL-PRODUCTO.md` §3.1) ni en la regla de sincronización funcional entre productos (`01-VISION-DEL-PRODUCTO.md` §10).
 
 * **Admin:** gestión y fuente de verdad de partners.
-* **Panel Partner:** superficie de consulta para el partner; sincroniza con Admin (`PANEL-PARTNER.md`).
+* **Panel Partner:** superficie de consulta para el partner; sincroniza con Admin (`PANEL-PARTNER.md`). Diseño propio, independiente de Fable 5 y de Admin.
 
 ## 4.6 Secuencia técnica de acceso
 
@@ -424,7 +424,7 @@ Ver inventario completo en `02-BASE-DATOS.md` §4. Resumen:
 | `precios_historial` | Histórico de cambios de precio | `user_id` |
 | `ia_uso_diario` | Conteo IA por usuario y día | `user_id` |
 | `calculos_log` | Log de cálculos | `presupuesto_id` → `presupuestos` |
-| `productos_master` | Productos ecosistema (lookup) | — |
+| `productos_master` | Productos del ecosistema (lookup) — cabecera de clasificación del Catálogo Maestro (`01-VISION-DEL-PRODUCTO.md` §3.1); corresponde a Admin/Móvil/Empresa, **no** incluye Partner (§3.2, §4.5) | — |
 | `configuracion_regional` | Config regional (lookup) | — |
 | `catalogo_categorias_maestro` | Categorías oficiales por producto/sector | `producto_id` → `productos_master` |
 
@@ -638,14 +638,21 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 
 | Campo | Valor |
 | ----- | ----- |
-| Versión | 3.3 |
-| Fecha | 03/07/2026 |
-| Estado | Sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.6 y MD oficiales vigentes |
+| Versión | 3.4 |
+| Fecha | 05/07/2026 |
+| Estado | Sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11 y MD oficiales vigentes |
 | Tipo | Documento técnico exclusivo del ecosistema |
+
+## 12.13 Actualización v3.4 — Sincronización Visión v2.11 (Productos y Programa Partner)
+
+* Sincronización de cabecera con `01-VISION-DEL-PRODUCTO.md` v2.11.
+* Corregida referencia rota `07-MODULO-CONFIGURACION.md` → `07-MODULO-MAS.md` (mapa §3.2 y nota K-04).
+* §4.5 Programa Partner sincronizado con Vision §3.2: no es producto, no participa en clasificación del Catálogo Maestro ni en sincronización funcional entre productos.
+* §7.1 `productos_master` documentado como cabecera de clasificación del Catálogo Maestro (Vision §3.1), excluyendo explícitamente a Partner.
 
 ## 12.1 Referencias oficiales principales
 
-* `01-VISION-DEL-PRODUCTO.md` v2.6
+* `01-VISION-DEL-PRODUCTO.md` v2.11
 * `02-BASE-DATOS.md` v1.0
 * `03-AUTENTICACION-DARIVO-PRO.md` v1.0
 * `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md` v1.0
@@ -681,7 +688,7 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 | K-01 | Topología de **tres productos** oficiales (no dos) |
 | K-02 | Empresa como producto vigente; dominios BD pendientes de documentación (no «futuro conceptual») |
 | K-03 | Admin documentado (`00`–`12`); eliminado estado «pendiente de construir» |
-| K-04 | Configuración Móvil remitida a `07-MODULO-CONFIGURACION.md` (sin fijar pestañas en AM) |
+| K-04 | Configuración Móvil remitida a `07-MODULO-MAS.md` (sin fijar pestañas en AM) |
 | K-05 | Eliminada ruta `/presupuestos` global (no existe según `05`) |
 | K-06 | Eliminado flujo `/ia` como alterno; IA es atajo según Visión §13 y `08-MODULO-IA.md` |
 | K-07 | Estados de factura remitidos a `06-MODULO-FACTURAS.md` (sin afirmar inmutabilidad absoluta) |

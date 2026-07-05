@@ -1,8 +1,8 @@
 ﻿# ÍNDICE OFICIAL — PANEL ADMINISTRADOR — DARIVO PRO
 
-**Versión:** 1.3
+**Versión:** 1.4
 
-**Estado:** Aprobado por el propietario — sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.5
+**Estado:** Aprobado por el propietario — sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11
 
 ---
 
@@ -84,7 +84,7 @@ Los documentos eliminados o archivados no deben utilizarse como fuente de refere
 | Referencia | Descripción |
 | ---------- | ----------- |
 | **C1 — Nombres de planes** | ✅ RESUELTO. Catálogo oficial: **Básico / Pro** (únicos planes v1). Fuente única: `04-PANEL-ADMIN-SUSCRIPCIONES.md`. |
-| **Referidos vs Partners** | Sin definición de coexistencia o sustitución. |
+| **Referidos vs Partners** | ✅ RESUELTO. "Referidos" es el nombre antiguo del Programa Partner; queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2). Acción "Ver referidos" del Dashboard renombrada a "Ver Partners" (`00-PANEL-ADMIN-DASHBOARD.md` v1.1). |
 | **Vista operacional Suscripciones** | Diseño de tabla por usuario pendiente de incorporar a `04` una vez resuelto C1. |
 | **Soporte usuario (Darivo Pro)** | ✅ RESUELTO. Formulario y consulta documentados en `07-MODULO-MAS.md` §6 (Soporte). |
 | **01 — Roles, Planes y Permisos** | ✅ RESUELTO. Documento oficial: `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`. |
@@ -93,7 +93,11 @@ Los documentos eliminados o archivados no deben utilizarse como fuente de refere
 
 # 7. Estado del documento
 
+**Versión:** 1.4
+
 Índice oficial aprobado.
+
+**Cambio principal (v1.4):** sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11; cerrado el punto "Referidos vs Partners" (§6).
 
 Actualizar este documento únicamente cuando el propietario autorice cambios en la numeración o en la incorporación de nuevos módulos.
 

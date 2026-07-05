@@ -1,7 +1,9 @@
 # 00 – PANEL ADMIN – DASHBOARD
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.1):** acción "Ver referidos" renombrada a "Ver Partners" — "Referidos" queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2). "Enviar anuncio" queda pendiente de definición funcional (ver `INDICE-OFICIAL-PANEL-ADMIN.md`).
 
 ---
 
@@ -153,7 +155,7 @@ Listado de eventos recientes.
 - Ver métricas
 - Catálogo maestro
 - Configuración
-- Ver referidos
+- Ver Partners
 
 ---
 

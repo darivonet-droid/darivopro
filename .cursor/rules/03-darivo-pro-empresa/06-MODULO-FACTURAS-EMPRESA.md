@@ -1,10 +1,10 @@
 # 06 – MÓDULO FACTURAS – DARIVO PRO EMPRESA
 
-**Versión:** 1.0
+**Versión:** 1.1
 
-**Estado:** ✅ Producción completada — imagen oficial (fase global §7 — 02/07/2026).
+**Estado:** ⚠️ Corregido — requiere nueva imagen oficial (ver §2 y §5.2). Lógica y texto ya sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md`.
 
-**Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §6, §9 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.4 · `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`
+**Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §6, §9, §18 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.4 · `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`
 
 ⚠️ Este documento es la **única fuente autorizada** para la adaptación a escritorio del **Módulo Facturas** en Darivo Pro Empresa.
 
@@ -80,7 +80,7 @@ Cuando exista, prevalecerá siempre este MD ante cualquier diferencia con la ima
 ┌─────────────┬──────────────────────────────────────────────────┐
 │  SIDEBAR    │  HEADER — Facturación · subtítulo · badge RUC    │
 │  240px      ├──────────────────────────────────────────────────┤
-│             │  CHIPS FILTRO: Todas | Emitidas | Cobradas | Pend.│
+│             │  CHIPS FILTRO: Todas | Borrador | Emitidas | Rechaz.│
 │  Facturas ● ├──────────────────────────────────────────────────┤
 │             │  BANNER ámbar (si hay cotiz. aprobadas sin fact.) │
 │             ├──────────────────────────────────────────────────┤
@@ -135,14 +135,18 @@ Equivalente funcional `InvoicesScreen` (Móvil §2). Presentación: tabla + chip
 
 ## 5.2 Filtros (chips horizontales)
 
+⚠️ **Corrección v1.1** — chips actualizados a los 5 estados oficiales de facturación electrónica (`01-VISION-DEL-PRODUCTO.md` §18; Móvil §1). La versión anterior usaba estados de cobro incompatibles con la Visión. **Requiere nueva imagen oficial** — la imagen actual (§2) queda desactualizada en este punto.
+
 Scroll horizontal bajo el header (Móvil §2 · Sistema Diseño §5.3):
 
-| Chip | Filtra por estado de pago |
-|------|---------------------------|
+| Chip | Filtra por estado |
+|------|--------------------|
 | Todas | Sin filtro |
+| Borrador | Estado Borrador |
+| En proceso | Estado En proceso |
 | Emitidas | Estado Emitida |
-| Cobradas | Estado Cobrada |
-| Pendientes | Estado Pendiente |
+| Rechazadas | Estado Rechazada |
+| Pendiente de envío | Estado Pendiente de envío |
 
 ## 5.3 Banner cotizaciones aprobadas
 
@@ -171,7 +175,7 @@ Sustituye las cards móviles (Móvil §2):
 | Doc. | RUC o DNI del cliente (si existe) |
 | Fecha | Fecha emisión |
 | Total | Importe (`T.blue`, bold) |
-| Estado | Chips tocables: **Pendiente** · **Emitida** · **Cobrada** (Móvil §2 · Fable 5 §6.5) |
+| Estado | Chips tocables: **Borrador · En proceso · Emitida · Rechazada · Pendiente de envío** (Móvil §2 · Fable 5 §6.5) |
 | Acciones | `[I.pdf Ver factura]` (secundario) |
 
 **Estado vacío:** icono 🧾 + «Sin facturas todavía» (Móvil §2).
@@ -222,16 +226,21 @@ Si total ≤ S/700: **no** mostrar selector.
 
 **Forma de pago:** Efectivo / Yape / Transferencia / Crédito (Móvil §5).
 
-**Estado inicial al emitir:** Emitida o Pendiente según cobro (Móvil §5).
+**Estado inicial al crear:** Borrador (Móvil §5).
 
 Tabla de líneas en columna izquierda del editor (§4.2): Descripción | Cant | P.Unit | Total.
 
-## 6.4 Estados de factura (verificación API)
+## 6.4 Estados de factura (facturación electrónica)
 
-| Estado arquitectónico | Editar | Eliminar | Cambiar estado pago |
-|----------------------|--------|----------|---------------------|
-| **NO verificada** | ✅ | ✅ | ✅ |
-| **Verificada** | ❌ | ❌ | ✅ (solo Pendiente / Emitida / Cobrada) |
+⚠️ **Corrección v1.1** — sustituye el modelo anterior "Verificada / NO verificada", que no existía en la Visión ni en Móvil. Estados oficiales (`01-VISION-DEL-PRODUCTO.md` §18; Móvil §1, §12):
+
+| Estado | Editar | Eliminar |
+|--------|--------|----------|
+| **Borrador** | ✅ | ✅ |
+| **En proceso** | ❌ (esperando respuesta API) | ❌ |
+| **Emitida** | ❌ | ❌ |
+| **Rechazada** | ✅ (corregir y reenviar) | ✅ |
+| **Pendiente de envío** | ✅ (reintentar envío) | ✅ |
 
 (Móvil §1 · §12)
 
@@ -247,20 +256,22 @@ Diseño PDF según `17-DISEÑO-OFICIAL-PDF-DARIVO-PRO.md` y Móvil §6 (FACTURA/
 
 ---
 
-# 7. Funcionalidad — Estado de pago
+# 7. Funcionalidad — Estado de facturación electrónica
 
-Los chips **Pendiente · Emitida · Cobrada** son **siempre funcionales** (Móvil §2):
+⚠️ **Corrección v1.1** — esta sección usaba estados de cobro (Pendiente → Emitida → Cobrada) que no existen en la Visión ni en Móvil. Sustituido por el flujo oficial (`01-VISION-DEL-PRODUCTO.md` §18; Móvil §7):
 
 ```
-Pendiente → Emitida → Cobrada
+Borrador → En proceso → Emitida
+                    ↘ Rechazada (corregir + reenviar)
+                    ↘ Pendiente de envío (reintentar)
 ```
 
-Al cambiar estado:
+Al cambiar de estado:
 
 * Actualización **inmediata** en base de datos.
 * Reflejo en lista Facturas **y** ficha Cliente (sección facturas / historial) **sin desincronización** — siempre valor real BD, nunca cache aparte (Móvil §2).
 
-**No existe** estado «Rechazada» (limitación BD actual — Móvil §2).
+**Ya existe** el estado **Rechazada** (corrección respecto a la versión anterior de este documento, que afirmaba erróneamente lo contrario).
 
 ---
 
@@ -279,8 +290,9 @@ Integración OSE/PSE autorizado: pendiente de documentación funcional futura. N
 * Detracción obligatoria si Factura y total > S/700.
 * Numeración F001-00000001 / B001-00000001 (8 dígitos, no reutilizable).
 * Una única factura por número; Clientes y Facturas comparten la misma entidad (Móvil §10).
-* Eliminar factura NO verificada desde cualquier módulo → desaparece en ambos.
-* Factura Verificada → no editar ni eliminar.
+* Factura puede crearse desde cotización aprobada o directamente desde cero (Móvil §1).
+* Eliminar factura en estado **Borrador**, **Rechazada** o **Pendiente de envío** desde cualquier módulo → desaparece en ambos.
+* Factura **Emitida** → no editar ni eliminar.
 
 ---
 
@@ -337,6 +349,6 @@ Limitaciones por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referencia única — 
 
 # 14. Estado
 
-✅ **Producción completada** — diseño aprobado · imagen oficial (Reglas §15 — 02/07/2026).
+⚠️ **Corregido v1.1 (05/07/2026)** — se sustituyó el modelo de estados de cobro (Pendiente/Emitida/Cobrada) y la terminología "Verificada/NO verificada" por los 5 estados oficiales de facturación electrónica de `01-VISION-DEL-PRODUCTO.md` §18, ya usados en Móvil `06-MODULO-FACTURAS.md`. **Pendiente: nueva imagen oficial** que refleje los chips y columna de estado corregidos (§2, §5.2).
 
 **Fin del documento.**
