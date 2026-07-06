@@ -5,7 +5,6 @@ import { fmtPEN } from "@/lib/utils";
 import { CATEGORIAS } from "@/lib/catalog";
 import { createServerClient } from "@/lib/supabase/server";
 import { AccesoDenegadoBanner } from "@/components/acceso/AccesoDenegadoBanner";
-import { ProductosEcosistemaLinks } from "@/components/frontend/ProductosEcosistemaLinks";
 import { T } from "@/lib/theme";
 
 /* ─── Datos ─────────────────────────────────────────────────── */
@@ -96,7 +95,6 @@ export default async function DashboardPage({
       {/* ══ CONTENIDO ═════════════════════════════════════════ */}
       <div className="relative -mt-10 px-4" style={{ zIndex: 10 }}>
         <AccesoDenegadoBanner codigo={searchParams?.acceso} />
-        <ProductosEcosistemaLinks email={user?.email} />
 
         {/* ── 3 tarjetas oscuras ─────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
@@ -145,30 +143,6 @@ export default async function DashboardPage({
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Link>
-
-        {/* Accesos rápidos — 02-MODULO-INICIO.md §2 */}
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          <Link
-            href="/clientes"
-            className="flex items-center gap-3 rounded-2xl px-4 py-4"
-            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
-          >
-            <span className="text-xl">👥</span>
-            <span className="text-sm font-extrabold" style={{ color: T.text }}>
-              Clientes
-            </span>
-          </Link>
-          <Link
-            href="/presupuestos"
-            className="flex items-center gap-3 rounded-2xl px-4 py-4"
-            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
-          >
-            <span className="text-xl">📋</span>
-            <span className="text-sm font-extrabold" style={{ color: T.text }}>
-              Presupuestos
-            </span>
-          </Link>
-        </div>
 
         {/* Capítulos de obra */}
         <h2 className="mb-3 mt-6 text-sm font-extrabold" style={{ color: T.text }}>
