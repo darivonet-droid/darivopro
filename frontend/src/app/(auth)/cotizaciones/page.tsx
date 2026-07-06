@@ -54,7 +54,7 @@ export default async function PresupuestosPage() {
             </p>
           </div>
           <Link
-            href="/presupuestos/nuevo"
+            href="/cotizaciones/nuevo"
             className="rounded-xl px-4 py-2.5 text-sm font-bold"
             style={{ background: T.blue, color: T.white }}
           >

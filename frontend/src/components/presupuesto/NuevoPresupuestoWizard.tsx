@@ -543,7 +543,7 @@ export function NuevoPresupuestoWizard() {
       {/* DarkHeader */}
       <div style={{ background: `linear-gradient(160deg,${T.navy} 0%,${T.navyLight} 100%)`, padding: "50px 18px 22px", borderBottomLeftRadius: 26, borderBottomRightRadius: 26 }}>
         {/* Back */}
-        <Link href="/presupuestos" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+        <Link href="/cotizaciones" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
           <Ic d={["M19 12H5","M12 19l-7-7 7-7"]} color={T.textLight} size={18} />
           <span style={{ color: T.textLight, fontSize: 13, fontWeight: 600 }}>Volver</span>
         </Link>
@@ -876,7 +876,7 @@ export function NuevoPresupuestoWizard() {
             {saved && (
               <button
                 type="button"
-                onClick={() => { router.push("/presupuestos"); router.refresh(); }}
+                onClick={() => { router.push("/cotizaciones"); router.refresh(); }}
                 style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10, boxShadow: `0 4px 16px ${T.blue}35` }}
               >
                 Ver mis cotizaciones →

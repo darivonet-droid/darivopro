@@ -268,7 +268,7 @@ export function usePresupuesto() {
   }, [supabase]);
 
   const generarPDF = useCallback(async (id: string): Promise<string | null> => {
-    const res = await fetch(`/api/pdf/presupuesto/${id}`, { method: "POST" });
+    const res = await fetch(`/api/pdf/cotizacion/${id}`, { method: "POST" });
     if (!res.ok) { setError("No se pudo generar el PDF"); return null; }
     const json = await res.json();
     return json.data?.data?.url ?? json.data?.url ?? null;

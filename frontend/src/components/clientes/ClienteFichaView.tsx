@@ -111,7 +111,7 @@ export function ClienteFichaView({ cliente, presupuestos, facturas }: Props) {
 
       {/* ── Nueva cotización para este cliente ─────────────── */}
       <Link
-        href={`/presupuestos/nuevo?cliente=${cliente.id}`}
+        href={`/cotizaciones/nuevo?cliente=${cliente.id}`}
         className="flex items-center justify-center rounded-2xl py-3.5 text-sm font-extrabold text-white"
         style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})`, boxShadow: `0 4px 16px ${T.blue}35` }}
       >

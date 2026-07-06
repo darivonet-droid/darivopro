@@ -7,7 +7,7 @@ import type { Cliente, EmpresaData, LineaPresupuesto, Presupuesto } from "@/type
 export default async function NuevaFacturaPage({
   searchParams,
 }: {
-  searchParams: { presupuesto?: string };
+  searchParams: { cotizacion?: string };
 }) {
   const supabase = createServerClient();
 
@@ -85,7 +85,7 @@ export default async function NuevaFacturaPage({
         numerosExistentes={numerosExistentes}
         aprobados={aprobados}
         clientes={clientes}
-        presupuestoId={searchParams.presupuesto}
+        presupuestoId={searchParams.cotizacion}
       />
     </div>
   );

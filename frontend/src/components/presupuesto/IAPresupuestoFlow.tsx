@@ -84,7 +84,7 @@ export function IAPresupuestoFlow() {
         margin: saved.margin,
       }));
       limpiar();
-      router.push("/presupuestos/nuevo?fromIA=1");
+      router.push("/cotizaciones/nuevo?fromIA=1");
     }
   }, [cargar, catalogo, limpiar, router]);
 
@@ -99,7 +99,7 @@ export function IAPresupuestoFlow() {
       margin: 40,
     }));
     limpiar();
-    router.push("/presupuestos/nuevo?fromIA=1");
+    router.push("/cotizaciones/nuevo?fromIA=1");
   }, [catalogo, limpiar, router]);
 
   const generarConIA = useCallback(async (texto: string) => {
@@ -109,7 +109,7 @@ export function IAPresupuestoFlow() {
     }
     setProcesando(true);
     try {
-      const res = await fetch("/api/ia/presupuesto", {
+      const res = await fetch("/api/ia/cotizacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ descripcion: texto }),

@@ -110,7 +110,7 @@ export default async function DashboardPage({
 
         {/* ── CTA azul grande ────────────────────────────────── */}
         <Link
-          href="/presupuestos/nuevo"
+          href="/cotizaciones/nuevo"
           className="mt-4 flex items-center gap-4 rounded-2xl p-5"
           style={{
             background: T.blue,
@@ -154,7 +154,7 @@ export default async function DashboardPage({
             return (
             <Link
               key={cat.id}
-              href={`/presupuestos/nuevo?cat=${cat.id}`}
+              href={`/cotizaciones/nuevo?cat=${cat.id}`}
               className="flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-transform active:scale-95"
               style={{ background: chip.bg }}
             >
@@ -172,7 +172,7 @@ export default async function DashboardPage({
           <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
             Últimas cotizaciones
           </h2>
-          <Link href="/presupuestos" className="text-xs font-bold" style={{ color: T.blue }}>
+          <Link href="/cotizaciones" className="text-xs font-bold" style={{ color: T.blue }}>
             Ver todos →
           </Link>
         </div>
@@ -197,7 +197,7 @@ export default async function DashboardPage({
               return (
                 <Link
                   key={p.id}
-                  href={`/presupuestos`}
+                  href={`/cotizaciones`}
                   className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm"
                 >
                   <div className="flex-1 pr-3">

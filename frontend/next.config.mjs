@@ -20,7 +20,7 @@ const withPWA = withPWAInit({
         },
       },
       {
-        urlPattern: /\/(presupuestos|facturas|clientes|dashboard)(\/)?$/i,
+        urlPattern: /\/(cotizaciones|facturas|clientes|dashboard)(\/)?$/i,
         handler: "StaleWhileRevalidate",
         options: { cacheName: "darivo-pages" },
       },

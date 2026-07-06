@@ -108,7 +108,7 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
                   </div>
                   <button
                     type="button"
-                    onClick={() => router.push(`/facturas/nueva?presupuesto=${p.id}`)}
+                    onClick={() => router.push(`/facturas/nueva?cotizacion=${p.id}`)}
                     className="shrink-0 rounded-xl px-3 py-2 text-xs font-bold text-white"
                     style={{ background: T.green }}
                   >

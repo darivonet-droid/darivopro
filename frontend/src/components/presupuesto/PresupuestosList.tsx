@@ -69,7 +69,7 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
         titulo="Sin cotizaciones todavía"
         descripcion="Crea tu primera cotización en menos de 60 segundos."
       >
-        <Link href="/presupuestos/nuevo">
+        <Link href="/cotizaciones/nuevo">
           <Button>Nueva cotización</Button>
         </Link>
       </EmptyState>
@@ -103,7 +103,7 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
   const hacerFactura = async (p: Presupuesto) => {
     // Modo "preguntar": el usuario elige Empresa (RUC) o Particular (DNI) en el formulario
     if (facturarMode === "preguntar") {
-      router.push(`/facturas/nueva?presupuesto=${p.id}`);
+      router.push(`/facturas/nueva?cotizacion=${p.id}`);
       return;
     }
     mostrarToast("Creando factura…");
@@ -144,14 +144,14 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
                   {/* Fila 1: Editar · Re-cotizar · → Factura */}
                   <div className="flex w-full gap-2">
                     <Link
-                      href={`/presupuestos/nuevo?editar=${p.id}`}
+                      href={`/cotizaciones/nuevo?editar=${p.id}`}
                       className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
                       style={{ background: T.amberPale, color: T.amberD }}
                     >
                       ✏️ Editar
                     </Link>
                     <Link
-                      href={`/presupuestos/nuevo?from=${p.id}`}
+                      href={`/cotizaciones/nuevo?from=${p.id}`}
                       className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
                       style={{ background: T.bluePale, color: T.blue }}
                     >

@@ -54,7 +54,7 @@ export default async function EmpresaCotizacionesPage() {
           {presupuestos.length} cotizaciones
         </p>
         <Link
-          href="/presupuestos/nuevo"
+          href="/cotizaciones/nuevo"
           className="rounded-xl px-4 py-2 text-sm font-bold text-white"
           style={{ background: T.blue }}
         >

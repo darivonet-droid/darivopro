@@ -63,7 +63,7 @@ export function EmpresaInicioView({
       </div>
 
       <Link
-        href="/presupuestos/nuevo"
+        href="/cotizaciones/nuevo"
         className="flex items-center gap-4 rounded-2xl p-5"
         style={{ background: `linear-gradient(135deg, ${T.blue}, ${T.blueL})` }}
       >
@@ -94,7 +94,7 @@ export function EmpresaInicioView({
             return (
               <Link
                 key={cat.id}
-                href={`/presupuestos/nuevo?cat=${cat.id}`}
+                href={`/cotizaciones/nuevo?cat=${cat.id}`}
                 className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold"
                 style={{ background: chip.bg, color: chip.color }}
               >
