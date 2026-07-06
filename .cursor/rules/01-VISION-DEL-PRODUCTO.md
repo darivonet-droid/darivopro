@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.13
+**Versión:** 2.14
 
 **Estado:** Visión oficial aprobada
 
@@ -341,13 +341,15 @@ Darivo Pro separa oficialmente el diseño de la funcionalidad.
 
 ## Diseño
 
-Cada producto dispone de su propio diseño oficial:
+Cada producto dispone del siguiente diseño oficial:
 
-* **Darivo Pro Móvil**: Fable 5 es la referencia oficial del diseño visual, la navegación, los componentes, los botones, las imágenes y la experiencia de usuario.
-* **Darivo Pro Admin**: dispone de su propio diseño oficial.
-* **Darivo Pro Empresa**: dispone de su propio diseño oficial.
+* **Darivo Pro Móvil**: Fable 5 es la referencia oficial del diseño visual, la navegación, los componentes, los botones, las imágenes y la experiencia de usuario — exclusiva de Móvil, independiente del resto del ecosistema.
+* **Darivo Pro Admin**: dispone de su propio diseño oficial, y este diseño es además **la referencia visual única** para el resto de productos de escritorio del ecosistema (actualmente, Darivo Pro Empresa).
+* **Darivo Pro Empresa**: reutiliza el mismo diseño visual de Darivo Pro Admin — mismos componentes, mismos botones, misma paleta — adaptado a su propia navegación y estructura de contenido. No dispone de un diseño visual propio e independiente.
 
-Cada producto puede adaptar su interfaz a su entorno de uso (móvil, administración o escritorio).
+**Razón del principio:** Darivo Pro Admin y Darivo Pro Empresa se utilizan siempre **desde ordenador** — comparten el mismo entorno de uso y, por tanto, el mismo diseño visual. Darivo Pro Móvil se utiliza desde dispositivo móvil y constituye un entorno de uso distinto, con su propio diseño (Fable 5).
+
+Esto significa que cuando se apruebe o modifique un componente visual en Darivo Pro Admin, ese mismo diseño debe aplicarse en Darivo Pro Empresa. Únicamente el **contenido funcional** (el MD específico de cada módulo) puede diferir entre Admin y Empresa — nunca el diseño visual de los componentes compartidos.
 
 ### Excepción oficial de Fable 5
 
@@ -373,9 +375,9 @@ Las funcionalidades compartidas del ecosistema tienen una única referencia ofic
 
 Cuando se cree, modifique o apruebe una funcionalidad o el comportamiento de un botón en Darivo Pro Admin, esa funcionalidad deberá sincronizarse con Darivo Pro Móvil y Darivo Pro Empresa.
 
-El aspecto visual de los botones podrá ser diferente en cada producto para adaptarse a su diseño oficial.
+El aspecto visual de los botones y componentes entre **Darivo Pro Admin y Darivo Pro Empresa debe ser el mismo** (sección 10, Diseño) — comparten diseño por ser ambos productos de escritorio. Únicamente **Darivo Pro Móvil** (Fable 5) mantiene un diseño visual independiente, adaptado a su entorno móvil.
 
-Sin embargo, su comportamiento, reglas de negocio y funcionamiento deberán ser siempre los mismos en todo el ecosistema Darivo Pro.
+Sin embargo, en los tres productos, el comportamiento, las reglas de negocio y el funcionamiento deberán ser siempre los mismos en todo el ecosistema Darivo Pro.
 
 Este principio garantiza una única lógica funcional para todos los productos y evita duplicidades o comportamientos diferentes para una misma acción.
 
@@ -928,9 +930,11 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.13
+**Versión:** 2.14
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.14):** §10 corregido — Darivo Pro Admin y Darivo Pro Empresa comparten el mismo diseño visual (ambos son productos de escritorio); Empresa deja de tener diseño propio independiente. Solo Darivo Pro Móvil (Fable 5) mantiene diseño visual independiente. Corregido también el párrafo de Funcionalidad, que antes permitía aspecto visual distinto entre productos.
 
 **Cambio principal (v2.13):** §8 — invertido el orden oficial de la secuencia: **Funcionalidades antes que Limitaciones** (antes era al revés). Las Limitaciones ahora se definen como restricciones de cantidad/uso aplicadas sobre funcionalidades ya determinadas (ej. número de cotizaciones, empleados), no como filtro previo a su existencia. Referencias sincronizadas en Arquitectura Maestra, `11-ROLES-PLANES-PERMISOS-EMPRESA.md` y `08-MODULO-IA.md`.
 
