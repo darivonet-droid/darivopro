@@ -17,7 +17,7 @@
 | Fuente | Documento | Uso |
 |--------|-----------|-----|
 | Arquitectura funcional | `02-darivo-pro-admin/12 – ROLES… ADMIN.md` v1.5 §6–§9, §16 | Roles, planes, permisos, jerarquía |
-| Secuencia ecosistema | `01-VISION-DEL-PRODUCTO.md` §8 | Suscripción → Producto → Rol → Permisos → Limitaciones |
+| Secuencia ecosistema | `01-VISION-DEL-PRODUCTO.md` §8 | Suscripción → Producto → Rol → Permisos → Funcionalidades → Limitaciones |
 | Planes | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Básico / Pro — fuente única |
 | Empleados | `10-MODULO-EMPLEADOS-EMPRESA.md` | Origen enlace «Editar permisos» |
 | Sistema Diseño | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.9 | |
@@ -57,7 +57,7 @@ Darivo Pro Empresa **no** administra planes de suscripción ni roles de platafor
 Secuencia aplicada (Visión §8):
 
 ```
-Suscripción (plan) → Producto → Rol → Permisos → Limitaciones → Funcionalidades
+Suscripción (plan) → Producto → Rol → Permisos → Funcionalidades → Limitaciones
 ```
 
 Los permisos **nunca** superan el plan (Admin §8).

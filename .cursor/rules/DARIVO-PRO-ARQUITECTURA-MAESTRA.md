@@ -324,7 +324,7 @@ El **Programa Partner** es un **componente del ecosistema** administrado desde D
 
 ## 4.6 Secuencia técnica de acceso
 
-La secuencia lógica del ecosistema (suscripción → producto → rol → permisos → limitaciones → funcionalidades) se define estratégicamente en `01-VISION-DEL-PRODUCTO.md` §8.
+La secuencia lógica del ecosistema (suscripción → producto → rol → permisos → funcionalidades → limitaciones) se define estratégicamente en `01-VISION-DEL-PRODUCTO.md` §8.
 
 A nivel técnico, cada capa de la secuencia se resuelve en backend (Supabase + reglas de aplicación) antes de exponer funcionalidades en la interfaz del producto correspondiente.
 
