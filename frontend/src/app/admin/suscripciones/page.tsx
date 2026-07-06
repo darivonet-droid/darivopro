@@ -31,7 +31,13 @@ export default async function AdminSuscripcionesPage() {
           plan.nombre,
           fmtPEN(plan.mensual),
           fmtPEN(plan.anual),
-          String(id === "basico" ? usuariosPorPlan.basico : usuariosPorPlan.pro),
+          String(
+            id === "basico"
+              ? usuariosPorPlan.basico
+              : id === "pro"
+                ? usuariosPorPlan.pro
+                : usuariosPorPlan.business
+          ),
         ])}
       />
       <div className="mt-6">
@@ -39,7 +45,7 @@ export default async function AdminSuscripcionesPage() {
           Otros plan_tipo en perfiles
         </p>
         <p className="text-sm">
-          Gratis: {usuariosPorPlan.gratis} · Empresa: {usuariosPorPlan.empresa}
+          Gratis: {usuariosPorPlan.gratis} · Business: {usuariosPorPlan.business}
         </p>
         <p className="mt-2 text-xs" style={{ color: "#94A3B8" }}>
           Cobros dLocal activos en Móvil — historial Admin pendiente tablas BD (DT-05-05).

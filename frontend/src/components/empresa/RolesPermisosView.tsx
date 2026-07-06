@@ -17,7 +17,7 @@ const MODULOS_PERMISO = [
 function labelPlan(plan: PlanTipoPersistido): string {
   if (plan === "basico") return `Plan ${PRECIOS_OFICIALES.basico.nombre}`;
   if (plan === "pro") return `Plan ${PRECIOS_OFICIALES.pro.nombre}`;
-  if (plan === "empresa") return "Darivo Pro Empresa (producto)";
+  if (plan === "business") return `Plan ${PRECIOS_OFICIALES.business.nombre}`;
   return "Prueba gratuita — sin suscripción activa";
 }
 

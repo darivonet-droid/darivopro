@@ -123,12 +123,22 @@ export function AdminRolesView() {
                         <li>Cotizaciones totales: {String(limites.presupuestosTotal)}</li>
                       )}
                       <li>
-                        Facturas/mes:{" "}
-                        {limites.facturasMes === Infinity ? "Ilimitadas" : limites.facturasMes}
+                        Facturación:{" "}
+                        {limites.facturasHabilitado ? "Habilitada" : "No disponible"}
                       </li>
                       <li>
-                        IA/día: {limites.iaDia === Infinity ? "Ilimitada" : limites.iaDia}
+                        IA cotizaciones/día:{" "}
+                        {limites.iaCotizacionesDia === Infinity
+                          ? "Ilimitada"
+                          : limites.iaCotizacionesDia}
                       </li>
+                      <li>
+                        IA facturas:{" "}
+                        {limites.iaFacturasHabilitado ? "Habilitada" : "No disponible"}
+                      </li>
+                      {"tecnicosIncluidos" in limites && (
+                        <li>Técnicos incluidos: {limites.tecnicosIncluidos}</li>
+                      )}
                     </ul>
                   </div>
                 );

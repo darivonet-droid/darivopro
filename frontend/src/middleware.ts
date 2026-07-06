@@ -63,7 +63,7 @@ export async function middleware(req: NextRequest) {
       url.searchParams.set("acceso", "partner_denegado");
       return NextResponse.redirect(url);
     }
-    if (path.startsWith("/empresa") && !puedeAccederEmpresa(user)) {
+    if (path.startsWith("/empresa") && !(await puedeAccederEmpresa(supabase, user))) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
       url.searchParams.set("acceso", "empresa_denegado");

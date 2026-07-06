@@ -126,7 +126,7 @@ export async function fetchAdminSuscripciones() {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
         pro: rows.filter((p) => p.plan_tipo === "pro").length,
         gratis: rows.filter((p) => !p.plan_tipo || p.plan_tipo === "gratis").length,
-        empresa: rows.filter((p) => p.plan_tipo === "empresa").length,
+        business: rows.filter((p) => p.plan_tipo === "business").length,
       },
     },
   };

@@ -24,7 +24,7 @@ export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo:
   },
   facturas_basico: {
     titulo: "Límite de facturas",
-    subtitulo: "Tu plan Básico incluye 10 facturas/mes. Pro es ilimitado.",
+    subtitulo: "Facturación no disponible en tu plan. Pásate a Pro o Business para facturar.",
   },
   ia_limite: {
     titulo: "Límite de IA diario",
@@ -92,19 +92,13 @@ export async function verificarLimiteFactura(
   if (!user) return { ok: false, razon: "facturas_basico" };
 
   const plan = await obtenerPlanTipo(supabase);
+  if (plan === "basico") {
+    return { ok: false, razon: "facturas_basico" };
+  }
   if (planTieneLimitesIlimitados(plan)) return { ok: true };
 
   if (plan === "gratis") return { ok: true };
 
-  const { count } = await supabase
-    .from("facturas")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .gte("created_at", inicioMesISO());
-
-  if ((count ?? 0) >= LIMITES_PLAN.basico.facturasMes) {
-    return { ok: false, razon: "facturas_basico" };
-  }
   return { ok: true };
 }
 
@@ -118,7 +112,9 @@ export async function verificarLimiteIA(
   if (planTieneLimitesIlimitados(plan)) return { ok: true };
 
   const limite =
-    plan === "basico" ? LIMITES_PLAN.basico.iaDia : LIMITES_PLAN.gratis.iaDia;
+    plan === "basico"
+      ? LIMITES_PLAN.basico.iaCotizacionesDia
+      : LIMITES_PLAN.gratis.iaCotizacionesDia;
   const hoy = new Date().toISOString().slice(0, 10);
 
   const { data } = await supabase

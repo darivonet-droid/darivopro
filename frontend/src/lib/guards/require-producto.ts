@@ -12,7 +12,7 @@ export async function requireProducto(producto: ProductoProtegido) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const acceso = verificarAccesoProducto(producto, user);
+  const acceso = await verificarAccesoProducto(producto, user, supabase);
   if (!acceso.ok) {
     redirect(`/dashboard?acceso=${acceso.razon}`);
   }

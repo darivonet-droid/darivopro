@@ -17,9 +17,9 @@ const PLAN_LABELS: Record<PlanTipoPersistido, { nombre: string; desc: string }> 
     nombre: `Plan ${PRECIOS_OFICIALES.pro.nombre}`,
     desc: "Cotizaciones y facturas ilimitadas · S/79/mes",
   },
-  empresa: {
-    nombre: "Darivo Pro Empresa",
-    desc: "Producto escritorio — no es plan de suscripción",
+  business: {
+    nombre: `Plan ${PRECIOS_OFICIALES.business.nombre}`,
+    desc: "Cotizaciones y facturas ilimitadas · hasta 5 Técnicos · S/115/mes",
   },
 };
 
@@ -29,7 +29,7 @@ interface MiPlanCardProps {
 
 export function MiPlanCard({ planTipo }: MiPlanCardProps) {
   const info = PLAN_LABELS[planTipo] ?? PLAN_LABELS.gratis;
-  const esPago = planTipo === "basico" || planTipo === "pro";
+  const esPago = planTipo === "basico" || planTipo === "pro" || planTipo === "business";
 
   return (
     <div className="flex flex-col gap-4">

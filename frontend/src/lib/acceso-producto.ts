@@ -3,6 +3,7 @@
  * Tarea 11 — sin columna rol en BD (DT-04-02); allowlist env para plataforma/partner.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 
 function emailsAllowlist(envKey: string): Set<string> {
@@ -29,17 +30,27 @@ export function esPartnerAutorizado(email: string | null | undefined): boolean {
   return list.has(email.toLowerCase());
 }
 
-/** Usuario Móvil solo = Gerente implícito (Visión §5 · 04 §2) */
-export function puedeAccederEmpresa(user: User | null): boolean {
-  return !!user?.email;
+/** Acceso a Darivo Pro Empresa — solo plan Business (04 §6 · Visión §8) */
+export async function puedeAccederEmpresa(
+  supabase: SupabaseClient,
+  user: User | null
+): Promise<boolean> {
+  if (!user) return false;
+  const { data } = await supabase
+    .from("perfiles")
+    .select("plan_tipo")
+    .eq("id", user.id)
+    .single();
+  return data?.plan_tipo === "business";
 }
 
 export type ProductoProtegido = "admin" | "empresa" | "partner";
 
-export function verificarAccesoProducto(
+export async function verificarAccesoProducto(
   producto: ProductoProtegido,
-  user: User | null
-): { ok: true } | { ok: false; razon: string } {
+  user: User | null,
+  supabase: SupabaseClient
+): Promise<{ ok: true } | { ok: false; razon: string }> {
   if (!user) return { ok: false, razon: "no_sesion" };
 
   switch (producto) {
@@ -54,7 +65,7 @@ export function verificarAccesoProducto(
       }
       return { ok: true };
     case "empresa":
-      if (!puedeAccederEmpresa(user)) {
+      if (!(await puedeAccederEmpresa(supabase, user))) {
         return { ok: false, razon: "empresa_denegado" };
       }
       return { ok: true };
