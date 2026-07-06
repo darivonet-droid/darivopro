@@ -1,10 +1,12 @@
 # DARIVO PRO — ARQUITECTURA MAESTRA
 
-**Versión:** 2.8
+**Versión:** 2.9
 
-**Fecha:** 03/07/2026
+**Fecha:** 06/07/2026
 
-**Estado:** Documento técnico oficial sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11
+**Estado:** Documento técnico oficial sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.14
+
+**Cambio principal (v2.9):** corregida la lista de "Sistemas de diseño por producto" — Empresa ya no tiene diseño propio, reutiliza `16-SISTEMA-DE-DISEÑO-ADMIN.md` (Visión §10, v2.14).
 
 ---
 
@@ -350,9 +352,9 @@ Stack aprobado para la implementación actual del ecosistema:
 
 **Sistemas de diseño por producto** (capa de presentación, no arquitectura de datos):
 
-* Darivo Pro Móvil → `16-SISTEMA-DE-DISEÑO-FABLE5.md`
-* Darivo Pro Admin → diseño propio de escritorio (MD Admin)
-* Darivo Pro Empresa → diseño propio de escritorio (pendiente de MD específico)
+* Darivo Pro Móvil → `16-SISTEMA-DE-DISEÑO-FABLE5.md` (independiente)
+* Darivo Pro Admin → `02-darivo-pro-admin/16-SISTEMA-DE-DISEÑO-ADMIN.md` — referencia visual única para escritorio
+* Darivo Pro Empresa → reutiliza `02-darivo-pro-admin/16-SISTEMA-DE-DISEÑO-ADMIN.md`; no tiene diseño propio e independiente (Visión §10, v2.14)
 
 **Referencia estratégica:** `01-VISION-DEL-PRODUCTO.md` §10.
 
