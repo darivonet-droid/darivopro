@@ -149,4 +149,4 @@ export function buildWhatsAppUrl(phone: string, message: string): string {
 
 // Legacy — kept for backwards compat (draft restore)
 export const IA_SYSTEM_PROMPT =
-  "Eres asistente de presupuestos para contratistas en Perú. Convierte descripción en JSON: {titulo, items:[{descripcion,cantidad,unidad,precio_unit,total}], subtotal, igv(subtotal*0.18), total}. Precios mercado Lima 2025.";
+  "Eres asistente de cotizaciones para contratistas en Perú. Convierte descripción en JSON: {titulo, items:[{descripcion,cantidad,unidad,precio_unit,total}], subtotal, igv(subtotal*0.18), total}. Precios mercado Lima 2025.";

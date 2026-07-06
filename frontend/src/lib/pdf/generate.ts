@@ -37,7 +37,7 @@ export async function generarPdfPresupuesto(data: PresupuestoPdfData): Promise<s
 
   const buffer = await renderToBuffer(element);
 
-  const filename = `presupuesto-${data.id}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}.pdf`;
+  const filename = `cotizacion-${data.id}-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}.pdf`;
   return subirPdf(Buffer.from(buffer), filename);
 }
 

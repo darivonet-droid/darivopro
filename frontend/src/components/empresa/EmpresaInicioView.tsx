@@ -74,14 +74,14 @@ export function EmpresaInicioView({
           ⚡
         </div>
         <div className="flex-1">
-          <p className="text-base font-extrabold text-white">Nuevo presupuesto</p>
+          <p className="text-base font-extrabold text-white">Nueva cotización</p>
           <p className="text-xs text-white/70">Combina partidas · menos de 60 seg</p>
         </div>
       </Link>
 
       <div className="grid gap-3 md:grid-cols-2">
         <QuickLink href="/empresa/clientes" label="Clientes" emoji="👥" />
-        <QuickLink href="/empresa/cotizaciones" label="Presupuestos" emoji="📋" />
+        <QuickLink href="/empresa/cotizaciones" label="Cotizaciones" emoji="📋" />
       </div>
 
       <div>
@@ -109,7 +109,7 @@ export function EmpresaInicioView({
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-extrabold" style={{ color: T.text }}>
-            Últimos presupuestos
+            Últimas cotizaciones
           </h3>
           <Link href="/empresa/clientes" className="text-xs font-bold" style={{ color: T.blue }}>
             Ver todos →
