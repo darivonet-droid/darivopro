@@ -11,7 +11,8 @@ export type UpgradeRazon =
   | "presupuestos_gratis"
   | "presupuestos_basico"
   | "facturas_basico"
-  | "ia_limite";
+  | "ia_limite"
+  | "roles_personalizados_limite";
 
 export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo: string }> = {
   presupuestos_gratis: {
@@ -29,6 +30,11 @@ export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo:
   ia_limite: {
     titulo: "Límite de IA diario",
     subtitulo: "3 llamadas/día en prueba gratuita y plan Básico. Pro: IA ilimitada.",
+  },
+  roles_personalizados_limite: {
+    titulo: "Límite de roles personalizados",
+    subtitulo:
+      "Has alcanzado el máximo de roles personalizados de tu empresa. Contacta a soporte o solicita ampliación desde tu suscripción Business.",
   },
 };
 
@@ -127,6 +133,42 @@ export async function verificarLimiteIA(
   const usadas = data?.llamadas ?? 0;
   if (usadas >= limite) return { ok: false, razon: "ia_limite" };
   return { ok: true, restantes: limite - usadas };
+}
+
+export async function verificarLimiteRolesPersonalizados(
+  supabase: SupabaseClient,
+  empresaId: string
+): Promise<{ ok: true; limite: number | null; activos: number } | { ok: false; razon: UpgradeRazon; limite: number; activos: number }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, razon: "roles_personalizados_limite", limite: 0, activos: 0 };
+  }
+
+  const plan = await obtenerPlanTipo(supabase);
+  if (plan !== "business") {
+    return { ok: false, razon: "roles_personalizados_limite", limite: 0, activos: 0 };
+  }
+
+  const { count: activos } = await supabase
+    .from("roles_personalizados")
+    .select("*", { count: "exact", head: true })
+    .eq("empresa_id", empresaId)
+    .eq("activo", true);
+
+  const { data: suscripcion } = await supabase
+    .from("suscripciones")
+    .select("limite_roles_personalizados")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const limite = suscripcion?.limite_roles_personalizados ?? null;
+  const totalActivos = activos ?? 0;
+
+  if (limite !== null && totalActivos >= limite) {
+    return { ok: false, razon: "roles_personalizados_limite", limite, activos: totalActivos };
+  }
+
+  return { ok: true, limite, activos: totalActivos };
 }
 
 export async function registrarUsoIA(supabase: SupabaseClient): Promise<number> {
