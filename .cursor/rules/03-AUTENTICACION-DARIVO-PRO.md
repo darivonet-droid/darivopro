@@ -123,9 +123,9 @@ No define roles, planes ni permisos — ver `04-ROLES-PLANES-PERMISOS-DARIVO-PRO
 
 Todos verifican `getUser()` antes de procesar:
 
-* `/api/pdf/presupuesto/[id]`
+* `/api/pdf/cotizacion/[id]`
 * `/api/pdf/factura/[id]`
-* `/api/ia/presupuesto`
+* `/api/ia/cotizacion`
 * `/api/whatsapp/enviar`
 
 Respuesta sin sesión: **401**.

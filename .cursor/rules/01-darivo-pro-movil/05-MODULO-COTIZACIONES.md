@@ -30,7 +30,7 @@ Existen **dos entradas independientes**. El diseño de la pantalla principal (`0
 
 | Entrada | Origen | Flujo |
 |---------|--------|-------|
-| **Nueva cotización** | Inicio → «Nuevo presupuesto» · pills capítulos obra | Flujo **manual** (§2) |
+| **Nueva cotización** | Inicio → «Nueva cotización» · pills capítulos obra | Flujo **manual** (§2) |
 | **IA** | Nav central → módulo IA (`08-MODULO-IA.md`) | Flujo **IA** → converge al mismo wizard desde **Cantidades** (§2 Paso 2) |
 
 ---
@@ -283,7 +283,7 @@ Botones de acción (según Fable 5):
 [I.wa    WhatsApp]                     (secundario)
 [I.pdf   Generar y enviar PDF]         (secundario)
 Si ya guardado: [I.receipt  Convertir en Factura →]   (primario verde)
-[Nuevo presupuesto]                    (dashed, resetea wizard)
+[Nueva cotización]                     (dashed, resetea wizard)
 
 FUNCIONALIDAD — Guardar (Regla 10):
 - El guardado definitivo ocurre aquí, no antes
@@ -299,19 +299,19 @@ FUNCIONALIDAD — Guardar (Regla 10):
 
 ## 3. DÓNDE SE VEN LAS COTIZACIONES — UNIFICADO CON CLIENTE
 
-⚠️ **Decisión de arquitectura (24/06/2026):** NO existe una pantalla separada `/presupuestos` con lista global. Las cotizaciones se ven ÚNICAMENTE dentro de la ficha de cada Cliente (módulo **Clientes** de la nav principal).
+⚠️ **Decisión de arquitectura (24/06/2026):** NO existe una pantalla separada `/cotizaciones` con lista global. Las cotizaciones se ven ÚNICAMENTE dentro de la ficha de cada Cliente (módulo **Clientes** de la nav principal).
 
 ```
 CREACIÓN DE COTIZACIÓN:
 Wizard de 4 pasos (Selección → Cantidades → Resumen → Cliente) accesible desde:
-· Inicio → «Nuevo presupuesto» (flujo manual — Regla 1)
+· Inicio → «Nueva cotización» (flujo manual — Regla 1)
 · Nav IA → flujos Escribir / Hablar (flujo IA — 08-MODULO-IA.md)
 
 AL GUARDAR:
 La cotización queda automáticamente dentro de la ficha
 del Cliente correspondiente (ver 03-MODULO-CLIENTES.md §4).
 
-NO EXISTE ruta /presupuestos como lista independiente.
+NO EXISTE ruta /cotizaciones como lista independiente.
 ```
 
 ```

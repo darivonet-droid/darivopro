@@ -186,7 +186,7 @@ subtítulo 12px T.textMid, chevron I.chevron a la derecha.
 
 🤖 IA — Preferencias (I.sparkle, T.purple)
    Ajustes de uso de los agentes de Inteligencia Artificial
-   Los agentes IA (Presupuestos y Facturas · Soporte y Tickets) 
+   Los agentes IA (Cotizaciones y Facturas · Soporte y Tickets) 
    se acceden desde el módulo **IA** de la navegación principal 
    y desde **Soporte** en este módulo — ver `08-MODULO-IA.md` 
    y `01-VISION-DEL-PRODUCTO.md` §13

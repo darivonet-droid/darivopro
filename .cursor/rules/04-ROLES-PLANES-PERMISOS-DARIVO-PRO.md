@@ -130,7 +130,7 @@ Pendiente Tareas 05 y 08. Estructura documentada en Doc 11 (toggles por módulo)
 | `frontend/src/lib/planes.ts` | Catálogo UI `/precios` (Básico, Pro) |
 | `frontend/src/components/precios/PreciosView.tsx` | Vista precios + contacto Empresa + prueba gratuita |
 | `frontend/src/components/plan/UpgradeModal.tsx` | Modal upgrade |
-| `frontend/src/app/api/ia/presupuesto/route.ts` | Límite IA + registro uso |
+| `frontend/src/app/api/ia/cotizacion/route.ts` | Límite IA + registro uso |
 | `supabase/migrations/005_plan_limits.sql` | Schema `plan_tipo`, `ia_uso_diario` |
 
 ---

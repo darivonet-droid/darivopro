@@ -12,7 +12,7 @@
 
 ⚠️ **REGLA FUNDAMENTAL (reafirmada en `05-MODULO-COTIZACIONES.md` y `06-MODULO-FACTURAS.md`):** La IA NUNCA genera un documento independiente o de tipo distinto. Siempre termina creando una **Cotización** normal del sistema (número `COT-`) o una **Factura** normal del sistema, con todas las reglas habituales. La IA es un **ATAJO** dentro del flujo de trabajo, no un flujo paralelo.
 
-> **Nota terminológica:** En la interfaz puede aparecer la palabra *presupuesto*; en Darivo Pro el documento oficial equivalente es la **cotización** (`COT-`).
+> **Nota terminológica:** El documento oficial en Darivo Pro es la **cotización** (`COT-`). El nombre interno en código y BD sigue siendo `presupuestos` hasta la migración de identificadores (paso 3).
 
 ---
 
@@ -22,7 +22,7 @@ Darivo Pro Móvil dispone de **dos agentes oficiales de Inteligencia Artificial*
 
 | Agente | Nombre oficial | Ámbito |
 |--------|----------------|--------|
-| **Agente IA 1** | Presupuestos y Facturas | Cotizaciones, facturas y conversión entre ambos |
+| **Agente IA 1** | Cotizaciones y Facturas | Cotizaciones, facturas y conversión entre ambos |
 | **Agente IA 2** | Soporte y Tickets | Uso de la app, incidencias y tickets de soporte |
 
 Ningún otro agente conversacional forma parte del producto.
@@ -31,19 +31,19 @@ La **IA automática del Módulo Cierre** (análisis de fotografías y documentos
 
 ---
 
-## 2. AGENTE IA 1 — PRESUPUESTOS Y FACTURAS
+## 2. AGENTE IA 1 — COTIZACIONES Y FACTURAS
 
 ### Responsabilidad exclusiva
 
-* Crear presupuestos (cotizaciones).
-* Editar presupuestos.
+* Crear cotizaciones.
+* Editar cotizaciones.
 * Crear facturas.
-* Convertir presupuestos en facturas.
+* Convertir cotizaciones en facturas.
 * Ayudar al usuario durante estos procesos.
 
 ### Límite de ámbito
 
-No puede responder consultas fuera de presupuestos, cotizaciones y facturas.
+No puede responder consultas fuera de cotizaciones y facturas.
 
 ---
 
@@ -107,7 +107,7 @@ Los estados oficiales del ticket (**Nuevo**, **En proceso**, **Resuelto**) y la 
 
 Los dos agentes únicamente responderán preguntas relacionadas con:
 
-* Presupuestos y cotizaciones.
+* Cotizaciones.
 * Facturas.
 * Soporte de la aplicación.
 * Tickets de soporte.
@@ -128,7 +128,7 @@ No responderán preguntas de:
 
 ### Comportamiento ante consultas fuera de ámbito
 
-Cuando el usuario realice una consulta fuera del ámbito del producto, la IA indicará que solo puede ayudar con **presupuestos, facturas, soporte y tickets de Darivo Pro Móvil**.
+Cuando el usuario realice una consulta fuera del ámbito del producto, la IA indicará que solo puede ayudar con **cotizaciones, facturas, soporte y tickets de Darivo Pro Móvil**.
 
 ---
 
@@ -185,7 +185,7 @@ Botón central en BottomNav:
 Al tocar la posición IA de la nav bar → IAMenuScreen:
 - DarkHeader: título "IA" + subtítulo guía
 
-AGENTE IA 1 — Presupuestos y Facturas:
+AGENTE IA 1 — Cotizaciones y Facturas:
 - Card opción 1: ✏️ Escribir con IA (I.edit, fondo T.purplePale)
   → Agente IA 1 — flujo texto (cotización)
 - Card opción 2: 🎤 Hablar con IA (I.phone, fondo T.purplePale)
@@ -401,7 +401,7 @@ DISEÑO:
 
 **Cambio principal (v1.6):** modelo oficial de soporte IA + humano (dos niveles), regla obligatoria de no inventar soluciones y escalado automático al soporte humano.
 
-**Cambio principal (v1.5):** definición oficial de los dos agentes de IA (Presupuestos y Facturas · Soporte y Tickets), ámbito permitido y rechazado, protección frente a robots, flujos de facturas y soporte/tickets; aclaración de que la IA del Módulo Cierre no es un agente conversacional.
+**Cambio principal (v1.5):** definición oficial de los dos agentes de IA (Cotizaciones y Facturas · Soporte y Tickets), ámbito permitido y rechazado, protección frente a robots, flujos de facturas y soporte/tickets; aclaración de que la IA del Módulo Cierre no es un agente conversacional.
 
 **Sincronización (04/07/2026):** diseño Fable 5 card «Soporte con IA» documentado en `16-SISTEMA-DE-DISEÑO-FABLE5.md` §6.8.2 · Empresa `08-MODULO-IA-EMPRESA.md` v1.1.
 

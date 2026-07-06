@@ -91,7 +91,7 @@ T.slateD, con:
 - Toda la card es clickeable → abre Ficha de Cliente
 
 BOTÓN INFERIOR:
-"+ Nuevo presupuesto" / "+ Nuevo cliente" — borde 
+"+ Nueva cotización" / "+ Nuevo cliente" — borde 
 punteado gris (I.plus, T.textLight), texto T.textMid
 (botón dashed)
 ```

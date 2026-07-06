@@ -44,7 +44,7 @@ frontend/src/lib/
   gasto-ia.ts         — System prompt extracción gastos Cierre
 
 frontend/src/app/api/ia/
-  presupuesto/route.ts — POST cotización desde descripción/voz
+  cotizacion/route.ts — POST cotización desde descripción/voz
   gasto/route.ts       — POST análisis gasto (texto o imagen)
 
 frontend/src/components/
@@ -58,7 +58,7 @@ frontend/src/app/(auth)/ia/page.tsx — Pantalla Módulo IA
 
 # 4. Módulo IA — Cotizaciones
 
-**Ruta API:** `POST /api/ia/presupuesto`
+**Ruta API:** `POST /api/ia/cotizacion`
 
 **Entrada:** `{ descripcion: string }`
 
@@ -83,7 +83,7 @@ frontend/src/app/(auth)/ia/page.tsx — Pantalla Módulo IA
 
 **Flujo:**
 
-1. Autenticación + límite IA (igual que presupuesto).
+1. Autenticación + límite IA (igual que cotización).
 2. Si hay imagen → `openaiVisionJSON`; si solo texto → `openaiChatJSON`.
 3. JSON normalizado vía `normalizarGastoIA`.
 4. UI abre modal «Revisar gasto» con campos prefilled.

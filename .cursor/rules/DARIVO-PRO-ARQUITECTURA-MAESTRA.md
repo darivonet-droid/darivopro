@@ -691,7 +691,7 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 | K-02 | Empresa como producto vigente; dominios BD pendientes de documentación (no «futuro conceptual») |
 | K-03 | Admin documentado (`00`–`12`); eliminado estado «pendiente de construir» |
 | K-04 | Configuración Móvil remitida a `07-MODULO-MAS.md` (sin fijar pestañas en AM) |
-| K-05 | Eliminada ruta `/presupuestos` global (no existe según `05`) |
+| K-05 | Eliminada ruta `/cotizaciones` global (no existe según `05`) |
 | K-06 | Eliminado flujo `/ia` como alterno; IA es atajo según Visión §13 y `08-MODULO-IA.md` |
 | K-07 | Estados de factura remitidos a `06-MODULO-FACTURAS.md` (sin afirmar inmutabilidad absoluta) |
 | K-08 | Diseño Fable 5 eliminado de AM; remitido a `16` (solo Móvil) |

@@ -299,7 +299,7 @@ La iconografía oficial es el objeto **`I`** en `docs/02-darivo-pro-movil/fable-
 | `trash` | Papelera |
 | `pdf` | Documento PDF |
 | `wa` | Logo WhatsApp |
-| `brief` | Maletín (presupuestos) |
+| `brief` | Maletín (cotizaciones) |
 | `star` | Estrella |
 | `layers` | Capas |
 | `camera` | Cámara |
@@ -336,12 +336,12 @@ Tamaño por defecto del componente `SVG`: **22px** (configurable con prop `size`
 | Nueva factura | `I.receipt` | Gradiente azul | "Nueva factura" | Lista facturas |
 | Confirmar/Emitir | `I.receipt` | Gradiente verde | "Confirmar y emitir factura" | InvoiceEditor |
 | Volver | `I.back` | `#94A3B8` | "Volver" / "Clientes" | Todas las fichas |
-| Añadir inline | `I.plus` | `T.textLight` | "Nuevo presupuesto" | Listas |
+| Añadir inline | `I.plus` | `T.textLight` | "Nueva cotización" | Listas |
 | Editar tarifa | `I.edit` | `#64748B` | — (solo icono) | Más |
 | Eliminar partida | `I.trash` | `#EF4444` | — (solo icono) | Más |
 | Cerrar modal | `I.x` | `T.textLight` | "Cerrar" | Modales |
 | Cancelar | — | `T.textMid` | "Cancelar" | Modales · InvoiceEditor |
-| Nuevo presupuesto (HomeScreen) | `I.zap` | Gradiente azul | "Nuevo presupuesto" | HomeScreen (Fable 5) |
+| Nueva cotización (HomeScreen) | `I.zap` | Gradiente azul | "Nueva cotización" | HomeScreen (Fable 5) |
 | Editar cotización | `I.edit` | Borde `T.slateD` | "Editar" | Ficha Cliente · Lista cotizaciones |
 | Re-cotizar | `I.convert` | Borde azul suave | "Re-cotizar" | Ficha Cliente · Lista cotizaciones |
 | Eliminar cotización | `I.trash` | Borde rojo suave | "Eliminar" | Ficha Cliente · Lista cotizaciones |
@@ -525,7 +525,7 @@ Pantalla de referencia: **`IAMenuScreen`** (nav posición 3 · `08-MODULO-IA.md`
 
 | Propiedad | Valor |
 |-----------|-------|
-| Agente | **Agente IA 1 — Presupuestos y Facturas** |
+| Agente | **Agente IA 1 — Cotizaciones y Facturas** |
 | Icono | `I.edit` · color `T.purple` · tamaño 22px |
 | Emoji guía (opcional en card) | ✏️ |
 | Fondo de card | `T.purplePale` (`#F5F3FF`) |
@@ -537,7 +537,7 @@ Pantalla de referencia: **`IAMenuScreen`** (nav posición 3 · `08-MODULO-IA.md`
 
 | Propiedad | Valor |
 |-----------|-------|
-| Agente | **Agente IA 1 — Presupuestos y Facturas** |
+| Agente | **Agente IA 1 — Cotizaciones y Facturas** |
 | Icono | `I.phone` · color `T.purple` |
 | Emoji guía (opcional) | 🎤 |
 | Fondo de card | `T.purplePale` |
@@ -561,7 +561,7 @@ Pantalla de referencia: **`IAMenuScreen`** (nav posición 3 · `08-MODULO-IA.md`
 ### Reglas visuales
 
 * Cards 1 y 2 comparten identidad **morada** (Agente IA 1).
-* Card 3 usa identidad **teal** (Agente IA 2) para diferenciar soporte de presupuestos/facturas.
+* Card 3 usa identidad **teal** (Agente IA 2) para diferenciar soporte de cotizaciones/facturas.
 * No mezclar gradiente morado del botón central nav (§6.8) con el fondo teal de la card 3.
 * Cualquier botón o card nueva en este menú requiere entrada en §5.2 y aprobación del propietario (§9.5).
 
@@ -673,7 +673,7 @@ Estas pantallas están implementadas en Fable 5 y definen el lenguaje visual del
 | `HomeScreen` | Inicio — nav posición 1 — ver `02-MODULO-INICIO.md` |
 | `ClientsScreen` | Lista de clientes — nav posición 2 |
 | `ClientDetail` | Ficha de cliente |
-| `QuotesScreen` | Lista de presupuestos |
+| `QuotesScreen` | Lista de cotizaciones |
 | `QuoteScreen` | Wizard de cotización |
 | `SettingsScreen` | Módulo Más (3 pestañas) — nav posición 6 (§7.1) |
 | `InvoicesScreen` | Lista de facturas — nav posición 4 |
@@ -746,7 +746,7 @@ En el resto de pantallas principales permanece visible.
 * Enlaces de texto en azul: "Ver todos →", "+ Añadir más"
 * Chips de filtro con scroll horizontal en listas
 
-**No hay información suficiente en la documentación oficial** sobre rutas URL (`/presupuestos`, `/clientes`, etc.) ni sobre decisiones de arquitectura de navegación entre lista global de cotizaciones y ficha de cliente.
+**No hay información suficiente en la documentación oficial** sobre rutas URL (`/cotizaciones`, `/clientes`, etc.) ni sobre decisiones de arquitectura de navegación entre lista global de cotizaciones y ficha de cliente.
 
 ## 7.5 Módulo Cierre — referencia visual oficial
 
@@ -976,7 +976,7 @@ El archivo `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` contiene contenido histórico de
 |------|-------------|
 | Moneda en catálogo | ✅ Resuelto | `fmt` y catálogo usan **S/** (PEN) conforme a `05` §4 y `07` §5 |
 | Icono del header de cotización | `QuoteScreen` usa `I.zap` en el header del wizard; el botón central de nav es **IA** (`I.sparkle`, morado — §6.8) |
-| Botón en lista de clientes | El botón inferior dice "Nuevo presupuesto" y abre el wizard de cotización, no un formulario de "Nuevo cliente" |
+| Botón en lista de clientes | El botón inferior dice "Nueva cotización" y abre el wizard de cotización, no un formulario de "Nuevo cliente" |
 
 Estas inconsistencias internas del prototipo deben resolverse con decisión del propietario del producto antes de implementación final. Este MD documenta el estado actual del archivo fuente sin corregirlo.
 

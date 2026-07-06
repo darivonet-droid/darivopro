@@ -137,7 +137,7 @@ Migraciones: 001, 008, 010, 013, 014.
 | `base_price` / `qty` / `unit_price` / `subtotal` | numeric | |
 | `created_at` | timestamptz | |
 
-**RLS:** vía existencia de presupuesto del usuario.
+**RLS:** vía existencia de la cotización del usuario.
 
 ### `cotizacion_series`
 
@@ -323,7 +323,7 @@ empresas · partners · soporte_* · suscripciones · gastos (ecosistema multi-p
 | Tabla | Modelo |
 |-------|--------|
 | perfiles, presupuestos, facturas, partidas_propias, precios_usuario, categorias, precios_historial, calculos_log, ia_uso_diario, cotizacion_series | `auth.uid() = user_id` (o id en perfiles) |
-| presupuesto_items | subquery presupuesto del usuario |
+| presupuesto_items | subquery cotización del usuario |
 | clientes | 4 políticas CRUD explícitas |
 | productos_master, configuracion_regional, catalogo_* | SELECT autenticados; admin vía `is_darivo_admin()` |
 | comprobante_series | SELECT autenticados (sin aislamiento por tenant) |

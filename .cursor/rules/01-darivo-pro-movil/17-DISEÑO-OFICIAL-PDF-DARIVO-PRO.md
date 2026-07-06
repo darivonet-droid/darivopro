@@ -138,7 +138,7 @@ Cada campo del PDF proviene exclusivamente de los módulos oficiales. No se inve
 ### 7.1 Naturaleza del documento
 
 - Documento de **trabajo**, sin validez fiscal (`05-MODULO-COTIZACIONES.md` §4).
-- El usuario siempre ve **"Cotización"** en pantalla, nunca "presupuesto" (`05-MODULO-COTIZACIONES.md` §1).
+- El usuario siempre ve **"Cotización"** en pantalla y en PDF (`05-MODULO-COTIZACIONES.md` §1).
 - Numeración correlativa: **COT-001, COT-002...** — al confirmar (Paso 4 · Regla 10).
 
 ### 7.2 Estructura oficial del PDF

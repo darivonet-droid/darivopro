@@ -23,7 +23,7 @@
 
 # 1. Objetivo
 
-Flujo de **cotización** (presupuesto de trabajo) en escritorio — wizard **Selección → Cantidades → Resumen → Cliente** (Móvil §2 · Reglas 1–10).
+Flujo de **cotización** (documento de trabajo) en escritorio — wizard **Selección → Cantidades → Resumen → Cliente** (Móvil §2 · Reglas 1–10).
 
 **Wizard único:** un solo wizard para todas las categorías; mismos StepDots (4 pasos) para todos los usuarios. La única diferencia es la navegación inicial del Paso 1 hasta Partidas (Construcción → subcategorías).
 
@@ -47,7 +47,7 @@ Prevalece siempre este MD ante cualquier diferencia funcional. La imagen puede r
 
 | Origen | Acción |
 |--------|--------|
-| Inicio (02) | CTA «Nuevo presupuesto» · pills capítulos obra → **flujo manual** |
+| Inicio (02) | CTA «Nueva cotización» · pills capítulos obra → **flujo manual** |
 | Clientes (03) | «+ Nuevo» en ficha · Editar / Re-cotizar en historial |
 | IA (08) | Flujos Escribir / Hablar con IA → converge a **Cantidades** (Móvil §2) |
 
@@ -137,7 +137,7 @@ Tras Cliente — botones (Móvil §2 · Fable 5 §5.2):
 | WhatsApp | `I.wa` | Secundario |
 | Generar y enviar PDF | `I.pdf` | Secundario |
 | Convertir en Factura → | `I.receipt` | Solo si ya guardado y Aprobado |
-| Nuevo presupuesto | — | Dashed · resetea wizard |
+| Nueva cotización | — | Dashed · resetea wizard |
 
 Selector estado: Borrador / Pendiente / Aprobado (en confirmación).
 

@@ -34,7 +34,7 @@ Darivo Pro Empresa comparte la **misma lógica de IA conversacional** que Darivo
 
 | Agente | Nombre | Ámbito |
 |--------|--------|--------|
-| **Agente IA 1** | Presupuestos y Facturas | Cotizaciones, facturas, conversión |
+| **Agente IA 1** | Cotizaciones y Facturas | Cotizaciones, facturas, conversión |
 | **Agente IA 2** | Soporte y Tickets | Uso de la app, errores, tickets |
 
 La **IA automática del Módulo Cierre** (gastos) **no** es un agente conversacional — ver `09-MODULO-CIERRE-EMPRESA.md`.
@@ -100,19 +100,19 @@ Cards 1–2 en fila 50/50 en viewport ≥1024px; card 3 ancho completo debajo. E
 
 ---
 
-# 5. Agente IA 1 — Presupuestos y Facturas
+# 5. Agente IA 1 — Cotizaciones y Facturas
 
 Referencia completa: Móvil §2, §7–§10.
 
 ### Responsabilidad exclusiva
 
-* Crear y editar cotizaciones (presupuestos).
+* Crear y editar cotizaciones.
 * Crear facturas y convertir cotizaciones en facturas.
 * Asistir durante estos procesos.
 
 ### Límite
 
-No responde fuera de presupuestos, cotizaciones y facturas (Móvil §4).
+No responde fuera de cotizaciones y facturas (Móvil §4).
 
 ---
 

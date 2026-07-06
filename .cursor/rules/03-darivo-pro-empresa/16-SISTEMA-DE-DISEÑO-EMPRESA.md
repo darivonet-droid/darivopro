@@ -219,10 +219,10 @@ Spec: `02-MODULO-INICIO-EMPRESA.md` v2.0 · imagen ⏳ (Reglas §7.1).
 | Lógica (Móvil) | Presentación (Admin Dashboard) |
 |----------------|--------------------------------|
 | KPIs en `DarkHeader` | Fila 3 cards KPI (§5 tarjetas resumen) |
-| CTA «Nuevo presupuesto» | Card gradiente ancho completo |
-| Accesos Clientes · Presupuestos | 2 cards horizontales (§6 acciones rápidas) |
+| CTA «Nueva cotización» | Card gradiente ancho completo |
+| Accesos Clientes · Cotizaciones | 2 cards horizontales (§6 acciones rápidas) |
 | Pills capítulos obra | Fila pills/chips |
-| Lista 4 presupuestos | Tabla compacta (§5 actividad reciente) |
+| Lista 4 cotizaciones | Tabla compacta (§5 actividad reciente) |
 | Bottom nav Inicio | Sidebar posición 1 |
 
 ## 6.2 Patrón Clientes

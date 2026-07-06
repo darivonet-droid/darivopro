@@ -68,13 +68,13 @@ Estructura de escritorio conforme a Sistema Diseño §5 y patrón Admin Dashboar
 │  240px      ├──────────────────────────────────────────────────┤
 │  navy       │  FILA KPI — 3 cards (§5.2)                       │
 │             ├──────────────────────────────────────────────────┤
-│  Inicio ●   │  CTA Nuevo presupuesto (§5.3)                    │
+│  Inicio ●   │  CTA Nueva cotización (§5.3)                    │
 │  Clientes   ├──────────────────────────────────────────────────┤
 │  IA         │  ACCESOS RÁPIDOS — 2 cards (§5.4)                │
 │  Facturas   ├──────────────────────────────────────────────────┤
 │  Cierre     │  CAPÍTULOS DE OBRA — pills (§5.5)                │
 │  Más        ├──────────────────────────────────────────────────┤
-│  …          │  ÚLTIMOS PRESUPUESTOS — tabla compacta (§5.6)    │
+│  …          │  ÚLTIMAS COTIZACIONES — tabla compacta (§5.6)    │
 └─────────────┴──────────────────────────────────────────────────┘
 ```
 
@@ -117,7 +117,7 @@ Moneda: **S/** (Móvil §5 · Sistema Diseño §3).
 
 Cada card: título del KPI · valor destacado · color de acento según tabla.
 
-## 5.3 CTA — Nuevo presupuesto
+## 5.3 CTA — Nueva cotización
 
 Card de acción principal a ancho completo del área de contenido:
 
@@ -125,7 +125,7 @@ Card de acción principal a ancho completo del área de contenido:
 |----------|-------|
 | Estilo | Gradiente `T.blue` → `T.blueL`, radius 20px |
 | Icono | `I.zap` en caja translúcida |
-| Título | «Nuevo presupuesto» |
+| Título | «Nueva cotización» |
 | Subtítulo | «Combina partidas · menos de 60 seg» |
 | Jerarquía | Botón primario (Sistema Diseño §6) |
 
@@ -138,7 +138,7 @@ Dos cards en fila horizontal (equivalente al grid 2 columnas móvil — Móvil �
 | Card | Destino | Tipo navegación |
 |------|---------|-----------------|
 | **Clientes** | Módulo Clientes | Sidebar posición 2 |
-| **Presupuestos** | Módulo Clientes | Sidebar posición 2 — historial por cliente (Cotizaciones §3) |
+| **Cotizaciones** | Módulo Clientes | Sidebar posición 2 — historial por cliente (Cotizaciones §3) |
 
 Iconografía de las cards: **Pendiente de documentación oficial** en MD Móvil Inicio §2 — no inventar iconos hasta que existan en fuente Móvil o Fable 5 §5.2.
 
@@ -150,11 +150,11 @@ Fila de pills/chips horizontales (Móvil §2 · Sistema Diseño §6 `Pill`):
 * Colores de categoría: tokens catálogo Fable 5 §3.2 (marca compartida).
 * **Acción al pulsar:** abre wizard de cotización con la categoría preseleccionada (`05-MODULO-COTIZACIONES.md` §2).
 
-## 5.6 Últimos presupuestos
+## 5.6 Últimas cotizaciones
 
 Sección inferior — equivalente a «Actividad reciente» del Admin Dashboard §5, con alcance Inicio Móvil §2:
 
-**Encabezado de sección:** «Últimos presupuestos» · enlace textual **Ver todos →** (destino: módulo **Clientes** — Cotizaciones §3: no existe lista global).
+**Encabezado de sección:** «Últimas cotizaciones» · enlace textual **Ver todos →** (destino: módulo **Clientes** — Cotizaciones §3: no existe lista global).
 
 **Tabla compacta** — máximo **4 filas** (Sistema Diseño §5.3 · §6):
 
@@ -177,9 +177,9 @@ Cabecera de tabla: fondo `T.navyLight`, texto claro (patrón Admin tablas).
 
 | Elemento | Tipo | Acción |
 |----------|------|--------|
-| CTA Nuevo presupuesto | Primario | Wizard cotización |
+| CTA Nueva cotización | Primario | Wizard cotización |
 | Card Clientes | Acceso rápido | Navega a Clientes (sidebar 2) |
-| Card Presupuestos | Acceso rápido | Navega a Clientes (sidebar 2) |
+| Card Cotizaciones | Acceso rápido | Navega a Clientes (sidebar 2) |
 | Pill capítulo obra | Chip | Wizard cotización (categoría) |
 | Ver todos → | Enlace | Módulo Clientes |
 | Notificaciones | Icono header | Patrón header Empresa (Sistema Diseño §5.2) — acción específica **pendiente** en Móvil |
