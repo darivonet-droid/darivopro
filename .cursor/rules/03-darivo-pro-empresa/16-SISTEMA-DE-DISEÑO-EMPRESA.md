@@ -6,6 +6,12 @@ Versión: 2.5
 
 Última actualización: 02/07/2026
 
+Este documento reutiliza el sistema de diseño oficial de 
+02-darivo-pro-admin/16-SISTEMA-DE-DISEÑO-ADMIN.md (Visión §10, v2.14). 
+Empresa no tiene diseño visual propio e independiente — solo adapta 
+la disposición de contenido (patrones de esta página) sobre la base 
+visual de Admin.
+
 ## 6.3 Patrón Cotizaciones
 
 Spec: `05-MODULO-COTIZACIONES-EMPRESA.md` v1.0 · imagen `05 – MÓDULO COTIZACIONES – DARIVO PRO EMPRESA.png`.
