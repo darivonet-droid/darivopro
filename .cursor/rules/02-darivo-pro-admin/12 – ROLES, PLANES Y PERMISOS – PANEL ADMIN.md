@@ -1,8 +1,10 @@
 # 12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN
 
-**Versión:** 1.5
+**Versión:** 1.6
 
 **Estado:** Documento oficial
+
+**Cambio principal (v1.6):** §7 ampliado a 3 planes (Básico, Pro, Business); añadido §7.1 (límite de Técnicos, solo Business, configurable por empresa) y §7.2 (roles personalizados, solo Business, límite por empresa); §14 con las reglas correspondientes.
 
 ---
 
@@ -126,14 +128,35 @@ El **Administrador Darivo** podrá:
 
 Actualmente los planes oficiales son:
 
-* Básico.
-* Pro.
+* **Básico.**
+* **Pro.**
+* **Business.**
+
+La matriz completa de funcionalidades por plan (Cotizaciones, Clientes, Catálogo, Facturación, IA, Usuarios) es responsabilidad exclusiva de `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6. Este documento no la duplica.
 
 Los planes determinan las funcionalidades disponibles para cada empresa.
 
 Los planes no son roles ni permisos.
 
 La creación o modificación de un plan no altera la arquitectura oficial de Roles y Permisos definida en este documento.
+
+## 7.1 Límite de Técnicos por plan
+
+Solo el plan **Business** permite la estructura Gerente + Técnicos (`01-VISION-DEL-PRODUCTO.md` §6, §19).
+
+* **Básico** y **Pro**: 1 único usuario (Gerente = Técnico, `01-VISION-DEL-PRODUCTO.md` §5, excepción de usuario único).
+* **Business**: 1 Gerente + hasta 5 Técnicos incluidos. Técnicos adicionales son una ampliación cuyo precio no está definido todavía (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
+
+El límite exacto de Técnicos de cada empresa se administra individualmente desde Suscripciones (Panel Admin), no como un número fijo idéntico para todas las empresas del mismo plan.
+
+## 7.2 Roles personalizados
+
+Cuando el plan lo permita, el **Gerente** puede crear roles personalizados adicionales a Gerente y Técnico (`01-VISION-DEL-PRODUCTO.md` §8).
+
+* Disponible únicamente en plan **Business** — es el único plan con estructura multiusuario; Básico y Pro son de un único usuario y no aplican roles personalizados.
+* El límite máximo de roles personalizados por empresa se administra desde Suscripciones (Panel Admin), igual que el límite de Técnicos.
+* Los roles personalizados nunca crean funcionalidades nuevas — únicamente activan o desactivan funcionalidades ya existentes (`01-VISION-DEL-PRODUCTO.md` §8, Permisos).
+* La especificación funcional detallada (pantalla, campos, validaciones) se documenta en `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md`.
 
 ---
 
@@ -208,6 +231,8 @@ Este módulo se relaciona con:
 * El Administrador Darivo podrá crear, modificar, activar, desactivar o eliminar planes de suscripción.
 * La creación de nuevos planes no modificará la definición oficial de los roles del sistema.
 * Toda modificación de planes de suscripción deberá registrarse mediante auditoría.
+* Los roles personalizados solo están disponibles en plan Business y nunca crean funcionalidades nuevas (§7.2).
+* El límite de Técnicos y de roles personalizados se administra individualmente por empresa desde Suscripciones, no como valor fijo igual para todas las empresas del mismo plan (§7.1, §7.2).
 
 ---
 

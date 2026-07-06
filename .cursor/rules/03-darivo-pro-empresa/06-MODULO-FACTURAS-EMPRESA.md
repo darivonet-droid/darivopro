@@ -1,8 +1,8 @@
 # 06 – MÓDULO FACTURAS – DARIVO PRO EMPRESA
 
-**Versión:** 1.1
+**Versión:** 1.2
 
-**Estado:** ⚠️ Corregido — requiere nueva imagen oficial (ver §2 y §5.2). Lógica y texto ya sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md`.
+**Estado:** ⚠️ Requiere nueva imagen oficial (ver §2 y §5.2, pendiente desde v1.1 + ahora también Cobrada). Lógica y texto sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md` v1.6.
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §6, §9, §18 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.4 · `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`
 
@@ -147,6 +147,7 @@ Scroll horizontal bajo el header (Móvil §2 · Sistema Diseño §5.3):
 | Emitidas | Estado Emitida |
 | Rechazadas | Estado Rechazada |
 | Pendiente de envío | Estado Pendiente de envío |
+| Cobradas | Estado Cobrada |
 
 ## 5.3 Banner cotizaciones aprobadas
 
@@ -175,7 +176,7 @@ Sustituye las cards móviles (Móvil §2):
 | Doc. | RUC o DNI del cliente (si existe) |
 | Fecha | Fecha emisión |
 | Total | Importe (`T.blue`, bold) |
-| Estado | Chips tocables: **Borrador · En proceso · Emitida · Rechazada · Pendiente de envío** (Móvil §2 · Fable 5 §6.5) |
+| Estado | Chips tocables: **Borrador · En proceso · Emitida · Rechazada · Pendiente de envío · Cobrada** (Móvil §2 · Fable 5 §6.5) |
 | Acciones | `[I.pdf Ver factura]` (secundario) |
 
 **Estado vacío:** icono 🧾 + «Sin facturas todavía» (Móvil §2).
@@ -241,8 +242,11 @@ Tabla de líneas en columna izquierda del editor (§4.2): Descripción | Cant | 
 | **Emitida** | ❌ | ❌ |
 | **Rechazada** | ✅ (corregir y reenviar) | ✅ |
 | **Pendiente de envío** | ✅ (reintentar envío) | ✅ |
+| **Cobrada** | ❌ (hereda protección de Emitida) | ❌ |
 
 (Móvil §1 · §12)
+
+**Cobrada** es un 6º estado adicional a los 5 oficiales de facturación electrónica (Visión §18), para gestión de cobro en el mismo campo — solo alcanzable desde Emitida (Móvil §1, corrección v1.6).
 
 ## 6.5 PDF y compartir
 
@@ -261,7 +265,7 @@ Diseño PDF según `17-DISEÑO-OFICIAL-PDF-DARIVO-PRO.md` y Móvil §6 (FACTURA/
 ⚠️ **Corrección v1.1** — esta sección usaba estados de cobro (Pendiente → Emitida → Cobrada) que no existen en la Visión ni en Móvil. Sustituido por el flujo oficial (`01-VISION-DEL-PRODUCTO.md` §18; Móvil §7):
 
 ```
-Borrador → En proceso → Emitida
+Borrador → En proceso → Emitida → Cobrada (marcado manual tras el pago)
                     ↘ Rechazada (corregir + reenviar)
                     ↘ Pendiente de envío (reintentar)
 ```
@@ -349,6 +353,8 @@ Limitaciones por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referencia única — 
 
 # 14. Estado
 
-⚠️ **Corregido v1.1 (05/07/2026)** — se sustituyó el modelo de estados de cobro (Pendiente/Emitida/Cobrada) y la terminología "Verificada/NO verificada" por los 5 estados oficiales de facturación electrónica de `01-VISION-DEL-PRODUCTO.md` §18, ya usados en Móvil `06-MODULO-FACTURAS.md`. **Pendiente: nueva imagen oficial** que refleje los chips y columna de estado corregidos (§2, §5.2).
+⚠️ **Actualizado v1.2 (05/07/2026)** — añadido el estado **Cobrada** como 6º estado (adicional a los 5 oficiales), alcanzable solo desde Emitida. **Pendiente: nueva imagen oficial** que refleje los 6 estados.
+
+⚠️ **Corregido v1.1 (05/07/2026)** — se sustituyó el modelo de estados de cobro (Pendiente/Emitida/Cobrada) y la terminología "Verificada/NO verificada" por los 5 estados oficiales de facturación electrónica de `01-VISION-DEL-PRODUCTO.md` §18, ya usados en Móvil `06-MODULO-FACTURAS.md`.
 
 **Fin del documento.**

@@ -1,8 +1,10 @@
 # DARIVO PRO — MÓDULO FACTURAS
 ## Diseño + Funcionalidad
-### Versión: 1.5 — 05/07/2026
+### Versión: 1.6 — 05/07/2026
 ### Fuente: diseño Fable 5 (InvoicesScreen/InvoiceEditor/InvoiceModal) + funcionalidad SUNAT ya construida
 ### Relacionado: ver 03-MODULO-CLIENTES.md, 05-MODULO-COTIZACIONES.md, `01-VISION-DEL-PRODUCTO.md` §18
+
+**Cambio principal (v1.6):** añadido el estado **Cobrada** — 6º estado en el mismo campo `inv_status`, alcanzable solo desde Emitida, para gestión de cobro sin crear un segundo campo paralelo.
 
 **Cambio principal (v1.5):** añadida nota de disponibilidad por plan — Facturación no disponible en Plan Básico (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
 
@@ -29,6 +31,9 @@ Documento comercial que el usuario crea en Darivo Pro y que, una vez validado, s
 | **Emitida** | Aceptada por la API oficial. | ❌ No puede editarse ni eliminarse. Información protegida. |
 | **Rechazada** | Rechazada por la API; incluye motivo del rechazo. | ✅ Puede corregirse y reenviarse. |
 | **Pendiente de envío** | Error de comunicación con la API. | ✅ Puede corregirse y reintentarse el envío. |
+| **Cobrada** | Estado adicional de gestión de cobro — solo alcanzable desde Emitida, cuando el cliente ya pagó. No forma parte del flujo de envío a SUNAT (Visión §18); es un dato de gestión interna que vive en el mismo campo de estado. | ❌ No puede editarse ni eliminarse (hereda la protección de Emitida). |
+
+**Nota de arquitectura:** "Cobrada" es un estado adicional a los 5 oficiales de facturación electrónica (Visión §18), añadido para llevar el control de cobro dentro del mismo campo `inv_status`, sin crear un segundo campo paralelo. Una factura solo puede pasar a Cobrada después de estar Emitida — nunca antes.
 
 Se llega a una factura SIEMPRE desde una Cotización Aprobada (vía botón "→ Factura" dentro de la ficha de Cliente — ver 05-MODULO-COTIZACIONES.md), o creando una nueva directamente desde cero.
 
@@ -48,7 +53,7 @@ HEADER (navy, gradiente, esquinas redondeadas 26px):
 - Subtítulo: "[N] facturas · S/ [total]"
 - Badge verde con el RUC de la empresa del usuario
 - Chips de filtro (scroll horizontal): 
-  Todas | Borrador | En proceso | Emitidas | Rechazadas | Pendiente de envío
+  Todas | Borrador | En proceso | Emitidas | Rechazadas | Pendiente de envío | Cobradas
 
 BANNER (si hay cotizaciones Aprobadas sin facturar):
 Fondo ámbar claro, borde ámbar:
@@ -77,7 +82,7 @@ Cada card (blanca, radius 14px — ver 16-SISTEMA-DE-DISEÑO-FABLE5.md §6.3):
 ```
 Los estados oficiales de facturación electrónica son:
 
-Borrador → En proceso → Emitida
+Borrador → En proceso → Emitida → Cobrada (marcado manual tras el pago)
                     ↘ Rechazada (corregir + reenviar)
                     ↘ Pendiente de envío (reintentar)
 

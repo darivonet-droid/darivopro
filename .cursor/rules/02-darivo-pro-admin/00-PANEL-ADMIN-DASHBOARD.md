@@ -1,11 +1,13 @@
 # 00 – PANEL ADMIN – DASHBOARD
 
-**Versión:** 1.2  
+**Versión:** 1.3  
 **Estado:** Diseño oficial aprobado
 
-**Cambio principal (v1.2):** "Distribución de suscripciones" ampliada a 3 planes (Básico, Pro, Empresa) — sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
+**Cambio principal (v1.3):** eliminada la acción "Enviar anuncio" — confirmado por el propietario que no existe funcionalidad de marketing/anuncios en el ecosistema (solo Móvil, Empresa, Admin). Corregida nota de changelog v1.2 (decía "Empresa", el plan se renombró a "Business").
 
-**Cambio principal (v1.1):** acción "Ver referidos" renombrada a "Ver Partners" — "Referidos" queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2). "Enviar anuncio" queda pendiente de definición funcional (ver `INDICE-OFICIAL-PANEL-ADMIN.md`).
+**Cambio principal (v1.2):** "Distribución de suscripciones" ampliada a 3 planes (Básico, Pro, Business) — sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
+
+**Cambio principal (v1.1):** acción "Ver referidos" renombrada a "Ver Partners" — "Referidos" queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2).
 
 ---
 
@@ -154,7 +156,6 @@ Listado de eventos recientes.
 - Nuevo usuario
 - Nueva suscripción
 - Nuevo ticket
-- Enviar anuncio
 - Ver métricas
 - Catálogo maestro
 - Configuración

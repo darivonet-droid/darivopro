@@ -1,8 +1,10 @@
 ﻿# ÍNDICE OFICIAL — PANEL ADMINISTRADOR — DARIVO PRO
 
-**Versión:** 1.4
+**Versión:** 1.5
 
-**Estado:** Aprobado por el propietario — sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11
+**Estado:** Aprobado por el propietario — sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.13
+
+**Cambio principal (v1.5):** número **05** asignado oficialmente a "Edición de Productos" (`05-PANEL-ADMIN-EDICION-DE-PRODUCTOS.md`), aprobado por el propietario.
 
 ---
 
@@ -23,7 +25,7 @@ Define la numeración oficial, el estado de cada módulo y las reglas de organiz
 | 02 | Empresas | `02-PANEL-ADMIN-EMPRESAS.md` | Existente |
 | 03 | Usuarios | `03-PANEL-ADMIN-USUARIOS.md` | Existente |
 | 04 | Gestión de Suscripciones | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Existente |
-| 05 | *(Reservado)* | — | **No utilizar** |
+| 05 | Edición de Productos | `05-PANEL-ADMIN-EDICION-DE-PRODUCTOS.md` | Aprobado por el propietario (05/07/2026) |
 | 06 | Partners | `06-PANEL-ADMIN-PARTNERS.md` | Existente |
 | 07 | Empleados | `07-PANEL-ADMIN-EMPLEADOS.md` | Existente |
 | 08 | Configuración de APIs | `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` | Existente |
@@ -93,9 +95,11 @@ Los documentos eliminados o archivados no deben utilizarse como fuente de refere
 
 # 7. Estado del documento
 
-**Versión:** 1.4
+**Versión:** 1.5
 
 Índice oficial aprobado.
+
+**Cambio principal (v1.5):** asignado número 05 a "Edición de Productos".
 
 **Cambio principal (v1.4):** sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11; cerrado el punto "Referidos vs Partners" (§6).
 

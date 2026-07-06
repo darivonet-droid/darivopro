@@ -1,8 +1,10 @@
 # 21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Arquitectura oficial propuesta
+
+**Cambio principal (v1.3):** añadida sección 4.1 — incorporación de `productos_master` como nivel superior a Sectores en la jerarquía del Catálogo Maestro, sincronizado con `01-VISION-DEL-PRODUCTO.md` §3.1 y `02-BASE-DATOS.md` §4.7.
 
 **Cambio principal (v1.2):** corregida referencia rota a "07 – MÓDULO CONFIGURACIÓN" (archivo inexistente) → "07 – MÓDULO MÁS" (`07-MODULO-MAS.md`), sincronizado con `01-VISION-DEL-PRODUCTO.md` §5 y §16.
 
@@ -58,6 +60,26 @@ Desde este módulo se gestionan:
 - Actualizaciones
 
 La empresa nunca modifica esta información.
+
+## 4.1 Nivel de Producto (`productos_master`)
+
+El Catálogo Maestro tiene un nivel de clasificación adicional, superior a Sectores: el **Producto del ecosistema** (`01-VISION-DEL-PRODUCTO.md` §3.1; `02-BASE-DATOS.md` §4.7).
+
+Jerarquía completa:
+
+```
+Producto (Darivo Pro Admin / Móvil / Empresa — tabla productos_master)
+    ↓
+Sector profesional (sección 5)
+    ↓
+Categoría
+    ↓
+Partida
+```
+
+* El **Producto** determina qué aplicación puede consumir esa parte del catálogo (Móvil, Empresa o Admin). Es un filtro independiente de **Sector** — Sector filtra por actividad profesional (construcción, electricidad, etc.); Producto filtra por aplicación del ecosistema.
+* El **Programa Partner** no participa en esta clasificación — no es un producto (`01-VISION-DEL-PRODUCTO.md` §3.2).
+* La administración de este nivel corresponde exclusivamente a Darivo Pro Admin, igual que el resto del Catálogo Maestro.
 
 ---
 

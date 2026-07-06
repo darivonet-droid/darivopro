@@ -1,8 +1,8 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.0
+**Versión:** 1.2
 
-**Estado:** ✅ Producción completada — imagen oficial (fase global §7 — 02/07/2026).
+**Estado:** ⚠️ Requiere nueva imagen oficial (roles personalizados, §6.1). Especificación funcional cerrada — sincronizado con `01-VISION-DEL-PRODUCTO.md` §8, `12 – ROLES… ADMIN.md` v1.6 y `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.6.
 
 **Relacionado:** `02-darivo-pro-admin/12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` §6–§9, §16–§17 · `01-VISION-DEL-PRODUCTO.md` §8 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.9
 
@@ -18,7 +18,7 @@
 |--------|-----------|-----|
 | Arquitectura funcional | `02-darivo-pro-admin/12 – ROLES… ADMIN.md` v1.5 §6–§9, §16 | Roles, planes, permisos, jerarquía |
 | Secuencia ecosistema | `01-VISION-DEL-PRODUCTO.md` §8 | Suscripción → Producto → Rol → Permisos → Funcionalidades → Limitaciones |
-| Planes | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Básico / Pro — fuente única |
+| Planes | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Básico / Pro / Business — fuente única |
 | Empleados | `10-MODULO-EMPLEADOS-EMPRESA.md` | Origen enlace «Editar permisos» |
 | Sistema Diseño | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.9 | |
 
@@ -51,7 +51,7 @@ Darivo Pro Empresa **no** administra planes de suscripción ni roles de platafor
 | Concepto | Responsabilidad Empresa |
 |----------|-------------------------|
 | **Rol** | Gerente · Técnico (roles cliente — Visión §8) |
-| **Plan** | Básico / Pro — **solo consulta**; administra Admin (`04`) |
+| **Plan** | Básico / Pro / Business — **solo consulta**; administra Admin (`04`) |
 | **Permiso** | Toggle funcionalidad por empleado — **sí administra** Gerente |
 
 Secuencia aplicada (Visión §8):
@@ -119,16 +119,32 @@ Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de
 
 | Rol | En Empresa |
 |-----|------------|
-| **Gerente** | Administra empleados, permisos y Mis Tarifas (Móvil + Empresa) |
+| **Gerente** | Administra empleados, permisos, Mis Tarifas (Móvil + Empresa) y roles personalizados (solo Business — §6.1) |
 | **Técnico** | Permisos asignados; trabajo en Móvil |
 
-No existen otros roles cliente documentados oficialmente.
+Roles base: Gerente y Técnico. Con plan **Business**, el Gerente puede además crear **roles personalizados** (§6.1).
+
+## 6.1 Roles personalizados (solo plan Business)
+
+⚠️ **Funcionalidad nueva — propuesta de diseño funcional, pendiente de aprobación e imagen oficial.** No forma parte de la imagen oficial actual (§2), que queda desactualizada en este punto.
+
+**Disponibilidad:** únicamente si el plan contratado es **Business** (`12 – ROLES… ADMIN.md` §7.2). Básico y Pro son de un único usuario y no aplican.
+
+**Quién los crea:** exclusivamente el **Gerente**, desde este mismo módulo (Roles y Permisos).
+
+**Propuesta de flujo:**
+
+1. Botón **"Crear rol personalizado"**, visible solo si plan = Business y no se ha alcanzado el límite máximo de roles personalizados de la empresa (límite configurado individualmente por cuenta desde Suscripciones — `04-PANEL-ADMIN-SUSCRIPCIONES.md`, `12 – ROLES… ADMIN.md` §7.2).
+2. Formulario: **nombre del rol** (obligatorio, único dentro de la empresa, no puede ser "Gerente" ni "Técnico" — nombres reservados) y **selección de permisos** sobre el mismo catálogo de funcionalidades toggleables ya usado en la matriz (§5.2) — nunca funcionalidades nuevas (Visión §8).
+3. Una vez creado, el rol personalizado se asigna a un empleado **Técnico** existente desde `10-MODULO-EMPLEADOS-EMPRESA.md`, como una variante con permisos propios — no sustituye el rol base Técnico, lo especializa.
+4. **Un rol personalizado puede asignarse a varios Técnicos a la vez** (patrón RBAC estándar de mercado: el rol es una plantilla de permisos reutilizable, no una configuración individual por persona). El Gerente crea el rol una vez y lo asigna a cuantos Técnicos necesite; si edita el rol, el cambio se aplica automáticamente a todos los Técnicos que lo tengan asignado.
+5. Eliminar un rol personalizado no elimina al empleado; el/los empleado(s) que lo tenían asignado vuelven a los permisos del rol Técnico base.
 
 ---
 
 # 7. Planes (referencia única)
 
-Catálogo oficial: **Básico** · **Pro** (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
+Catálogo oficial: **Básico** · **Pro** · **Business** (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
 
 Empresa **no** crea, modifica ni elimina planes.
 
@@ -160,7 +176,9 @@ Mi Plan (consulta/cambio): `07-MODULO-MAS-EMPRESA.md` §6.
 
 # 10. Estado
 
-✅ **Producción completada** — Reglas §15 (02/07/2026).
+⚠️ **Actualizado v1.2 (05/07/2026)** — cerrada la decisión pendiente: un rol personalizado puede asignarse a varios Técnicos (patrón RBAC estándar). **Pendiente: nueva imagen oficial** (§6.1).
+
+⚠️ **Actualizado v1.1 (05/07/2026)** — añadida propuesta funcional de roles personalizados (§6.1, solo plan Business); sincronizados los 3 planes oficiales en §0, §3 y §7.
 
 ⏳ **Matriz detallada de permisos** — pendiente aprobación propietario (Admin §8).
 

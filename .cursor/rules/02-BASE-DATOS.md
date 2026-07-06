@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 2.0
+**Versión:** 2.1
 
 **Fecha:** 05/07/2026
 
 **Estado:** Documento técnico oficial — esquema V2 (32 tablas) · inicio producto
+
+**Cambio principal (v2.1):** definido esquema mínimo de columnas de `productos_master` (§4.7) para soportar el nuevo módulo Admin de Edición de Productos (05).
 
 **Referencia:** `01-VISION-DEL-PRODUCTO.md` v2.6 §14 · `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` §7 · `03-AUTENTICACION-DARIVO-PRO.md` v1.0 · `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.1
 
@@ -233,7 +235,21 @@ Tablas globales sin `user_id` salvo políticas RLS de lectura autenticados / adm
 
 ### `productos_master`
 
-Productos del ecosistema (`darivo-pro`).
+Productos del ecosistema (`darivo-pro`) — cabecera de clasificación del Catálogo Maestro (`01-VISION-DEL-PRODUCTO.md` §3.1; Doc 21 §4.1).
+
+Esquema mínimo (v1 — pendiente de validar contra Supabase real antes de migrar):
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | uuid PK | `uuid_generate_v4()` |
+| `nombre` | text NOT NULL | Ej. "Darivo Pro Móvil" |
+| `codigo` | text UNIQUE NOT NULL | Slug interno usado como referencia en `catalogo_categorias_maestro.producto_id` — ej. `movil`, `admin`, `empresa` |
+| `descripcion` | text NULL | Opcional |
+| `activo` | boolean DEFAULT true | Ocultar como filtro sin borrar categorías asociadas |
+| `orden` | integer DEFAULT 0 | Orden de visualización en el filtro |
+| `created_at` / `updated_at` | timestamptz | Estándar |
+
+El **Programa Partner** no tiene fila en esta tabla (`01-VISION-DEL-PRODUCTO.md` §3.2).
 
 ### `configuracion_regional`
 
