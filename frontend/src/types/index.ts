@@ -47,12 +47,20 @@ export interface Detraccion {
   ctaDetracciones?: string;
 }
 
+export type InvStatus =
+  | "Borrador"
+  | "En proceso"
+  | "Emitida"
+  | "Rechazada"
+  | "Pendiente de envío"
+  | "Cobrada";
+
 export interface Factura {
   invId: string;
   tenant_id: string;
   invNum: string;
   invDate: string;
-  invStatus: "Pendiente" | "Emitida" | "Cobrada";
+  invStatus: InvStatus;
   tipoDoc: "boleta" | "factura";
   clientName: string;
   clientRuc?: string;

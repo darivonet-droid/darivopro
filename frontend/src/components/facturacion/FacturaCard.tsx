@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { compartirPDF } from "@/lib/share";
+import { chipBg } from "@/lib/design-system/tokens";
 import { fmtPEN } from "@/lib/utils";
 import { INV_STATUS_COLORS, T } from "@/lib/theme";
 import type { Factura } from "@/types";
@@ -15,7 +16,6 @@ export function FacturaCard({ factura: f }: { factura: Factura }) {
   const router = useRouter();
   const { generarPDF, actualizarEstado } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
-  // Espejo optimista; se re-sincroniza si el servidor envía un estado distinto
   const [estado, setEstado] = useState<Factura["invStatus"]>(f.invStatus);
   useEffect(() => { setEstado(f.invStatus); }, [f.invStatus]);
 
@@ -30,18 +30,19 @@ export function FacturaCard({ factura: f }: { factura: Factura }) {
 
   const cambiarEstado = async (nuevo: Factura["invStatus"]) => {
     const previo = estado;
-    setEstado(nuevo); // optimista
+    setEstado(nuevo);
     const ok = await actualizarEstado(f.invId, nuevo);
     if (ok) {
-      mostrarToast(nuevo === "Cobrada" ? "Factura marcada como pagada ✓" : "Factura marcada como pendiente");
-      router.refresh(); // fuerza relectura del estado real desde la BD
+      mostrarToast(nuevo === "Cobrada" ? "Factura marcada como cobrada ✓" : "Estado actualizado");
+      router.refresh();
     } else {
-      setEstado(previo); // revertir si falló
+      setEstado(previo);
       mostrarToast("No se pudo cambiar el estado", "error");
     }
   };
 
-  const esPagada = estado === "Cobrada";
+  const colorEstado = INV_STATUS_COLORS[estado] ?? T.textMid;
+  const puedeMarcarCobrada = estado === "Emitida";
 
   return (
     <div className="rounded-2xl bg-white px-4 py-4 shadow-sm">
@@ -58,34 +59,24 @@ export function FacturaCard({ factura: f }: { factura: Factura }) {
           <span
             className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold"
             style={{
-              background: esPagada ? T.greenPale : T.amberPale,
-              color: INV_STATUS_COLORS[estado] ?? T.textMid,
+              background: chipBg(colorEstado),
+              color: colorEstado,
             }}
           >
-            {esPagada ? "Pagado" : "Pendiente"}
+            {estado}
           </span>
         </div>
       </div>
 
-      {/* Botones de estado (mapa: pagada → Cobrada, pendiente → Pendiente) */}
       <div className="mt-3 flex gap-2 border-t pt-3" style={{ borderColor: T.slateD }}>
-        {esPagada ? (
-          <button
-            type="button"
-            onClick={() => cambiarEstado("Pendiente")}
-            className="flex-1 rounded-xl py-2.5 text-xs font-bold"
-            style={{ background: T.amberPale, color: T.amberD }}
-          >
-            Marcar pendiente
-          </button>
-        ) : (
+        {puedeMarcarCobrada && (
           <button
             type="button"
             onClick={() => cambiarEstado("Cobrada")}
             className="flex-1 rounded-xl py-2.5 text-xs font-bold text-white"
             style={{ background: T.green }}
           >
-            Marcar como pagada
+            Marcar como cobrada
           </button>
         )}
         <button

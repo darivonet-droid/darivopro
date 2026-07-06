@@ -1,7 +1,7 @@
 // DARIVO PRO — Facturación (Server Component)
 import { FacturasView } from "@/components/facturacion/FacturasView";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Factura, LineaPresupuesto, Presupuesto } from "@/types";
+import type { Factura, InvStatus, LineaPresupuesto, Presupuesto } from "@/types";
 
 export default async function FacturasPage() {
   const supabase = createServerClient();
@@ -21,7 +21,7 @@ export default async function FacturasPage() {
     tenant_id: row.user_id,
     invNum: row.inv_num,
     invDate: row.inv_date,
-    invStatus: row.inv_status,
+    invStatus: row.inv_status as InvStatus,
     tipoDoc: row.tipo_doc ?? "factura",
     clientName: row.client_name,
     clientRuc: row.client_ruc ?? undefined,

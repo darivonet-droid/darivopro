@@ -1,4 +1,4 @@
-import type { Detraccion, Factura, TipoDetraccion } from "@/types";
+import type { Detraccion, Factura, InvStatus, TipoDetraccion } from "@/types";
 
 export type FiltroFactura = "Todas" | "Emitidas" | "Cobradas" | "Pendientes";
 export type TipoComprobante = "boleta" | "factura";
@@ -60,8 +60,19 @@ export function filtrarFacturas(facturas: Factura[], filtro: FiltroFactura): Fac
     return facturas.filter((f) => f.invStatus === "Emitida" || f.invStatus === "Cobrada");
   }
   if (filtro === "Cobradas") return facturas.filter((f) => f.invStatus === "Cobrada");
-  return facturas.filter((f) => f.invStatus === "Emitida" || f.invStatus === "Pendiente");
+  // Pendientes = emitidas sin cobrar (estado Emitida)
+  return facturas.filter((f) => f.invStatus === "Emitida");
 }
+
+/** Estados oficiales de factura — referencia única para validaciones UI */
+export const INV_STATUSES: InvStatus[] = [
+  "Borrador",
+  "En proceso",
+  "Emitida",
+  "Rechazada",
+  "Pendiente de envío",
+  "Cobrada",
+];
 
 /* ─── Numeración (8 dígitos, serie B001 / F001) ──────────── */
 export function nextNumeroComprobante(

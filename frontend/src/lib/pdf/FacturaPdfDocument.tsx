@@ -1,13 +1,13 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { baseStyles, C, fmtMoney } from "./styles";
-import type { Detraccion, EmpresaData, LineaFactura } from "@/types";
+import type { Detraccion, EmpresaData, InvStatus, LineaFactura } from "@/types";
 import { OPCIONES_DETRACCION } from "@/lib/factura-utils";
 
 export interface FacturaPdfData {
   inv_num: string;
   inv_date: string;
-  inv_status?: string | null;
+  inv_status?: InvStatus | null;
   tipo_doc?: "boleta" | "factura" | null;
   client_name: string;
   client_ruc?: string | null;

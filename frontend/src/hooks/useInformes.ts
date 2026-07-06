@@ -98,7 +98,7 @@ export function useInformes() {
     const cotizado   = sum(presRes.data ?? []);
     const facturado  = sum(facsEsta);
     const cobrado    = sum(facsEsta.filter(f => f.inv_status === "Cobrada"));
-    const pendiente  = facturado - cobrado;
+    const pendiente  = sum(facsEsta.filter(f => f.inv_status === "Emitida"));
 
     setSemana({
       cotizado, facturado, cobrado, pendiente,
@@ -174,7 +174,7 @@ export function useInformes() {
 
     const totalFacturado  = facs.reduce((s, f) => s + Number(f.total_final ?? 0), 0);
     const totalCobrado    = facs.filter(f => f.inv_status === "Cobrada").reduce((s, f) => s + Number(f.total_final ?? 0), 0);
-    const pendienteCobro  = totalFacturado - totalCobrado;
+    const pendienteCobro  = facs.filter(f => f.inv_status === "Emitida").reduce((s, f) => s + Number(f.total_final ?? 0), 0);
     const igvAcumulado    = Math.round(totalFacturado * 0.18 * 100) / 100;
 
     const numCotizaciones = pres.length;

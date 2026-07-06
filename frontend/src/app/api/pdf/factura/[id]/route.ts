@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { generarPdfFactura } from "@/lib/pdf/generate";
-import type { Detraccion, EmpresaData, LineaFactura, TipoDetraccion } from "@/types";
+import type { Detraccion, EmpresaData, InvStatus, LineaFactura, TipoDetraccion } from "@/types";
 
 export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -39,7 +39,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
     const url = await generarPdfFactura({
       inv_num: factura.inv_num,
       inv_date: factura.inv_date,
-      inv_status: factura.inv_status,
+      inv_status: factura.inv_status as InvStatus,
       tipo_doc: factura.tipo_doc,
       client_name: factura.client_name,
       client_ruc: factura.client_ruc,

@@ -9,12 +9,11 @@ import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { fmtPEN } from "@/lib/utils";
 import { INV_STATUS_COLORS, T } from "@/lib/theme";
-import type { Factura } from "@/types";
+import type { Factura, InvStatus } from "@/types";
 
-const SIGUIENTE_ESTADO: Record<Factura["invStatus"], Factura["invStatus"] | null> = {
-  "Pendiente": "Emitida",
-  "Emitida": "Cobrada",
-  "Cobrada": null,
+/** Transición rápida en lista — solo Emitida → Cobrada (Doc 06 §6) */
+const SIGUIENTE_ESTADO: Partial<Record<InvStatus, InvStatus>> = {
+  Emitida: "Cobrada",
 };
 
 export function FacturasList({ iniciales }: { iniciales: Factura[] }) {

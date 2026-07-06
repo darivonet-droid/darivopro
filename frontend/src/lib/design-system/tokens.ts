@@ -106,7 +106,10 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const INV_STATUS_COLORS: Record<string, string> = {
-  Pendiente: T.amber,
+  Borrador: T.textMid,
+  "En proceso": T.purple,
   Emitida: T.blue,
+  Rechazada: T.red,
+  "Pendiente de envío": T.amber,
   Cobrada: T.green,
 };

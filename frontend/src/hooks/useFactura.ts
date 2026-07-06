@@ -5,14 +5,14 @@ import { createClient } from "@/lib/supabase/client";
 import { verificarLimiteFactura } from "@/lib/plan-limits";
 import { buildWAMessage } from "@/lib/utils";
 import { nextNumeroComprobante } from "@/lib/factura-utils";
-import type { EmpresaData, Factura, LineaFactura, Presupuesto } from "@/types";
+import type { EmpresaData, Factura, InvStatus, LineaFactura, Presupuesto } from "@/types";
 
 interface FacturaRow {
   inv_id: string;
   user_id: string;
   inv_num: string;
   inv_date: string;
-  inv_status: Factura["invStatus"];
+  inv_status: InvStatus;
   tipo_doc: Factura["tipoDoc"] | null;
   client_name: string;
   client_ruc: string | null;
@@ -230,7 +230,7 @@ export function useFactura() {
         user_id:        user.id,
         inv_num:        invNum,
         inv_date:       hoy,
-        inv_status:     "Pendiente",
+        inv_status:     "Emitida",
         tipo_doc:       "boleta",
         client_name:    p.clientName,
         client_dir:     p.city ?? null,
