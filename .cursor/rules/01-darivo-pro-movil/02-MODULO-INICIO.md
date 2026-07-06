@@ -3,6 +3,8 @@
 ### Versión: 1.1 — 06/07/2026
 ### Fuente: diseño Fable 5 (`HomeScreen`) + `01-VISION-DEL-PRODUCTO.md` §5
 
+**Cambio principal (v1.1):** eliminados los accesos rápidos a Clientes y Presupuestos (decisión del propietario). Prohibido explícitamente cualquier enlace/promoción hacia Darivo Pro Empresa desde esta pantalla — se detectó en producción un bloque "Otros productos → Empresa" sin base documental, añadido fuera de este MD.
+
 ⚠️ Este documento es la ÚNICA fuente autorizada para el diseño y funcionalidad del Módulo Inicio. Ninguna IA puede modificar esto sin aprobación.
 
 > **Sistema de diseño:** Para colores, iconos, componentes, navegación y animaciones → **ver 16-SISTEMA-DE-DISEÑO-FABLE5.md**. En caso de contradicción, prevalece Fable 5.
@@ -32,7 +34,7 @@ Estadísticas en header (grid 3 columnas, fondo translúcido):
 
 CUERPO (fondo T.slate):
 
-Botón principal — "Nueva cotización":
+Botón principal — "Nuevo presupuesto":
 - Gradiente azul (T.blue → T.blueL), radius 20px
 - Icono I.zap en caja translúcida
 - Subtítulo: "Combina partidas · menos de 60 seg"
@@ -47,7 +49,10 @@ Capítulos de obra:
 - Enlace "Ver todos →" → lista secundaria quotes
 ```
 
-**No forma parte de Inicio:** bloques «Otros productos», enlaces a Darivo Pro Empresa / Admin / Partner, ni accesos rápidos duplicados a Clientes o Presupuestos (esos módulos tienen entrada propia en la navegación principal).
+### ❌ Prohibido en esta pantalla
+
+* **No debe existir ningún bloque "Otros productos" ni enlace/promoción hacia Darivo Pro Empresa** desde Inicio. No tiene base en este documento ni en la Visión — cualquier IA que lo encuentre debe eliminarlo, no documentarlo.
+* **No debe existir acceso rápido a Clientes ni a Presupuestos** desde esta pantalla (corregido — antes sí figuraban como "Accesos rápidos"; el propietario decidió eliminarlos el 06/07/2026).
 
 ---
 
@@ -69,12 +74,13 @@ Capítulos de obra:
 
 | Módulo | Relación |
 |--------|----------|
-| Clientes | Acceso desde nav principal (posición 2) — no desde Inicio |
+| Clientes | Sin acceso directo desde Inicio (corregido 06/07/2026) |
 | IA | Entrada **independiente** al wizard (posición 3) — flujo IA |
 | Cotizaciones | Wizard manual desde Inicio + wizard IA — ver `05-MODULO-COTIZACIONES.md` Regla 1 |
 | Facturas | Sin acceso directo desde Inicio |
 | Cierre | Sin acceso directo desde Inicio |
 | Más | Sin acceso directo desde Inicio |
+| Empresa (producto) | **Sin ningún enlace ni promoción desde Inicio** — prohibido explícitamente |
 
 ---
 
@@ -84,11 +90,8 @@ Capítulos de obra:
 ✅ Inicio es pantalla de resumen y atajos — no almacena datos propios
 ✅ No forma parte de flujos fiscales ni de cierre mensual
 ✅ Moneda mostrada: S/ (soles) — ver 05-MODULO-COTIZACIONES.md §4
-✅ No muestra enlaces cross-producto ni accesos rápidos redundantes con la BottomNav
 ```
 
 ---
-
-⚠️ **Actualizado v1.1 (06/07/2026)** — eliminados accesos rápidos Clientes/Presupuestos y cualquier bloque «Otros productos» en Inicio; alineado con `HomeScreen` Fable 5 y navegación §5 Visión.
 
 *Este documento describe el Módulo Inicio únicamente. Para navegación oficial, ver `01-VISION-DEL-PRODUCTO.md` §5.*
