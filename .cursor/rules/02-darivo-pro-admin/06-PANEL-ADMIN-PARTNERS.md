@@ -1,8 +1,10 @@
 # 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2):** añadida sección 5.1 — plan oficial de comisiones (20% pago único por venta + bono escalonado por hitos 5/20/50/100+, individual por Partner). Derogada la tabla anterior por tramo de registros (S/6–S/12).
 
 ---
 
@@ -119,6 +121,39 @@ El Panel Administrador permite únicamente:
 * Administrar el programa de Partners.
 
 No documentar funcionalidades adicionales sin aprobación.
+
+---
+
+## 5.1 Plan oficial de comisiones (aprobado por el propietario 07/07/2026)
+
+⚠️ **Sustituye y deroga por completo** cualquier tabla de comisiones anterior por tramo de registros (S/6–S/12 por registro). Esa tabla queda **oficialmente eliminada** — no debe volver a documentarse ni configurarse en el sistema.
+
+### Comisión por venta
+
+* **20% de comisión**, calculado sobre el primer pago del cliente referido.
+* **Pago único** — no es recurrente, no se repite en meses siguientes del mismo cliente.
+
+### Bono por hitos de clientes propios referidos
+
+Bono adicional, calculado como **porcentaje sobre la facturación del tramo de clientes correspondiente a ese hito** (no sobre el acumulado total).
+
+| Hito (clientes propios acumulados) | % del bono sobre ese tramo |
+|---|---|
+| 5 | 10% |
+| 20 | 10% |
+| 50 | 15% |
+| 100 y cada 50 siguientes (150, 200, 250…) | 20% — techo permanente, no sigue subiendo |
+
+* El hito se calcula **por Partner individual**, nunca de forma agregada entre varios Partners.
+* A partir del hito de 100, el bono se mantiene fijo en 20% para todos los tramos posteriores — no hay un quinto escalón.
+
+### Plan regalado
+
+* Cada Partner activo recibe acceso gratuito al **Plan Business** mientras permanezca activo en el programa (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
+
+### Administración
+
+Este plan de comisiones se configura y edita exclusivamente desde este módulo (Panel Admin → Partners → "Configurar tabla de comisiones"). Ningún otro documento ni pantalla puede duplicar estos porcentajes — deben referenciar esta sección.
 
 ---
 

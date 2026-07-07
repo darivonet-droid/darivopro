@@ -1,8 +1,10 @@
 # PANEL PARTNER
 
-**Versión:** 1.0
+**Versión:** 1.1
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.1):** detallado qué ve el Partner de la tabla de comisiones (20% pago único + hitos 5/20/50/100+), referenciando `06-PANEL-ADMIN-PARTNERS.md` §5.1 como fuente única.
 
 ---
 
@@ -97,6 +99,14 @@ Acción disponible:
 Visualización de la tabla oficial de comisiones.
 
 Solo lectura.
+
+El Partner ve, como mínimo:
+
+* Comisión por venta: **20%, pago único**, al momento de la venta del cliente referido.
+* Sus hitos personales alcanzados y pendientes (5, 20, 50, y cada 50 a partir de 100), con el % de bono correspondiente a cada uno (10% / 10% / 15% / 20%).
+* Progreso actual hacia su siguiente hito (ej. "38 de 50 clientes").
+
+Fuente y definición completa: `02-darivo-pro-admin/06-PANEL-ADMIN-PARTNERS.md` §5.1 — este panel solo la muestra, nunca la define ni la duplica.
 
 ---
 
