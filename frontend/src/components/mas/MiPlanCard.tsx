@@ -11,7 +11,7 @@ const PLAN_LABELS: Record<PlanTipoPersistido, { nombre: string; desc: string }> 
   },
   basico: {
     nombre: `Plan ${PRECIOS_OFICIALES.basico.nombre}`,
-    desc: "20 cotizaciones/mes · 10 facturas/mes · S/39/mes",
+    desc: "20 cotizaciones/mes · Facturación no incluida · S/39/mes",
   },
   pro: {
     nombre: `Plan ${PRECIOS_OFICIALES.pro.nombre}`,

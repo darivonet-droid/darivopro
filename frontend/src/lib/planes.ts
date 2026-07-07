@@ -29,7 +29,7 @@ export const PLANES: Plan[] = [
     precioAnual: PRECIOS_OFICIALES.basico.anual,
     features: [
       { texto: "20 cotizaciones/mes", incluido: true },
-      { texto: "10 facturas/mes", incluido: true },
+      { texto: "Facturación no incluida", incluido: false },
       { texto: "PDF con tu nombre", incluido: true },
       { texto: "IGV automático", incluido: true },
       { texto: "IA por voz", incluido: false },

@@ -69,7 +69,7 @@ Extiende `auth.users`. Creada en 001; ampliada en 004, 005, 006, 007.
 | `simbolo` | text | default `S/` |
 | `categorias` | text[] | onboarding (004) |
 | `onboarding_done` | boolean | default false (004) |
-| `plan_tipo` | text | `gratis` (sin suscripción) \| `basico` \| `pro` (04 §6) \| `empresa` (valor técnico legacy — no plan comercial; ver `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md` §4) (005) |
+| `plan_tipo` | text | `gratis` (sin suscripción) \| `basico` \| `pro` (04 §6) \| `business` (plan Business; antes `empresa` en baseline — ver `20260706123000_plan_tipo_business.sql`) |
 | `cta_detracciones` | text | cuenta BN (007) |
 | `created_at` / `updated_at` | timestamptz | |
 
@@ -152,7 +152,7 @@ Migraciones: 001, 008, 010, 013, 014.
 
 ### `facturas`
 
-Migraciones: 001, 007, 013.
+Migraciones: baseline; `20260706160000_factura_6_estados.sql` (6 estados `inv_status`).
 
 | Columna | Tipo | Notas |
 |---------|------|-------|
@@ -160,7 +160,7 @@ Migraciones: 001, 007, 013.
 | `user_id` | uuid FK | |
 | `inv_num` | text NOT NULL | B001-/F001- (generado en app) |
 | `inv_date` | date | |
-| `inv_status` | text | Pendiente \| Emitida \| Cobrada |
+| `inv_status` | text | `Borrador` \| `En proceso` \| `Emitida` \| `Rechazada` \| `Pendiente de envío` \| `Cobrada` — default `Borrador` (`20260706160000_factura_6_estados.sql`; remapeo histórico `Pendiente`→`Emitida`) |
 | `tipo_doc` | text | boleta \| factura (007) |
 | `client_name` / `client_ruc` / `client_dni` / `client_dir` | text | |
 | `moneda` / `sym` | text | |
@@ -237,13 +237,13 @@ Tablas globales sin `user_id` salvo políticas RLS de lectura autenticados / adm
 
 Productos del ecosistema (`darivo-pro`) — cabecera de clasificación del Catálogo Maestro (`01-VISION-DEL-PRODUCTO.md` §3.1; Doc 21 §4.1).
 
-Esquema mínimo (v1 — pendiente de validar contra Supabase real antes de migrar):
+Esquema implementado en baseline (`20260705120000_baseline_v2.sql`):
 
 | Columna | Tipo | Notas |
 |---|---|---|
 | `id` | uuid PK | `uuid_generate_v4()` |
 | `nombre` | text NOT NULL | Ej. "Darivo Pro Móvil" |
-| `codigo` | text UNIQUE NOT NULL | Slug interno usado como referencia en `catalogo_categorias_maestro.producto_id` — ej. `movil`, `admin`, `empresa` |
+| `slug` | text UNIQUE NOT NULL | Identificador interno — ej. `movil`, `admin`, `empresa` |
 | `descripcion` | text NULL | Opcional |
 | `activo` | boolean DEFAULT true | Ocultar como filtro sin borrar categorías asociadas |
 | `orden` | integer DEFAULT 0 | Orden de visualización en el filtro |
@@ -347,7 +347,12 @@ empresas · partners · soporte_* · suscripciones · gastos (ecosistema multi-p
 | Versión | Archivo | Contenido |
 |---------|---------|-----------|
 | Baseline oficial | `20260705120000_baseline_v2.sql` | 32 tablas · funciones · triggers · RLS · storage · realtime |
+| Incremental | `20260706123000_plan_tipo_business.sql` | `plan_tipo`: `empresa` → `business` en `perfiles` y `suscripciones` |
+| Incremental | `20260706140000_roles_personalizados.sql` | Tabla `roles_personalizados` · RLS tenant |
+| Incremental | `20260706160000_factura_6_estados.sql` | 6 estados oficiales `facturas.inv_status` · default `Borrador` |
 | Seed | `supabase/seed.sql` | Productos, planes, catálogo maestro, series |
+
+> **Nota histórica:** las migraciones numeradas **001–016** citadas en secciones anteriores corresponden al esquema **pre-baseline** (consolidado en `20260705120000_baseline_v2.sql`). La fuente de verdad actual es baseline + incrementales listadas arriba.
 
 Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase/migrations/`.
 
