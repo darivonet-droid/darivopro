@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { T } from "@/lib/theme";
-import type { Capitulo, LineaPresupuesto } from "@/types";
+import type { Capitulo, LineaCotizacion } from "@/types";
 
 type CalcChip = "m2" | "unit" | "hour" | "fixed";
 
@@ -44,7 +44,7 @@ interface NuevaPartidaModalProps {
   open: boolean;
   categoria: Capitulo;
   onClose: () => void;
-  onAdd: (linea: LineaPresupuesto) => void;
+  onAdd: (linea: LineaCotizacion) => void;
 }
 
 export function NuevaPartidaModal({

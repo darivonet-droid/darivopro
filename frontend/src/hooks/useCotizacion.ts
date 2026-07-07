@@ -1,10 +1,10 @@
-// DARIVO PRO — Hook de presupuestos
+// DARIVO PRO — Hook de cotizaciones
 "use client";
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { verificarLimitePresupuesto } from "@/lib/plan-limits";
+import { verificarLimiteCotizacion } from "@/lib/plan-limits";
 import { soloDigitos } from "@/lib/utils";
-import type { Presupuesto, LineaPresupuesto } from "@/types";
+import type { Cotizacion, LineaCotizacion } from "@/types";
 
 interface ItemRow {
   svc_id: string;
@@ -18,7 +18,7 @@ interface ItemRow {
   subtotal: number | null;
 }
 
-interface PresupuestoRow {
+interface CotizacionRow {
   id: string;
   user_id: string;
   cot_num: string | null;
@@ -29,18 +29,18 @@ interface PresupuestoRow {
   total_base: number | null;
   total_labor: number | null;
   total_final: number | null;
-  status: Presupuesto["status"];
+  status: Cotizacion["status"];
   notes: string | null;
   created_at: string;
   pdf_url: string | null;
   items?: ItemRow[];
 }
 
-const mapItem = (it: ItemRow): LineaPresupuesto => ({
+const mapItem = (it: ItemRow): LineaCotizacion => ({
   svcId: it.svc_id,
   catLabel: it.cat_label ?? "",
   svcLabel: it.svc_label ?? "",
-  calcType: (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+  calcType: (it.calc_type as LineaCotizacion["calcType"]) ?? "fixed",
   basePrice: Number(it.base_price ?? 0),
   unit: it.unit ?? "",
   qty: Number(it.qty ?? 0),
@@ -48,7 +48,7 @@ const mapItem = (it: ItemRow): LineaPresupuesto => ({
   subtotal: Number(it.subtotal ?? 0),
 });
 
-const mapRow = (row: PresupuestoRow): Presupuesto => ({
+const mapRow = (row: CotizacionRow): Cotizacion => ({
   id: row.id,
   tenant_id: row.user_id,
   cotNum: row.cot_num ?? undefined,
@@ -66,7 +66,7 @@ const mapRow = (row: PresupuestoRow): Presupuesto => ({
   pdfUrl: row.pdf_url ?? undefined,
 });
 
-export function usePresupuesto() {
+export function useCotizacion() {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
   const supabase = createClient();
@@ -113,7 +113,7 @@ export function usePresupuesto() {
     return (creado?.id as string) ?? null;
   }, [supabase]);
 
-  const listar = useCallback(async (): Promise<Presupuesto[]> => {
+  const listar = useCallback(async (): Promise<Cotizacion[]> => {
     setLoading(true);
     const { data, error } = await supabase
       .from("presupuestos")
@@ -121,19 +121,19 @@ export function usePresupuesto() {
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) { setError(error.message); return []; }
-    return ((data ?? []) as PresupuestoRow[]).map(mapRow);
+    return ((data ?? []) as CotizacionRow[]).map(mapRow);
   }, [supabase]);
 
   const crear = useCallback(async (
-    presupuesto: Omit<Presupuesto, "id" | "tenant_id" | "createdAt">,
+    cotizacion: Omit<Cotizacion, "id" | "tenant_id" | "createdAt">,
     onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
-  ): Promise<Presupuesto | null> => {
+  ): Promise<Cotizacion | null> => {
     setLoading(true);
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); setError("Sesión expirada"); return null; }
 
-    const limite = await verificarLimitePresupuesto(supabase);
+    const limite = await verificarLimiteCotizacion(supabase);
     if (!limite.ok) {
       setLoading(false);
       setError("Límite de plan alcanzado");
@@ -142,31 +142,31 @@ export function usePresupuesto() {
     }
 
     // Auto-vinculación cotización → cliente (invisible)
-    const clienteId = await findOrCreateCliente(user.id, presupuesto.clientName, presupuesto.phone);
+    const clienteId = await findOrCreateCliente(user.id, cotizacion.clientName, cotizacion.phone);
 
     const { data, error } = await supabase
       .from("presupuestos")
       .insert({
         user_id: user.id,
         cliente_id: clienteId,
-        client_name: presupuesto.clientName,
-        phone: presupuesto.phone ?? null,
-        city: presupuesto.city ?? null,
-        margin: presupuesto.margin,
-        total_base: presupuesto.totalBase,
-        total_labor: presupuesto.totalLabor,
-        total_final: presupuesto.totalFinal,
-        status: presupuesto.status,
-        notes: presupuesto.notes ?? null,
+        client_name: cotizacion.clientName,
+        phone: cotizacion.phone ?? null,
+        city: cotizacion.city ?? null,
+        margin: cotizacion.margin,
+        total_base: cotizacion.totalBase,
+        total_labor: cotizacion.totalLabor,
+        total_final: cotizacion.totalFinal,
+        status: cotizacion.status,
+        notes: cotizacion.notes ?? null,
       })
       .select()
       .single();
 
     if (error || !data) { setLoading(false); setError(error?.message ?? "Error"); return null; }
 
-    if (presupuesto.items.length > 0) {
+    if (cotizacion.items.length > 0) {
       const { error: itemsError } = await supabase.from("presupuesto_items").insert(
-        presupuesto.items.map((it) => ({
+        cotizacion.items.map((it) => ({
           presupuesto_id: data.id,
           svc_id: it.svcId,
           cat_label: it.catLabel,
@@ -183,7 +183,7 @@ export function usePresupuesto() {
     }
 
     setLoading(false);
-    return mapRow({ ...(data as PresupuestoRow), items: [] });
+    return mapRow({ ...(data as CotizacionRow), items: [] });
   }, [supabase]);
 
   /**
@@ -193,29 +193,29 @@ export function usePresupuesto() {
    */
   const actualizar = useCallback(async (
     id: string,
-    presupuesto: Omit<Presupuesto, "id" | "tenant_id" | "createdAt" | "cotNum">
-  ): Promise<Presupuesto | null> => {
+    cotizacion: Omit<Cotizacion, "id" | "tenant_id" | "createdAt" | "cotNum">
+  ): Promise<Cotizacion | null> => {
     setLoading(true);
     setError(null);
 
     const { data: { user } } = await supabase.auth.getUser();
     const clienteId = user
-      ? await findOrCreateCliente(user.id, presupuesto.clientName, presupuesto.phone)
+      ? await findOrCreateCliente(user.id, cotizacion.clientName, cotizacion.phone)
       : null;
 
     const { error: updErr } = await supabase
       .from("presupuestos")
       .update({
         ...(clienteId ? { cliente_id: clienteId } : {}),
-        client_name: presupuesto.clientName,
-        phone:       presupuesto.phone       ?? null,
-        city:        presupuesto.city        ?? null,
-        margin:      presupuesto.margin,
-        total_base:  presupuesto.totalBase,
-        total_labor: presupuesto.totalLabor,
-        total_final: presupuesto.totalFinal,
-        status:      presupuesto.status,
-        notes:       presupuesto.notes       ?? null,
+        client_name: cotizacion.clientName,
+        phone:       cotizacion.phone       ?? null,
+        city:        cotizacion.city        ?? null,
+        margin:      cotizacion.margin,
+        total_base:  cotizacion.totalBase,
+        total_labor: cotizacion.totalLabor,
+        total_final: cotizacion.totalFinal,
+        status:      cotizacion.status,
+        notes:       cotizacion.notes       ?? null,
         pdf_url:     null,
       })
       .eq("id", id);
@@ -224,9 +224,9 @@ export function usePresupuesto() {
 
     await supabase.from("presupuesto_items").delete().eq("presupuesto_id", id);
 
-    if (presupuesto.items.length > 0) {
+    if (cotizacion.items.length > 0) {
       const { error: itemsErr } = await supabase.from("presupuesto_items").insert(
-        presupuesto.items.map((it) => ({
+        cotizacion.items.map((it) => ({
           presupuesto_id: id,
           svc_id:     it.svcId,
           cat_label:  it.catLabel,
@@ -249,10 +249,10 @@ export function usePresupuesto() {
       .single();
 
     setLoading(false);
-    return data ? mapRow({ ...(data as PresupuestoRow), items: [] }) : null;
+    return data ? mapRow({ ...(data as CotizacionRow), items: [] }) : null;
   }, [supabase]);
 
-  const actualizarEstado = useCallback(async (id: string, status: Presupuesto["status"]) => {
+  const actualizarEstado = useCallback(async (id: string, status: Cotizacion["status"]) => {
     const { error } = await supabase
       .from("presupuestos")
       .update({ status })
@@ -279,7 +279,7 @@ export function usePresupuesto() {
    * Silencioso — nunca bloquea el guardado principal.
    */
   const registrarCalculo = useCallback(async (
-    presupuestoId: string,
+    cotizacionId: string,
     calc: {
       totalMateriales: number;
       totalManoDeObra: number;
@@ -295,7 +295,7 @@ export function usePresupuesto() {
       if (!user) return;
       await supabase.from("calculos_log").insert({
         user_id:          user.id,
-        presupuesto_id:   presupuestoId,
+        presupuesto_id:   cotizacionId,
         total_materiales: calc.totalMateriales,
         total_mano_obra:  calc.totalManoDeObra,
         total_base:       calc.totalBase,

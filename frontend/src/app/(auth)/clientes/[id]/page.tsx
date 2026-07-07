@@ -1,11 +1,11 @@
 // DARIVO PRO — Ficha de cliente (Server Component)
-// Lectura SIEMPRE fresca: el estado de cotizaciones (presupuestos.status) y de
+// Lectura SIEMPRE fresca: el estado de cotizaciones (cotizaciones.status) y de
 // facturas (facturas.inv_status) se consulta en vivo. No se cachea ningún estado.
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ClienteFichaView } from "@/components/clientes/ClienteFichaView";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Cliente, Factura, InvStatus, LineaPresupuesto, Presupuesto } from "@/types";
+import type { Cliente, Factura, InvStatus, LineaCotizacion, Cotizacion } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -38,18 +38,18 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
     .eq("cliente_id", params.id)
     .order("created_at", { ascending: false });
 
-  const presupuestos: Presupuesto[] = (presRows ?? []).map((row) => ({
+  const cotizaciones: Cotizacion[] = (presRows ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
     cotNum: row.cot_num ?? undefined,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>): LineaPresupuesto => ({
+    items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
-      calcType: (it.calc_type ?? "fixed") as LineaPresupuesto["calcType"],
+      calcType: (it.calc_type ?? "fixed") as LineaCotizacion["calcType"],
       basePrice: Number(it.base_price ?? 0),
       unit: String(it.unit ?? ""),
       qty: Number(it.qty ?? 0),
@@ -68,7 +68,7 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
 
   // Facturas asociadas — vinculadas vía la cotización origen (from_quote_id).
   // Estado leído en vivo de facturas.inv_status (sin copia local).
-  const quoteIds = presupuestos.map((p) => p.id);
+  const quoteIds = cotizaciones.map((p) => p.id);
   let facturas: Factura[] = [];
   if (quoteIds.length > 0) {
     const { data: facRows } = await supabase
@@ -110,7 +110,7 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
     <div style={{ background: "#F8FAFF", minHeight: "100vh" }}>
       <PageHeader titulo={cliente.nombre} subtitulo={cliente.telefono ?? "Sin teléfono"} backHref="/clientes" />
       <main className="px-4 py-4">
-        <ClienteFichaView cliente={cliente} presupuestos={presupuestos} facturas={facturas} />
+        <ClienteFichaView cliente={cliente} cotizaciones={cotizaciones} facturas={facturas} />
       </main>
     </div>
   );

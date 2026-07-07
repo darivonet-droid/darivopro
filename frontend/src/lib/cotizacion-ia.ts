@@ -1,4 +1,4 @@
-import type { Capitulo, LineaPresupuesto } from "@/types";
+import type { Capitulo, LineaCotizacion } from "@/types";
 import { calcIGV } from "@/lib/utils";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -8,7 +8,7 @@ import { calcIGV } from "@/lib/utils";
  * svcId/catLabel vienen del catálogo real cuando la IA los mapea correctamente.
  * precio_unit SIEMPRE proviene del catálogo — nunca inventado por la IA.
  */
-export interface IAPresupuestoItem {
+export interface IACotizacionItem {
   descripcion: string;
   cantidad:    number;
   unidad:      string;
@@ -19,32 +19,32 @@ export interface IAPresupuestoItem {
   sugerida?:   boolean;  // Propuesta por IA, no mencionada explícitamente
 }
 
-export interface IAPresupuestoResult {
+export interface IACotizacionResult {
   titulo:           string;
-  items:            IAPresupuestoItem[];
+  items:            IACotizacionItem[];
   subtotal:         number;
   igv:              number;
   total:            number;
   notasFaltantes?:  string[];  // trabajos mencionados sin partida equivalente
 }
 
-export interface PresupuestoDraft {
+export interface CotizacionDraft {
   clientName: string;
   phone:      string;
   city:       string;
-  items:      LineaPresupuesto[];
+  items:      LineaCotizacion[];
   margin:     number;
   notes:      string;
-  iaResult?:  IAPresupuestoResult | null;
+  iaResult?:  IACotizacionResult | null;
 }
 
-export const DRAFT_STORAGE_KEY = "darivo_presupuesto_draft";
+export const DRAFT_STORAGE_KEY = "darivo_cotizacion_draft";
 /** Handoff IA → wizard Resumen (08-MODULO-IA.md §9) */
 export const WIZARD_IA_SESSION_KEY = "darivo_wizard_ia_handoff";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const CALC_MAP: Record<string, LineaPresupuesto["calcType"]> = {
+const CALC_MAP: Record<string, LineaCotizacion["calcType"]> = {
   m2: "m2", "m²": "m2",
   unit: "unit", unidad: "unit", und: "unit", pto: "unit",
   hora: "hour", horas: "hour", h: "hour", hour: "hour",
@@ -52,14 +52,14 @@ const CALC_MAP: Record<string, LineaPresupuesto["calcType"]> = {
 };
 
 /**
- * Convierte los items IA en LineaPresupuesto para guardar en Supabase.
+ * Convierte los items IA en LineaCotizacion para guardar en Supabase.
  * Usa svcId real del catálogo cuando está disponible.
  * Omite items con cantidad = 0.
  */
 export function iaItemsALineas(
-  items:           IAPresupuestoItem[],
+  items:           IACotizacionItem[],
   defaultCatLabel = "IA"
-): LineaPresupuesto[] {
+): LineaCotizacion[] {
   return items
     .filter((it) => it.cantidad > 0)
     .map((it, i) => ({
@@ -75,16 +75,16 @@ export function iaItemsALineas(
     }));
 }
 
-export function recalcularTotalesIA(items: IAPresupuestoItem[]): IAPresupuestoResult {
+export function recalcularTotalesIA(items: IACotizacionItem[]): IACotizacionResult {
   const subtotal = Math.round(items.reduce((s, it) => s + it.total, 0) * 100) / 100;
   const { igv, total } = calcIGV(subtotal);
   return { titulo: "", items, subtotal, igv, total };
 }
 
-export function parseIAResponse(text: string): IAPresupuestoResult {
+export function parseIAResponse(text: string): IACotizacionResult {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("La IA no devolvió JSON válido");
-  const parsed = JSON.parse(jsonMatch[0]) as IAPresupuestoResult;
+  const parsed = JSON.parse(jsonMatch[0]) as IACotizacionResult;
   if (!parsed.items?.length) throw new Error("Sin partidas en la respuesta");
   const subtotal =
     parsed.subtotal ??

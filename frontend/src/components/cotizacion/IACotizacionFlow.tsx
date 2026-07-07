@@ -1,18 +1,18 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PresupuestoIASkeleton } from "@/components/ui/Skeleton";
-import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
+import { CotizacionIASkeleton } from "@/components/ui/Skeleton";
+import { useCotizacionDraft } from "@/hooks/useCotizacionDraft";
 import { useCatalogo } from "@/hooks/useCatalogo";
 import type { Capitulo } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
 import {
   iaItemsALineas,
   WIZARD_IA_SESSION_KEY,
-  type IAPresupuestoResult,
-  type PresupuestoDraft,
-} from "@/lib/presupuesto-ia";
-import type { LineaPresupuesto } from "@/types";
+  type IACotizacionResult,
+  type CotizacionDraft,
+} from "@/lib/cotizacion-ia";
+import type { LineaCotizacion } from "@/types";
 import { T } from "@/lib/theme";
 type Modo = "elegir" | "escribir" | "hablar";
 
@@ -20,7 +20,7 @@ interface IaBasketItem {
   svcId: string;
   catLabel: string;
   svcLabel: string;
-  calcType: LineaPresupuesto["calcType"];
+  calcType: LineaCotizacion["calcType"];
   basePrice: number;
   unit: string;
   qty: string;
@@ -28,7 +28,7 @@ interface IaBasketItem {
   catEmoji: string;
 }
 
-function lineasToBasket(lineas: LineaPresupuesto[], catalogo: Capitulo[]): IaBasketItem[] {
+function lineasToBasket(lineas: LineaCotizacion[], catalogo: Capitulo[]): IaBasketItem[] {
   return lineas.map((l) => {
     const cap = catalogo.find((c) => c.partidas.some((p) => p.id === l.svcId))
       ?? catalogo.find((c) => c.nombre === l.catLabel);
@@ -50,7 +50,7 @@ interface SpeechRecognitionEvent {
   results: { [index: number]: { [index: number]: { transcript: string } } };
 }
 
-export function IAPresupuestoFlow() {
+export function IACotizacionFlow() {
   const router = useRouter();
   const { catalogo } = useCatalogo();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -64,7 +64,7 @@ export function IAPresupuestoFlow() {
 
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
-  const draft: PresupuestoDraft = {
+  const draft: CotizacionDraft = {
     clientName: "",
     phone: "",
     city: "",
@@ -73,7 +73,7 @@ export function IAPresupuestoFlow() {
     notes: descripcion,
     iaResult: null,
   };
-  const { cargar, limpiar } = usePresupuestoDraft(draft, modo !== "elegir");
+  const { cargar, limpiar } = useCotizacionDraft(draft, modo !== "elegir");
 
   useEffect(() => {
     const saved = cargar();
@@ -88,7 +88,7 @@ export function IAPresupuestoFlow() {
     }
   }, [cargar, catalogo, limpiar, router]);
 
-  const redirigirAResumen = useCallback((data: IAPresupuestoResult, texto: string) => {
+  const redirigirAResumen = useCallback((data: IACotizacionResult, texto: string) => {
     const lineas = iaItemsALineas(data.items);
     const notas = data.notasFaltantes?.length
       ? `${texto}\n\nNotas IA: ${data.notasFaltantes.join("; ")}`
@@ -241,7 +241,7 @@ export function IAPresupuestoFlow() {
           }}
         />
         {procesando ? (
-          <PresupuestoIASkeleton />
+          <CotizacionIASkeleton />
         ) : (
           <button
             type="button"
@@ -270,10 +270,10 @@ export function IAPresupuestoFlow() {
         <p className="font-bold" style={{ color: T.text }}>
           {escuchando ? "Escuchando… habla ahora" : "Procesando voz…"}
         </p>
-        {procesando && <PresupuestoIASkeleton />}
+        {procesando && <CotizacionIASkeleton />}
       </div>
     );
   }
 
-  return <PresupuestoIASkeleton />;
+  return <CotizacionIASkeleton />;
 }

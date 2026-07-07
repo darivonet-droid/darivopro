@@ -21,7 +21,7 @@ import { calcIGV, fmtPEN, hoy } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type {
   Cliente, Detraccion, EmpresaData, Factura, LineaFactura,
-  Presupuesto, TipoDetraccion,
+  Cotizacion, TipoDetraccion,
 } from "@/types";
 
 const FORMAS_PAGO: FormaPago[] = ["Efectivo", "Yape", "Transferencia", "Crédito"];
@@ -30,9 +30,9 @@ const LINEA_VACIA: LineaFactura = { desc: "", cantidad: 1, pu: 0, subtotal: 0 };
 interface Props {
   empresa:           EmpresaData | null;
   numerosExistentes: string[];
-  aprobados:         Presupuesto[];
+  aprobados:         Cotizacion[];
   clientes:          Cliente[];
-  presupuestoId?:    string;
+  cotizacionId?:    string;
 }
 
 /* ─── Paso 0: elegir tipo de comprobante ──────────────────── */
@@ -75,7 +75,7 @@ function PasoCero({ onElegir }: { onElegir: (tipo: TipoComprobante) => void }) {
 
 /* ─── Formulario principal ────────────────────────────────── */
 export function NuevaFacturaForm({
-  empresa, numerosExistentes, aprobados, clientes, presupuestoId,
+  empresa, numerosExistentes, aprobados, clientes, cotizacionId,
 }: Props) {
   const router       = useRouter();
   const { crear, generarPDF, loading } = useFactura();
@@ -91,7 +91,7 @@ export function NuevaFacturaForm({
   const [clientDir,    setClientDir]    = useState("");
   const [clientPhone,  setClientPhone]  = useState("");
   const [items,        setItems]        = useState<LineaFactura[]>([{ ...LINEA_VACIA }]);
-  const [desdeQuote,   setDesdeQuote]   = useState(presupuestoId ?? "");
+  const [desdeQuote,   setDesdeQuote]   = useState(cotizacionId ?? "");
   const [formaPago,    setFormaPago]    = useState<FormaPago>("Efectivo");
   const [pagado,       setPagado]       = useState(false);
   const [detTipo,      setDetTipo]      = useState<TipoDetraccion | null>(null);
@@ -115,7 +115,7 @@ export function NuevaFacturaForm({
     return calcularDetraccion(total, detTipo, empresa?.cta_detracciones ?? undefined);
   }, [aplicaDetraccion, detTipo, total, empresa]);
 
-  const importarPresupuesto = (id: string) => {
+  const importarCotizacion = (id: string) => {
     setDesdeQuote(id);
     const p = aprobados.find((x) => x.id === id);
     if (!p) return;
@@ -131,9 +131,9 @@ export function NuevaFacturaForm({
   };
 
   useEffect(() => {
-    if (presupuestoId) importarPresupuesto(presupuestoId);
+    if (cotizacionId) importarCotizacion(cotizacionId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presupuestoId]);
+  }, [cotizacionId]);
 
   const seleccionarCliente = (id: string) => {
     const c = clientes.find((x) => x.id === id);
@@ -343,7 +343,7 @@ export function NuevaFacturaForm({
           <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
             Importar desde cotización
           </span>
-          <select value={desdeQuote} onChange={(e) => importarPresupuesto(e.target.value)}
+          <select value={desdeQuote} onChange={(e) => importarCotizacion(e.target.value)}
             className="w-full rounded-xl px-4 py-3 text-sm outline-none"
             style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
             <option value="">— Desde cero —</option>

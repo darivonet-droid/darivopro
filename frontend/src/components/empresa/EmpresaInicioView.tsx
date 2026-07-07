@@ -3,7 +3,7 @@ import { CATEGORIAS } from "@/lib/catalog";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/design-system/tokens";
 
-type PresupuestoReciente = {
+type CotizacionReciente = {
   id: string;
   client_name: string;
   total_final: number | null;
@@ -17,7 +17,7 @@ interface Props {
   aprobados: number;
   pendientes: number;
   ingresos: number;
-  recientes: PresupuestoReciente[];
+  recientes: CotizacionReciente[];
 }
 
 const CHIP: Record<string, { bg: string; color: string }> = {
@@ -171,7 +171,7 @@ function QuickLink({ href, label, emoji }: { href: string; label: string; emoji:
   );
 }
 
-function AdminStyleTable({ recientes }: { recientes: PresupuestoReciente[] }) {
+function AdminStyleTable({ recientes }: { recientes: CotizacionReciente[] }) {
   return (
     <div className="overflow-hidden rounded-2xl" style={{ border: `1px solid ${T.slateD}` }}>
       <table className="w-full text-left text-sm">

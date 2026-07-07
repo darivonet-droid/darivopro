@@ -1,17 +1,17 @@
 "use client";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
-import type { IAPresupuestoItem } from "@/lib/presupuesto-ia";
+import type { IACotizacionItem } from "@/lib/cotizacion-ia";
 
 interface Props {
-  items: IAPresupuestoItem[];
+  items: IACotizacionItem[];
   subtotal: number;
   igv: number;
   total: number;
-  onChangeItem: (index: number, field: keyof IAPresupuestoItem, value: string | number) => void;
+  onChangeItem: (index: number, field: keyof IACotizacionItem, value: string | number) => void;
 }
 
-export function PresupuestoTotalesIA({
+export function CotizacionTotalesIA({
   items,
   subtotal,
   igv,

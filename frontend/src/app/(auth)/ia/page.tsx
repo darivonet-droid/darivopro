@@ -1,5 +1,5 @@
 import { DarkHeader } from "@/components/design-system/DarkHeader";
-import { IAPresupuestoFlow } from "@/components/presupuesto/IAPresupuestoFlow";
+import { IACotizacionFlow } from "@/components/cotizacion/IACotizacionFlow";
 import { GRADIENTS, T } from "@/lib/design-system/tokens";
 
 export default function IAPage() {
@@ -19,7 +19,7 @@ export default function IAPage() {
       />
 
       <main className="px-4 py-4">
-        <IAPresupuestoFlow />
+        <IACotizacionFlow />
       </main>
     </div>
   );

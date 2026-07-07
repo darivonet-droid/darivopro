@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { PresupuestosList } from "@/components/presupuesto/PresupuestosList";
+import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/design-system/tokens";
-import type { LineaPresupuesto, Presupuesto } from "@/types";
+import type { LineaCotizacion, Cotizacion } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -17,18 +17,18 @@ export default async function EmpresaCotizacionesPage() {
     )
     .order("created_at", { ascending: false });
 
-  const presupuestos: Presupuesto[] = (data ?? []).map((row) => ({
+  const cotizaciones: Cotizacion[] = (data ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
     cotNum: row.cot_num ?? undefined,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>): LineaPresupuesto => ({
+    items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
-      calcType: (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+      calcType: (it.calc_type as LineaCotizacion["calcType"]) ?? "fixed",
       basePrice: Number(it.base_price ?? 0),
       unit: String(it.unit ?? ""),
       qty: Number(it.qty ?? 0),
@@ -51,7 +51,7 @@ export default async function EmpresaCotizacionesPage() {
     <EmpresaShell titulo={mod.label}>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm" style={{ color: T.textMid }}>
-          {presupuestos.length} cotizaciones
+          {cotizaciones.length} cotizaciones
         </p>
         <Link
           href="/cotizaciones/nuevo"
@@ -61,7 +61,7 @@ export default async function EmpresaCotizacionesPage() {
           + Nueva cotización
         </Link>
       </div>
-      <PresupuestosList iniciales={presupuestos} />
+      <CotizacionesList iniciales={cotizaciones} />
     </EmpresaShell>
   );
 }

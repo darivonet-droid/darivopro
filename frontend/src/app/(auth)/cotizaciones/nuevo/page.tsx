@@ -1,14 +1,14 @@
-// DARIVO PRO — Nuevo presupuesto
+// DARIVO PRO — Nuevo cotizacion
 import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { NuevoPresupuestoWizard } from "@/components/presupuesto/NuevoPresupuestoWizard";
+import { NuevoCotizacionWizard } from "@/components/cotizacion/NuevoCotizacionWizard";
 
-export default function NuevoPresupuestoPage() {
+export default function NuevoCotizacionPage() {
   return (
     <div style={{ background: "#F8FAFF" }}>
       <PageHeader titulo="Nueva cotización" subtitulo="Listo en menos de 60 segundos" backHref="/cotizaciones" />
       <Suspense>
-        <NuevoPresupuestoWizard />
+        <NuevoCotizacionWizard />
       </Suspense>
     </div>
   );

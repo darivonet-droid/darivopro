@@ -11,7 +11,7 @@
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-/** Tipos de cálculo coincidentes con LineaPresupuesto.calcType */
+/** Tipos de cálculo coincidentes con LineaCotizacion.calcType */
 export type CalcType = "m2" | "unit" | "hour" | "fixed";
 
 /** Clasificación de un ítem dentro de la cotización */
@@ -161,7 +161,7 @@ export function clasificarItem(calcType: CalcType): CalcCategory {
 }
 
 /**
- * Calcula un único ítem del presupuesto con precisión entera y validación.
+ * Calcula un único ítem del cotizacion con precisión entera y validación.
  */
 export function calcItemPrecise(input: CalcInput): CalcItemResult {
   const qty       = input.calcType === "fixed" ? 1 : input.qty;

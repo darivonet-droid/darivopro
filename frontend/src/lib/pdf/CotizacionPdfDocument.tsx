@@ -2,7 +2,7 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { baseStyles, C, fmtMoney, fmtQty } from "./styles";
 
-export interface PresupuestoItemRow {
+export interface CotizacionItemRow {
   cat_label?: string | null;
   svc_label?: string | null;
   qty?: number | null;
@@ -11,7 +11,7 @@ export interface PresupuestoItemRow {
   subtotal?: number | null;
 }
 
-export interface PresupuestoPdfData {
+export interface CotizacionPdfData {
   id: string;
   cot_num?: string | null;
   client_name: string;
@@ -23,7 +23,7 @@ export interface PresupuestoPdfData {
   total_labor?: number | null;
   total_final?: number | null;
   notes?: string | null;
-  items: PresupuestoItemRow[];
+  items: CotizacionItemRow[];
 }
 
 const s = StyleSheet.create({
@@ -95,11 +95,11 @@ const s = StyleSheet.create({
 });
 
 interface Props {
-  data: PresupuestoPdfData;
+  data: CotizacionPdfData;
   fechaGeneracion: string;
 }
 
-export function PresupuestoPdfDocument({ data, fechaGeneracion }: Props) {
+export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
   let lastCap = "";
 
   return (

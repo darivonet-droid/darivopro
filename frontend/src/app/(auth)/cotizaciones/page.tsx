@@ -1,11 +1,11 @@
-// DARIVO PRO — Presupuestos (Server Component)
+// DARIVO PRO — Cotizaciones (Server Component)
 import Link from "next/link";
-import { PresupuestosList } from "@/components/presupuesto/PresupuestosList";
+import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
-import type { Presupuesto, LineaPresupuesto } from "@/types";
+import type { Cotizacion, LineaCotizacion } from "@/types";
 
-export default async function PresupuestosPage() {
+export default async function CotizacionesPage() {
   const supabase = createServerClient();
   // Select only columns used by UI + card expansion; skip presupuesto_items.id/created_at
   const { data } = await supabase
@@ -13,18 +13,18 @@ export default async function PresupuestosPage() {
     .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
     .order("created_at", { ascending: false });
 
-  const presupuestos: Presupuesto[] = (data ?? []).map((row) => ({
+  const cotizaciones: Cotizacion[] = (data ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
     cotNum: row.cot_num ?? undefined,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>): LineaPresupuesto => ({
+    items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
-      calcType: (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+      calcType: (it.calc_type as LineaCotizacion["calcType"]) ?? "fixed",
       basePrice: Number(it.base_price ?? 0),
       unit: String(it.unit ?? ""),
       qty: Number(it.qty ?? 0),
@@ -50,7 +50,7 @@ export default async function PresupuestosPage() {
               Cotizaciones
             </h1>
             <p className="mt-0.5 text-xs" style={{ color: T.textLight }}>
-              {presupuestos.length} en total
+              {cotizaciones.length} en total
             </p>
           </div>
           <Link
@@ -64,7 +64,7 @@ export default async function PresupuestosPage() {
       </header>
 
       <main className="px-4 py-4">
-        <PresupuestosList iniciales={presupuestos} />
+        <CotizacionesList iniciales={cotizaciones} />
       </main>
     </div>
   );

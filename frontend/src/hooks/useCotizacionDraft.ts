@@ -2,10 +2,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import {
   DRAFT_STORAGE_KEY,
-  type PresupuestoDraft,
-} from "@/lib/presupuesto-ia";
+  type CotizacionDraft,
+} from "@/lib/cotizacion-ia";
 
-const DEFAULT: PresupuestoDraft = {
+const DEFAULT: CotizacionDraft = {
   clientName: "",
   phone: "",
   city: "",
@@ -15,14 +15,14 @@ const DEFAULT: PresupuestoDraft = {
   iaResult: null,
 };
 
-export function usePresupuestoDraft(
-  draft: PresupuestoDraft,
+export function useCotizacionDraft(
+  draft: CotizacionDraft,
   enabled = true
 ) {
   const draftRef = useRef(draft);
   draftRef.current = draft;
 
-  const cargar = useCallback((): PresupuestoDraft | null => {
+  const cargar = useCallback((): CotizacionDraft | null => {
     if (typeof window === "undefined") return null;
     try {
       const raw = localStorage.getItem(DRAFT_STORAGE_KEY);

@@ -9,7 +9,7 @@ export function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
-export function PresupuestoIASkeleton() {
+export function CotizacionIASkeleton() {
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <Skeleton className="h-5 w-2/3 animate-pulse" />

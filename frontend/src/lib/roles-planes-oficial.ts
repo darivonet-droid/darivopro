@@ -36,25 +36,25 @@ export type PlanTipoPersistido = "gratis" | PlanSuscripcionOficial;
 /** Límites de uso — referencia 04 §6 + implementación Móvil (Mi Plan / UpgradeModal) */
 export const LIMITES_PLAN = {
   gratis: {
-    presupuestosTotal: 5,
+    cotizacionesTotal: 5,
     facturasHabilitado: false,
     iaCotizacionesDia: 3,
     iaFacturasHabilitado: false,
   },
   basico: {
-    presupuestosMes: 20,
+    cotizacionesMes: 20,
     facturasHabilitado: false,
     iaCotizacionesDia: 5,
     iaFacturasHabilitado: false,
   },
   pro: {
-    presupuestosMes: Infinity,
+    cotizacionesMes: Infinity,
     facturasHabilitado: true,
     iaCotizacionesDia: Infinity,
     iaFacturasHabilitado: true,
   },
   business: {
-    presupuestosMes: Infinity,
+    cotizacionesMes: Infinity,
     facturasHabilitado: true,
     iaCotizacionesDia: Infinity,
     iaFacturasHabilitado: true,

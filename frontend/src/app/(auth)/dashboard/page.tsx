@@ -23,7 +23,7 @@ export default async function DashboardPage({
   const [
     { data: { user } },
     { data: perfil },
-    { data: statsRaw },   // todos los presupuestos — solo id+status para conteos exactos
+    { data: statsRaw },   // todos los cotizaciones — solo id+status para conteos exactos
     { data: presRaw },    // últimos 5 para la lista visual
     { data: facsRaw },    // facturas del mes para ingresos
   ] = await Promise.all([
@@ -167,7 +167,7 @@ export default async function DashboardPage({
           })}
         </div>
 
-        {/* ── Últimos presupuestos ────────────────────────────── */}
+        {/* ── Últimos cotizaciones ────────────────────────────── */}
         <div className="mb-3 mt-6 flex items-center justify-between">
           <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
             Últimas cotizaciones

@@ -2,19 +2,19 @@
 // DARIVO PRO — Wizard de cotización (diseño Fable 5 exacto)
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePresupuesto } from "@/hooks/usePresupuesto";
-import { usePresupuestoDraft } from "@/hooks/usePresupuestoDraft";
+import { useCotizacion } from "@/hooks/useCotizacion";
+import { useCotizacionDraft } from "@/hooks/useCotizacionDraft";
 import { useCatalogo } from "@/hooks/useCatalogo";
 import { useRecentItems } from "@/hooks/useRecentItems";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase/client";
-import { presupuestoSchema } from "@/lib/validations";
+import { cotizacionSchema } from "@/lib/validations";
 import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
 import { compartirPDF } from "@/lib/share";
-import { WIZARD_IA_SESSION_KEY } from "@/lib/presupuesto-ia";
+import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
 import { T } from "@/lib/theme";
-import type { LineaPresupuesto, Capitulo, Partida } from "@/types";
+import type { LineaCotizacion, Capitulo, Partida } from "@/types";
 import Link from "next/link";
 
 // Navegación Construcción → subcategorías (05 v1.5 · Doc 21 §15 — solo UI, cat_ids de catalog.ts)
@@ -97,7 +97,7 @@ interface BasketItem {
   svcId: string;
   catLabel: string;
   svcLabel: string;
-  calcType: LineaPresupuesto["calcType"];
+  calcType: LineaCotizacion["calcType"];
   basePrice: number;
   unit: string;
   qty: string;
@@ -106,10 +106,10 @@ interface BasketItem {
 }
 
 // ─── Wizard principal ──────────────────────────────────────────────────────────
-export function NuevoPresupuestoWizard() {
+export function NuevoCotizacionWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, actualizar, loading, generarPDF, registrarCalculo, registrarEnvioWA } = usePresupuesto();
+  const { crear, actualizar, loading, generarPDF, registrarCalculo, registrarEnvioWA } = useCotizacion();
   const { catalogo } = useCatalogo();
   const {
     trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
@@ -137,7 +137,7 @@ export function NuevoPresupuestoWizard() {
 
   // Draft restore
   const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
-  const { limpiar } = usePresupuestoDraft(draftState);
+  const { limpiar } = useCotizacionDraft(draftState);
 
   // ── Catálogo ordenado por frecuencia global + boost por cliente ──────────
   const sortedCatalogo = useMemo(() => {
@@ -234,8 +234,8 @@ export function NuevoPresupuestoWizard() {
       return;
     }
 
-    // Helper: cargar presupuesto en el wizard (usado por ?from= y ?editar=)
-    const cargarPresupuesto = async (id: string, esEdicion: boolean) => {
+    // Helper: cargar cotizacion en el wizard (usado por ?from= y ?editar=)
+    const cargarCotizacion = async (id: string, esEdicion: boolean) => {
       const { data } = await supabase
         .from("presupuestos")
         .select("*, items:presupuesto_items(*)")
@@ -249,7 +249,7 @@ export function NuevoPresupuestoWizard() {
           svcId:     String(it.svc_id),
           catLabel:  String(it.cat_label ?? ""),
           svcLabel:  String(it.svc_label ?? ""),
-          calcType:  (it.calc_type as LineaPresupuesto["calcType"]) ?? "fixed",
+          calcType:  (it.calc_type as LineaCotizacion["calcType"]) ?? "fixed",
           basePrice: Number(it.base_price ?? 0),
           unit:      String(it.unit ?? ""),
           qty:       String(it.qty ?? (it.calc_type === "fixed" ? 1 : "")),
@@ -269,13 +269,13 @@ export function NuevoPresupuestoWizard() {
 
     // 2. Editar cotización existente (?editar=<id>) — actualiza el registro original
     if (editarParam) {
-      void cargarPresupuesto(editarParam, true);
+      void cargarCotizacion(editarParam, true);
       return;
     }
 
     // 3. Re-usar cotización anterior (?from=<id>) — crea una nueva
     if (fromParam) {
-      void cargarPresupuesto(fromParam, false);
+      void cargarCotizacion(fromParam, false);
       return;
     }
 
@@ -350,7 +350,7 @@ export function NuevoPresupuestoWizard() {
       setBasket((b) => b.filter((x) => x.svcId !== partida.id));
       return;
     }
-    const calcType = tipoToCalcType(partida.tipo) as LineaPresupuesto["calcType"];
+    const calcType = tipoToCalcType(partida.tipo) as LineaCotizacion["calcType"];
     setBasket((b) => [...b, {
       svcId: partida.id,
       catLabel: cap.nombre,
@@ -383,7 +383,7 @@ export function NuevoPresupuestoWizard() {
   const updateQty = (idx: number, val: string) =>
     setBasket((b) => b.map((it, i) => i === idx ? { ...it, qty: val } : it));
 
-  const controlLabel = (calcType: LineaPresupuesto["calcType"]) => {
+  const controlLabel = (calcType: LineaCotizacion["calcType"]) => {
     if (calcType === "m2") return "m²";
     if (calcType === "hour") return "Horas";
     if (calcType === "unit") return "Cantidad";
@@ -394,7 +394,7 @@ export function NuevoPresupuestoWizard() {
   const doSave = async () => {
     const calcInputs = buildCalcInputs(basket);
     const engineResult = calcBasket(calcInputs, margin);
-    const items: LineaPresupuesto[] = basket.map((it, idx) => {
+    const items: LineaCotizacion[] = basket.map((it, idx) => {
       const ci = engineResult.items[idx];
       return {
         svcId:     it.svcId,
@@ -409,7 +409,7 @@ export function NuevoPresupuestoWizard() {
       };
     });
     const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
-    const valido = presupuestoSchema.safeParse(payload);
+    const valido = cotizacionSchema.safeParse(payload);
     if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
 
     // ── MODO EDICIÓN: actualizar registro existente ────────────────────────

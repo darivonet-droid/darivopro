@@ -2,7 +2,7 @@
 import { NuevaFacturaForm } from "@/components/facturacion/NuevaFacturaForm";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
-import type { Cliente, EmpresaData, LineaPresupuesto, Presupuesto } from "@/types";
+import type { Cliente, EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
 
 export default async function NuevaFacturaPage({
   searchParams,
@@ -37,17 +37,17 @@ export default async function NuevaFacturaPage({
 
   const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
 
-  const aprobados: Presupuesto[] = (aprobadosRes.data ?? []).map((row) => ({
+  const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>): LineaPresupuesto => ({
+    items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
-      calcType: (it.calc_type ?? "fixed") as LineaPresupuesto["calcType"],
+      calcType: (it.calc_type ?? "fixed") as LineaCotizacion["calcType"],
       basePrice: Number(it.base_price ?? 0),
       unit: String(it.unit ?? ""),
       qty: Number(it.qty ?? 0),
@@ -85,7 +85,7 @@ export default async function NuevaFacturaPage({
         numerosExistentes={numerosExistentes}
         aprobados={aprobados}
         clientes={clientes}
-        presupuestoId={searchParams.cotizacion}
+        cotizacionId={searchParams.cotizacion}
       />
     </div>
   );

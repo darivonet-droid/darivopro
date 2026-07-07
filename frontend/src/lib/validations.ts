@@ -1,7 +1,7 @@
 // DARIVO PRO — Schemas de validación Zod
 import { z } from "zod";
 
-export const lineaPresupuestoSchema = z.object({
+export const lineaCotizacionSchema = z.object({
   svcId: z.string().min(1),
   catLabel: z.string(),
   svcLabel: z.string().min(1),
@@ -13,11 +13,11 @@ export const lineaPresupuestoSchema = z.object({
   subtotal: z.number().nonnegative(),
 });
 
-export const presupuestoSchema = z.object({
+export const cotizacionSchema = z.object({
   clientName: z.string().min(2, "Ingresa el nombre del cliente"),
   phone: z.string().optional(),
   city: z.string().optional(),
-  items: z.array(lineaPresupuestoSchema).min(1, "Agrega al menos una partida"),
+  items: z.array(lineaCotizacionSchema).min(1, "Agrega al menos una partida"),
   margin: z.number().min(0).max(200),
   totalBase: z.number().nonnegative(),
   totalLabor: z.number().nonnegative(),

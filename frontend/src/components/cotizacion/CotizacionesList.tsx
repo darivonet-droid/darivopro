@@ -5,24 +5,24 @@ import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
-import { PresupuestoCard } from "@/components/presupuesto/PresupuestoCard";
-import { usePresupuesto } from "@/hooks/usePresupuesto";
+import { CotizacionCard } from "@/components/cotizacion/CotizacionCard";
+import { useCotizacion } from "@/hooks/useCotizacion";
 import { useFactura } from "@/hooks/useFactura";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { compartirPDF } from "@/lib/share";
 import { T } from "@/lib/theme";
-import type { Presupuesto } from "@/types";
+import type { Cotizacion } from "@/types";
 
-const SIGUIENTE_ESTADO: Record<Presupuesto["status"], Presupuesto["status"] | null> = {
+const SIGUIENTE_ESTADO: Record<Cotizacion["status"], Cotizacion["status"] | null> = {
   Borrador: "Pendiente de firma",
   "Pendiente de firma": "Aprobado",
   Aprobado: null,
 };
 
-interface PresupuestosListProps {
-  iniciales: Presupuesto[];
+interface CotizacionesListProps {
+  iniciales: Cotizacion[];
   /**
    * "directo"   → convierte la cotización en boleta al instante (comportamiento por defecto).
    * "preguntar" → abre el formulario de factura para elegir Empresa (RUC) o Particular (DNI).
@@ -35,27 +35,27 @@ interface PresupuestosListProps {
   soloHistorial?: boolean;
 }
 
-export function PresupuestosList({ iniciales, facturarMode = "directo", soloHistorial = false }: PresupuestosListProps) {
+export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false }: CotizacionesListProps) {
   const router = useRouter();
-  const [presupuestos, setPresupuestos] = useState(() => {
+  const [cotizaciones, setCotizaciones] = useState(() => {
     if (iniciales.length > 0) return iniciales;
-    return leerListaCache<Presupuesto>("presupuestos") ?? iniciales;
+    return leerListaCache<Cotizacion>("cotizaciones") ?? iniciales;
   });
   const [abierto, setAbierto] = useState<string | null>(null);
-  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(presupuestos);
-  const { actualizarEstado, eliminar, generarPDF } = usePresupuesto();
-  const { convertirDesdePresupuesto } = useFactura();
+  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(cotizaciones);
+  const { actualizarEstado, eliminar, generarPDF } = useCotizacion();
+  const { convertirDesdeCotizacion } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
   useEffect(() => {
     if (iniciales.length > 0) {
-      setPresupuestos(iniciales);
-      guardarListaCache("presupuestos", iniciales);
+      setCotizaciones(iniciales);
+      guardarListaCache("cotizaciones", iniciales);
     }
   }, [iniciales]);
 
-  if (presupuestos.length === 0) {
+  if (cotizaciones.length === 0) {
     if (soloHistorial) {
       return (
         <div className="rounded-2xl bg-white py-6 text-center shadow-sm">
@@ -76,12 +76,12 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
     );
   }
 
-  const avanzarEstado = async (p: Presupuesto) => {
+  const avanzarEstado = async (p: Cotizacion) => {
     const siguiente = SIGUIENTE_ESTADO[p.status];
     if (!siguiente) return;
     const ok = await actualizarEstado(p.id, siguiente);
     if (ok) {
-      setPresupuestos((prev) =>
+      setCotizaciones((prev) =>
         prev.map((x) => (x.id === p.id ? { ...x, status: siguiente } : x))
       );
       mostrarToast(`Cotización → ${siguiente}`);
@@ -93,21 +93,21 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
   const borrar = async (id: string) => {
     const ok = await eliminar(id);
     if (ok) {
-      setPresupuestos((prev) => prev.filter((x) => x.id !== id));
+      setCotizaciones((prev) => prev.filter((x) => x.id !== id));
       mostrarToast("Cotización eliminada");
     } else {
       mostrarToast("No se pudo eliminar", "error");
     }
   };
 
-  const hacerFactura = async (p: Presupuesto) => {
+  const hacerFactura = async (p: Cotizacion) => {
     // Modo "preguntar": el usuario elige Empresa (RUC) o Particular (DNI) en el formulario
     if (facturarMode === "preguntar") {
       router.push(`/facturas/nueva?cotizacion=${p.id}`);
       return;
     }
     mostrarToast("Creando factura…");
-    const factura = await convertirDesdePresupuesto(p, mostrarUpgrade);
+    const factura = await convertirDesdeCotizacion(p, mostrarUpgrade);
     if (factura) {
       mostrarToast(`${factura.invNum} creada ✓`);
     } else {
@@ -115,7 +115,7 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
     }
   };
 
-  const compartir = async (p: Presupuesto) => {
+  const compartir = async (p: Cotizacion) => {
     mostrarToast("Preparando PDF…");
     const url = p.pdfUrl || (await generarPDF(p.id));
     if (!url) { mostrarToast("No se pudo generar el PDF", "error"); return; }
@@ -130,9 +130,9 @@ export function PresupuestosList({ iniciales, facturarMode = "directo", soloHist
       {slice.map((p) => {
         const expandido = abierto === p.id;
         return (
-          <PresupuestoCard
+          <CotizacionCard
             key={p.id}
-            presupuesto={p}
+            cotizacion={p}
             onClick={() => setAbierto(expandido ? null : p.id)}
             footer={
               expandido ? (

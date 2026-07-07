@@ -4,9 +4,9 @@ import { createServerClient } from "@/lib/supabase/server";
 import {
   buildSystemPrompt,
   recalcularTotalesIA,
-  type IAPresupuestoItem,
-  type IAPresupuestoResult,
-} from "@/lib/presupuesto-ia";
+  type IACotizacionItem,
+  type IACotizacionResult,
+} from "@/lib/cotizacion-ia";
 import { CATALOGO } from "@/lib/catalog";
 import {
   obtenerPlanTipo,
@@ -116,7 +116,7 @@ interface IAItemResponse {
   sugerida?: boolean;
   nota?: string;
 }
-interface IAPresupuestoIAJson {
+interface IACotizacionIAJson {
   titulo: string;
   items: IAItemResponse[];
   notasFaltantes?: string[];
@@ -172,12 +172,12 @@ export async function POST(req: NextRequest) {
       user: `Analiza este trabajo y genera el JSON de cotización:\n\n${descripcion}`,
     });
 
-    const iaResult = parseJSONFromModel<IAPresupuestoIAJson>(text);
+    const iaResult = parseJSONFromModel<IACotizacionIAJson>(text);
     if (!Array.isArray(iaResult.items)) {
       throw new Error("Sin partidas en la respuesta");
     }
 
-    const mappedItems: IAPresupuestoItem[] = [];
+    const mappedItems: IACotizacionItem[] = [];
     const sinCatalogo: string[] = iaResult.notasFaltantes ?? [];
 
     for (const ci of iaResult.items) {
@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const resultado: IAPresupuestoResult = {
+    const resultado: IACotizacionResult = {
       ...recalcularTotalesIA(mappedItems),
       titulo: iaResult.titulo ?? "Cotización",
       items: mappedItems,
@@ -228,7 +228,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof OpenAIConfigError) {
       return NextResponse.json({ error: e.message }, { status: 503 });
     }
-    console.error("IA presupuesto error:", e);
+    console.error("IA cotizacion error:", e);
     return NextResponse.json({ error: "No se pudo interpretar la respuesta de la IA" }, { status: 500 });
   }
 }

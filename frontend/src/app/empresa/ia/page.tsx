@@ -1,4 +1,4 @@
-import { IAPresupuestoFlow } from "@/components/presupuesto/IAPresupuestoFlow";
+import { IACotizacionFlow } from "@/components/cotizacion/IACotizacionFlow";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { T } from "@/lib/design-system/tokens";
@@ -12,7 +12,7 @@ export default function EmpresaIAPage() {
         Cotización con OpenAI — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
       </p>
       <div className="max-w-lg">
-        <IAPresupuestoFlow />
+        <IACotizacionFlow />
       </div>
     </EmpresaShell>
   );

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
-import type { Presupuesto } from "@/types";
+import type { Cotizacion } from "@/types";
 
 const STATUS_BADGE: Record<string, { bg: string; color: string; label: string }> = {
   Aprobado:           { bg: T.greenPale, color: T.greenD,  label: "Aprobado"  },
@@ -10,14 +10,14 @@ const STATUS_BADGE: Record<string, { bg: string; color: string; label: string }>
   Borrador:           { bg: T.slate,     color: T.textMid, label: "Borrador"  },
 };
 
-interface PresupuestoCardProps {
-  presupuesto: Presupuesto;
+interface CotizacionCardProps {
+  cotizacion: Cotizacion;
   href?: string;
   onClick?: () => void;
   footer?: React.ReactNode;
 }
 
-export function PresupuestoCard({ presupuesto: p, href, onClick, footer }: PresupuestoCardProps) {
+export function CotizacionCard({ cotizacion: p, href, onClick, footer }: CotizacionCardProps) {
   const badge = STATUS_BADGE[p.status] ?? STATUS_BADGE.Borrador;
   const fecha = new Date(p.createdAt).toLocaleDateString("es-PE", {
     day: "numeric",

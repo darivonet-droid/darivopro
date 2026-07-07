@@ -8,20 +8,20 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { PresupuestosList } from "@/components/presupuesto/PresupuestosList";
+import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { FacturaCard } from "@/components/facturacion/FacturaCard";
 import { useClientes } from "@/hooks/useClientes";
 import { useAppStore } from "@/store/useAppStore";
 import { T } from "@/lib/theme";
-import type { Cliente, Factura, Presupuesto } from "@/types";
+import type { Cliente, Factura, Cotizacion } from "@/types";
 
 interface Props {
   cliente: Cliente;
-  presupuestos: Presupuesto[];
+  cotizaciones: Cotizacion[];
   facturas: Factura[];
 }
 
-export function ClienteFichaView({ cliente, presupuestos, facturas }: Props) {
+export function ClienteFichaView({ cliente, cotizaciones, facturas }: Props) {
   const router = useRouter();
   const { actualizar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -121,16 +121,16 @@ export function ClienteFichaView({ cliente, presupuestos, facturas }: Props) {
       {/* ── Historial de cotizaciones ──────────────────────── */}
       <div>
         <p className="mb-2 px-1 text-[11px] font-extrabold uppercase tracking-wide" style={{ color: T.textMid }}>
-          Cotizaciones ({presupuestos.length})
+          Cotizaciones ({cotizaciones.length})
         </p>
-        {presupuestos.length === 0 ? (
+        {cotizaciones.length === 0 ? (
           <div className="rounded-2xl bg-white py-8 text-center shadow-sm">
             <p className="text-sm font-semibold" style={{ color: T.textMid }}>
               Sin cotizaciones todavía
             </p>
           </div>
         ) : (
-          <PresupuestosList iniciales={presupuestos} facturarMode="preguntar" soloHistorial />
+          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial />
         )}
       </div>
 

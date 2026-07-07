@@ -31,7 +31,7 @@ export interface ClientHistoryEntry {
   city:        string;
   margin:      number;    // último margen de beneficio usado con este cliente
   notes:       string;    // últimas observaciones usadas con este cliente
-  svcIds:      string[];  // partidas del último presupuesto
+  svcIds:      string[];  // partidas del último cotizacion
   catIds:      string[];  // capítulos correspondientes (mismo orden que svcIds)
   lastUsedAt:  number;    // timestamp de la última cotización
   count:       number;    // número total de cotizaciones para este cliente

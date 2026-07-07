@@ -9,14 +9,14 @@ import { filtrarFacturas, type FiltroFactura } from "@/lib/factura-utils";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
-import type { Factura, Presupuesto } from "@/types";
+import type { Factura, Cotizacion } from "@/types";
 
 const FILTROS: FiltroFactura[] = ["Todas", "Emitidas", "Cobradas", "Pendientes"];
 
 interface FacturasViewProps {
   facturas: Factura[];
   rucEmpresa: string;
-  aprobados: Presupuesto[];
+  aprobados: Cotizacion[];
 }
 
 export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: FacturasViewProps) {
@@ -84,7 +84,7 @@ export function FacturasView({ facturas: iniciales, rucEmpresa, aprobados }: Fac
       </header>
 
       <main className="flex flex-col gap-4 px-4 py-4">
-        {/* Banner presupuestos aprobados */}
+        {/* Banner cotizaciones aprobados */}
         {aprobados.length > 0 && (
           <div
             className="rounded-2xl p-4"

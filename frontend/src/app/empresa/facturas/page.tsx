@@ -2,7 +2,7 @@ import { FacturasView } from "@/components/facturacion/FacturasView";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Factura, InvStatus, LineaPresupuesto, Presupuesto } from "@/types";
+import type { Factura, InvStatus, LineaCotizacion, Cotizacion } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -57,13 +57,13 @@ export default async function EmpresaFacturasPage() {
     },
   }));
 
-  const aprobados: Presupuesto[] = (aprobadosRes.data ?? []).map((row) => ({
+  const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
     id: row.id,
     tenant_id: row.user_id,
     clientName: row.client_name,
     phone: row.phone ?? undefined,
     city: row.city ?? undefined,
-    items: [] as LineaPresupuesto[],
+    items: [] as LineaCotizacion[],
     margin: Number(row.margin ?? 0),
     totalBase: Number(row.total_base ?? 0),
     totalLabor: Number(row.total_labor ?? 0),

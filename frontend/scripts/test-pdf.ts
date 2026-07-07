@@ -1,25 +1,25 @@
 /**
- * Prueba local: genera PDF de presupuesto de ejemplo en disco.
+ * Prueba local: genera PDF de cotizacion de ejemplo en disco.
  * Uso: npm run test:pdf
  */
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { PresupuestoPdfDocument } from "../src/lib/pdf/PresupuestoPdfDocument";
-import { PRESUPUESTO_EJEMPLO } from "../src/lib/pdf/generate";
+import { CotizacionPdfDocument } from "../src/lib/pdf/CotizacionPdfDocument";
+import { COTIZACION_EJEMPLO } from "../src/lib/pdf/generate";
 
 async function main() {
   const buffer = await renderToBuffer(
-    React.createElement(PresupuestoPdfDocument, {
-      data: PRESUPUESTO_EJEMPLO,
+    React.createElement(CotizacionPdfDocument, {
+      data: COTIZACION_EJEMPLO,
       fechaGeneracion: new Date().toLocaleDateString("es-PE"),
     })
   );
 
   const outDir = join(process.cwd(), "test-output");
   mkdirSync(outDir, { recursive: true });
-  const outPath = join(outDir, "presupuesto-ejemplo.pdf");
+  const outPath = join(outDir, "cotizacion-ejemplo.pdf");
   writeFileSync(outPath, buffer);
 
   const header = buffer.subarray(0, 5).toString("utf8");

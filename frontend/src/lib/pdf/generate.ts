@@ -1,7 +1,7 @@
 import React, { type ReactElement } from "react";
 import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { PresupuestoPdfDocument, type PresupuestoPdfData } from "./PresupuestoPdfDocument";
+import { CotizacionPdfDocument, type CotizacionPdfData } from "./CotizacionPdfDocument";
 import { FacturaPdfDocument, type FacturaPdfData } from "./FacturaPdfDocument";
 
 const BUCKET = "documentos";
@@ -29,8 +29,8 @@ async function subirPdf(buffer: Buffer, filename: string): Promise<string> {
   return data.publicUrl;
 }
 
-export async function generarPdfPresupuesto(data: PresupuestoPdfData): Promise<string> {
-  const element = React.createElement(PresupuestoPdfDocument, {
+export async function generarPdfCotizacion(data: CotizacionPdfData): Promise<string> {
+  const element = React.createElement(CotizacionPdfDocument, {
     data,
     fechaGeneracion: fechaHoy(),
   }) as ReactElement<DocumentProps>;
@@ -55,7 +55,7 @@ export async function generarPdfFactura(data: FacturaPdfData): Promise<string> {
 }
 
 /** Datos de ejemplo para pruebas locales */
-export const PRESUPUESTO_EJEMPLO: PresupuestoPdfData = {
+export const COTIZACION_EJEMPLO: CotizacionPdfData = {
   id: "ejemplo-test",
   client_name: "Juan Pérez García",
   city: "Lima",

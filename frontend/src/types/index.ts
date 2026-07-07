@@ -1,6 +1,6 @@
 // DARIVO PRO — Tipos TypeScript globales
 
-export interface LineaPresupuesto {
+export interface LineaCotizacion {
   svcId: string;
   catLabel: string;
   svcLabel: string;
@@ -12,14 +12,14 @@ export interface LineaPresupuesto {
   subtotal: number;
 }
 
-export interface Presupuesto {
+export interface Cotizacion {
   id: string;
   tenant_id: string;
   cotNum?: string;
   clientName: string;
   phone?: string;
   city?: string;
-  items: LineaPresupuesto[];
+  items: LineaCotizacion[];
   margin: number;
   totalBase: number;
   totalLabor: number;

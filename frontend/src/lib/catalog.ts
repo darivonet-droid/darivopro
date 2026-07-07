@@ -1,6 +1,6 @@
 // DARIVO PRO — Catálogo base de partidas de obra (precios referenciales PEN)
 // Debe mantenerse en sincronía con backend/services/catalogo_base.py
-import type { Capitulo, LineaPresupuesto, Partida } from "@/types";
+import type { Capitulo, LineaCotizacion, Partida } from "@/types";
 
 export const CATALOGO: Capitulo[] = [
   {
@@ -103,15 +103,15 @@ export const CATEGORIAS: CategoriaMeta[] = CATALOGO.map(({ id, nombre, emoji, co
   color,
 }));
 
-const TIPO_A_CALC: Record<Partida["tipo"], LineaPresupuesto["calcType"]> = {
+const TIPO_A_CALC: Record<Partida["tipo"], LineaCotizacion["calcType"]> = {
   m2: "m2",
   unidad: "unit",
   hora: "hour",
   fijo: "fixed",
 };
 
-/** Convierte una partida del catálogo en una línea de presupuesto */
-export const partidaALinea = (cap: Capitulo, partida: Partida, qty = 1): LineaPresupuesto => ({
+/** Convierte una partida del catálogo en una línea de cotizacion */
+export const partidaALinea = (cap: Capitulo, partida: Partida, qty = 1): LineaCotizacion => ({
   svcId: partida.id,
   catLabel: cap.nombre,
   svcLabel: partida.nombre,

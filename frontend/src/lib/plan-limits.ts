@@ -8,18 +8,18 @@ import {
 export type PlanTipo = PlanTipoPersistido;
 
 export type UpgradeRazon =
-  | "presupuestos_gratis"
-  | "presupuestos_basico"
+  | "cotizaciones_gratis"
+  | "cotizaciones_basico"
   | "facturas_basico"
   | "ia_limite"
   | "roles_personalizados_limite";
 
 export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo: string }> = {
-  presupuestos_gratis: {
+  cotizaciones_gratis: {
     titulo: "Límite de prueba gratuita",
     subtitulo: "Ya usaste tus 5 cotizaciones. Pásate a Pro para seguir trabajando.",
   },
-  presupuestos_basico: {
+  cotizaciones_basico: {
     titulo: "Límite mensual alcanzado",
     subtitulo: "Tu plan Básico incluye 20 cotizaciones/mes. Pro es ilimitado.",
   },
@@ -59,11 +59,11 @@ export async function obtenerPlanTipo(
   return plan ?? "gratis";
 }
 
-export async function verificarLimitePresupuesto(
+export async function verificarLimiteCotizacion(
   supabase: SupabaseClient
 ): Promise<{ ok: true } | { ok: false; razon: UpgradeRazon }> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { ok: false, razon: "presupuestos_gratis" };
+  if (!user) return { ok: false, razon: "cotizaciones_gratis" };
 
   const plan = await obtenerPlanTipo(supabase);
   if (planTieneLimitesIlimitados(plan)) return { ok: true };
@@ -73,8 +73,8 @@ export async function verificarLimitePresupuesto(
       .from("presupuestos")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
-    if ((count ?? 0) >= LIMITES_PLAN.gratis.presupuestosTotal) {
-      return { ok: false, razon: "presupuestos_gratis" };
+    if ((count ?? 0) >= LIMITES_PLAN.gratis.cotizacionesTotal) {
+      return { ok: false, razon: "cotizaciones_gratis" };
     }
     return { ok: true };
   }
@@ -85,8 +85,8 @@ export async function verificarLimitePresupuesto(
     .eq("user_id", user.id)
     .gte("created_at", inicioMesISO());
 
-  if ((count ?? 0) >= LIMITES_PLAN.basico.presupuestosMes) {
-    return { ok: false, razon: "presupuestos_basico" };
+  if ((count ?? 0) >= LIMITES_PLAN.basico.cotizacionesMes) {
+    return { ok: false, razon: "cotizaciones_basico" };
   }
   return { ok: true };
 }

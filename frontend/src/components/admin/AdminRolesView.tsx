@@ -116,11 +116,11 @@ export function AdminRolesView() {
                       Anual: S/ {p.anual}
                     </p>
                     <ul className="mt-4 text-xs" style={{ color: T.textMid }}>
-                      {"presupuestosMes" in limites && (
-                        <li>Cotizaciones/mes: {limites.presupuestosMes}</li>
+                      {"cotizacionesMes" in limites && (
+                        <li>Cotizaciones/mes: {limites.cotizacionesMes}</li>
                       )}
-                      {"presupuestosTotal" in limites && (
-                        <li>Cotizaciones totales: {String(limites.presupuestosTotal)}</li>
+                      {"cotizacionesTotal" in limites && (
+                        <li>Cotizaciones totales: {String(limites.cotizacionesTotal)}</li>
                       )}
                       <li>
                         Facturación:{" "}

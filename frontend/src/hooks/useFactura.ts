@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { verificarLimiteFactura } from "@/lib/plan-limits";
 import { buildWAMessage } from "@/lib/utils";
 import { nextNumeroComprobante } from "@/lib/factura-utils";
-import type { EmpresaData, Factura, InvStatus, LineaFactura, Presupuesto } from "@/types";
+import type { EmpresaData, Factura, InvStatus, LineaFactura, Cotizacion } from "@/types";
 
 interface FacturaRow {
   inv_id: string;
@@ -163,13 +163,13 @@ export function useFactura() {
   }, []);
 
   /**
-   * Convierte una cotización (presupuesto) en una factura/boleta.
+   * Convierte una cotización (cotizacion) en una factura/boleta.
    * Copia cliente, partidas, cantidades, precios, observaciones.
    * Mantiene trazabilidad vía from_quote_id.
    * IGV 18% se aplica sobre el total de la cotización.
    */
-  const convertirDesdePresupuesto = useCallback(async (
-    p: Presupuesto,
+  const convertirDesdeCotizacion = useCallback(async (
+    p: Cotizacion,
     onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
   ): Promise<Factura | null> => {
     setLoading(true);
@@ -199,7 +199,7 @@ export function useFactura() {
     // Auto-generate next boleta number
     const invNum = nextNumeroComprobante("boleta", numerosExistentes);
 
-    // Map presupuesto items → lineas de factura (one-to-one, full traceability)
+    // Map cotizacion items → lineas de factura (one-to-one, full traceability)
     const items: LineaFactura[] = p.items.map((it) => ({
       desc: it.catLabel ? `${it.catLabel} — ${it.svcLabel}` : it.svcLabel,
       cantidad: it.calcType === "fixed" ? 1 : it.qty,
@@ -207,7 +207,7 @@ export function useFactura() {
       subtotal: it.subtotal,
     }));
 
-    // Totals: presupuesto.totalFinal is the pre-IGV base; invoice adds 18% IGV
+    // Totals: cotizacion.totalFinal is the pre-IGV base; invoice adds 18% IGV
     const subtotalBase = Math.round(p.totalFinal * 100) / 100;
     const igvAmount    = Math.round(subtotalBase * 0.18 * 100) / 100;
     const totalFinal   = Math.round((subtotalBase + igvAmount) * 100) / 100;
@@ -254,5 +254,5 @@ export function useFactura() {
     return mapRow(data as FacturaRow);
   }, [supabase]);
 
-  return { loading, error, listar, crear, actualizarEstado, enviarWhatsApp, generarPDF, convertirDesdePresupuesto };
+  return { loading, error, listar, crear, actualizarEstado, enviarWhatsApp, generarPDF, convertirDesdeCotizacion };
 }
