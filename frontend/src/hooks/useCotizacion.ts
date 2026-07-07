@@ -262,9 +262,13 @@ export function useCotizacion() {
   }, [supabase]);
 
   const eliminar = useCallback(async (id: string) => {
-    const { error } = await supabase.from("presupuestos").delete().eq("id", id);
-    if (error) setError(error.message);
-    return !error;
+    const { error, count } = await supabase
+      .from("presupuestos")
+      .delete({ count: "exact" })
+      .eq("id", id);
+    if (error) { setError(error.message); return false; }
+    if (count === 0) { setError("No tienes permiso para eliminar esta cotización"); return false; }
+    return true;
   }, [supabase]);
 
   const generarPDF = useCallback(async (id: string): Promise<string | null> => {

@@ -8,7 +8,14 @@ export const fmtPEN = (n: number, sym = "S/") =>
 export const hoy = () => new Date().toISOString().slice(0, 10);
 
 /** Normaliza un teléfono a SOLO dígitos (sin espacios, +, guiones). "" → "" */
-export const soloDigitos = (s?: string | null) => (s ?? "").replace(/\D/g, "");
+export const soloDigitos = (s?: string | null) => {
+  const digits = (s ?? "").replace(/\D/g, "");
+  // Perú: 51 + 9 dígitos locales → quitar prefijo de país (03-MODULO-CLIENTES.md §2)
+  if (digits.length === 11 && digits.startsWith("51")) {
+    return digits.slice(2);
+  }
+  return digits;
+};
 
 /** Calcula IGV 18% Perú — siempre subtotal × 0.18 */
 export const calcIGV = (subtotal: number) => {
