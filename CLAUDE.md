@@ -1,5 +1,9 @@
 # Darivo Pro — Guía para Claude Code
 
+## Flujo de ramas (Git)
+
+Todo el trabajo se hace en la rama `develop`, nunca directamente en `main`. Cuando una tarea (o un conjunto de tareas relacionadas) esté lista y verificada, se abre un Pull Request de `develop` hacia `main` para que Mohamed lo revise antes de fusionar. No hacer merge ni push directo a `main` sin su aprobación explícita.
+
 ## Skills a utilizar (confirmado por el propietario, 07/07/2026)
 
 De las skills personales disponibles, usar solo estas 6 (7 comandos, Review+Ultrareview cuentan como una pareja):
