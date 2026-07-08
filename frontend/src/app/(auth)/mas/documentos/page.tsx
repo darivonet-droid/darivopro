@@ -8,7 +8,7 @@ export default async function DocumentosPage() {
   const supabase = createServerClient();
   const [{ data: pres }, { data: facs }] = await Promise.all([
     supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .select("id, client_name, total_final, created_at, status")
       .order("created_at", { ascending: false })
       .limit(20),

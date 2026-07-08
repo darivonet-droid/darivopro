@@ -29,20 +29,20 @@
 </head>
 <body>
   <div class="header">
-    <h1>PRESUPUESTO</h1>
+    <h1>COTIZACIÓN</h1>
     <div class="sub">Generado con DARIVO PRO · {{ fecha_generacion }}</div>
   </div>
 
   <div class="meta">
     <div>
       <div class="label">Cliente</div>
-      <div class="value">{{ presupuesto.client_name }}</div>
-      {% if presupuesto.city %}<div>{{ presupuesto.city }}</div>{% endif %}
-      {% if presupuesto.phone %}<div>{{ presupuesto.phone }}</div>{% endif %}
+      <div class="value">{{ cotizacion.client_name }}</div>
+      {% if cotizacion.city %}<div>{{ cotizacion.city }}</div>{% endif %}
+      {% if cotizacion.phone %}<div>{{ cotizacion.phone }}</div>{% endif %}
     </div>
     <div>
       <div class="label">Estado</div>
-      <div class="estado">{{ presupuesto.status }}</div>
+      <div class="estado">{{ cotizacion.status }}</div>
     </div>
   </div>
 
@@ -57,7 +57,7 @@
     </thead>
     <tbody>
       {% set ns = namespace(cap='') %}
-      {% for item in presupuesto["items"] %}
+      {% for item in cotizacion["items"] %}
         {% if item.cat_label != ns.cap %}
           {% set ns.cap = item.cat_label %}
           <tr><td colspan="4" class="cap">{{ ns.cap }}</td></tr>
@@ -75,24 +75,24 @@
   <div class="totales">
     <div class="row">
       <span>Materiales y partidas</span>
-      <span>S/ {{ "%.2f"|format(presupuesto.total_base or 0) }}</span>
+      <span>S/ {{ "%.2f"|format(cotizacion.total_base or 0) }}</span>
     </div>
     <div class="row">
-      <span>Mano de obra ({{ presupuesto.margin or 0 }}%)</span>
-      <span>S/ {{ "%.2f"|format(presupuesto.total_labor or 0) }}</span>
+      <span>Mano de obra ({{ cotizacion.margin or 0 }}%)</span>
+      <span>S/ {{ "%.2f"|format(cotizacion.total_labor or 0) }}</span>
     </div>
     <div class="row final">
       <span>TOTAL</span>
-      <span>S/ {{ "%.2f"|format(presupuesto.total_final or 0) }}</span>
+      <span>S/ {{ "%.2f"|format(cotizacion.total_final or 0) }}</span>
     </div>
   </div>
 
-  {% if presupuesto.notes %}
-  <div class="notas"><strong>Notas:</strong> {{ presupuesto.notes }}</div>
+  {% if cotizacion.notes %}
+  <div class="notas"><strong>Notas:</strong> {{ cotizacion.notes }}</div>
   {% endif %}
 
   <div class="footer">
-    Este presupuesto tiene validez de 30 días desde su emisión · DARIVO PRO
+    Esta cotización tiene validez de 30 días desde su emisión · DARIVO PRO
   </div>
 </body>
 </html>

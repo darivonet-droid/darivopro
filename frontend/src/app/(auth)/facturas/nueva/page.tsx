@@ -15,8 +15,8 @@ export default async function NuevaFacturaPage({
     supabase.from("perfiles").select("*").single(),
     supabase.from("facturas").select("inv_num"),
     supabase
-      .from("presupuestos")
-      .select("*, items:presupuesto_items(*)")
+      .from("cotizaciones")
+      .select("*, items:cotizacion_items(*)")
       .eq("status", "Aprobado")
       .order("created_at", { ascending: false }),
     supabase.from("clientes").select("*").order("nombre"),

@@ -2,7 +2,7 @@
 import pytest
 from pydantic import ValidationError
 
-from models.schemas import EmpresaData, PresupuestoIn
+from models.schemas import EmpresaData, CotizacionIn
 
 
 def test_ruc_valido() -> None:
@@ -17,7 +17,7 @@ def test_ruc_invalido() -> None:
 
 def test_margen_fuera_de_rango() -> None:
     with pytest.raises(ValidationError):
-        PresupuestoIn(
+        CotizacionIn(
             clientName="Juan",
             items=[],
             margin=500,

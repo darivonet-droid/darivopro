@@ -35,14 +35,14 @@ VALUES
     'BÁSICO',
     39.00,
     390.00,
-    '{"presupuestosMes": 20, "facturasMes": 10, "iaDia": 3}'::jsonb
+    '{"cotizacionesMes": 20, "facturasMes": 10, "iaDia": 3}'::jsonb
   ),
   (
     'pro',
     'PRO',
     79.00,
     790.00,
-    '{"presupuestosMes": null, "facturasMes": null, "iaDia": null}'::jsonb
+    '{"cotizacionesMes": null, "facturasMes": null, "iaDia": null}'::jsonb
   )
 ON CONFLICT (slug) DO NOTHING;
 

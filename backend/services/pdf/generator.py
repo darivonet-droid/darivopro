@@ -48,10 +48,10 @@ def _subir_a_storage(pdf_bytes: bytes, filename: str) -> str:
     url = supabase.storage.from_(bucket).get_public_url(path)
     return url
 
-async def generar_pdf_presupuesto(presupuesto: dict) -> str:
-    """Genera PDF de presupuesto y retorna URL pública"""
-    html = _render_html("presupuesto.html", {
-        "presupuesto": presupuesto,
+async def generar_pdf_cotizacion(cotizacion: dict) -> str:
+    """Genera PDF de cotizacion y retorna URL pública"""
+    html = _render_html("cotizacion.html", {
+        "cotizacion": cotizacion,
         "fecha_generacion": datetime.now().strftime("%d/%m/%Y"),
         "colores": {
             "navy": "#0A1628",
@@ -62,7 +62,7 @@ async def generar_pdf_presupuesto(presupuesto: dict) -> str:
     })
 
     pdf_bytes = _generar_pdf_bytes(html)
-    filename  = f"presupuesto-{presupuesto['id']}-{datetime.now().strftime('%Y%m%d')}.pdf"
+    filename  = f"cotizacion-{cotizacion['id']}-{datetime.now().strftime('%Y%m%d')}.pdf"
     url       = _subir_a_storage(pdf_bytes, filename)
     return url
 

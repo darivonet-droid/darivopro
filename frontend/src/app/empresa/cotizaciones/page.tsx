@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function EmpresaCotizacionesPage() {
   const supabase = createServerClient();
   const { data } = await supabase
-    .from("presupuestos")
+    .from("cotizaciones")
     .select(
-      "id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)"
+      "id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)"
     )
     .order("created_at", { ascending: false });
 

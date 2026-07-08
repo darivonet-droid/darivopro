@@ -11,7 +11,7 @@ export default async function CierrePage() {
   const [{ count: cotizaciones }, { count: facturas }, { data: facs }] =
     await Promise.all([
       supabase
-        .from("presupuestos")
+        .from("cotizaciones")
         .select("*", { count: "exact", head: true })
         .gte("created_at", inicioMes.toISOString()),
       supabase

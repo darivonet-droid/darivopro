@@ -10,8 +10,8 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
     if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const { data: cotizacion, error } = await supabase
-      .from("presupuestos")
-      .select("*, items:presupuesto_items(cat_label, svc_label, qty, unit, unit_price, subtotal)")
+      .from("cotizaciones")
+      .select("*, items:cotizacion_items(cat_label, svc_label, qty, unit, unit_price, subtotal)")
       .eq("id", params.id)
       .eq("user_id", user.id)
       .single();
@@ -42,7 +42,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
     // Persist URL so subsequent requests return instantly
     supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .update({ pdf_url: url })
       .eq("id", params.id)
       .then(({ error: updErr }) => {

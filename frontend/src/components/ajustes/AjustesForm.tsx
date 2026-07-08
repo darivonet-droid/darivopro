@@ -19,7 +19,7 @@ export function AjustesForm({ inicial, email }: { inicial: EmpresaForm; email: s
   const conectado = !modoOffline;
   const MODULOS = [
     ["perfiles",    "Empresa"    ],
-    ["presupuestos","Cotizaciones"],
+    ["cotizaciones","Cotizaciones"],
     ["facturas",    "Facturas"   ],
     ["clientes",    "Clientes"   ],
     ["categorias",  "Catálogo"   ],

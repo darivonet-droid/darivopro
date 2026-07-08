@@ -1,17 +1,17 @@
-# DARIVO PRO — Endpoints de presupuestos
+# DARIVO PRO — Endpoints de cotizaciones
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from core.auth import User, get_current_user
 from core.supabase_client import get_supabase
-from models.schemas import ApiResponse, PresupuestoIn, PresupuestoOut
+from models.schemas import ApiResponse, CotizacionIn, CotizacionOut
 
 router = APIRouter()
 
 
-def _row_to_out(row: dict, items: list[dict]) -> PresupuestoOut:
-    return PresupuestoOut(
+def _row_to_out(row: dict, items: list[dict]) -> CotizacionOut:
+    return CotizacionOut(
         id=str(row["id"]),
         tenant_id=str(row["user_id"]),
         clientName=row["client_name"],
@@ -41,14 +41,14 @@ def _row_to_out(row: dict, items: list[dict]) -> PresupuestoOut:
     )
 
 
-@router.get("", response_model=ApiResponse[List[PresupuestoOut]])
-async def listar_presupuestos(
+@router.get("", response_model=ApiResponse[List[CotizacionOut]])
+async def listar_cotizaciones(
     user: User = Depends(get_current_user),
-) -> ApiResponse[List[PresupuestoOut]]:
+) -> ApiResponse[List[CotizacionOut]]:
     sb = get_supabase()
     res = (
-        sb.table("presupuestos")
-        .select("*, items:presupuesto_items(*)")
+        sb.table("cotizaciones")
+        .select("*, items:cotizacion_items(*)")
         .eq("user_id", user.id)
         .order("created_at", desc=True)
         .execute()
@@ -57,34 +57,34 @@ async def listar_presupuestos(
     return ApiResponse(data=data, meta={"total": len(data)})
 
 
-@router.get("/{presupuesto_id}", response_model=ApiResponse[PresupuestoOut])
-async def obtener_presupuesto(
-    presupuesto_id: str,
+@router.get("/{cotizacion_id}", response_model=ApiResponse[CotizacionOut])
+async def obtener_cotizacion(
+    cotizacion_id: str,
     user: User = Depends(get_current_user),
-) -> ApiResponse[PresupuestoOut]:
+) -> ApiResponse[CotizacionOut]:
     sb = get_supabase()
     res = (
-        sb.table("presupuestos")
-        .select("*, items:presupuesto_items(*)")
+        sb.table("cotizaciones")
+        .select("*, items:cotizacion_items(*)")
         .eq("user_id", user.id)
-        .eq("id", presupuesto_id)
+        .eq("id", cotizacion_id)
         .execute()
     )
     if not res.data:
-        raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
     row = res.data[0]
     return ApiResponse(data=_row_to_out(row, row.get("items") or []))
 
 
-@router.post("", response_model=ApiResponse[PresupuestoOut], status_code=201)
-async def crear_presupuesto(
-    data: PresupuestoIn,
+@router.post("", response_model=ApiResponse[CotizacionOut], status_code=201)
+async def crear_cotizacion(
+    data: CotizacionIn,
     user: User = Depends(get_current_user),
-) -> ApiResponse[PresupuestoOut]:
+) -> ApiResponse[CotizacionOut]:
     sb = get_supabase()
     try:
         res = (
-            sb.table("presupuestos")
+            sb.table("cotizaciones")
             .insert({
                 "user_id": user.id,
                 "client_name": data.clientName,
@@ -103,10 +103,10 @@ async def crear_presupuesto(
         items_rows: list[dict] = []
         if data.items:
             items_res = (
-                sb.table("presupuesto_items")
+                sb.table("cotizacion_items")
                 .insert([
                     {
-                        "presupuesto_id": row["id"],
+                        "cotizacion_id": row["id"],
                         "svc_id": it.svcId,
                         "cat_label": it.catLabel,
                         "svc_label": it.svcLabel,
@@ -126,12 +126,12 @@ async def crear_presupuesto(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"No se pudo crear el presupuesto: {e}")
+        raise HTTPException(status_code=400, detail=f"No se pudo crear la cotización: {e}")
 
 
-@router.patch("/{presupuesto_id}/estado", response_model=ApiResponse[dict])
+@router.patch("/{cotizacion_id}/estado", response_model=ApiResponse[dict])
 async def actualizar_estado(
-    presupuesto_id: str,
+    cotizacion_id: str,
     body: dict,
     user: User = Depends(get_current_user),
 ) -> ApiResponse[dict]:
@@ -140,30 +140,30 @@ async def actualizar_estado(
         raise HTTPException(status_code=400, detail="Estado inválido")
     sb = get_supabase()
     res = (
-        sb.table("presupuestos")
+        sb.table("cotizaciones")
         .update({"status": status})
         .eq("user_id", user.id)
-        .eq("id", presupuesto_id)
+        .eq("id", cotizacion_id)
         .execute()
     )
     if not res.data:
-        raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
-    return ApiResponse(data={"id": presupuesto_id, "status": status})
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    return ApiResponse(data={"id": cotizacion_id, "status": status})
 
 
-@router.delete("/{presupuesto_id}", response_model=ApiResponse[dict])
-async def eliminar_presupuesto(
-    presupuesto_id: str,
+@router.delete("/{cotizacion_id}", response_model=ApiResponse[dict])
+async def eliminar_cotizacion(
+    cotizacion_id: str,
     user: User = Depends(get_current_user),
 ) -> ApiResponse[dict]:
     sb = get_supabase()
     res = (
-        sb.table("presupuestos")
+        sb.table("cotizaciones")
         .delete()
         .eq("user_id", user.id)
-        .eq("id", presupuesto_id)
+        .eq("id", cotizacion_id)
         .execute()
     )
     if not res.data:
-        raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
-    return ApiResponse(data={"id": presupuesto_id, "eliminado": True})
+        raise HTTPException(status_code=404, detail="Cotización no encontrada")
+    return ApiResponse(data={"id": cotizacion_id, "eliminado": True})

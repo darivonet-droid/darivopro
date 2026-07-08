@@ -49,7 +49,7 @@ export async function fetchAdminDashboard() {
     admin.from("perfiles").select("id, plan_tipo, onboarding_done, created_at"),
     admin.from("facturas").select("total_final, inv_status, created_at").gte("created_at", isoMes),
     admin
-      .from("presupuestos")
+      .from("cotizaciones")
       .select("client_name, total_final, status, created_at")
       .order("created_at", { ascending: false })
       .limit(5),

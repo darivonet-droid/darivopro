@@ -3,7 +3,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.v1 import presupuestos, facturas, clientes, catalogo, pdf, whatsapp
+from api.v1 import cotizaciones, facturas, clientes, catalogo, pdf, whatsapp
 from config.settings import settings
 
 app = FastAPI(
@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 # Routers
-app.include_router(presupuestos.router, prefix="/api/v1/presupuestos", tags=["presupuestos"])
+app.include_router(cotizaciones.router, prefix="/api/v1/cotizaciones", tags=["cotizaciones"])
 app.include_router(facturas.router,     prefix="/api/v1/facturas",     tags=["facturas"])
 app.include_router(clientes.router,     prefix="/api/v1/clientes",     tags=["clientes"])
 app.include_router(catalogo.router,     prefix="/api/v1/catalogo",     tags=["catalogo"])
