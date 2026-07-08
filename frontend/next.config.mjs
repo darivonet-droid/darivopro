@@ -11,7 +11,7 @@ const withPWA = withPWAInit({
     disableDevLogs: true,
     runtimeCaching: [
       {
-        urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(presupuestos|facturas|clientes).*/i,
+        urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(cotizaciones|facturas|clientes).*/i,
         handler: "NetworkFirst",
         options: {
           cacheName: "darivo-listas",
