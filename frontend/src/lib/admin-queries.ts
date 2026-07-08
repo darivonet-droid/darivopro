@@ -165,3 +165,47 @@ export async function fetchAdminCatalogo() {
 
   return { data: { productos: productos ?? [], categorias: categorias ?? [] } };
 }
+
+/**
+ * Productos oficiales del ecosistema (Módulo Admin 05 — Edición de Productos).
+ * Esquema real de `productos_master` (baseline_v2 §productos_master): id, slug,
+ * nombre, descripcion, activo, created_at. NO existen `orden` ni `updated_at`.
+ * `categorias` = nº de categorías del Catálogo Maestro asociadas vía producto_id.
+ */
+export type AdminProductoRow = {
+  id: string;
+  slug: string;
+  nombre: string;
+  descripcion: string | null;
+  activo: boolean;
+  created_at: string;
+  categorias: number;
+};
+
+export async function fetchAdminProductos(): Promise<
+  { data: AdminProductoRow[] } | { error: string }
+> {
+  const admin = adminClientOrNull();
+  if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+
+  const { data, error } = await admin
+    .from("productos_master")
+    .select("id, slug, nombre, descripcion, activo, created_at, catalogo_categorias_maestro(count)")
+    .order("nombre");
+
+  if (error) return { error: error.message };
+
+  const productos: AdminProductoRow[] = (data ?? []).map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    nombre: p.nombre,
+    descripcion: p.descripcion ?? null,
+    activo: p.activo,
+    created_at: p.created_at,
+    categorias: Array.isArray(p.catalogo_categorias_maestro)
+      ? (p.catalogo_categorias_maestro[0]?.count ?? 0)
+      : 0,
+  }));
+
+  return { data: productos };
+}
