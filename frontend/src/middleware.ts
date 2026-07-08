@@ -17,7 +17,42 @@ const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena"
 // /nueva-contrasena: el usuario llega con sesión de recuperación — no redirigir al dashboard
 const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar"];
 
+// ── Enrutado por subdominio (PREPARADO, DESACTIVADO por defecto) ──────────────
+// Mapea cada subdominio real de producción a la sección raíz de su panel.
+// Se activa SOLO cuando SUBDOMAIN_ROUTING_ENABLED === "1" (ver .env.example).
+// En localhost/desarrollo y en el apex (darivopro.com) es un no-op total:
+// los hostnames aquí terminan en ".darivopro.com", que no ocurre en local.
+// No tocar next.config.mjs ni vercel.json hasta conectar el dominio en Vercel.
+const SUBDOMINIOS: Record<string, string> = {
+  app: "/dashboard", // Darivo Pro Móvil
+  empresa: "/empresa", // Darivo Pro Empresa
+  admin: "/admin", // Darivo Pro Admin
+  partner: "/partner", // Panel Partner
+};
+
+/** Devuelve la sección base del subdominio *.darivopro.com, o null si no aplica. */
+function baseDeSubdominio(host: string | null): string | null {
+  if (!host) return null;
+  const h = host.split(":")[0].toLowerCase();
+  const sufijo = ".darivopro.com";
+  if (!h.endsWith(sufijo)) return null; // apex, localhost, IPs → no aplica
+  const sub = h.slice(0, -sufijo.length);
+  return SUBDOMINIOS[sub] ?? null;
+}
+
 export async function middleware(req: NextRequest) {
+  // Rewrite por hostname: solo la raíz "/" del subdominio se reescribe a la
+  // sección del panel; el resto de rutas ya usan paths absolutos y pasan igual.
+  // La protección de auth de más abajo se aplica luego en la navegación normal.
+  if (process.env.SUBDOMAIN_ROUTING_ENABLED === "1") {
+    const base = baseDeSubdominio(req.headers.get("host"));
+    if (base && req.nextUrl.pathname === "/") {
+      const url = req.nextUrl.clone();
+      url.pathname = base;
+      return NextResponse.rewrite(url);
+    }
+  }
+
   let res = NextResponse.next({ request: req });
 
   const supabase = createServerClient(
