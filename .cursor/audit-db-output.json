@@ -1,7 +1,0 @@
-﻿node : BLOCKED: Falta SUPABASE_DB_PASSWORD en supabase/.env o en variables de entorno.
-En C:\Users\yatri\AppData\Local\Temp\ps-script-46f21189-be88-4a07-9f05-d2de6cbfb3e2.ps1: 107 Carácter: 73
-+ ... arivo-saas"; node scripts/schema-introspect-readonly.mjs 2>&1 | Out-F ...
-+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (BLOCKED: Falta ...les de entorno.:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
