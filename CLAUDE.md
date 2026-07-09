@@ -62,8 +62,8 @@ Estos documentos tienen protección explícita ("solo el propietario puede modif
 ## Tareas de código pendientes conocidas (06/07/2026)
 
 - Tarea 3: Módulo Admin 05 — Edición de Productos (MD listo, código no empezado).
-- Tarea 5: Middleware de subdominios (app./empresa./admin./partner.darivopro.com) — preparar, no activar hasta conectar dominio.
-- Migración completa de terminología presupuesto→cotización en BD (tablas `presupuestos`, `presupuesto_items`), tipos TS (`interface Presupuesto`) y `components/presupuesto/`.
+- Tarea 5: Middleware de subdominios (app./empresa./admin./partner.darivopro.com) — preparar, no activar hasta conectar dominio. ✅ Auditoría 09/07/2026 confirma que sigue correctamente apagado (los 4 subdominios ni siquiera resuelven en DNS) — no tocar todavía.
+- ~~Migración completa de terminología presupuesto→cotización en BD~~ ✅ **Confirmado COMPLETO por auditoría 09/07/2026** (migraciones, rutas, tipos, caché PWA) — no repetir este trabajo.
 
 ## Lo que NO existe en este producto (para no reinventarlo)
 
@@ -111,6 +111,49 @@ Hasta el 06/07/2026, el trabajo de código se hizo con Cursor (Composer 2.5). A 
 
 **Pendiente de verificar por Claude Code al empezar** (Cursor lo hizo pero no se auditó a fondo): la migración de terminología presupuesto→cotización en rutas de página/API (commits `6f19ea5`, `3538514`, `a897249`) — confirmar que quedó bien antes de continuar con el Día 1.
 
+## Estado de remediación — Auditoría 09/07/2026 (leer antes de continuar)
+
+Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificación directa en producción) comparando MD ↔ BD ↔ código ↔ producción. Nada se modificó en esa sesión. Esta sección es el registro vivo de esos hallazgos — se marca cada punto aquí mismo al corregirlo, no se crean informes nuevos.
+
+**Regla de trabajo:** un punto a la vez, en el orden de abajo. Para cada uno: releer el archivo:línea citado → aplicar el cambio mínimo → verificar en vivo/local que el síntoma desaparece → marcar `[x]` aquí.
+
+### Prioridad 1 — Crítico (páginas públicas / venta)
+
+- [ ] **Plan Business ausente en `/precios`.** `frontend/src/lib/planes.ts:24-61` solo tiene Básico y Pro; `roles-planes-oficial.ts` sí tiene los 3. Metadata de la página dice *"Planes Básico y Pro"*. Sincronizar `planes.ts` con `roles-planes-oficial.ts` (fuente de verdad) y corregir metadata. *(Esto es lo mismo que el punto 3 del plan de mañana — al llegar ahí, usar esta descripción exacta, el bug sigue activo.)*
+- [ ] **"IA" visible al usuario en 16 archivos (31 apariciones)**, cuando la regla de negocio exige "Calculadora inteligente" (o el término aprobado). **Antes de tocar código:** confirmar con Mohamed si la regla es solo de landing (como dice `LANDING-PAGE-DARIVO-PRO.md` v1.3) o global de producto — si es global, los MD internos (`08-MODULO-IA.md`, etc.) también hay que renombrarlos.
+  - `components/ui/BottomNav.tsx:53` (botón central) · `(auth)/ia/page.tsx:9` (título)
+  - `components/cotizacion/IACotizacionFlow.tsx:107,123,128,189,253` (copys/toasts) — ojo: línea 94 persiste "Notas IA:" en la cotización, decidir si el dato guardado también cambia
+  - `lib/planes.ts:35,53` ("IA por voz", "IA texto + voz 🎤") · `components/plan/UpgradeModal.tsx:10` · `lib/plan-limits.ts:31-32`
+  - `components/mas/MasOpcionesList.tsx:49-50` ("IA — Preferencias") + pantalla de preferencias del asistente
+  - `CierreView.tsx:131,412` · label de navegación en Empresa · "IA cotizaciones/día" en Admin
+  - Casos límite a decidir explícitamente (no corregir sin decisión): rutas URL `/ia`, `/empresa/ia`, `/mas/ia-preferencias` — renombrar puede romper bookmarks, evaluar redirect 301.
+
+### Prioridad 2 — Incumplimiento de MD / bug funcional
+
+- [ ] **Bug de facturación:** `verificarLimiteFactura` (`lib/plan-limits.ts:106`) permite facturas al plan `gratis` pese a que `LIMITES_PLAN.gratis.facturasHabilitado = false`. Corregir la lógica para que respete el flag.
+- [ ] **Logout ausente en Admin/Empresa/Partner** — solo tienen "← Volver a Móvil", pese a que el MD de Admin lo exige explícitamente en §Sesión y §Panel lateral. Añadir botón real reutilizando `cerrarSesion` de `AjustesForm.tsx:53-57` en los 3 paneles.
+- [ ] **Logout enterrado en Móvil** — existe en `AjustesForm.tsx:141-147` pero solo dentro de Más → pestaña "Empresa" (3ª pestaña, con scroll); el menú principal `MasOpcionesList.tsx` (7 items) no tiene ninguno. Añadir botón al final de `MasOpcionesList.tsx` (mismo estilo de fila, reutilizando `cerrarSesion`). Actualizar la ubicación en el MD de autenticación si cambia.
+
+### Prioridad 3 — Contradicciones de precio/nombre entre MD
+
+- [ ] **Precio Básico: S/39 vs S/49.** Un MD de roles/permisos dice S/39; `04-PANEL-ADMIN-SUSCRIPCIONES.md` y el código dicen S/49. Unificar a S/49 (el que está en código) en el MD que lo tenga mal.
+- [ ] **Nombre del 3er plan inconsistente dentro del mismo MD** — aparece como "Empresa" (cabecera), "Business" (cuerpo) y "empresa=legacy no comercial" en otra sección. BD y código usan `business`. Unificar a "Business" en todo ese documento.
+
+### Prioridad 4 — Documentación desactualizada (no bloquea producto)
+
+- [ ] `00-ECOSISTEMA-DARIVO-PRO.md` usa dominio obsoleto `darivo.net` y menciona producto "Multiempresa" (no existe en ningún otro sitio); no menciona Partner. Actualizar a `darivopro.com`, quitar "Multiempresa", añadir Partner. Corregir también la referencia rota a `01-VISION-DEL-PRODUCTO.md` (nombre de archivo incorrecto).
+- [ ] `02-BASE-DATOS.md` desactualizado: sigue documentando `presupuestos`/`presupuesto_items` (ya renombradas — ver arriba, esto sí está resuelto en código, falta reflejarlo en el MD); documenta columnas `perfiles.categorias` y `productos_master.orden/updated_at` que no existen; no documenta la tabla `roles_personalizados` ni ~8 tablas más. Regenerar el esquema documentado desde la BD real (33 tablas).
+- [ ] Versionados internos inconsistentes (ARQUITECTURA-MAESTRA con v2.9 en cabecera y v3.4 en §12, etc.) y referencias a docs eliminados en la Tarea 0 (22-25) o inexistentes (`04-SIMBOLOS-Y-BOTONES.md`). Bajo esfuerzo, limpiar cuando se toquen esos archivos por otra razón.
+- [ ] "Referidos" vs "Partners": Visión ya lo cerró (es "Partners"), pero ARQUITECTURA §11.4 lo presenta como "decisión abierta". Cerrar esa sección alineada con Visión.
+
+### Prioridad 5 — Deuda conocida, no urgente (requiere decisión de negocio)
+
+- [ ] La jerarquía "Suscripción → Producto → Rol → Permisos" solo está implementada hasta la mitad: Producto se gatea por allowlist de emails en env vars (no por tabla `suscripciones`); Rol → Permisos → Funcionalidades no gatea nada (`MATRIZ_PERMISOS_APROBADA = false`, RBAC administrable pero inerte). Esto ya está documentado como pendiente (DT-04-02) en el MD de roles — **no es una sorpresa**. Acción mínima ahora: corregir ARQUITECTURA-MAESTRA §4.6, que la presenta como "secuencia vigente" cuando no lo está. Decisión de activarla de verdad: pendiente de Mohamed, no hacerlo sin confirmación.
+
+### Verificado como coherente en la auditoría — no tocar
+
+Migraciones de terminología cotización (completo) · `roles-planes-oficial.ts` ↔ `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 · Middleware de subdominios (correctamente apagado) · Landing v1.3 ↔ MD v1.3 · los 3 botones del header · RLS activo en todas las tablas de usuario.
+
 ## Plan de trabajo — MAÑANA (todo excepto SUNAT)
 
 SUNAT queda para **pasado mañana**, cuando el dominio y `info@darivopro.com` estén operativos y se pueda enviar el correo a Bizlinks. No lo toques mañana.
@@ -133,7 +176,7 @@ Orden de prioridad para mañana (de mayor a menor riesgo — hazlo en este orden
 
 ### 3. Precios (`/precios`) — actualizar a 3 planes
 
-Cambiar metadata y contenido de "Planes Básico y Pro" a los 3 planes oficiales (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 — precios marcados como provisionales).
+Cambiar metadata y contenido de "Planes Básico y Pro" a los 3 planes oficiales (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 — precios marcados como provisionales). Ver detalle exacto de archivo:línea en "Estado de remediación — Auditoría 09/07/2026" → Prioridad 1. Al terminar, marcar ese checkbox también, no solo tachar esto de la lista de mañana.
 
 ### 4. Módulo Admin 05 (Edición de Productos)
 
