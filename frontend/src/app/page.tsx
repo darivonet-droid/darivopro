@@ -1,9 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
   IconList,
   IconSparkle,
   IconWhatsapp,
+  IconMail,
   IconClock,
   IconCalculator,
   IconDocument,
@@ -50,11 +52,13 @@ const PASOS = [
   },
 ];
 
+// Fotos de stock (Pexels, licencia libre) — fuentes y autores en
+// public/landing/CREDITOS-IMAGENES.md
 const CATEGORIAS = [
-  { icon: IconHelmet, nombre: "Construcción", texto: "Albañilería, estructuras, acabados y mucho más." },
-  { icon: IconWrench, nombre: "Fontanería", texto: "Instalaciones de agua, desagüe, gas y sanitarios." },
-  { icon: IconRoller, nombre: "Pintura", texto: "Pintura interior, exterior, empastes y acabados." },
-  { icon: IconBolt, nombre: "Electricidad", texto: "Instalaciones, circuitos, tableros y más." },
+  { icon: IconHelmet, nombre: "Construcción", texto: "Albañilería, estructuras, acabados y mucho más.", foto: "/landing/categoria-construccion.jpg" },
+  { icon: IconWrench, nombre: "Fontanería", texto: "Instalaciones de agua, desagüe, gas y sanitarios.", foto: "/landing/categoria-fontaneria.jpg" },
+  { icon: IconRoller, nombre: "Pintura", texto: "Pintura interior, exterior, empastes y acabados.", foto: "/landing/categoria-pintura.jpg" },
+  { icon: IconBolt, nombre: "Electricidad", texto: "Instalaciones, circuitos, tableros y más.", foto: "/landing/categoria-electricidad.jpg" },
 ];
 
 const FEATURES = [
@@ -65,20 +69,6 @@ const FEATURES = [
   { icon: IconShieldCloud, titulo: "Seguro y en la nube", texto: "Tus datos y documentos siempre protegidos." },
 ];
 
-function FotoPendiente({ label, className }: { label: string; className?: string }) {
-  // Placeholder visual — reemplazar por foto real cuando esté disponible.
-  // No usar el archivo frontend/public/logo-darivo-pro.png: está corrupto (es un
-  // HTML de WhatsApp Web guardado con extensión .png), no es una imagen.
-  return (
-    <div
-      className={`flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 text-center text-xs font-semibold text-slate-500 ${className ?? ""}`}
-    >
-      Foto pendiente
-      <br />
-      {label}
-    </div>
-  );
-}
 
 export default function LandingPage() {
   return (
@@ -163,9 +153,14 @@ export default function LandingPage() {
 
           {/* Mockup */}
           <div className="relative mx-auto w-full max-w-sm">
-            <FotoPendiente
-              label="maestro de obra con celular"
-              className="absolute -right-4 bottom-0 hidden h-72 w-56 rounded-3xl sm:flex"
+            {/* Foto: Pexels 33477104 (Mahsum Oğrak) — trabajador sonriente con celular en
+                obra. Desviación del brief: sin casco (ver CREDITOS-IMAGENES.md). */}
+            <Image
+              src="/landing/hero-maestro.jpg"
+              alt="Trabajador de construcción sonriendo con su celular en obra"
+              width={448}
+              height={288}
+              className="absolute -right-4 bottom-0 hidden h-72 w-56 rounded-3xl object-cover shadow-xl sm:block"
             />
 
             {/* Marco del teléfono — mockup ilustrativo, no captura real de la app */}
@@ -291,7 +286,13 @@ export default function LandingPage() {
             {CATEGORIAS.map((cat) => (
               <div key={cat.nombre} className="text-left">
                 <div className="relative">
-                  <FotoPendiente label={cat.nombre.toLowerCase()} className="aspect-square w-full rounded-2xl" />
+                  <Image
+                    src={cat.foto}
+                    alt={`${cat.nombre} — ${cat.texto}`}
+                    width={400}
+                    height={400}
+                    className="aspect-square w-full rounded-2xl object-cover"
+                  />
                   <span
                     className="absolute -bottom-3 left-3 flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-lg"
                     style={{ background: BLUE }}
@@ -367,12 +368,11 @@ export default function LandingPage() {
           </div>
 
           <div>
-            {/* Sin número de WhatsApp real todavía — el único canal de contacto
-                confirmado hoy es hola@darivo.pro (ver (public)/contacto/page.tsx).
-                Reemplazar este enlace por wa.me/<numero real> cuando exista. */}
-            <a href="/contacto" className="flex items-center gap-2 text-sm font-semibold">
-              <IconWhatsapp />
-              Escríbenos
+            {/* Sin número de WhatsApp real todavía — reemplazar por wa.me/<numero real>
+                cuando exista. Correo oficial confirmado por el propietario: info@darivopro.com */}
+            <a href="mailto:info@darivopro.com" className="flex items-center gap-2 text-sm font-semibold">
+              <IconMail />
+              info@darivopro.com
             </a>
             <p className="mt-2 text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
               Lun - Vie: 8:00 am - 6:00 pm

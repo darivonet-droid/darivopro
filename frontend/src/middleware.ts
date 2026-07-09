@@ -110,5 +110,9 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  // `.*\\..*` excluye archivos estáticos de public/ (imágenes, manifest.json,
+  // sw.js, icons/…): sin esta exclusión, un visitante anónimo recibía
+  // 307 → /login hasta para un .jpg, y el optimizador de next/image
+  // devolvía 400 al recibir HTML en lugar de la imagen.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/|.*\\..*).*)"],
 };
