@@ -58,7 +58,7 @@ export async function fetchAdminDashboard() {
   const rows = perfiles ?? [];
   const usuariosActivos = rows.filter((p) => p.onboarding_done).length;
   const suscripcionesActivas = rows.filter(
-    (p) => p.plan_tipo === "basico" || p.plan_tipo === "pro"
+    (p) => p.plan_tipo === "basico" || p.plan_tipo === "pro" || p.plan_tipo === "business"
   ).length;
   const nuevosRegistros = rows.filter((p) => new Date(p.created_at) >= inicioMes).length;
   const ingresosMes = (facturasMes ?? [])
@@ -81,10 +81,80 @@ export async function fetchAdminDashboard() {
       distribucion: {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
         pro: rows.filter((p) => p.plan_tipo === "pro").length,
+        business: rows.filter((p) => p.plan_tipo === "business").length,
         gratis: rows.filter((p) => !p.plan_tipo || p.plan_tipo === "gratis").length,
       },
     },
   };
+}
+
+/**
+ * Empresas — Panel Admin (Módulo 02, `02-PANEL-ADMIN-EMPRESAS.md`).
+ * Fuente principal: tabla `empresas` (baseline_v2). Se hace JOIN con `perfiles`
+ * (por `gerente_user_id` = `perfiles.id`) solo para exponer plan y estado de
+ * onboarding, y con `auth.users` para el email de contacto — `empresas` no
+ * almacena plan ni email directamente.
+ */
+export type AdminEmpresaRow = {
+  id: string;
+  gerente_user_id: string;
+  razon_social: string;
+  ruc: string | null;
+  direccion: string | null;
+  telefono: string | null;
+  created_at: string;
+  plan_tipo: string | null;
+  /** Reutiliza `perfiles.onboarding_done` como proxy de activación de cuenta:
+   *  no existe columna `activo`/`suspendida` en el esquema real — crear una
+   *  requeriría una migración de BD, fuera del alcance de este cambio.
+   *  Desactivar pone `onboarding_done = false`, lo que ya bloquea el acceso
+   *  de la empresa a la app (ver `empresa/layout.tsx`). */
+  activa: boolean;
+  email: string;
+};
+
+export async function fetchAdminEmpresas(): Promise<
+  { data: AdminEmpresaRow[] } | { error: string }
+> {
+  const admin = adminClientOrNull();
+  if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+
+  const { data: empresas, error } = await admin
+    .from("empresas")
+    .select("id, gerente_user_id, razon_social, ruc, direccion, telefono, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) return { error: error.message };
+
+  const gerenteIds = (empresas ?? []).map((e) => e.gerente_user_id);
+
+  const [{ data: perfiles }, { data: authData }] = await Promise.all([
+    gerenteIds.length
+      ? admin.from("perfiles").select("id, plan_tipo, onboarding_done").in("id", gerenteIds)
+      : Promise.resolve({ data: [] as Array<{ id: string; plan_tipo: string | null; onboarding_done: boolean | null }> }),
+    admin.auth.admin.listUsers({ perPage: 200 }),
+  ]);
+
+  const perfilById = new Map((perfiles ?? []).map((p) => [p.id, p]));
+  const emailById = new Map((authData?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+
+  const data: AdminEmpresaRow[] = (empresas ?? []).map((e) => {
+    const perfil = perfilById.get(e.gerente_user_id);
+    return {
+      id: e.id,
+      gerente_user_id: e.gerente_user_id,
+      razon_social: e.razon_social,
+      ruc: e.ruc,
+      direccion: e.direccion,
+      telefono: e.telefono,
+      created_at: e.created_at,
+      plan_tipo: perfil?.plan_tipo ?? null,
+      activa: perfil?.onboarding_done ?? false,
+      email: emailById.get(e.gerente_user_id) ?? "",
+    };
+  });
+
+  return { data };
 }
 
 export async function fetchAdminUsuarios(): Promise<

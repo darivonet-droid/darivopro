@@ -49,6 +49,7 @@ export default async function AdminDashboardPage() {
           <ul className="mt-3 space-y-2 text-sm" style={{ color: T.textMid }}>
             <li>Básico: {d.distribucion.basico}</li>
             <li>Pro: {d.distribucion.pro}</li>
+            <li>Business: {d.distribucion.business}</li>
             <li>Gratis / sin plan: {d.distribucion.gratis}</li>
           </ul>
         </div>
