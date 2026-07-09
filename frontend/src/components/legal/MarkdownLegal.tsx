@@ -4,15 +4,45 @@ import { Fragment, type ReactNode } from "react";
 /**
  * Renderer Markdown mínimo y fiel para los documentos legales (Términos,
  * Privacidad). Soporta lo que esos MD usan: encabezados #/##/###, negrita **,
- * listas *, tablas GitHub, y reglas ---. No interpreta enlaces [texto](url),
- * por lo que los corchetes de marcador [pendiente] se muestran tal cual.
+ * itálica *, código en línea `x`, listas *, tablas GitHub, y reglas ---.
+ * No interpreta enlaces [texto](url) — es intencional: los corchetes de
+ * marcador [pendiente] deben seguir visibles tal cual hasta revisión legal
+ * (ver comentario en terminos/privacidad page.tsx).
  */
 
-// Negrita **x** → <strong>; el resto es texto literal (corchetes incluidos).
+// Negrita **x**, itálica *x*, código `x` → nodos React; recursivo para
+// permitir anidamiento (p. ej. `código` dentro de **negrita**).
 function inline(texto: string, keyBase: string): ReactNode[] {
-  return texto.split("**").map((parte, i) =>
-    i % 2 === 1 ? <strong key={`${keyBase}-b${i}`}>{parte}</strong> : <Fragment key={`${keyBase}-t${i}`}>{parte}</Fragment>
-  );
+  const nodos: ReactNode[] = [];
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|`([^`]+?)`/g;
+  let cursor = 0;
+  let key = 0;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(texto))) {
+    if (m.index > cursor) {
+      nodos.push(<Fragment key={`${keyBase}-t${key++}`}>{texto.slice(cursor, m.index)}</Fragment>);
+    }
+    if (m[1] !== undefined) {
+      nodos.push(<strong key={`${keyBase}-b${key}`}>{inline(m[1], `${keyBase}-b${key++}`)}</strong>);
+    } else if (m[2] !== undefined) {
+      nodos.push(<em key={`${keyBase}-i${key}`}>{inline(m[2], `${keyBase}-i${key++}`)}</em>);
+    } else if (m[3] !== undefined) {
+      nodos.push(
+        <code
+          key={`${keyBase}-c${key++}`}
+          className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.85em]"
+          style={{ color: T.text }}
+        >
+          {m[3]}
+        </code>
+      );
+    }
+    cursor = regex.lastIndex;
+  }
+  if (cursor < texto.length) {
+    nodos.push(<Fragment key={`${keyBase}-t${key++}`}>{texto.slice(cursor)}</Fragment>);
+  }
+  return nodos;
 }
 
 export function MarkdownLegal({ source }: { source: string }) {
