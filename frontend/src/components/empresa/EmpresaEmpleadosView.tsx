@@ -5,66 +5,79 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminBadge } from "@/components/admin/AdminTabs";
 import { T } from "@/lib/design-system/tokens";
 import {
-  empleadosStorageKey,
+  actualizarEstadoEmpleado,
+  crearEmpleadoEmpresa,
+  listarEmpleadosEmpresa,
   type EmpleadoEmpresa,
   type EstadoEmpleadoEmpresa,
 } from "@/lib/empresa-empleados-types";
+import { obtenerEmpresaIdGerente } from "@/lib/roles-personalizados";
 import { createClient } from "@/lib/supabase/client";
 
 export function EmpresaEmpleadosView() {
   const [empleados, setEmpleados] = useState<EmpleadoEmpresa[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(true);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
   const [buscar, setBuscar] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [errorForm, setErrorForm] = useState<string | null>(null);
 
-  const cargar = useCallback(async (uid: string) => {
+  const cargar = useCallback(async (eid: string) => {
     try {
-      const raw = localStorage.getItem(empleadosStorageKey(uid));
-      setEmpleados(raw ? (JSON.parse(raw) as EmpleadoEmpresa[]) : []);
+      const supabase = createClient();
+      const lista = await listarEmpleadosEmpresa(supabase, eid);
+      setEmpleados(lista);
     } catch {
       setEmpleados([]);
+    } finally {
+      setCargando(false);
     }
   }, []);
 
   useEffect(() => {
     const supabase = createClient();
-    void supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUserId(data.user.id);
-        void cargar(data.user.id);
+    void obtenerEmpresaIdGerente(supabase).then((eid) => {
+      setEmpresaId(eid);
+      if (eid) {
+        void cargar(eid);
+      } else {
+        setCargando(false);
       }
     });
   }, [cargar]);
 
-  const guardar = (list: EmpleadoEmpresa[]) => {
-    if (!userId) return;
-    localStorage.setItem(empleadosStorageKey(userId), JSON.stringify(list));
-    setEmpleados(list);
+  const invitar = async () => {
+    if (!nombre.trim() || !email.trim() || !empresaId) return;
+    setGuardando(true);
+    setErrorForm(null);
+    try {
+      const supabase = createClient();
+      await crearEmpleadoEmpresa(supabase, empresaId, {
+        nombre: nombre.trim(),
+        email: email.trim(),
+        telefono: telefono.trim() || undefined,
+      });
+      setNombre("");
+      setEmail("");
+      setTelefono("");
+      setMostrarForm(false);
+      void cargar(empresaId);
+    } catch (e) {
+      setErrorForm(e instanceof Error ? e.message : "No se pudo guardar el empleado.");
+    } finally {
+      setGuardando(false);
+    }
   };
 
-  const invitar = () => {
-    if (!nombre.trim() || !email.trim()) return;
-    const nuevo: EmpleadoEmpresa = {
-      id: crypto.randomUUID(),
-      nombre: nombre.trim(),
-      email: email.trim(),
-      telefono: telefono.trim() || undefined,
-      rol: "Técnico",
-      estado: "Invitación pendiente",
-      createdAt: new Date().toISOString(),
-    };
-    guardar([nuevo, ...empleados]);
-    setNombre("");
-    setEmail("");
-    setTelefono("");
-    setMostrarForm(false);
-  };
-
-  const cambiarEstado = (id: string, estado: EstadoEmpleadoEmpresa) => {
-    guardar(empleados.map((e) => (e.id === id ? { ...e, estado } : e)));
+  const cambiarEstado = async (id: string, estado: EstadoEmpleadoEmpresa) => {
+    if (!empresaId) return;
+    const supabase = createClient();
+    await actualizarEstadoEmpleado(supabase, id, estado);
+    void cargar(empresaId);
   };
 
   const filtrados = empleados.filter((e) => {
@@ -105,6 +118,13 @@ export function EmpresaEmpleadosView() {
         </Link>
       </div>
 
+      {!empresaId && !cargando && (
+        <p className="mb-4 text-sm" style={{ color: T.textMid }}>
+          No se encontró la entidad empresa vinculada a tu cuenta. Completa el onboarding o
+          contacta soporte.
+        </p>
+      )}
+
       {mostrarForm && (
         <div
           className="mb-4 rounded-2xl p-4"
@@ -132,6 +152,11 @@ export function EmpresaEmpleadosView() {
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
             style={{ borderColor: T.slateD }}
           />
+          {errorForm && (
+            <p className="mb-2 text-xs font-semibold" style={{ color: T.red }}>
+              {errorForm}
+            </p>
+          )}
           <div className="flex gap-2">
             <button
               type="button"
@@ -143,20 +168,29 @@ export function EmpresaEmpleadosView() {
             </button>
             <button
               type="button"
-              onClick={invitar}
-              className="flex-[2] rounded-xl py-2 text-sm font-bold text-white"
+              disabled={guardando || !empresaId}
+              onClick={() => void invitar()}
+              className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
               style={{ background: T.blue }}
             >
-              Enviar invitación
+              {guardando ? "Guardando…" : "Enviar invitación"}
             </button>
           </div>
           <p className="mt-2 text-xs" style={{ color: T.textLight }}>
-            Invitación acceso Móvil — tabla empleados BD pendiente (Doc 10 §9).
+            El empleado se crea con estado «Pendiente» y queda disponible como Técnico asignable
+            en Roles y Permisos.
           </p>
         </div>
       )}
 
-      {filtrados.length === 0 ? (
+      {cargando ? (
+        <div
+          className="rounded-2xl py-12 text-center text-sm"
+          style={{ background: T.slate, color: T.textMid }}
+        >
+          Cargando empleados…
+        </div>
+      ) : filtrados.length === 0 ? (
         <div
           className="rounded-2xl py-12 text-center text-sm"
           style={{ background: T.slate, color: T.textMid }}
@@ -192,7 +226,7 @@ export function EmpresaEmpleadosView() {
                       tone={
                         e.estado === "Activo"
                           ? "success"
-                          : e.estado === "Desactivado"
+                          : e.estado === "Inactivo"
                             ? "danger"
                             : "warning"
                       }
@@ -207,16 +241,16 @@ export function EmpresaEmpleadosView() {
                         <button
                           type="button"
                           style={{ color: T.greenD }}
-                          onClick={() => cambiarEstado(e.id, "Activo")}
+                          onClick={() => void cambiarEstado(e.id, "Activo")}
                         >
                           Activar
                         </button>
                       )}
-                      {e.estado !== "Desactivado" && (
+                      {e.estado !== "Inactivo" && (
                         <button
                           type="button"
                           style={{ color: T.red }}
-                          onClick={() => cambiarEstado(e.id, "Desactivado")}
+                          onClick={() => void cambiarEstado(e.id, "Inactivo")}
                         >
                           Desactivar
                         </button>
