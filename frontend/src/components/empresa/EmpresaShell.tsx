@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { EMPRESA_NAV } from "@/lib/empresa-modules";
 import { EMPRESA_LAYOUT } from "@/lib/design-system/empresa-tokens";
 import { T } from "@/lib/design-system/tokens";
+import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 export { EMPRESA_NAV };
 
@@ -52,9 +53,12 @@ export function EmpresaShell({
             );
           })}
         </nav>
-        <Link href="/dashboard" className="mt-auto pt-6 text-xs font-bold" style={{ color: T.textLight }}>
-          ← Volver a Móvil
-        </Link>
+        <div className="mt-auto flex flex-col gap-2 pt-6">
+          <Link href="/dashboard" className="text-xs font-bold" style={{ color: T.textLight }}>
+            ← Volver a Móvil
+          </Link>
+          <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: T.red }} />
+        </div>
       </aside>
       <div className="flex flex-1 flex-col">
         <header

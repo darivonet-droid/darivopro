@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ADMIN_LAYOUT } from "@/lib/design-system/admin-tokens";
 import { T } from "@/lib/design-system/tokens";
+import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 /** Navegación oficial — 00-PANEL-ADMIN-DASHBOARD.md §4 */
 export const ADMIN_NAV = [
@@ -64,13 +65,12 @@ export function AdminShell({
             );
           })}
         </nav>
-        <Link
-          href="/dashboard"
-          className="mt-auto pt-6 text-xs font-bold"
-          style={{ color: T.textLight }}
-        >
-          ← Volver a Móvil
-        </Link>
+        <div className="mt-auto flex flex-col gap-2 pt-6">
+          <Link href="/dashboard" className="text-xs font-bold" style={{ color: T.textLight }}>
+            ← Volver a Móvil
+          </Link>
+          <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: T.red }} />
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

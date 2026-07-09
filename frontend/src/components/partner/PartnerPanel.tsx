@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { T } from "@/lib/design-system/tokens";
+import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 import {
   COMISIONES_OFICIALES_PLACEHOLDER,
   type PartnerRegistro,
@@ -179,9 +180,12 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
         </table>
       </section>
 
-      <Link href="/dashboard" className="text-sm font-bold" style={{ color: T.blue }}>
-        ← Volver a Móvil
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/dashboard" className="text-sm font-bold" style={{ color: T.blue }}>
+          ← Volver a Móvil
+        </Link>
+        <CerrarSesionButton className="text-sm font-bold" style={{ color: T.red }} />
+      </div>
     </div>
   );
 }
