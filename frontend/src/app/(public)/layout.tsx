@@ -40,6 +40,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       </main>
 
       <footer className="px-5 py-3 text-center">
+        <nav className="mb-1.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-semibold">
+          <a href="/contacto" style={{ color: T.textMid }}>Contacto</a>
+          <a href="/terminos" style={{ color: T.textMid }}>Términos</a>
+          <a href="/privacidad" style={{ color: T.textMid }}>Privacidad</a>
+        </nav>
         <p className="text-[10px]" style={{ color: T.textLight }}>
           Build: 22 Jun 2026, 11:30 — Darivo Pro
         </p>

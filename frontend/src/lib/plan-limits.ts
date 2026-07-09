@@ -70,7 +70,7 @@ export async function verificarLimiteCotizacion(
 
   if (plan === "gratis") {
     const { count } = await supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
     if ((count ?? 0) >= LIMITES_PLAN.gratis.cotizacionesTotal) {
@@ -80,7 +80,7 @@ export async function verificarLimiteCotizacion(
   }
 
   const { count } = await supabase
-    .from("presupuestos")
+    .from("cotizaciones")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
     .gte("created_at", inicioMesISO());

@@ -16,10 +16,10 @@ export default async function EmpresaInicioPage() {
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("razon_social, onboarding_done").single(),
-    supabase.from("presupuestos").select("id, status, total_final"),
+    supabase.from("cotizaciones").select("id, status, total_final"),
     supabase
-      .from("presupuestos")
-      .select("id, status, total_final, client_name, created_at, presupuesto_items(count)")
+      .from("cotizaciones")
+      .select("id, status, total_final, client_name, created_at, cotizacion_items(count)")
       .order("created_at", { ascending: false })
       .limit(4),
   ]);
@@ -43,7 +43,7 @@ export default async function EmpresaInicioPage() {
     status: p.status,
     created_at: p.created_at,
     itemCount:
-      (p as { presupuesto_items?: { count: number }[] }).presupuesto_items?.[0]?.count ?? 0,
+      (p as { cotizacion_items?: { count: number }[] }).cotizacion_items?.[0]?.count ?? 0,
   }));
 
   return (

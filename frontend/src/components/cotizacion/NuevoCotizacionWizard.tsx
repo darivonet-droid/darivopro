@@ -237,8 +237,8 @@ export function NuevoCotizacionWizard() {
     // Helper: cargar cotizacion en el wizard (usado por ?from= y ?editar=)
     const cargarCotizacion = async (id: string, esEdicion: boolean) => {
       const { data } = await supabase
-        .from("presupuestos")
-        .select("*, items:presupuesto_items(*)")
+        .from("cotizaciones")
+        .select("*, items:cotizacion_items(*)")
         .eq("id", id)
         .single();
       if (!data) return;

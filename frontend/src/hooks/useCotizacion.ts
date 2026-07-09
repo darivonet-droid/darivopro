@@ -116,8 +116,8 @@ export function useCotizacion() {
   const listar = useCallback(async (): Promise<Cotizacion[]> => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("presupuestos")
-      .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
+      .from("cotizaciones")
+      .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) { setError(error.message); return []; }
@@ -145,7 +145,7 @@ export function useCotizacion() {
     const clienteId = await findOrCreateCliente(user.id, cotizacion.clientName, cotizacion.phone);
 
     const { data, error } = await supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .insert({
         user_id: user.id,
         cliente_id: clienteId,
@@ -165,9 +165,9 @@ export function useCotizacion() {
     if (error || !data) { setLoading(false); setError(error?.message ?? "Error"); return null; }
 
     if (cotizacion.items.length > 0) {
-      const { error: itemsError } = await supabase.from("presupuesto_items").insert(
+      const { error: itemsError } = await supabase.from("cotizacion_items").insert(
         cotizacion.items.map((it) => ({
-          presupuesto_id: data.id,
+          cotizacion_id: data.id,
           svc_id: it.svcId,
           cat_label: it.catLabel,
           svc_label: it.svcLabel,
@@ -204,7 +204,7 @@ export function useCotizacion() {
       : null;
 
     const { error: updErr } = await supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .update({
         ...(clienteId ? { cliente_id: clienteId } : {}),
         client_name: cotizacion.clientName,
@@ -222,12 +222,12 @@ export function useCotizacion() {
 
     if (updErr) { setLoading(false); setError(updErr.message); return null; }
 
-    await supabase.from("presupuesto_items").delete().eq("presupuesto_id", id);
+    await supabase.from("cotizacion_items").delete().eq("cotizacion_id", id);
 
     if (cotizacion.items.length > 0) {
-      const { error: itemsErr } = await supabase.from("presupuesto_items").insert(
+      const { error: itemsErr } = await supabase.from("cotizacion_items").insert(
         cotizacion.items.map((it) => ({
-          presupuesto_id: id,
+          cotizacion_id: id,
           svc_id:     it.svcId,
           cat_label:  it.catLabel,
           svc_label:  it.svcLabel,
@@ -243,7 +243,7 @@ export function useCotizacion() {
     }
 
     const { data } = await supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url")
       .eq("id", id)
       .single();
@@ -254,7 +254,7 @@ export function useCotizacion() {
 
   const actualizarEstado = useCallback(async (id: string, status: Cotizacion["status"]) => {
     const { error } = await supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .update({ status })
       .eq("id", id);
     if (error) setError(error.message);
@@ -262,9 +262,13 @@ export function useCotizacion() {
   }, [supabase]);
 
   const eliminar = useCallback(async (id: string) => {
-    const { error } = await supabase.from("presupuestos").delete().eq("id", id);
-    if (error) setError(error.message);
-    return !error;
+    const { error, count } = await supabase
+      .from("cotizaciones")
+      .delete({ count: "exact" })
+      .eq("id", id);
+    if (error) { setError(error.message); return false; }
+    if (count === 0) { setError("No tienes permiso para eliminar esta cotización"); return false; }
+    return true;
   }, [supabase]);
 
   const generarPDF = useCallback(async (id: string): Promise<string | null> => {
@@ -295,7 +299,7 @@ export function useCotizacion() {
       if (!user) return;
       await supabase.from("calculos_log").insert({
         user_id:          user.id,
-        presupuesto_id:   cotizacionId,
+        cotizacion_id:   cotizacionId,
         total_materiales: calc.totalMateriales,
         total_mano_obra:  calc.totalManoDeObra,
         total_base:       calc.totalBase,
@@ -319,7 +323,7 @@ export function useCotizacion() {
   ): Promise<void> => {
     try {
       await supabase
-        .from("presupuestos")
+        .from("cotizaciones")
         .update({
           wa_enviado_at: new Date().toISOString(),
           ...(pdfUrl ? { pdf_url: pdfUrl } : {}),

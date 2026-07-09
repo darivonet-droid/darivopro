@@ -297,22 +297,26 @@ FUNCIONALIDAD — Guardar (Regla 10):
 
 ---
 
-## 3. DÓNDE SE VEN LAS COTIZACIONES — UNIFICADO CON CLIENTE
+## 3. DÓNDE SE VEN LAS COTIZACIONES — LISTA GLOBAL + FICHA DE CLIENTE
 
-⚠️ **Decisión de arquitectura (24/06/2026):** NO existe una pantalla separada `/cotizaciones` con lista global. Las cotizaciones se ven ÚNICAMENTE dentro de la ficha de cada Cliente (módulo **Clientes** de la nav principal).
+**Estado actual (código):** existe la ruta **`/cotizaciones`** como **lista global activa** (`page.tsx` + `CotizacionesList`), con acceso al wizard en **`/cotizaciones/nuevo`**. Además, cada cotización aparece en la ficha del cliente correspondiente (módulo **Clientes**).
 
 ```
-CREACIÓN DE COTIZACIÓN:
-Wizard de 4 pasos (Selección → Cantidades → Resumen → Cliente) accesible desde:
+LISTA GLOBAL:
+· Ruta /cotizaciones — listado de todas las cotizaciones del usuario
+· Botón «+ Nuevo» → /cotizaciones/nuevo (wizard de 4 pasos)
+
+CREACIÓN DE COTIZACIÓN (también accesible desde):
 · Inicio → «Nueva cotización» (flujo manual — Regla 1)
 · Nav IA → flujos Escribir / Hablar (flujo IA — 08-MODULO-IA.md)
+· Ficha de Cliente → «+ Nueva cotización para este cliente»
 
 AL GUARDAR:
-La cotización queda automáticamente dentro de la ficha
-del Cliente correspondiente (ver 03-MODULO-CLIENTES.md §4).
-
-NO EXISTE ruta /cotizaciones como lista independiente.
+La cotización queda vinculada al cliente (ver 03-MODULO-CLIENTES.md §4)
+y visible tanto en /cotizaciones como en la ficha del cliente.
 ```
+
+> **Decisión vigente (07/2026):** se mantiene lista global `/cotizaciones`. Puede revisarse en una iteración futura de navegación.
 
 ```
 DISEÑO de cada cotización dentro de la ficha de Cliente

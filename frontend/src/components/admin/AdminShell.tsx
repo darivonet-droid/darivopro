@@ -7,6 +7,7 @@ import { T } from "@/lib/design-system/tokens";
 /** Navegación oficial — 00-PANEL-ADMIN-DASHBOARD.md §4 */
 export const ADMIN_NAV = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
+  { href: "/admin/productos", label: "Productos", icon: "📦" },
   { href: "/admin/catalogo", label: "Catálogo Maestro", icon: "📚" },
   { href: "/admin/usuarios", label: "Usuarios", icon: "👤" },
   { href: "/admin/suscripciones", label: "Gestión de Suscripciones", icon: "💳" },

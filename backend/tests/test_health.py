@@ -13,7 +13,7 @@ def test_health() -> None:
 
 
 def test_endpoints_requieren_auth() -> None:
-    for path in ("/api/v1/presupuestos", "/api/v1/facturas", "/api/v1/clientes", "/api/v1/catalogo"):
+    for path in ("/api/v1/cotizaciones", "/api/v1/facturas", "/api/v1/clientes", "/api/v1/catalogo"):
         res = client.get(path)
         assert res.status_code == 422  # falta header Authorization
 

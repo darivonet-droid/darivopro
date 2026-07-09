@@ -7,10 +7,10 @@ import type { Cotizacion, LineaCotizacion } from "@/types";
 
 export default async function CotizacionesPage() {
   const supabase = createServerClient();
-  // Select only columns used by UI + card expansion; skip presupuesto_items.id/created_at
+  // Select only columns used by UI + card expansion; skip cotizacion_items.id/created_at
   const { data } = await supabase
-    .from("presupuestos")
-    .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
+    .from("cotizaciones")
+    .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
     .order("created_at", { ascending: false });
 
   const cotizaciones: Cotizacion[] = (data ?? []).map((row) => ({

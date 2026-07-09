@@ -12,8 +12,8 @@ class ApiResponse(BaseModel, Generic[T]):
     error: Optional[str] = None
     meta:  Optional[dict]= None
 
-# ── Línea de presupuesto ────────────────────────────────────────────────────
-class LineaPresupuesto(BaseModel):
+# ── Línea de cotizacion ────────────────────────────────────────────────────
+class LineaCotizacion(BaseModel):
     svcId:     str
     catLabel:  str
     svcLabel:  str
@@ -24,12 +24,12 @@ class LineaPresupuesto(BaseModel):
     unitPrice: float
     subtotal:  float
 
-# ── Presupuesto ─────────────────────────────────────────────────────────────
-class PresupuestoIn(BaseModel):
+# ── Cotizacion ─────────────────────────────────────────────────────────────
+class CotizacionIn(BaseModel):
     clientName: str
     phone:      Optional[str] = None
     city:       Optional[str] = None
-    items:      List[LineaPresupuesto]
+    items:      List[LineaCotizacion]
     margin:     float = Field(ge=0, le=200)
     totalBase:  float
     totalLabor: float
@@ -37,7 +37,7 @@ class PresupuestoIn(BaseModel):
     status:     str = "Borrador"
     notes:      Optional[str] = None
 
-class PresupuestoOut(PresupuestoIn):
+class CotizacionOut(CotizacionIn):
     id:        str
     tenant_id: str
     createdAt: str

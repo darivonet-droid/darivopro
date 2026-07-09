@@ -83,9 +83,9 @@ export function useInformes() {
     const swEnd  = new Date(sw); swEnd.setDate(swEnd.getDate() + 7);
 
     const [presRes, facsRes, prevPresRes, prevFacsRes] = await Promise.all([
-      supabase.from("presupuestos").select("total_final").gte("created_at", sw.toISOString()).lt("created_at", swEnd.toISOString()),
+      supabase.from("cotizaciones").select("total_final").gte("created_at", sw.toISOString()).lt("created_at", swEnd.toISOString()),
       supabase.from("facturas").select("total_final, inv_status, created_at"),
-      supabase.from("presupuestos").select("total_final").gte("created_at", swPrev.toISOString()).lt("created_at", sw.toISOString()),
+      supabase.from("cotizaciones").select("total_final").gte("created_at", swPrev.toISOString()).lt("created_at", sw.toISOString()),
       supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", swPrev.toISOString()).lt("created_at", sw.toISOString()),
     ]);
 
@@ -120,7 +120,7 @@ export function useInformes() {
     const [facsRes, facsPrevRes, presAprobRes] = await Promise.all([
       supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", smInicio.toISOString()),
       supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", smPrev.toISOString()).lt("created_at", smPrevEnd.toISOString()),
-      supabase.from("presupuestos").select("client_name, total_final").eq("status", "Aprobado").gte("created_at", smInicio.toISOString()),
+      supabase.from("cotizaciones").select("client_name, total_final").eq("status", "Aprobado").gte("created_at", smInicio.toISOString()),
     ]);
 
     const facs     = facsRes.data     ?? [];
@@ -165,7 +165,7 @@ export function useInformes() {
 
     const [facsRes, presRes, perfilRes] = await Promise.all([
       supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", sq.toISOString()),
-      supabase.from("presupuestos").select("status, client_name, total_final, presupuesto_items(cat_label)").gte("created_at", sq.toISOString()),
+      supabase.from("cotizaciones").select("status, client_name, total_final, cotizacion_items(cat_label)").gte("created_at", sq.toISOString()),
       supabase.from("perfiles").select("razon_social, ruc").single(),
     ]);
 
@@ -192,7 +192,7 @@ export function useInformes() {
     // Categoría más frecuente
     const catMap: Record<string, number> = {};
     for (const p of pres) {
-      const items = (p as { presupuesto_items?: { cat_label?: string }[] }).presupuesto_items ?? [];
+      const items = (p as { cotizacion_items?: { cat_label?: string }[] }).cotizacion_items ?? [];
       for (const it of items) {
         const cat = it.cat_label ?? "Sin categoría";
         catMap[cat] = (catMap[cat] ?? 0) + 1;

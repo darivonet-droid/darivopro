@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ClientesPage() {
   const supabase = createServerClient();
-  // presupuestos(count) usa la FK cliente_id → clientes (migración 014)
+  // cotizaciones(count) usa la FK cliente_id → clientes (migración 014)
   const { data } = await supabase
     .from("clientes")
-    .select("*, presupuestos(count)")
+    .select("*, cotizaciones(count)")
     .order("nombre");
 
   const clientes: ClienteConConteo[] = (data ?? []).map((row) => ({
@@ -23,7 +23,7 @@ export default async function ClientesPage() {
     ciudad: row.ciudad ?? undefined,
     notas: row.notas ?? undefined,
     createdAt: row.created_at,
-    cotizaciones: Array.isArray(row.presupuestos) ? (row.presupuestos[0]?.count ?? 0) : 0,
+    cotizaciones: Array.isArray(row.cotizaciones) ? (row.cotizaciones[0]?.count ?? 0) : 0,
   }));
 
   return (

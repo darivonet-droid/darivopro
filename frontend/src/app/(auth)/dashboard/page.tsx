@@ -29,10 +29,10 @@ export default async function DashboardPage({
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("razon_social, onboarding_done").single(),
-    supabase.from("presupuestos").select("id, status"),
+    supabase.from("cotizaciones").select("id, status"),
     supabase
-      .from("presupuestos")
-      .select("id, status, total_final, client_name, created_at, presupuesto_items(count)")
+      .from("cotizaciones")
+      .select("id, status, total_final, client_name, created_at, cotizacion_items(count)")
       .order("created_at", { ascending: false })
       .limit(4),
     supabase
@@ -189,8 +189,8 @@ export default async function DashboardPage({
             </div>
           ) : (
             recientes.map((p) => {
-              const itemCount = (p as { presupuesto_items?: { count: number }[] })
-                .presupuesto_items?.[0]?.count ?? 0;
+              const itemCount = (p as { cotizacion_items?: { count: number }[] })
+                .cotizacion_items?.[0]?.count ?? 0;
               const fecha = new Date(p.created_at).toLocaleDateString("es-PE", {
                 day: "numeric", month: "short",
               });

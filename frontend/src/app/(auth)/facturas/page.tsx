@@ -10,7 +10,7 @@ export default async function FacturasPage() {
     supabase.from("facturas").select("*").order("created_at", { ascending: false }),
     supabase.from("perfiles").select("ruc").single(),
     supabase
-      .from("presupuestos")
+      .from("cotizaciones")
       .select("id, user_id, client_name, phone, city, margin, total_base, total_labor, total_final, status, created_at, notes")
       .eq("status", "Aprobado")
       .order("created_at", { ascending: false }),

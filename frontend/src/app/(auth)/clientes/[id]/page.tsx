@@ -31,10 +31,10 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
     createdAt: cliRow.created_at,
   };
 
-  // Cotizaciones del cliente — estado leído en vivo de presupuestos.status
+  // Cotizaciones del cliente — estado leído en vivo de cotizaciones.status
   const { data: presRows } = await supabase
-    .from("presupuestos")
-    .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:presupuesto_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
+    .from("cotizaciones")
+    .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
     .eq("cliente_id", params.id)
     .order("created_at", { ascending: false });
 
