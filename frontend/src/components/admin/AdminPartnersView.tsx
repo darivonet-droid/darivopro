@@ -92,8 +92,8 @@ export function AdminPartnersView({ initialPartners }: AdminPartnersViewProps) {
   return (
     <div>
       <AdminNotice>
-        Registro servidor (JSON interim) — sincronizado con Panel Partner vía Server Actions
-        (INC-A02). BD partners pendiente (Doc 06 §10 · DT-05-09).
+        Registro en tabla real <span className="font-mono">partners</span> (Supabase) —
+        sincronizado con Panel Partner vía Server Actions (INC-A02 resuelto).
       </AdminNotice>
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">

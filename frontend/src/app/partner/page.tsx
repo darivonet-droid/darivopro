@@ -14,7 +14,7 @@ export default async function PartnerPage() {
     .single();
 
   const email = user?.email ?? "";
-  const partner = email ? await getPartnerByEmail(email) : null;
+  const partner = email ? await getPartnerByEmail(email, supabase) : null;
 
   const nombre =
     perfil?.razon_social ?? user?.user_metadata?.nombre_empresa ?? email.split("@")[0] ?? "Partner";
