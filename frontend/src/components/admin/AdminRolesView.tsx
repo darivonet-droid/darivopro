@@ -127,13 +127,13 @@ export function AdminRolesView() {
                         {limites.facturasHabilitado ? "Habilitada" : "No disponible"}
                       </li>
                       <li>
-                        IA cotizaciones/día:{" "}
+                        Calculadora inteligente cotizaciones/día:{" "}
                         {limites.iaCotizacionesDia === Infinity
                           ? "Ilimitada"
                           : limites.iaCotizacionesDia}
                       </li>
                       <li>
-                        IA facturas:{" "}
+                        Calculadora inteligente facturas:{" "}
                         {limites.iaFacturasHabilitado ? "Habilitada" : "No disponible"}
                       </li>
                       {"tecnicosIncluidos" in limites && (

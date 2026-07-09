@@ -5,7 +5,7 @@ export const EMPRESA_NAV = [
   { href: "/empresa/cotizaciones", label: "Cotizaciones", md: "03-darivo-pro-empresa/05-MODULO-COTIZACIONES-EMPRESA.md" },
   { href: "/empresa/facturas", label: "Facturas", md: "03-darivo-pro-empresa/06-MODULO-FACTURAS-EMPRESA.md" },
   { href: "/empresa/cierre", label: "Cierre", md: "03-darivo-pro-empresa/09-MODULO-CIERRE-EMPRESA.md" },
-  { href: "/empresa/ia", label: "IA", md: "03-darivo-pro-empresa/08-MODULO-IA-EMPRESA.md" },
+  { href: "/empresa/ia", label: "Calculadora inteligente", md: "03-darivo-pro-empresa/08-MODULO-IA-EMPRESA.md" },
   { href: "/empresa/mas", label: "Más", md: "03-darivo-pro-empresa/07-MODULO-MAS-EMPRESA.md" },
   { href: "/empresa/empleados", label: "Empleados", md: "03-darivo-pro-empresa/10-MODULO-EMPLEADOS-EMPRESA.md" },
   { href: "/empresa/roles", label: "Roles y Permisos", md: "03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md" },

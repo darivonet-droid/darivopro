@@ -13,8 +13,8 @@ const APIS_OFICIALES = [
   {
     nombre: "OpenAI API",
     estado: "Activa",
-    uso: "IA producto — cotizaciones y análisis gastos",
-    modulos: "Móvil IA · Cierre · Empresa IA",
+    uso: "Calculadora inteligente — cotizaciones y análisis gastos",
+    modulos: "Móvil Calculadora inteligente · Cierre · Empresa Calculadora inteligente",
   },
   {
     nombre: "dLocal API",

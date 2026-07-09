@@ -9,7 +9,7 @@ export default function EmpresaIAPage() {
   return (
     <EmpresaShell titulo={mod.label}>
       <p className="mb-4 text-sm" style={{ color: T.textMid }}>
-        Cotización con OpenAI — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
+        Cotización con Calculadora inteligente — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
       </p>
       <div className="max-w-lg">
         <IACotizacionFlow />
