@@ -6,7 +6,8 @@ import { AdminBadge, AdminNotice, AdminTabs } from "@/components/admin/AdminTabs
 import { AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
 import { T } from "@/lib/design-system/tokens";
 import {
-  COMISIONES_OFICIALES_PLACEHOLDER,
+  COMISION_VENTA_PORCENTAJE,
+  HITOS_COMISION_OFICIALES,
   type EstadoPartner,
   type PartnerRegistro,
 } from "@/lib/partners-types";
@@ -226,11 +227,19 @@ export function AdminPartnersView({ initialPartners }: AdminPartnersViewProps) {
 
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>
-          Tabla oficial de comisiones
+          Plan oficial de comisiones (Doc 06 §5.1)
         </h2>
+        <p className="mb-3 text-xs" style={{ color: T.textLight }}>
+          Comisión por venta: <strong>{COMISION_VENTA_PORCENTAJE}% pago único</strong> sobre el
+          primer pago del cliente referido. Además, bono escalonado por hitos de clientes propios
+          (calculado por Partner individual, nunca de forma agregada).
+        </p>
         <AdminTable
-          headers={["Rango registros", "Comisión"]}
-          rows={COMISIONES_OFICIALES_PLACEHOLDER.map((c) => [c.rango, c.comision])}
+          headers={["Hito (clientes propios)", "Bono sobre ese tramo"]}
+          rows={HITOS_COMISION_OFICIALES.map((h) => [
+            h.hito === 100 ? `${h.hito} y cada 50 siguientes (150, 200, 250…)` : String(h.hito),
+            `${h.bonoPorcentaje}%${h.hito === 100 ? " — techo permanente" : ""}`,
+          ])}
         />
       </section>
     </div>

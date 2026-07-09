@@ -5,7 +5,9 @@ import { useState } from "react";
 import { T } from "@/lib/design-system/tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 import {
-  COMISIONES_OFICIALES_PLACEHOLDER,
+  COMISION_VENTA_PORCENTAJE,
+  HITOS_COMISION_OFICIALES,
+  calcularProgresoHitos,
   type PartnerRegistro,
 } from "@/lib/partners-types";
 
@@ -21,6 +23,7 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
   const enlace = partner?.enlace ?? "https://darivo.pro/ref/—";
   const codigo = partner?.codigo ?? "—";
   const registros = partner?.registros ?? [];
+  const progresoHitos = calcularProgresoHitos(registros.length);
   const [copiado, setCopiado] = useState(false);
 
   const copiar = async () => {
@@ -149,30 +152,68 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
         style={{ background: T.white, border: `1px solid ${T.slateD}` }}
       >
         <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
-          Tabla oficial de comisiones
+          Plan oficial de comisiones
         </h2>
-        <p className="mb-3 text-xs" style={{ color: T.textMid }}>
-          Solo lectura — configurada desde Admin Partners.
+        <p className="mb-4 text-xs" style={{ color: T.textMid }}>
+          Solo lectura — configurado desde Admin Partners (Doc 06 §5.1).
         </p>
-        <table className="w-full text-left text-sm">
+
+        <p className="text-sm" style={{ color: T.text }}>
+          Comisión por venta: <strong>{COMISION_VENTA_PORCENTAJE}%, pago único</strong>, al
+          momento de la venta del cliente referido.
+        </p>
+
+        <div className="mt-4">
+          <div className="flex items-baseline justify-between">
+            <p className="text-xs font-bold" style={{ color: T.textMid }}>
+              Progreso hacia tu próximo hito
+            </p>
+            <p className="text-xs font-bold" style={{ color: T.blue }}>
+              {progresoHitos.clientes} de {progresoHitos.hitoSiguiente} clientes
+            </p>
+          </div>
+          <div
+            className="mt-2 h-2.5 w-full overflow-hidden rounded-full"
+            style={{ background: T.slate }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${progresoHitos.progreso * 100}%`, background: T.blue }}
+            />
+          </div>
+          <p className="mt-2 text-xs" style={{ color: T.textLight }}>
+            {progresoHitos.faltantes > 0
+              ? `Te faltan ${progresoHitos.faltantes} clientes propios para tu siguiente bono.`
+              : "¡Hito alcanzado!"}
+          </p>
+        </div>
+
+        <table className="mt-5 w-full text-left text-sm">
           <thead>
             <tr style={{ borderBottom: `1px solid ${T.slateD}` }}>
               <th className="py-2 text-xs font-bold" style={{ color: T.textMid }}>
-                Rango
+                Hito (clientes propios)
               </th>
               <th className="py-2 text-xs font-bold" style={{ color: T.textMid }}>
-                Comisión
+                Bono sobre ese tramo
               </th>
             </tr>
           </thead>
           <tbody>
-            {COMISIONES_OFICIALES_PLACEHOLDER.map((c) => (
-              <tr key={c.rango} style={{ borderBottom: `1px solid ${T.slateD}` }}>
-                <td className="py-2" style={{ color: T.text }}>
-                  {c.rango}
+            {HITOS_COMISION_OFICIALES.map((h) => (
+              <tr key={h.hito} style={{ borderBottom: `1px solid ${T.slateD}` }}>
+                <td
+                  className="py-2"
+                  style={{
+                    color: progresoHitos.hitoActual >= h.hito ? T.blue : T.text,
+                    fontWeight: progresoHitos.hitoActual === h.hito ? 800 : 400,
+                  }}
+                >
+                  {h.hito === 100 ? "100 y cada 50 siguientes" : h.hito}
+                  {progresoHitos.hitoActual >= h.hito && h.hito !== 100 ? " ✓" : ""}
                 </td>
                 <td className="py-2 text-xs" style={{ color: T.textMid }}>
-                  {c.comision}
+                  {h.bonoPorcentaje}%{h.hito === 100 ? " — techo permanente" : ""}
                 </td>
               </tr>
             ))}
