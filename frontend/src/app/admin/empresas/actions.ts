@@ -8,8 +8,9 @@ import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
  * Acciones del Módulo Admin Empresas (02-PANEL-ADMIN-EMPRESAS.md §5, §12:
  * "El cambio de plan se realiza desde este módulo" / "La activación y
  * desactivación de empresas se realiza desde este módulo").
- * Ambas operan sobre `perfiles` (plan/onboarding), no sobre `empresas`
- * (que no almacena plan ni estado — ver nota en admin-queries.ts).
+ * Cambiar plan opera sobre `perfiles.plan_tipo` (el plan vive en el gerente,
+ * no en `empresas`). Activar/desactivar opera sobre `empresas.activo`
+ * (migración 20260709180000).
  */
 export async function cambiarPlanEmpresaAction(
   gerenteUserId: string,
@@ -34,7 +35,7 @@ export async function cambiarPlanEmpresaAction(
 }
 
 export async function setEmpresaActivaAction(
-  gerenteUserId: string,
+  empresaId: string,
   activa: boolean
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   let admin;
@@ -45,9 +46,9 @@ export async function setEmpresaActivaAction(
   }
 
   const { error } = await admin
-    .from("perfiles")
-    .update({ onboarding_done: activa })
-    .eq("id", gerenteUserId);
+    .from("empresas")
+    .update({ activo: activa })
+    .eq("id", empresaId);
 
   if (error) return { ok: false, error: error.message };
 

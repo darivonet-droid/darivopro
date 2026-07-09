@@ -104,11 +104,7 @@ export type AdminEmpresaRow = {
   telefono: string | null;
   created_at: string;
   plan_tipo: string | null;
-  /** Reutiliza `perfiles.onboarding_done` como proxy de activación de cuenta:
-   *  no existe columna `activo`/`suspendida` en el esquema real — crear una
-   *  requeriría una migración de BD, fuera del alcance de este cambio.
-   *  Desactivar pone `onboarding_done = false`, lo que ya bloquea el acceso
-   *  de la empresa a la app (ver `empresa/layout.tsx`). */
+  /** Columna dedicada `empresas.activo` (migración 20260709180000). */
   activa: boolean;
   email: string;
 };
@@ -121,7 +117,7 @@ export async function fetchAdminEmpresas(): Promise<
 
   const { data: empresas, error } = await admin
     .from("empresas")
-    .select("id, gerente_user_id, razon_social, ruc, direccion, telefono, created_at")
+    .select("id, gerente_user_id, razon_social, ruc, direccion, telefono, created_at, activo")
     .order("created_at", { ascending: false });
 
   if (error) return { error: error.message };
@@ -130,8 +126,8 @@ export async function fetchAdminEmpresas(): Promise<
 
   const [{ data: perfiles }, { data: authData }] = await Promise.all([
     gerenteIds.length
-      ? admin.from("perfiles").select("id, plan_tipo, onboarding_done").in("id", gerenteIds)
-      : Promise.resolve({ data: [] as Array<{ id: string; plan_tipo: string | null; onboarding_done: boolean | null }> }),
+      ? admin.from("perfiles").select("id, plan_tipo").in("id", gerenteIds)
+      : Promise.resolve({ data: [] as Array<{ id: string; plan_tipo: string | null }> }),
     admin.auth.admin.listUsers({ perPage: 200 }),
   ]);
 
@@ -149,7 +145,7 @@ export async function fetchAdminEmpresas(): Promise<
       telefono: e.telefono,
       created_at: e.created_at,
       plan_tipo: perfil?.plan_tipo ?? null,
-      activa: perfil?.onboarding_done ?? false,
+      activa: e.activo,
       email: emailById.get(e.gerente_user_id) ?? "",
     };
   });

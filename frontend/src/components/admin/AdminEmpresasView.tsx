@@ -49,10 +49,10 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
     });
   };
 
-  const toggleActiva = (id: string, gerenteUserId: string, activa: boolean) => {
+  const toggleActiva = (id: string, activa: boolean) => {
     setEmpresas((prev) => prev.map((e) => (e.id === id ? { ...e, activa } : e)));
     startTransition(() => {
-      void setEmpresaActivaAction(gerenteUserId, activa);
+      void setEmpresaActivaAction(id, activa);
     });
   };
 
@@ -112,7 +112,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
                 key="toggle"
                 type="button"
                 disabled={isPending}
-                onClick={() => toggleActiva(e.id, e.gerente_user_id, !e.activa)}
+                onClick={() => toggleActiva(e.id, !e.activa)}
                 className="text-xs font-bold"
                 style={{ color: e.activa ? T.red : T.greenD }}
               >
@@ -121,8 +121,9 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
             ])}
           />
           <p className="mt-3 text-xs" style={{ color: T.textLight }}>
-            Fuente: tabla <span className="font-mono">empresas</span> (Supabase) — plan y estado
-            se leen/escriben en <span className="font-mono">perfiles</span> vía{" "}
+            Fuente: tabla <span className="font-mono">empresas</span> (Supabase) — el estado
+            activo/suspendida vive en <span className="font-mono">empresas.activo</span>, el plan
+            en <span className="font-mono">perfiles.plan_tipo</span> vía{" "}
             <span className="font-mono">gerente_user_id</span> (Doc 02 §9).
           </p>
         </>
