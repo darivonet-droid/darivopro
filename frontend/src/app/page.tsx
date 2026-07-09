@@ -1,10 +1,27 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
-import { fmtPrecio } from "@/lib/planes";
+import {
+  IconList,
+  IconSparkle,
+  IconWhatsapp,
+  IconClock,
+  IconCalculator,
+  IconDocument,
+  IconSend,
+  IconShieldCloud,
+  IconHelmet,
+  IconWrench,
+  IconRoller,
+  IconBolt,
+  IconArrow,
+} from "@/components/landing/Icons";
 
-// LANDING-PAGE-DARIVO-PRO.md v1.2 — página pública de marketing en darivopro.com.
+// LANDING-PAGE-DARIVO-PRO.md v1.3 — página pública de marketing en darivopro.com.
 // No requiere sesión, no comparte diseño con Admin/Empresa ni con Fable 5 (Móvil).
+// Regla de producto: nunca se comunica como "IA" de cara al usuario — "Calculadora
+// inteligente" en todo texto visible (ver §2 del MD).
+// Testimonios y vídeo del hero: omitidos a propósito en esta versión — pendientes
+// de contenido real (clientes verificados / grabación sobre la app real).
 
 export const metadata: Metadata = {
   title: "Darivo Pro — Una factura en un minuto",
@@ -13,112 +30,364 @@ export const metadata: Metadata = {
 
 const NAVY = "#0A1628";
 const BLUE = "#2563EB";
+const LIGHT_BLUE = "#60A5FA";
 
-const PLANES_LANDING = [
-  { id: "basico", ...PRECIOS_OFICIALES.basico, destacado: false },
-  { id: "pro", ...PRECIOS_OFICIALES.pro, destacado: true },
-  { id: "business", ...PRECIOS_OFICIALES.business, destacado: false },
-] as const;
+const PASOS = [
+  {
+    icon: IconList,
+    titulo: "Elige tu categoría",
+    texto: "Selecciona tu trabajo: construcción, fontanería, pintura o electricidad.",
+  },
+  {
+    icon: IconSparkle,
+    titulo: "La calculadora arma tu cotización",
+    texto: "Elige las partidas, la calculadora calcula precios, cantidades e impuestos al instante.",
+  },
+  {
+    icon: IconWhatsapp,
+    titulo: "PDF al WhatsApp",
+    texto: "Genera tu factura o cotización y envíala directo al WhatsApp de tu cliente.",
+  },
+];
+
+const CATEGORIAS = [
+  { icon: IconHelmet, nombre: "Construcción", texto: "Albañilería, estructuras, acabados y mucho más." },
+  { icon: IconWrench, nombre: "Fontanería", texto: "Instalaciones de agua, desagüe, gas y sanitarios." },
+  { icon: IconRoller, nombre: "Pintura", texto: "Pintura interior, exterior, empastes y acabados." },
+  { icon: IconBolt, nombre: "Electricidad", texto: "Instalaciones, circuitos, tableros y más." },
+];
+
+const FEATURES = [
+  { icon: IconClock, titulo: "Ahorra tiempo", texto: "Factura en menos de 1 minuto." },
+  { icon: IconCalculator, titulo: "Precios actualizados", texto: "Costos reales de materiales y mano de obra." },
+  { icon: IconDocument, titulo: "PDF profesional", texto: "Con tu logo y listo para enviar." },
+  { icon: IconSend, titulo: "Envío directo", texto: "Al WhatsApp de tu cliente con un clic." },
+  { icon: IconShieldCloud, titulo: "Seguro y en la nube", texto: "Tus datos y documentos siempre protegidos." },
+];
+
+function FotoPendiente({ label, className }: { label: string; className?: string }) {
+  // Placeholder visual — reemplazar por foto real cuando esté disponible.
+  // No usar el archivo frontend/public/logo-darivo-pro.png: está corrupto (es un
+  // HTML de WhatsApp Web guardado con extensión .png), no es una imagen.
+  return (
+    <div
+      className={`flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 text-center text-xs font-semibold text-slate-500 ${className ?? ""}`}
+    >
+      Foto pendiente
+      <br />
+      {label}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* ── Header ─────────────────────────────────────────────── */}
-      {/* Texto en vez de logo-darivo-pro.png: ese archivo está corrupto (es un HTML
-          de WhatsApp Web guardado con extensión .png) — ver nota en el resumen de la tarea. */}
-      <header className="flex items-center justify-center px-6 py-5">
-        <span className="text-xl font-black tracking-tight" style={{ color: NAVY }}>
-          DARIVO <span style={{ color: BLUE }}>PRO</span>
-        </span>
+      <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <span className="text-lg font-black tracking-tight" style={{ color: NAVY }}>
+            DARIVO <span style={{ color: BLUE }}>PRO</span>
+          </span>
+
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 sm:flex">
+            <Link href="/precios">Precios</Link>
+            <a href="#como-funciona">¿Cómo funciona?</a>
+          </nav>
+
+          <div className="flex items-center gap-1 whitespace-nowrap sm:gap-2">
+            <a
+              href="/login"
+              className="rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 sm:px-4 sm:py-2 sm:text-sm"
+            >
+              Iniciar sesión
+            </a>
+            <a
+              href="/registro"
+              className="rounded-xl border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-700 sm:px-4 sm:py-2 sm:text-sm"
+            >
+              Registrarse
+            </a>
+            <a
+              href="/registro"
+              className="rounded-xl px-2 py-1.5 text-xs font-bold text-white sm:px-4 sm:py-2 sm:text-sm"
+              style={{ background: BLUE }}
+            >
+              Empieza gratis
+            </a>
+          </div>
+        </div>
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col items-center px-6 pb-16 pt-6 text-center">
-        <div className="w-full" style={{ maxWidth: 640 }}>
-          <h1 className="text-3xl font-black leading-tight sm:text-5xl" style={{ color: NAVY }}>
-            Una factura en un minuto
-          </h1>
-          <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600 sm:text-lg">
-            Cotiza y factura tus obras desde el celular, sin perder tiempo en papeleo.
-          </p>
+      <section className="px-6 py-14" style={{ background: NAVY }}>
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          {/* Texto */}
+          <div>
+            <h1 className="text-4xl font-black leading-tight sm:text-5xl">
+              <span className="block text-white">Una factura</span>
+              <span className="block" style={{ color: LIGHT_BLUE }}>
+                en un minuto
+              </span>
+            </h1>
+            <p className="mt-4 max-w-md text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+              Cotiza y factura desde tu celular, PDF directo al WhatsApp de tu cliente.
+            </p>
 
-          <a
-            href="/registro"
-            className="mt-7 inline-block rounded-2xl px-8 py-4 text-base font-bold text-white transition-transform active:scale-[0.97]"
-            style={{ background: BLUE }}
-          >
-            Empieza gratis
-          </a>
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
+              {[
+                { icon: IconList, texto: "400+ partidas" },
+                { icon: IconSparkle, texto: "Calculadora inteligente" },
+                { icon: IconWhatsapp, texto: "PDF al WhatsApp" },
+              ].map(({ icon: Icon, texto }) => (
+                <div key={texto} className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <span style={{ color: LIGHT_BLUE }}>
+                    <Icon />
+                  </span>
+                  {texto}
+                </div>
+              ))}
+            </div>
 
-          {/* Vídeo del producto — pendiente de grabar (47s-1min, app real en uso). */}
-          <div
-            className="mx-auto mt-10 flex aspect-video w-full items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-400"
-            style={{ maxWidth: 480 }}
-          >
-            Video del producto — próximamente
+            <a
+              href="/registro"
+              className="mt-8 inline-block rounded-2xl px-8 py-4 text-base font-bold text-white transition-transform active:scale-[0.97]"
+              style={{ background: BLUE }}
+            >
+              Empieza gratis
+            </a>
+            <p className="mt-3 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Sin tarjeta • Sin compromiso • Empieza en 1 minuto
+            </p>
+          </div>
+
+          {/* Mockup */}
+          <div className="relative mx-auto w-full max-w-sm">
+            <FotoPendiente
+              label="maestro de obra con celular"
+              className="absolute -right-4 bottom-0 hidden h-72 w-56 rounded-3xl sm:flex"
+            />
+
+            {/* Marco del teléfono — mockup ilustrativo, no captura real de la app */}
+            <div
+              className="relative z-10 mx-auto w-64 rounded-[2.2rem] p-3 shadow-2xl"
+              style={{ background: "#111C33", border: "6px solid #1E2A44" }}
+            >
+              <div className="rounded-[1.6rem] bg-white p-3">
+                <p className="text-[11px] font-bold" style={{ color: NAVY }}>
+                  Nueva cotización
+                </p>
+                <p className="text-[10px] text-slate-400">Listo en menos de 60 segundos</p>
+
+                <span
+                  className="mt-2 inline-block rounded-full px-2 py-1 text-[10px] font-bold text-white"
+                  style={{ background: BLUE }}
+                >
+                  Muro de ladrillo
+                </span>
+
+                <div className="mt-3 flex flex-col gap-2">
+                  {[
+                    { nombre: "Muro de ladrillo", precio: "S/ 85 / m²" },
+                    { nombre: "Tarrajeo de paredes", precio: "S/ 35 / m²" },
+                    { nombre: "Piso cerámico instalado", precio: "S/ 55 / m²" },
+                  ].map((item) => (
+                    <div
+                      key={item.nombre}
+                      className="flex items-center justify-between rounded-xl bg-slate-50 px-2.5 py-2"
+                    >
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-700">{item.nombre}</p>
+                        <p className="text-[9px] text-slate-400">{item.precio}</p>
+                      </div>
+                      <span className="text-xs font-bold" style={{ color: BLUE }}>
+                        +
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  className="mt-3 rounded-xl py-2 text-center text-[11px] font-bold text-white"
+                  style={{ background: BLUE }}
+                >
+                  Calcular cotización →
+                </div>
+              </div>
+            </div>
+
+            {/* Badge "0:47" */}
+            <div
+              className="absolute -left-2 top-6 z-20 flex h-20 w-20 flex-col items-center justify-center rounded-full text-center shadow-xl"
+              style={{ background: "white" }}
+            >
+              <span className="text-lg font-black" style={{ color: BLUE }}>
+                0:47
+              </span>
+              <span className="text-[8px] font-bold leading-tight text-slate-500">
+                Factura
+                <br />
+                lista en
+              </span>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* ── Planes ───────────────────────────────────────────── */}
-        <section className="mt-16 w-full" style={{ maxWidth: 960 }}>
-          <h2 className="text-2xl font-black" style={{ color: NAVY }}>
-            Elige tu plan
+      {/* ── Así de fácil ───────────────────────────────────────── */}
+      <section id="como-funciona" className="px-6 py-16">
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-2xl font-black sm:text-3xl" style={{ color: NAVY }}>
+            Así de fácil
           </h2>
-          <p className="mt-1 text-sm text-slate-500">Precios provisionales, sujetos a confirmación final.</p>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {PLANES_LANDING.map((plan) => (
-              <div
-                key={plan.id}
-                className="flex flex-col rounded-2xl p-6 text-left"
-                style={
-                  plan.destacado
-                    ? { background: BLUE, boxShadow: "0 8px 32px rgba(37,99,235,0.35)" }
-                    : { background: "#F8FAFF", border: "1.5px solid #E2E8F0" }
-                }
-              >
-                <span
-                  className="text-sm font-bold uppercase tracking-wide"
-                  style={{ color: plan.destacado ? "rgba(255,255,255,0.85)" : "#64748B" }}
-                >
-                  {plan.nombre}
-                </span>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-3xl font-black" style={{ color: plan.destacado ? "white" : NAVY }}>
-                    S/{fmtPrecio(plan.mensual)}
+          <div className="mt-10 grid grid-cols-1 items-start gap-10 sm:grid-cols-3">
+            {PASOS.map((paso, i) => (
+              <div key={paso.titulo} className="relative flex flex-col items-center">
+                <div className="flex flex-col items-center gap-3">
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white"
+                    style={{ background: BLUE }}
+                  >
+                    {i + 1}
                   </span>
                   <span
-                    className="text-sm font-semibold"
-                    style={{ color: plan.destacado ? "rgba(255,255,255,0.75)" : "#94A3B8" }}
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                    style={{ background: "#EFF4FF", color: BLUE }}
                   >
-                    /mes
+                    <paso.icon />
                   </span>
                 </div>
-                <a
-                  href="/registro"
-                  className="mt-5 block rounded-xl py-3 text-center text-sm font-bold transition-transform active:scale-[0.97]"
-                  style={
-                    plan.destacado
-                      ? { background: "white", color: BLUE }
-                      : { background: BLUE, color: "white" }
-                  }
-                >
-                  Regístrate
-                </a>
+                <h3 className="mt-4 text-base font-bold" style={{ color: NAVY }}>
+                  {paso.titulo}
+                </h3>
+                <p className="mt-1.5 max-w-[220px] text-sm text-slate-500">{paso.texto}</p>
+
+                {i < PASOS.length - 1 && (
+                  <span
+                    className="absolute right-[-38px] top-9 hidden text-slate-300 sm:block"
+                    aria-hidden
+                  >
+                    <IconArrow />
+                  </span>
+                )}
               </div>
             ))}
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* ── Hecho para tu chamba ───────────────────────────────── */}
+      <section className="px-6 py-16" style={{ background: "#F8FAFF" }}>
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-2xl font-black sm:text-3xl" style={{ color: NAVY }}>
+            Hecho para <span style={{ color: BLUE }}>tu chamba</span>
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Miles de maestros y técnicos ya cotizan y facturan más rápido
+          </p>
+
+          <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-4">
+            {CATEGORIAS.map((cat) => (
+              <div key={cat.nombre} className="text-left">
+                <div className="relative">
+                  <FotoPendiente label={cat.nombre.toLowerCase()} className="aspect-square w-full rounded-2xl" />
+                  <span
+                    className="absolute -bottom-3 left-3 flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-lg"
+                    style={{ background: BLUE }}
+                  >
+                    <cat.icon />
+                  </span>
+                </div>
+                <h3 className="mt-4 text-sm font-bold" style={{ color: NAVY }}>
+                  {cat.nombre}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">{cat.texto}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Todo lo que necesitas en tu celular ───────────────── */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-2xl font-black sm:text-3xl" style={{ color: NAVY }}>
+            Todo lo que necesitas <span style={{ color: BLUE }}>en tu celular</span>
+          </h2>
+
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+            {FEATURES.map((f) => (
+              <div key={f.titulo} className="flex flex-col items-center text-center">
+                <span style={{ color: BLUE }}>
+                  <f.icon />
+                </span>
+                <h3 className="mt-3 text-sm font-bold" style={{ color: NAVY }}>
+                  {f.titulo}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">{f.texto}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Banner CTA final ───────────────────────────────────── */}
+      <section className="px-6 pb-16">
+        <div
+          className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-5 rounded-3xl px-8 py-8 text-center sm:flex-row sm:text-left"
+          style={{ background: NAVY }}
+        >
+          <div>
+            <h2 className="text-xl font-black text-white sm:text-2xl">Empieza gratis hoy mismo</h2>
+            <p className="mt-1 text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
+              Sin tarjeta, sin compromiso. Crea tu primera factura en 1 minuto.
+            </p>
+          </div>
+          <a
+            href="/registro"
+            className="shrink-0 rounded-2xl px-7 py-3.5 text-sm font-bold transition-transform active:scale-[0.97]"
+            style={{ background: "white", color: BLUE }}
+          >
+            Empieza gratis →
+          </a>
+        </div>
+      </section>
 
       {/* ── Footer ─────────────────────────────────────────────── */}
-      <footer className="px-6 py-8 text-center">
-        <nav className="mb-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
-          <Link href="/terminos">Términos</Link>
-          <Link href="/privacidad">Privacidad</Link>
-          <Link href="/contacto">Contacto</Link>
-        </nav>
-        <p className="text-[11px] text-slate-400">© {new Date().getFullYear()} Darivo Pro</p>
+      <footer className="px-6 py-10 text-white" style={{ background: NAVY }}>
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-3">
+          <div>
+            <span className="text-base font-black tracking-tight">
+              DARIVO <span style={{ color: LIGHT_BLUE }}>PRO</span>
+            </span>
+            <p className="mt-2 text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+              La herramienta más rápida para cotizar y facturar desde tu celular.
+            </p>
+          </div>
+
+          <div>
+            {/* Sin número de WhatsApp real todavía — el único canal de contacto
+                confirmado hoy es hola@darivo.pro (ver (public)/contacto/page.tsx).
+                Reemplazar este enlace por wa.me/<numero real> cuando exista. */}
+            <a href="/contacto" className="flex items-center gap-2 text-sm font-semibold">
+              <IconWhatsapp />
+              Escríbenos
+            </a>
+            <p className="mt-2 text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Lun - Vie: 8:00 am - 6:00 pm
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 text-sm font-semibold sm:items-end">
+            <Link href="/terminos">Términos y condiciones</Link>
+            <Link href="/privacidad">Política de privacidad</Link>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+          © {new Date().getFullYear()} Darivo Pro. Todos los derechos reservados.
+        </p>
       </footer>
     </div>
   );
