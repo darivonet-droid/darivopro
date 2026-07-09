@@ -1,8 +1,10 @@
-# MD-10 – PANEL ADMIN – CATÁLOGO MAESTRO
+﻿# MD-10 – PANEL ADMIN – CATÁLOGO MAESTRO
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 ---
 
@@ -79,6 +81,7 @@ El módulo **Catálogo Maestro** forma parte del Panel Administrador de Darivo P
 La navegación oficial del Panel Administrador es:
 
 * Dashboard
+* Productos
 * Catálogo Maestro *(módulo actual)*
 * Usuarios
 * Gestión de Suscripciones

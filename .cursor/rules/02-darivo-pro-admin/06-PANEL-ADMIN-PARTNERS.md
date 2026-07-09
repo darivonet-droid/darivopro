@@ -1,8 +1,10 @@
-# 06 – PANEL ADMIN – PARTNERS
+﻿# 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.3 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 **Cambio principal (v1.2):** añadida sección 5.1 — plan oficial de comisiones (20% pago único por venta + bono escalonado por hitos 5/20/50/100+, individual por Partner). Derogada la tabla anterior por tramo de registros (S/6–S/12).
 
@@ -65,6 +67,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones

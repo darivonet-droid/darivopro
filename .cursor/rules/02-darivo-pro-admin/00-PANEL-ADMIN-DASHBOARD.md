@@ -1,7 +1,9 @@
-# 00 – PANEL ADMIN – DASHBOARD
+﻿# 00 – PANEL ADMIN – DASHBOARD
 
-**Versión:** 1.3  
+**Versión:** 1.4  
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.4 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 **Cambio principal (v1.3):** eliminada la acción "Enviar anuncio" — confirmado por el propietario que no existe funcionalidad de marketing/anuncios en el ecosistema (solo Móvil, Empresa, Admin). Corregida nota de changelog v1.2 (decía "Empresa", el plan se renombró a "Business").
 
@@ -69,6 +71,7 @@ No modificar:
 Menú lateral mostrado en el diseño:
 
 - Dashboard
+- Productos
 - Catálogo Maestro
 - Usuarios
 - Gestión de Suscripciones

@@ -1,10 +1,12 @@
 # 04 – ROLES, PLANES Y PERMISOS – DARIVO PRO
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Fecha:** 05/07/2026
 
 **Estado:** Documento técnico oficial — implementación Darivo Pro Móvil (capa de límites y catálogo)
+
+**Cambio principal (v1.2 — 09/07/2026):** corrección documental. DT-04-04 marcada ✅ resuelta (migración `20260706123000_plan_tipo_business.sql`). §5.1 y §6 corrigen referencias residuales a `verificarLimitePresupuesto`/tabla `presupuestos` por `verificarLimiteCotizacion`/`cotizaciones` (la migración de terminología ya está completa en código, este MD no lo reflejaba).
 
 **Cambio principal (v1.1):** catálogo oficial ampliado a 3 planes (Básico, Pro, Empresa) — sincronizado con `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.
 
@@ -96,7 +98,7 @@ Columna `perfiles.plan_tipo` (migración 005):
 * No hay matriz de permisos implementada.
 * Control de acceso: autenticación (Tarea 03) + RLS por `user_id`.
 * Control de uso: funciones en `frontend/src/lib/plan-limits.ts`:
-  * `verificarLimitePresupuesto`
+  * `verificarLimiteCotizacion` (renombrada de `verificarLimitePresupuesto` — migración de terminología presupuesto→cotización, completa)
   * `verificarLimiteFactura`
   * `verificarLimiteIA`
   * `registrarUsoIA` → tabla `ia_uso_diario` + RPC `incrementar_ia_uso`
@@ -115,7 +117,7 @@ Pendiente Tareas 05 y 08. Estructura documentada en Doc 11 (toggles por módulo)
 |---------|----------------|
 | Identidad | `auth.users.id` = `perfiles.id` |
 | Plan | Lectura `perfiles.plan_tipo` tras `getUser()` |
-| Límites cotizaciones | Count en `presupuestos` filtrado por `user_id` (+ mes para básico) |
+| Límites cotizaciones | Count en `cotizaciones` filtrado por `user_id` (+ mes para básico) |
 | Límites IA | `ia_uso_diario` por `user_id` + fecha |
 | RLS | Políticas existentes por tenant — sin cambios en Tarea 04 |
 
@@ -142,7 +144,7 @@ Pendiente Tareas 05 y 08. Estructura documentada en Doc 11 (toggles por módulo)
 | DT-04-01 | Matriz detallada permisos empleado | Propietario + 05/08 |
 | DT-04-02 | Tablas BD roles/permisos (Doc 12 §12) | 02 / propietario |
 | DT-04-03 | Escritura `plan_tipo` vía dLocal webhook (Tarea 08) | ✅ Resuelta |
-| DT-04-04 | Renombrar/eliminar valor `empresa` en CHECK `plan_tipo` | Propietario |
+| DT-04-04 | Renombrar/eliminar valor `empresa` en CHECK `plan_tipo` | ✅ Resuelta — migración `supabase/migrations/20260706123000_plan_tipo_business.sql` |
 | DT-04-05 | UI Mi Plan en Más (Doc 07 §8) | 05 Frontend |
 | DT-04-06 | Auth y roles Admin/Empresa | 05 Frontend |
 

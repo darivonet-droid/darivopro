@@ -1,8 +1,10 @@
-# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
+﻿# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.6
+**Versión:** 1.7
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.7 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 **Cambio principal (v1.6):** tercer plan renombrado de "Empresa" a **"Business"** (decisión del propietario, evita confusión con el producto Darivo Pro Empresa); incorporada la matriz oficial de funcionalidades por plan (Cotizaciones, Clientes, Catálogo, Facturación, IA por tipo, Usuarios); precios marcados explícitamente como provisionales/ejemplo.
 
@@ -69,6 +71,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones *(módulo actual)*

@@ -1,8 +1,10 @@
-# 02 – PANEL ADMIN – EMPRESAS
+﻿# 02 – PANEL ADMIN – EMPRESAS
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar; §8 actualiza el catálogo de planes de 2 a los 3 planes reales (Básico/Pro/Business). Módulo migrado en código de lectura de `perfiles` a la tabla real `empresas` (cambiar plan / activar / desactivar).
 
 ---
 
@@ -79,6 +81,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones
@@ -170,7 +173,7 @@ La gestión de usuarios pertenece exclusivamente al módulo **Usuarios**.
 
 ## Catálogo de planes
 
-El catálogo oficial de planes (**Básico** y **Pro**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
+El catálogo oficial de planes (**Básico**, **Pro** y **Business**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 (fuente única de precios y límites — no duplicar aquí).
 
 Este módulo utiliza ese catálogo para el campo "Plan" asociado a cada empresa.
 

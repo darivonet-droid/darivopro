@@ -1,8 +1,10 @@
-# 07 – PANEL ADMIN – EMPLEADOS
+﻿# 07 – PANEL ADMIN – EMPLEADOS
 
-**Versión:** 1.0
+**Versión:** 1.1
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.1 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 ---
 
@@ -63,6 +65,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones

@@ -1,8 +1,10 @@
-# 08 – PANEL ADMIN – CONFIGURACIÓN DE APIs
+﻿# 08 – PANEL ADMIN – CONFIGURACIÓN DE APIs
 
-**Versión:** 2.1
+**Versión:** 2.2
 
 **Estado:** ✅ Registro oficial de APIs — decisión propietario (02/07/2026)
+
+**Cambio principal (v2.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 ---
 
@@ -65,6 +67,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones

@@ -1,8 +1,8 @@
-# 09 – PANEL ADMIN – SOPORTE
+﻿# 09 – PANEL ADMIN – SOPORTE
 
-**Versión:** 1.1
+**Versión:** 1.2
 
-**Estado:** Diseño oficial aprobado
+**Estado:** Diseño oficial aprobado. Endpoint desactivado a propósito (INC-A01) — este documento solo corrige los estados a los reales de BD, no reactiva el pipeline.
 
 ---
 
@@ -63,6 +63,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones
@@ -95,9 +96,12 @@ No existen prioridades.
 
 ## Estados
 
-* Nuevo
-* En proceso
+Estados reales de `soporte_tickets` (`supabase/migrations/20260705120000_baseline_v2.sql`, CHECK de la columna `estado`):
+
+* Abierto
+* En progreso
 * Resuelto
+* Cerrado
 
 ## Modelo oficial — Soporte Humano (segundo nivel)
 
@@ -112,7 +116,7 @@ El **Soporte Humano** podrá:
 * Comunicarse con el usuario.
 * Solicitar información adicional.
 * Resolver incidencias técnicas.
-* Cerrar el ticket una vez solucionado (estado **Resuelto**).
+* Marcar el ticket como solucionado (estado **Resuelto**) y cerrarlo (estado **Cerrado**).
 
 > La IA de Soporte **nunca inventa soluciones sin certeza** y deriva automáticamente al soporte humano mediante ticket cuando no puede resolver.
 
@@ -148,9 +152,10 @@ Soporte no duplica la información del módulo Usuarios.
 
 ## Resumen
 
-* Nuevo
-* En proceso
+* Abierto
+* En progreso
 * Resuelto
+* Cerrado
 
 ## Información
 
@@ -190,7 +195,7 @@ No documentar funcionalidades adicionales sin aprobación.
 * Los usuarios acceden al soporte desde **Más → Soporte** y desde el **Módulo IA** — card Soporte con IA (`07-MODULO-MAS.md` §8 · `08-MODULO-IA.md` §6, §11).
 * **Primer nivel:** IA de Soporte (Agente IA 2) — preguntas frecuentes, uso de la app, incidencias comunes, creación y consulta de tickets.
 * **Segundo nivel:** este módulo (Soporte Humano) — tickets escalados o creados manualmente.
-* Estados oficiales del ticket: **Nuevo**, **En proceso**, **Resuelto** (§5 de este documento).
+* Estados oficiales del ticket (reales en BD): **Abierto**, **En progreso**, **Resuelto**, **Cerrado** (§5 de este documento).
 
 ## Otras relaciones
 
@@ -242,11 +247,13 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 
 # 14. Estado del documento
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 🟡 Documento de diseño oficial.
 
 **Cambio principal (v1.1):** modelo oficial Soporte Humano (segundo nivel), escalado desde IA de Soporte, regla de no inventar soluciones y relación actualizada con Móvil v1.6.
+
+**Cambio principal (v1.2 — 09/07/2026):** corrección puramente documental. Este MD documentaba 3 estados (Nuevo/En proceso/Resuelto); la tabla real `soporte_tickets` tiene 4 (`Abierto`/`En progreso`/`Resuelto`/`Cerrado`, CHECK en `20260705120000_baseline_v2.sql`). Se actualizan §5, §7 y §9 a los estados reales. No se reactiva el endpoint de Soporte (desactivado a propósito por INC-A01) — este cambio es solo de documentación, sin efecto en código.
 
 La documentación funcional se completará cuando el resto de documentos oficiales del proyecto estén finalizados y aprobados.
 

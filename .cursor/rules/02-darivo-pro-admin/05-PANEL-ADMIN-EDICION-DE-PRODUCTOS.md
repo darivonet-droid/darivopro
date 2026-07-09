@@ -1,8 +1,8 @@
 # 05 – PANEL ADMIN – EDICIÓN DE PRODUCTOS
 
-**Versión:** 1.0
+**Versión:** 1.1
 
-**Estado:** ✅ Documento oficial — aprobado por el propietario (05/07/2026). Pendiente únicamente de imagen oficial (§2).
+**Estado:** ✅ Documento oficial — aprobado por el propietario (05/07/2026). Pendiente únicamente de imagen oficial (§2). Código implementado (`frontend/src/app/admin/productos/`).
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §3, §3.1, §3.2, §4, §11 · `02-BASE-DATOS.md` §4.7 · `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO.md` §4.1 · `10-PANEL-ADMIN-CATALOGO-MAESTRO.md`
 
@@ -11,6 +11,7 @@
 ## Historial de aprobación
 
 * **05/07/2026:** número oficial **05** asignado en `INDICE-OFICIAL-PANEL-ADMIN.md` v1.5. Esquema de columnas de `productos_master` definido en `02-BASE-DATOS.md` v2.1. Doc 21 ya incorporaba la jerarquía desde su v1.3 (§4.1). Corregida la lista de productos: **el Programa Partner no participa** (`01-VISION-DEL-PRODUCTO.md` §3.2) — se elimina de todas las listas de este documento respecto a la versión propuesta original.
+* **09/07/2026 (v1.1):** el esquema real de `productos_master` (`supabase/migrations/20260705120000_baseline_v2.sql`) es `id, slug, nombre, descripcion, activo, created_at` — **no existen** las columnas `codigo`, `orden` ni `updated_at` documentadas en v1.0. Este MD ya no reflejaba el esquema real de BD (que prevalece siempre — `CLAUDE.md` §"Fuente de verdad del esquema"). Se reemplazan las referencias a `codigo` por `slug` y se marcan `orden`/`updated_at` como no implementadas en §7 y §9. Módulo ya construido en código (`frontend/src/app/admin/productos/`, `frontend/src/lib/admin-queries.ts`).
 
 ---
 
@@ -53,6 +54,19 @@ Pendiente de imagen oficial (§2). Mientras tanto, se aplican las reglas general
 
 Número oficial: **05** (`INDICE-OFICIAL-PANEL-ADMIN.md` v1.5).
 
+* Dashboard
+* Productos *(módulo actual)*
+* Catálogo Maestro
+* Usuarios
+* Gestión de Suscripciones
+* Roles y Permisos
+* Empresas
+* Empleados
+* Configuración de APIs
+* Partners
+* Soporte
+* Configuración
+
 ---
 
 # 5. Estructura de la pantalla
@@ -80,12 +94,12 @@ No existe acción "Nuevo producto": los 3 productos del ecosistema están defini
 Por producto:
 
 * Nombre del producto
-* Código interno (`codigo`)
+* Identificador interno (`slug`) — antes documentado como `codigo` en v1.0, no existe esa columna en BD
 * Descripción
 * Estado (Activo / Inactivo)
 * Número de categorías asociadas (`catalogo_categorias_maestro` vía `producto_id`)
-* Última actualización
-* Usuario que realizó la actualización
+* ~~Última actualización~~ — no implementada, `productos_master` no tiene columna `updated_at`
+* ~~Usuario que realizó la actualización~~ — no implementada, sin tabla de auditoría
 
 ---
 
@@ -122,19 +136,20 @@ Según `01-VISION-DEL-PRODUCTO.md` §3: **Darivo Pro Admin, Darivo Pro Móvil, D
 
 Tabla: `productos_master` (`02-BASE-DATOS.md` §4.7).
 
-Esquema oficial (v1):
+Esquema real (v1.1, verificado en `supabase/migrations/20260705120000_baseline_v2.sql` — prevalece sobre cualquier versión anterior de este MD):
 
 | Columna | Tipo | Notas |
 |---|---|---|
 | `id` | uuid PK | `uuid_generate_v4()` |
+| `slug` | text UNIQUE NOT NULL | Identificador interno — `movil`, `admin`, `empresa`. Reemplaza a `codigo`, que **no existe** en BD. |
 | `nombre` | text NOT NULL | Ej. "Darivo Pro Móvil" |
-| `codigo` | text UNIQUE NOT NULL | Slug interno — `movil`, `admin`, `empresa` |
 | `descripcion` | text NULL | Opcional |
 | `activo` | boolean DEFAULT true | |
-| `orden` | integer DEFAULT 0 | Orden de visualización |
-| `created_at` / `updated_at` | timestamptz | Estándar |
+| `created_at` | timestamptz | Estándar |
 
-Este panel edita `nombre`, `codigo`, `descripcion`, `activo` y `orden` de las 3 filas ya existentes (Móvil, Admin, Empresa). No crea ni elimina filas.
+**No existen** `orden` ni `updated_at` — quedan fuera del esquema real hasta que se apruebe y ejecute una migración que las añada.
+
+Este panel edita `nombre`, `descripcion` y `activo` de las 3 filas ya existentes (Móvil, Admin, Empresa). `slug` no se edita (clave funcional referenciada por FKs del Catálogo Maestro). No crea ni elimina filas.
 
 ---
 
@@ -165,9 +180,10 @@ Este MD no define permisos propios; los permisos oficiales del ecosistema están
 
 # 13. Estado del documento
 
-✅ **Documento oficial completo**, salvo:
+✅ **Documento oficial completo y sincronizado con el esquema real de BD (v1.1)**, salvo:
 
 * Imagen oficial (§2) — único punto pendiente.
+* Historial de cambios / auditoría (§7) — no implementado, requiere `updated_at` y tabla de auditoría (fuera de alcance sin migración aprobada).
 
 ---
 

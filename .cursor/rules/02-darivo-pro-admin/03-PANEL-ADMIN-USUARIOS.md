@@ -1,8 +1,10 @@
-# 03 – PANEL ADMIN – USUARIOS
+﻿# 03 – PANEL ADMIN – USUARIOS
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar; catálogo de planes actualizado de 2 a los 3 planes reales (Básico/Pro/Business).
 
 ---
 
@@ -63,6 +65,7 @@ No modificar:
 # 4. Navegación del Panel Administrador
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios *(módulo actual)*
 * Gestión de Suscripciones
@@ -154,7 +157,7 @@ Este módulo forma parte del Panel Administrador.
 
 ## Catálogo de planes
 
-El catálogo oficial de planes (**Básico** y **Pro**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
+El catálogo oficial de planes (**Básico**, **Pro** y **Business**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 (fuente única de precios y límites — no duplicar aquí).
 
 Este módulo utiliza ese catálogo para el campo "Plan" asociado a cada usuario y para la acción "Cambiar plan".
 

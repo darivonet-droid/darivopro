@@ -1,10 +1,12 @@
 ﻿# ÍNDICE OFICIAL — PANEL ADMINISTRADOR — DARIVO PRO
 
-**Versión:** 1.5
+**Versión:** 1.6
 
 **Estado:** Aprobado por el propietario — sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.13
 
 **Cambio principal (v1.5):** número **05** asignado oficialmente a "Edición de Productos" (`05-PANEL-ADMIN-EDICION-DE-PRODUCTOS.md`), aprobado por el propietario.
+
+**Cambio principal (v1.6 — 09/07/2026):** corrección documental. §5 no reflejaba la entrada real "Productos" del sidebar (`AdminShell.tsx`) — añadida entre Dashboard y Catálogo Maestro. §6 (C1) actualizado de 2 a los 3 planes reales (Básico/Pro/Business).
 
 ---
 
@@ -58,6 +60,7 @@ Gestión exclusiva de la cuenta del administrador (perfil y credenciales de acce
 Orden del menú lateral (referencia):
 
 * Dashboard
+* Productos
 * Catálogo Maestro
 * Usuarios
 * Gestión de Suscripciones
@@ -85,7 +88,7 @@ Los documentos eliminados o archivados no deben utilizarse como fuente de refere
 
 | Referencia | Descripción |
 | ---------- | ----------- |
-| **C1 — Nombres de planes** | ✅ RESUELTO. Catálogo oficial: **Básico / Pro** (únicos planes v1). Fuente única: `04-PANEL-ADMIN-SUSCRIPCIONES.md`. |
+| **C1 — Nombres de planes** | ✅ RESUELTO. Catálogo oficial: **Básico / Pro / Business** (3 planes). Fuente única de precios y límites: `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6. |
 | **Referidos vs Partners** | ✅ RESUELTO. "Referidos" es el nombre antiguo del Programa Partner; queda eliminado del ecosistema (`01-VISION-DEL-PRODUCTO.md` §3.2). Acción "Ver referidos" del Dashboard renombrada a "Ver Partners" (`00-PANEL-ADMIN-DASHBOARD.md` v1.1). |
 | **Vista operacional Suscripciones** | Diseño de tabla por usuario pendiente de incorporar a `04` una vez resuelto C1. |
 | **Soporte usuario (Darivo Pro)** | ✅ RESUELTO. Formulario y consulta documentados en `07-MODULO-MAS.md` §6 (Soporte). |
@@ -95,9 +98,11 @@ Los documentos eliminados o archivados no deben utilizarse como fuente de refere
 
 # 7. Estado del documento
 
-**Versión:** 1.5
+**Versión:** 1.6
 
 Índice oficial aprobado.
+
+**Cambio principal (v1.6):** añadida entrada "Productos" a la navegación oficial (§5); actualizado C1 a los 3 planes reales (§6).
 
 **Cambio principal (v1.5):** asignado número 05 a "Edición de Productos".
 
