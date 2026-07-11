@@ -1,12 +1,14 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 2.1
+**Versión:** 2.2
 
-**Fecha:** 05/07/2026
+**Fecha:** 10/07/2026
 
-**Estado:** Documento técnico oficial — esquema V2 (32 tablas) · inicio producto
+**Estado:** Documento técnico oficial — esquema V2 (33 tablas) · inicio producto
 
 **Cambio principal (v2.1):** definido esquema mínimo de columnas de `productos_master` (§4.7) para soportar el nuevo módulo Admin de Edición de Productos (05).
+
+**Cambio v2.2 (10/07/2026, auditoría BD):** corregida §9 — `comprobante_series` no tiene política `SELECT autenticados` (contradecía la migración real); RLS es deny-all salvo la función `SECURITY DEFINER` `asignar_inv_num()`, confirmado como diseño intencional (ningún panel la consulta directamente).
 
 **Referencia:** `01-VISION-DEL-PRODUCTO.md` v2.6 §14 · `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` §7 · `03-AUTENTICACION-DARIVO-PRO.md` v1.0 · `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.1
 
@@ -326,7 +328,7 @@ empresas · partners · soporte_* · suscripciones · gastos (ecosistema multi-p
 | presupuesto_items | subquery cotización del usuario |
 | clientes | 4 políticas CRUD explícitas |
 | productos_master, configuracion_regional, catalogo_* | SELECT autenticados; admin vía `is_darivo_admin()` |
-| comprobante_series | SELECT autenticados (sin aislamiento por tenant) |
+| comprobante_series | **Deny-all** — RLS activo, sin políticas `CREATE POLICY`. Acceso exclusivo vía función `SECURITY DEFINER` `asignar_inv_num()`. Corregido 10/07/2026: el MD decía "SELECT autenticados", la migración real (`20260705120000_baseline_v2.sql`) nunca creó esa política — verificado que ningún panel (Móvil/Empresa/Admin/Partner) consulta esta tabla directamente, así que el deny-all es el diseño intencional, no un bug. |
 
 ---
 
