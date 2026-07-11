@@ -239,6 +239,38 @@ Una vez `info@darivopro.com` esté operativo:
 3. Rellenar todos los corchetes `[...]` de ambos documentos (razón social, NIF, email de contacto).
 4. Confirmar que un abogado ha revisado ambos documentos — son borradores de IA, no válidos para publicar tal cual.
 
+## Cuenta de prueba QA (permanente)
+
+Para probar cualquier feature (facturación, IA, roles personalizados, Empresa) sin depender de una cuenta real:
+
+- **Email:** `demo@darivopro.com`
+- **Plan:** `business` (acceso total — facturación, IA ilimitada, roles personalizados, producto Empresa)
+- **Contraseña:** definida por Mohamed al crear el usuario, no versionada en este repo — no la pidas ni la escribas aquí si te la comparte.
+- **Creación:** Supabase Dashboard → Authentication → Users → Add user (email de arriba, contraseña a elección, "Auto Confirm User"). El trigger `handle_new_user()` crea el `perfiles` automáticamente en plan `gratis`/`onboarding_done=false` — después de crear el usuario, correr en el SQL Editor:
+  ```sql
+  UPDATE public.perfiles
+  SET plan_tipo = 'business', onboarding_done = true, razon_social = 'Constructora Demo QA'
+  WHERE id = (SELECT id FROM auth.users WHERE email = 'demo@darivopro.com');
+  ```
+- **Datos de ejemplo:** un cliente + una cotización de muestra (para probar historial de cliente, "Re-cotizar" y PDF desde el primer momento) — SQL opcional:
+  ```sql
+  WITH u AS (SELECT id FROM auth.users WHERE email = 'demo@darivopro.com'),
+  c AS (
+    INSERT INTO public.clientes (user_id, nombre, telefono, ciudad)
+    SELECT id, 'Cliente Demo QA', '51987654321', 'Lima' FROM u
+    RETURNING id, user_id
+  ),
+  q AS (
+    INSERT INTO public.cotizaciones (user_id, cliente_id, client_name, phone, city, margin, total_base, total_labor, total_final, status)
+    SELECT c.user_id, c.id, 'Cliente Demo QA', '51987654321', 'Lima', 40, 850, 340, 1190, 'Aprobado' FROM c
+    RETURNING id
+  )
+  INSERT INTO public.cotizacion_items (cotizacion_id, svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)
+  SELECT q.id, 'alb-muro', 'Albañilería', 'Muro de ladrillo', 'm2', 85, 'm²', 10, 85, 850 FROM q;
+  ```
+  La factura de prueba es mejor crearla en vivo desde la app (prueba el flujo real de numeración/detracción/PDF) en vez de insertarla directo en BD.
+- No documentar aquí ninguna otra cuenta de prueba — reutilizar siempre `demo@darivopro.com` para que quede permanente entre sesiones.
+
 ## Bloqueado — no iniciar sin confirmación explícita
 
 - Conexión API Claude/Anthropic para los Agentes IA 1 y 2: decisión de arquitectura pendiente (¿sustituye o convive con OpenAI?).
