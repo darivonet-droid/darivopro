@@ -1,10 +1,12 @@
 # 08 – PAGOS – IMPLEMENTACIÓN DARIVO PRO
 
-**Versión:** 1.0
+**Versión:** 1.1
 
 **Fecha:** 03/07/2026
 
 **Estado:** Documento técnico oficial — capa de implementación
+
+**Cambio principal (v1.1 — 11/07/2026):** corrección documental (auditoría 09/07/2026, Prioridad 3). El checkout ya soporta los 3 planes (`esPlanSuscripcionOficial` incluye `business` desde que el Plan Business se activó como plan real de autoservicio); este documento seguía documentando solo Básico/Pro. Precios actualizados a los de `roles-planes-oficial.ts` (Básico S/49, no S/39).
 
 **Referencias:**
 
@@ -17,7 +19,7 @@
 
 # 1. Objetivo
 
-Documentar la **integración oficial dLocal Go API** para suscripciones Básico/Pro: checkout, webhook y activación de `plan_tipo`.
+Documentar la **integración oficial dLocal Go API** para suscripciones Básico/Pro/Business: checkout, webhook y activación de `plan_tipo`.
 
 **No se modifica** la lógica de límites por plan (`plan-limits.ts`).
 
@@ -64,7 +66,7 @@ frontend/src/components/mas/MiPlanCard.tsx — UI Mi Plan
 
 **Ruta:** `POST /api/pagos/checkout`
 
-**Entrada:** `{ plan: "basico"|"pro", ciclo: "mensual"|"anual" }`
+**Entrada:** `{ plan: "basico"|"pro"|"business", ciclo: "mensual"|"anual" }`
 
 **Autenticación:** Supabase session obligatoria.
 
@@ -75,7 +77,7 @@ frontend/src/components/mas/MiPlanCard.tsx — UI Mi Plan
 
 **order_id:** `darivo-{userId}-{plan}-{ciclo}-{timestamp}` para correlación en webhook.
 
-**Precios:** `PRECIOS_OFICIALES` (04 §6) — Básico S/39·390 · Pro S/79·790.
+**Precios:** `PRECIOS_OFICIALES` (04 §6) — Básico S/49·490 *(provisional)* · Pro S/79·790 *(provisional)* · Business S/120·1200 *(definitivo, confirmado 11/07/2026)*.
 
 ---
 

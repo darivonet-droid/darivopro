@@ -1,10 +1,12 @@
 # 04 – ROLES, PLANES Y PERMISOS – DARIVO PRO
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Fecha:** 05/07/2026
 
 **Estado:** Documento técnico oficial — implementación Darivo Pro Móvil (capa de límites y catálogo)
+
+**Cambio principal (v1.3 — 11/07/2026):** corrección documental (auditoría 09/07/2026, Prioridad 3). §3 tenía precios desincronizados de `roles-planes-oficial.ts` (Básico S/39 en vez de S/49) y no incluía la fila del plan **Business** (precio definitivo S/120, confirmado 11/07/2026). §4 seguía documentando `empresa` como "valor técnico legacy" pese a que la migración `20260706123000_plan_tipo_business.sql` (ya reconocida como resuelta en el changelog v1.2 de este mismo documento) renombró ese valor a `business` en el CHECK constraint real de `perfiles.plan_tipo` y `suscripciones.plan_tipo` — `empresa` ya no es un valor válido en BD.
 
 **Cambio principal (v1.2 — 09/07/2026):** corrección documental. DT-04-04 marcada ✅ resuelta (migración `20260706123000_plan_tipo_business.sql`). §5.1 y §6 corrigen referencias residuales a `verificarLimitePresupuesto`/tabla `presupuestos` por `verificarLimiteCotizacion`/`cotizaciones` (la migración de terminología ya está completa en código, este MD no lo reflejaba).
 
@@ -59,8 +61,9 @@ Constantes: `frontend/src/lib/roles-planes-oficial.ts` → `ROLES_PLATAFORMA`, `
 
 | Plan | Mensual | Anual | Límites Móvil |
 |------|---------|-------|---------------|
-| **Básico** | S/39 | S/390 | 20 cotizaciones/mes · 10 facturas/mes · 3 IA/día |
-| **Pro** | S/79 | S/790 | Ilimitado (cotizaciones, facturas, IA) |
+| **Básico** | S/49 *(provisional)* | S/490 | 20 cotizaciones/mes · facturación no incluida · 5 IA/día |
+| **Pro** | S/79 *(provisional)* | S/790 | Ilimitado (cotizaciones, facturas, IA) |
+| **Business** | S/120 *(definitivo, confirmado 11/07/2026)* | S/1200 | Todo lo de Pro + acceso a Darivo Pro Empresa (1 Gerente + hasta 5 Técnicos, roles personalizados) |
 
 **Prohibido** en documentación y UI comercial: Premium, Plan Prueba, Plan Autónomo, Plan Empresa, etc. (04 §6). Planes oficiales: Básico, Pro y Business.
 
@@ -83,9 +86,11 @@ Columna `perfiles.plan_tipo` (migración 005):
 | `gratis` | Sin suscripción de pago (default al registrarse) | 5 cotizaciones **totales** · 3 IA/día · facturas sin límite mensual en código |
 | `basico` | Plan Básico activo | Según §3 |
 | `pro` | Plan Pro activo | Ilimitado |
-| `empresa` | **Valor técnico legacy** — NO es plan comercial | Tratado como Pro para límites hasta decisión propietario / Tarea 08 |
+| `business` | Plan Business activo | Ilimitado + acceso a Darivo Pro Empresa (según §3) |
 
 **Nota:** `gratis` no es un plan comercial; es el estado previo a suscripción (onboarding: 5 cotizaciones).
+
+**Nota (11/07/2026):** el valor legacy `empresa` ya no existe en BD — la migración `20260706123000_plan_tipo_business.sql` lo renombró a `business` y el CHECK constraint de `perfiles.plan_tipo`/`suscripciones.plan_tipo` solo acepta `gratis`, `basico`, `pro`, `business`.
 
 **Darivo Pro Empresa** es un **producto** del ecosistema (escritorio), no un plan de suscripción. En `/precios` se muestra bloque de contacto (`CONTACTO_PRODUCTO_EMPRESA`), no tarjeta de precio.
 

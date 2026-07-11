@@ -167,8 +167,8 @@ Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificació
 
 ### Prioridad 3 — Contradicciones de precio/nombre entre MD
 
-- [ ] **Precio Básico: S/39 vs S/49.** Un MD de roles/permisos dice S/39; `04-PANEL-ADMIN-SUSCRIPCIONES.md` y el código dicen S/49. Unificar a S/49 (el que está en código) en el MD que lo tenga mal.
-- [ ] **Nombre del 3er plan inconsistente dentro del mismo MD** — aparece como "Empresa" (cabecera), "Business" (cuerpo) y "empresa=legacy no comercial" en otra sección. BD y código usan `business`. Unificar a "Business" en todo ese documento.
+- [x] **Precio Básico: S/39 vs S/49.** ✅ Resuelto (11/07/2026, sesión continua): `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md` §3 tenía S/39 (v1.3) — unificado a S/49, añadida fila Business (S/120, definitivo) que faltaba. `08-PAGOS-DARIVO-PRO.md` (v1.1) también corregido (mismo precio stale + checkout ya soporta `business`, solo documentaba Básico/Pro). **Pendiente, no tocado:** `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 sigue marcando S/49 y S/115–120 como "ejemplo/no decidido" pese a que Business ya tiene precio definitivo en código — este documento tiene protección explícita ("queda prohibido modificar por iniciativa propia... informar al propietario y esperar instrucciones"), así que se informa aquí en vez de editarlo: Mohamed debe confirmar y actualizar esa tabla él mismo (o autorizar el cambio explícitamente).
+- [x] **Nombre del 3er plan inconsistente dentro del mismo MD** — ✅ Resuelto junto con el punto anterior: `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md` §4 documentaba `empresa` como "valor técnico legacy", pese a que la migración `20260706123000_plan_tipo_business.sql` ya renombró ese valor a `business` en el CHECK constraint real (confirmado leyendo la migración). Corregido a `business` en todo el documento.
 
 ### Prioridad 4 — Documentación desactualizada (no bloquea producto)
 
