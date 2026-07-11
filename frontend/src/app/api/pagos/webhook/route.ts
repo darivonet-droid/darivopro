@@ -4,12 +4,15 @@ import { activarPlanUsuario, userIdPorEmail } from "@/lib/activar-plan";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   ESTADOS_PAGO_EXITOSO,
+  ESTADOS_PAGO_FALLIDO,
   parseOrderId,
 } from "@/lib/pagos-suscripcion";
 import {
   esPlanSuscripcionOficial,
+  PRECIOS_OFICIALES,
   type PlanSuscripcionOficial,
 } from "@/lib/roles-planes-oficial";
+import { enviarPagoConfirmado, enviarPagoFallido, enviarCambioPlan } from "@/lib/email/send";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -89,6 +92,31 @@ async function registrarPagoEvento(opts: {
   }
 }
 
+/** Email + nombre para las notificaciones — usa el payload si trae email, si no consulta Auth. */
+async function obtenerContactoUsuario(
+  userId: string,
+  payload: JsonRecord
+): Promise<{ email: string; nombre: string } | null> {
+  const emailPayload = extractEmail(payload);
+  const admin = createAdminClient();
+
+  const { data: perfil } = await admin
+    .from("perfiles")
+    .select("razon_social")
+    .eq("id", userId)
+    .maybeSingle();
+
+  let email = emailPayload;
+  if (!email) {
+    const { data } = await admin.auth.admin.getUserById(userId);
+    email = data?.user?.email ?? undefined;
+  }
+  if (!email) return null;
+
+  const nombre = perfil?.razon_social?.trim() || email.split("@")[0];
+  return { email, nombre };
+}
+
 /** Inferir plan desde nombre del plan dLocal (tokens env en dashboard) */
 function planDesdeNombre(name: string | undefined): PlanSuscripcionOficial | null {
   if (!name) return null;
@@ -157,6 +185,19 @@ export async function POST(req: NextRequest) {
     await registrarPagoEvento({ userId, status, orderId, payload });
   }
 
+  // Pago fallido — email best-effort, no bloquea la respuesta del webhook.
+  if (status && ESTADOS_PAGO_FALLIDO.has(status) && userId) {
+    const contacto = await obtenerContactoUsuario(userId, payload);
+    if (contacto) {
+      await enviarPagoFallido(contacto.email, {
+        nombre: contacto.nombre,
+        monto: extractAmount(payload),
+        moneda: extractMoneda(payload),
+        plan: plan ? PRECIOS_OFICIALES[plan].nombre : "Darivo Pro",
+      });
+    }
+  }
+
   if (!status || !ESTADOS_PAGO_EXITOSO.has(status)) {
     return NextResponse.json({ received: true, action: "ignored", status });
   }
@@ -166,9 +207,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, action: "unmatched" });
   }
 
+  // Plan anterior — para saber si corresponde el email de "cambio de plan"
+  // (evita mandarlo si el usuario ya estaba en ese mismo plan, p.ej. un
+  // reintento de webhook duplicado).
+  const admin = createAdminClient();
+  const { data: perfilAntes } = await admin
+    .from("perfiles")
+    .select("plan_tipo")
+    .eq("id", userId)
+    .maybeSingle();
+  const planAnterior = perfilAntes?.plan_tipo as PlanSuscripcionOficial | "gratis" | undefined;
+
   const result = await activarPlanUsuario(userId, plan);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  // Emails best-effort — nunca bloquean la respuesta del webhook.
+  const contacto = await obtenerContactoUsuario(userId, payload);
+  if (contacto) {
+    await enviarPagoConfirmado(contacto.email, {
+      nombre: contacto.nombre,
+      monto: extractAmount(payload) ?? PRECIOS_OFICIALES[plan].mensual,
+      moneda: extractMoneda(payload),
+      plan: PRECIOS_OFICIALES[plan].nombre,
+    });
+    if (planAnterior && planAnterior !== plan) {
+      await enviarCambioPlan(contacto.email, {
+        nombre: contacto.nombre,
+        planAnterior:
+          planAnterior === "gratis" ? "Gratis" : PRECIOS_OFICIALES[planAnterior].nombre,
+        planNuevo: PRECIOS_OFICIALES[plan].nombre,
+      });
+    }
   }
 
   return NextResponse.json({ received: true, action: "plan_activated", plan });

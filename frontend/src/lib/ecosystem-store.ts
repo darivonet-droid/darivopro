@@ -18,6 +18,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { activarPlanUsuario, revocarBusinessSiFueRegaloPartner } from "@/lib/activar-plan";
+import { enviarBienvenidaPartner } from "@/lib/email/send";
 import type { EstadoPartner, PartnerRegistro } from "@/lib/partners-types";
 
 interface PartnerRow {
@@ -138,6 +139,14 @@ export async function updatePartnerEstado(
   estado: EstadoPartner
 ): Promise<PartnerRegistro | null> {
   const admin = createAdminClient();
+
+  const { data: antes } = await admin
+    .from("partners")
+    .select("estado")
+    .eq("id", id)
+    .maybeSingle();
+  const estadoAnterior = (antes as { estado: EstadoPartner } | null)?.estado;
+
   const { data, error } = await admin
     .from("partners")
     .update({ estado })
@@ -154,6 +163,16 @@ export async function updatePartnerEstado(
     } else {
       await revocarBusinessSiFueRegaloPartner(partner.id, partner.user_id);
     }
+  }
+
+  // Email de Bienvenida Partner — solo en la transición real a Activo, no en
+  // cada guardado repetido del mismo estado.
+  if (estado === "Activo" && estadoAnterior !== "Activo") {
+    await enviarBienvenidaPartner(partner.email, {
+      nombre: partner.nombre,
+      codigo: partner.codigo,
+      enlace: partner.enlace,
+    });
   }
 
   return mapPartner(admin, partner);

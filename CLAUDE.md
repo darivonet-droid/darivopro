@@ -289,6 +289,25 @@ Para probar cualquier feature (facturación, IA, roles personalizados, Empresa) 
   La factura de prueba es mejor crearla en vivo desde la app (prueba el flujo real de numeración/detracción/PDF) en vez de insertarla directo en BD.
 - No documentar aquí ninguna otra cuenta de prueba — reutilizar siempre `demo@darivopro.com` para que quede permanente entre sesiones.
 
+## Email transaccional (Gmail API) — construido 12/07/2026, pendiente de contenido y setup
+
+Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, `templates.ts`, `send.ts`) — domain-wide delegation (1 credencial de Google Cloud sirve para las 5 cuentas info@/facturacion@/noreply@/partners@/soporte@, no 5 OAuth consent flows separados).
+
+**Conectado a eventos reales (7 de 9):**
+1. Bienvenida (info@) — `registro/page.tsx`, solo en el flujo de sesión inmediata (ver nota en `auth/callback/route.ts` sobre por qué el flujo de confirmación por correo no está cubierto — comparte ruta con el login de Google, sin señal fiable para distinguir registro nuevo de login recurrente).
+2–3. Pago confirmado / Pago fallido (facturacion@) — `api/pagos/webhook/route.ts`.
+5. Cambio de plan (noreply@) — mismo webhook, solo si el plan realmente cambió.
+6. Bienvenida Partner (partners@) — `ecosystem-store.ts` `updatePartnerEstado`, solo en la transición real a Activo.
+7. Comisión ganada (partners@) — `api/webhooks/supabase/partner-comision/route.ts`, nuevo endpoint.
+
+**Pendiente, no se puede resolver desde código — requiere que Mohamed:**
+- Complete el setup de Google Cloud + Workspace (cuenta de servicio, domain-wide delegation) — pasos exactos documentados en `gmail-client.ts`. Sin esto, cualquier envío falla con error claro (no en silencio).
+- Configure el Database Webhook de Supabase para el evento 7 (Dashboard → Database → Webhooks → tabla `partner_comisiones_historial`, INSERT) — pasos en `partner-comision/route.ts`.
+- Reenvíe los 9 textos aprobados — `templates.ts` tiene copy funcional pero **placeholder**, no el texto final.
+- Confirme la plantilla de reset de contraseña (evento 4, noreply@): ya la envía Supabase Auth automáticamente; personalizarla es config de Supabase Dashboard → Authentication → Email Templates, no código.
+
+**Bloqueado, no construido:** Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11 "No crear endpoints"), no existe ningún evento real de creación/resolución al que enganchar el envío. Las plantillas ya están listas en `templates.ts` para el día que se decida reconstruir ese backend.
+
 ## Bloqueado — no iniciar sin confirmación explícita
 
 - Conexión API Claude/Anthropic para los Agentes IA 1 y 2: decisión de arquitectura pendiente (¿sustituye o convive con OpenAI?).

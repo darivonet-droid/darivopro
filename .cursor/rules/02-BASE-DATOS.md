@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 3.2
+**Versión:** 3.3
 
 **Fecha:** 12/07/2026
 
 **Estado:** Documento técnico oficial — esquema V2 (34 tablas) · inicio producto
+
+**Cambio principal (v3.3 — 12/07/2026):** corregido §4.7 — `partner_comisiones` estaba documentada como "tabla de tarifas oficiales", contradiciendo la decisión de negocio ya cerrada que la derogó por completo (`06-PANEL-ADMIN-PARTNERS.md` §5.1, 07/07/2026). Marcada explícitamente como no usar. Sin cambios de schema.
 
 **Cambio principal (v3.2 — 12/07/2026, autorizado por el propietario):** unificado el vocabulario `tipo` (español) de `partidas_propias` al vocabulario `calc_type` (inglés) ya oficial de `catalogo_partidas_maestro`/`cotizacion_items` — §4.5. Migración `20260712110000_unify_partidas_propias_calc_type.sql` (pendiente de ejecución por el propietario). Código frontend ya actualizado (10 archivos) en la misma sesión.
 
@@ -289,7 +291,7 @@ Metadata comercial: `id`, `slug` (UNIQUE), `nombre`, `precio_mensual`, `precio_a
 
 ### `partner_comisiones`
 
-Tabla de **tarifas** oficiales del programa Partners (no confundir con `partner_comisiones_historial`, §4.9): `id`, `rango_desde`, `rango_hasta`, `descripcion`, `comision_texto`, `orden`, `activo`, `created_at`.
+⚠️ **Derogada oficialmente (`06-PANEL-ADMIN-PARTNERS.md` §5.1, 07/07/2026): "Sustituye y deroga por completo cualquier tabla de comisiones anterior por tramo de registros... queda oficialmente eliminada — no debe volver a documentarse ni configurarse en el sistema."** Corregido 12/07/2026 — una versión anterior de este documento la presentaba como "tabla de tarifas oficiales", contradiciendo esa decisión de negocio ya cerrada. La tabla sigue existiendo físicamente en el schema (creada en el baseline, nunca eliminada por migración) pero **no debe leerse, escribirse ni referenciarse desde código nuevo**. El modelo real de comisiones (20% por venta + bonos por hito) vive en `partner_comisiones_historial` (§4.9, registro histórico) y como constantes en `frontend/src/lib/partners-types.ts` — nunca en esta tabla. Columnas heredadas del baseline (sin uso): `id`, `rango_desde`, `rango_hasta`, `descripcion`, `comision_texto`, `orden`, `activo`, `created_at`.
 
 ---
 
@@ -381,7 +383,7 @@ No es un producto (`01-VISION-DEL-PRODUCTO.md` §3.2) — componente del ecosist
 
 ### `partner_comisiones_historial`
 
-Añadida por `20260711120000_partner_comisiones_historial.sql` (`06-PANEL-ADMIN-PARTNERS.md` §5.2). **Registro inmutable** de cada comisión generada — no confundir con `partner_comisiones` (tabla de tarifas, §4.7).
+Añadida por `20260711120000_partner_comisiones_historial.sql` (`06-PANEL-ADMIN-PARTNERS.md` §5.2). **Registro inmutable** de cada comisión generada — no confundir con `partner_comisiones` (§4.7, tabla derogada oficialmente, no usar).
 
 | Columna | Tipo | Notas |
 |---|---|---|
@@ -609,7 +611,7 @@ Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase
 
 # 11. Estado del documento
 
-**Versión:** 3.2
+**Versión:** 3.3
 
 **Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (12/07/2026).
 

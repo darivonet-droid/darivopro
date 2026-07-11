@@ -87,6 +87,12 @@ export default function RegistroPage() {
       // (para que no se cancele por la navegación siguiente) pero un fallo
       // nunca bloquea el registro — el catch garantiza que igual redirige.
       await fetch("/api/partners/registrar-referido", { method: "POST" }).catch(() => {});
+      // Email de Bienvenida — best-effort, nunca bloquea el registro.
+      // (Este es el único punto de "registro completado" sin ambigüedad; el
+      // flujo de confirmación por correo comparte /auth/callback con el login
+      // de Google y no tiene todavía una señal fiable para distinguir un
+      // registro nuevo de un inicio de sesión recurrente — ver nota en esa ruta.)
+      await fetch("/api/emails/bienvenida", { method: "POST" }).catch(() => {});
       window.location.assign("/onboarding/1");
       return;
     }

@@ -1,4 +1,13 @@
-// DARIVO PRO — Callback Supabase Auth (confirmación email, magic links)
+// DARIVO PRO — Callback Supabase Auth (confirmación email, login Google OAuth)
+//
+// Nota (12/07/2026): esta ruta también la usa el login con Google (ver
+// login/page.tsx), no solo la confirmación de registro nuevo. El email de
+// Bienvenida (info@) NO se dispara aquí por eso — no hay todavía una señal
+// fiable para distinguir "primera confirmación de una cuenta nueva" de "un
+// usuario existente volviendo a entrar por Google", y enviarlo sin esa
+// distinción mandaría "Bienvenida" en cada login recurrente. Sí se dispara
+// en el flujo de registro con sesión inmediata (registro/page.tsx) — ver
+// frontend/src/lib/email/send.ts para el resto de eventos conectados.
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
