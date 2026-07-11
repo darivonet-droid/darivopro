@@ -15,6 +15,42 @@ Para todo lo demás (código de frontend/backend, commits a develop, buscar e im
 
 Toda migración que referencie columnas de una tabla ya existente debe incluir, como parte de la respuesta, el extracto literal del `CREATE TABLE` de esa tabla (con número de archivo y líneas), no solo la afirmación de que se verificó el schema. Si la tabla pudo haber sido modificada por `ALTER TABLE` en otra migración posterior, debe confirmarse explícitamente que no hay ningún `ALTER TABLE` que la afecte, listando el resultado de esa búsqueda. Sin este extracto, la migración no se considera verificada y no debe entregarse como final.
 
+## ESTADO REAL DEL PROYECTO (única fuente de verdad — actualizar al final de cada bloque de trabajo)
+
+*Última actualización: 12/07/2026, sesión continua.*
+
+### 🟢 Congelado — verificado, no revisar de nuevo salvo que el código cambie
+
+- Planes Básico (S/49, provisional) / Pro (S/79, provisional) / Business (S/120·S/1200, **definitivo**) — código, `/precios`, `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md`, `08-PAGOS-DARIVO-PRO.md`.
+- Terminología "IA" → "Calculadora inteligente" en todo el copy visible al usuario (Móvil, Empresa, Admin). Rutas y nombres internos (`/ia`, `08-MODULO-IA.md`) deliberadamente sin cambiar.
+- Logout real en los 4 paneles (Admin, Empresa, Partner, Móvil incl. menú principal de Más).
+- Migración de terminología `presupuesto`→`cotización` — BD y código, completa y confirmada.
+- Bug de facturación en plan `gratis` — ya bloqueaba correctamente antes de esta sesión.
+- Middleware de subdominios — preparado, apagado intencionalmente (DNS todavía no resuelve). No tocar hasta que se conecte el dominio.
+- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código ya migrado; falta solo ejecutar la migración SQL (ver abajo).
+- Wizard de cotización de 4 pasos + migración a tokens de design-system compartidos.
+- `02-BASE-DATOS.md` (v3.3), `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` (v3.5), `00-ECOSISTEMA-DARIVO-PRO.md` (v1.1) — regenerados/sincronizados contra el esquema y código reales.
+
+### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
+
+- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados. Pendiente: (1) Mohamed reenvía los 9 textos aprobados — hoy es placeholder funcional; (2) setup manual de Google Cloud + Workspace (domain-wide delegation); (3) configurar el Database Webhook de Supabase para "comisión ganada". Ver sección "Email transaccional" más abajo para el detalle completo.
+- **2 migraciones SQL escritas, pendientes de que el propietario las ejecute** en Supabase SQL Editor (nunca las ejecuto yo — regla permanente):
+  1. `supabase/migrations/20260712100000_fix_comision_venta_trigger_estado.sql` — corrige el trigger de comisiones Partner (comparaba contra un placeholder que nunca coincidía con los valores reales de dLocal).
+  2. `supabase/migrations/20260712110000_unify_partidas_propias_calc_type.sql` — renombra `partidas_propias.tipo` → `calc_type` con traducción de valores, preservando datos.
+
+### 🔴 Sin auditar / pendiente de decisión de negocio — no improvisar
+
+- **Backend de tickets de soporte** (`/api/soporte/tickets`) — deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11). Decisión pendiente: ¿se reconstruye? Bloquea los eventos de email 8-9 (ticket recibido/resuelto).
+- **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen marcados "provisional" (protección de propietario, no tocado sin autorización explícita nueva).
+- **Jerarquía Suscripción→Producto→Rol→Permisos** — solo implementada hasta la mitad (`MATRIZ_PERMISOS_APROBADA=false`). Activarla de verdad requiere decisión del propietario.
+- **Admin Usuarios** — módulo de solo lectura, sin ninguna de las 5 acciones que exige el MD.
+- **Admin Partners** — falta "Configurar tabla de comisiones" (hoy hardcodeado en código).
+- **Empresa Cotizaciones** — contradice el MD (sidebar + lista global cuando debe ser solo vía ficha de Cliente).
+- **Empresa Ficha de Cliente** — saca al Gerente del shell de escritorio hacia la UI de Móvil.
+- **Empresa Invitar empleado** — no otorga acceso real a Móvil, solo crea una fila.
+- **Panel Partner** — sin visibilidad de comisiones pendientes/pagadas pese a que el backend ya las genera; acceso no se revoca al suspender.
+- Ver la sección "Auditoría 12/07/2026 — Admin/Empresa/Partner" más abajo para el detalle completo de cada punto.
+
 ## Flujo de ramas (Git)
 
 Todo el trabajo se hace en la rama `develop`, nunca directamente en `main`. Cuando una tarea (o un conjunto de tareas relacionadas) esté lista y verificada, se abre un Pull Request de `develop` hacia `main` para que Mohamed lo revise antes de fusionar.
