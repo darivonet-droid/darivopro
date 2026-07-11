@@ -1,8 +1,10 @@
 ﻿# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.7
+**Versión:** 1.8
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.8 — 11/07/2026, autorizado explícitamente por el propietario):** precio de **Business fijado como definitivo — S/120/mes, S/1200/año** (ya no es "rango de ejemplo"). Básico (S/49) y Pro (S/79) siguen provisionales — no confirmados como definitivos por el propietario todavía, no se inventa ese dato.
 
 **Cambio principal (v1.7 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
@@ -121,11 +123,11 @@ No duplicar la definición de planes en otros documentos MD.
 
 | Plan | Tipo | Precio mensual | Precio anual |
 |------|------|----------------|--------------|
-| **Básico** | Pago | S/49 *(ejemplo — precio final no decidido)* | *Pendiente* |
-| **Pro** | Pago | S/79 *(ejemplo — precio final no decidido)* | *Pendiente* |
-| **Business** | Pago | S/115–120 *(rango de ejemplo — precio final no decidido)* | *Pendiente* |
+| **Básico** | Pago | S/49 *(provisional — precio final no decidido)* | *Pendiente* |
+| **Pro** | Pago | S/79 *(provisional — precio final no decidido)* | *Pendiente* |
+| **Business** | Pago | **S/120 (definitivo)** | **S/1200 (definitivo)** |
 
-> Todos los precios de esta tabla son **provisionales**. El propietario aún no ha fijado el precio definitivo de ningún plan; se documentan solo como referencia de rango.
+> Básico y Pro siguen **provisionales** — el propietario aún no ha fijado su precio definitivo. **Business ya tiene precio definitivo** (confirmado 11/07/2026): S/120/mes, S/1200/año.
 
 > El **Plan Pro** es el plan destacado y recomendado visualmente en Darivo Pro.
 

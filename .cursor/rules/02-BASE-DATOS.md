@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 3.0
+**Versión:** 3.1
 
-**Fecha:** 11/07/2026
+**Fecha:** 12/07/2026
 
 **Estado:** Documento técnico oficial — esquema V2 (34 tablas) · inicio producto
+
+**Cambio principal (v3.1 — 12/07/2026, autorizado por el propietario):** corregido el trigger `on_pago_evento_generar_comision_venta` (§4.9, DT-02-06) — comparaba contra el placeholder `'exitoso'` en vez de los valores reales que ya usa el webhook de dLocal. Migración `20260712100000_fix_comision_venta_trigger_estado.sql` (pendiente de ejecución por el propietario). También se corrigió que el webhook nunca insertaba en `pagos_eventos` (código, no BD — sin migración).
 
 **Cambio principal (v3.0 — 11/07/2026, autorizado por el propietario):** regeneración completa desde el esquema real (auditoría 09/07/2026, Prioridad 4). Versión de cabecera y §11 desincronizadas (2.2 vs 2.0) — unificadas. Terminología actualizada de `presupuestos`/`presupuesto_items` a `cotizaciones`/`cotizacion_items` (renombradas en `20260708120000_rename_presupuestos_to_cotizaciones.sql`, dato ya reflejado en código pero no en este MD). Eliminadas columnas documentadas que no existen en el esquema real: `perfiles.categorias` (nunca existió en el baseline) y `productos_master.orden`/`productos_master.updated_at` (el baseline solo tiene `id, slug, nombre, descripcion, activo, created_at`). Añadidas al inventario (§4) las ~11 tablas del ecosistema multi-producto que solo aparecían mencionadas de pasada (`empresas`, `empresa_empleados`, `roles_personalizados`, `partners`, `partner_referidos`, `partner_comisiones`, `partner_comisiones_historial`, `soporte_tickets`, `soporte_mensajes`, `suscripciones`, `pagos_eventos`, `darivo_admin_empleados`, `gastos`). Tampoco listaba las columnas añadidas por migraciones incrementales (`perfiles.empresa_id`, `perfiles.plan_origen_partner_id`, `empresas.activo`, `empresa_empleados.rol_personalizado_id`, `suscripciones.limite_roles_personalizados`/`limite_tecnicos`). Historial de migraciones (§10) completado con las 10 migraciones reales.
 
@@ -398,7 +400,7 @@ Añadida por `20260711120000_partner_comisiones_historial.sql` (`06-PANEL-ADMIN-
 
 **Trigger:** `on_pago_evento_generar_comision_venta` (`AFTER INSERT OR UPDATE OF estado ON pagos_eventos`) llama a `generar_comision_venta_partner()`.
 
-> ⚠️ **Deuda técnica real, no cosmética** (documentada en la propia migración): el trigger solo dispara `WHEN (NEW.estado = 'exitoso')`, pero `pagos_eventos.estado` es texto libre **sin `CHECK` constraint**, y a la fecha de esta migración no existe integración real del webhook de dLocal que confirme que `'exitoso'` es el valor real que se escribirá. **Ver §9, DT-02-06.**
+> ✅ **Corregido 12/07/2026** (migración `20260712100000_fix_comision_venta_trigger_estado.sql`, pendiente de ejecución por el propietario — ver informe de esa fecha): el trigger comparaba contra el placeholder `'exitoso'`, que nunca coincidía con los valores reales que ya usa el webhook de dLocal (`ESTADOS_PAGO_EXITOSO` en `pagos-suscripcion.ts`: `PAID`/`COMPLETED`/`CONFIRMED`/`ACTIVE`/`APPROVED`). Además, hasta el 11/07/2026 el webhook nunca insertaba en `pagos_eventos` — corregido en el mismo bloque (`registrarPagoEvento` en `route.ts`). `pagos_eventos.estado` sigue sin `CHECK` constraint (texto libre) — ver DT-02-06.
 
 **RLS:** el partner solo lee sus propias comisiones (nunca inserta/edita directo); Admin control total.
 
@@ -577,7 +579,7 @@ darivo_admin_empleados (independiente — alimenta is_darivo_admin())
 | DT-02-03 | Tablas de empresas, suscripciones, partners | ✅ Resuelta — todas documentadas en §4.8–§4.11 |
 | DT-02-04 | Proveedor IA — OpenAI implementado (Tarea 07) | ✅ Resuelta |
 | DT-02-05 | `04-SIMBOLOS-Y-BOTONES.md` ausente | Documentación Móvil, sin fecha |
-| DT-02-06 | `pagos_eventos.estado` es texto libre sin `CHECK` constraint; el trigger `on_pago_evento_generar_comision_venta` asume el literal `'exitoso'` como placeholder — no existe todavía integración real del webhook dLocal que confirme ese valor (ver comentario literal en `20260711120000_partner_comisiones_historial.sql`) | **Pendiente — confirmar antes de activar pagos Partner en producción** |
+| DT-02-06 | `pagos_eventos.estado` sigue siendo texto libre sin `CHECK` constraint (riesgo si se escribe un valor con otra capitalización/typo) | ✅ El trigger ya corregido (migración `20260712100000`, pendiente de ejecución por el propietario en Supabase). Falta decidir si vale la pena añadir un `CHECK` — no urgente, el webhook ya normaliza a mayúsculas antes de insertar |
 | DT-02-07 | `productos_master` no tiene `orden` ni `updated_at` — el módulo Admin 05 no puede reordenar productos ni auditar cambios hasta decidir si se añaden (requiere migración, pendiente de confirmación de Mohamed) | Pendiente de decisión del propietario |
 | DT-02-08 | `roles_personalizados.permisos` es administrable desde la UI pero no gatea ninguna funcionalidad todavía (`MATRIZ_PERMISOS_APROBADA=false` en código) | Pendiente de decisión del propietario (activar RBAC de verdad) |
 
@@ -605,9 +607,9 @@ Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase
 
 # 11. Estado del documento
 
-**Versión:** 3.0
+**Versión:** 3.1
 
-**Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (11/07/2026).
+**Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (12/07/2026).
 
 ---
 

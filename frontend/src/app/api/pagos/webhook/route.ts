@@ -1,6 +1,7 @@
 // DARIVO PRO — Webhook dLocal Go (pagos + suscripciones)
 import { NextRequest, NextResponse } from "next/server";
 import { activarPlanUsuario, userIdPorEmail } from "@/lib/activar-plan";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   ESTADOS_PAGO_EXITOSO,
   parseOrderId,
@@ -39,6 +40,53 @@ function extractEmail(payload: JsonRecord): string | undefined {
     asString((payload.payer as JsonRecord | undefined)?.email) ??
     asString((payload.subscription as JsonRecord | undefined)?.client_email)
   );
+}
+
+function extractAmount(payload: JsonRecord): number | undefined {
+  const raw =
+    payload.amount ??
+    (payload.payment as JsonRecord | undefined)?.amount ??
+    (payload.subscription as JsonRecord | undefined)?.amount;
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  return typeof n === "number" && Number.isFinite(n) ? n : undefined;
+}
+
+function extractMoneda(payload: JsonRecord): string {
+  return (
+    asString(payload.currency) ??
+    asString((payload.payment as JsonRecord | undefined)?.currency) ??
+    asString((payload.subscription as JsonRecord | undefined)?.currency) ??
+    "PEN"
+  );
+}
+
+/**
+ * Registra cada notificación de dLocal en `pagos_eventos` — sin este registro,
+ * el trigger `on_pago_evento_generar_comision_venta` (comisiones Partner) nunca
+ * dispara y `tienePagoRealBusiness` (activar-plan.ts) nunca encuentra nada.
+ * No bloquea la respuesta del webhook si falla (best-effort, igual que
+ * asegurarEmpresaParaGerente en activar-plan.ts).
+ */
+async function registrarPagoEvento(opts: {
+  userId?: string;
+  status: string;
+  orderId?: string;
+  payload: JsonRecord;
+}): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    await admin.from("pagos_eventos").insert({
+      user_id: opts.userId ?? null,
+      evento_tipo: "dlocal_webhook",
+      monto: extractAmount(opts.payload) ?? null,
+      moneda: extractMoneda(opts.payload),
+      estado: opts.status,
+      dlocal_order_id: opts.orderId ?? null,
+      payload: opts.payload,
+    });
+  } catch (e) {
+    console.error("registrarPagoEvento:", e);
+  }
 }
 
 /** Inferir plan desde nombre del plan dLocal (tokens env en dashboard) */
@@ -82,10 +130,6 @@ export async function POST(req: NextRequest) {
   }
 
   const status = extractStatus(payload);
-  if (!status || !ESTADOS_PAGO_EXITOSO.has(status)) {
-    return NextResponse.json({ received: true, action: "ignored", status });
-  }
-
   const orderId = extractOrderId(payload);
   let userId: string | undefined;
   let plan: PlanSuscripcionOficial | null = null;
@@ -104,6 +148,18 @@ export async function POST(req: NextRequest) {
   }
 
   if (!plan) plan = planDesdePayload(payload);
+
+  // Registro de auditoría — alimenta el trigger de comisiones Partner
+  // (on_pago_evento_generar_comision_venta) y tienePagoRealBusiness
+  // (activar-plan.ts). Se registra todo evento con estado reconocible,
+  // exitoso o no — sin esto la fila nunca existe y el trigger nunca dispara.
+  if (status) {
+    await registrarPagoEvento({ userId, status, orderId, payload });
+  }
+
+  if (!status || !ESTADOS_PAGO_EXITOSO.has(status)) {
+    return NextResponse.json({ received: true, action: "ignored", status });
+  }
 
   if (!userId || !plan) {
     console.warn("webhook dLocal: no userId/plan", { orderId, status });
