@@ -27,29 +27,33 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - Migración de terminología `presupuesto`→`cotización` — BD y código, completa y confirmada.
 - Bug de facturación en plan `gratis` — ya bloqueaba correctamente antes de esta sesión.
 - Middleware de subdominios — preparado, apagado intencionalmente (DNS todavía no resuelve). No tocar hasta que se conecte el dominio.
-- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código y BD migrados y verificados (13/07/2026: confirmado directamente que `calc_type` existe y `tipo` ya no).
+- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código y BD migrados y **verificados directamente** (12/07/2026: confirmado que `calc_type` existe y `tipo` ya no).
 - Wizard de cotización de 4 pasos + migración a tokens de design-system compartidos.
-- `02-BASE-DATOS.md` (v3.3), `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` (v3.5), `00-ECOSISTEMA-DARIVO-PRO.md` (v1.1) — regenerados/sincronizados contra el esquema y código reales.
+- Admin Usuarios: Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso + filtros (`admin/usuarios/actions.ts`, `AdminUsuariosView.tsx`).
+- Admin Partners: "Configurar tabla de comisiones" — nueva tabla `partner_comisiones_config`, editable desde Admin, leída también por Panel Partner y por el trigger de comisiones (ya no hay valores duplicados en 3 sitios).
+- Empresa Cotizaciones: quitado el ítem de sidebar y la lista global que contradecían `05-MODULO-COTIZACIONES-EMPRESA.md` — acceso ahora solo vía Inicio y ficha de Cliente, como exige el MD.
+- Empresa Ficha de Cliente: panel lateral real dentro de `EmpresaShell` (`EmpresaClientesPanel.tsx`) — ya no saca al Gerente a la UI de Móvil.
+- Empresa Invitar empleado: `invitarEmpleadoAction` otorga acceso real a Móvil (`auth.admin.inviteUserByEmail` + vínculo `empresa_empleados.user_id`), ya no es solo una fila decorativa.
+- Panel Partner: visibilidad de comisiones pendientes/pagadas (`mapPartner()` consulta `partner_comisiones_historial`).
+- `02-BASE-DATOS.md` (v3.5, 35 tablas), `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` (v3.5), `00-ECOSISTEMA-DARIVO-PRO.md` (v1.1) — regenerados/sincronizados contra el esquema y código reales.
 
 ### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
 
-- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados. Pendiente: (1) Mohamed reenvía los 9 textos aprobados — hoy es placeholder funcional; (2) setup manual de Google Cloud + Workspace (domain-wide delegation); (3) configurar el Database Webhook de Supabase para "comisión ganada". Ver sección "Email transaccional" más abajo para el detalle completo.
-- **2 migraciones SQL — ejecutadas por el propietario el 13/07/2026, verificación mixta:**
-  1. `supabase/migrations/20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — **no se pudo verificar directamente**: `pagos_eventos` y `partner_comisiones_historial` están vacías (cero pagos reales procesados todavía), así que no hay ningún evento real que observar para confirmar que el trigger corregido dispara bien. No hay forma de leer la definición de un trigger vía la API REST de Supabase (solo lectura de tablas, no `pg_catalog`) sin una función RPC dedicada, que no existe. Se da por aplicado porque el propietario confirmó haberlo ejecutado, pero la primera vez que haya un pago real de Business vía Partner, verificar que sí se generó la fila en `partner_comisiones_historial`.
-  2. `supabase/migrations/20260712110000_unify_partidas_propias_calc_type.sql` (`partidas_propias.tipo`→`calc_type`) — ✅ **confirmado directamente contra la BD real** (13/07/2026): `select=calc_type` responde 200, `select=tipo` responde 400 "column does not exist". Columna renombrada correctamente.
+- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados. Pendiente: (1) Mohamed reenvía los 9 textos aprobados — sigue sin llegar, hoy es placeholder funcional; (2) setup manual de Google Cloud + Workspace (domain-wide delegation); (3) configurar el Database Webhook de Supabase para "comisión ganada". Ver sección "Email transaccional" más abajo para el detalle completo.
+- **4 migraciones SQL escritas — 2 ejecutadas y verificadas, 2 pendientes:**
+  1. `20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — ejecutada por el propietario, **no se pudo verificar directamente** (sin pagos reales todavía que observar, sin acceso a `pg_catalog` vía REST). Verificar en el primer pago real de Business vía Partner.
+  2. `20260712110000_unify_partidas_propias_calc_type.sql` — ✅ ejecutada y **confirmada directamente contra la BD real**.
+  3. `20260713100000_empresa_empleados_user_id.sql` — **pendiente de ejecución**.
+  4. `20260713110000_partner_comisiones_config.sql` — **pendiente de ejecución**.
 
 ### 🔴 Sin auditar / pendiente de decisión de negocio — no improvisar
 
 - **Backend de tickets de soporte** (`/api/soporte/tickets`) — deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11). Decisión pendiente: ¿se reconstruye? Bloquea los eventos de email 8-9 (ticket recibido/resuelto).
 - **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen marcados "provisional" (protección de propietario, no tocado sin autorización explícita nueva).
-- **Jerarquía Suscripción→Producto→Rol→Permisos** — solo implementada hasta la mitad (`MATRIZ_PERMISOS_APROBADA=false`). Activarla de verdad requiere decisión del propietario.
-- ~~**Admin Usuarios**~~ ✅ **Resuelto 12/07/2026**: `admin/usuarios/actions.ts` (Bloquear/Desbloquear vía `auth.admin` ban, Cambiar plan, Reenviar invitación, Restablecer acceso) + `AdminUsuariosView.tsx` con filtros plan/estado. Sin construir (fuera de alcance): importar/exportar Excel-CSV, invitación masiva, "último contacto con soporte" (backend de tickets deshabilitado).
-- **Admin Partners** — falta "Configurar tabla de comisiones" (hoy hardcodeado en código).
-- ~~**Empresa Cotizaciones**~~ ✅ **Resuelto 12/07/2026**: quitado el ítem del sidebar y la lista global (`empresa-modules.ts`, `EmpresaInicioView.tsx`); `/empresa/cotizaciones` ahora redirige a `/empresa/clientes`.
-- ~~**Empresa Ficha de Cliente**~~ ✅ **Resuelto 12/07/2026**: `EmpresaClientesPanel.tsx` nuevo (tabla + panel lateral dentro de `EmpresaShell`, reutiliza `ClienteFichaView`). Pendiente menor: el botón "+ Nueva cotización" dentro de la ficha sigue enlazando a `/cotizaciones/nuevo` (ruta/diseño Móvil) — el wizard de 3 paneles de escritorio (`05-MODULO-COTIZACIONES-EMPRESA.md` §4) no se construyó, fuera del alcance de este fix puntual.
-- ~~**Empresa Invitar empleado**~~ ✅ **Resuelto 13/07/2026**: `invitarEmpleadoAction` usa `auth.admin.inviteUserByEmail` (cuenta real + correo de invitación de Supabase) y vincula `empresa_empleados.user_id` (migración `20260713100000`, pendiente de ejecución). Sin construir: diferenciación de permisos Gerente/Técnico en la UI (parte de DT-04-02, pendiente de decisión del propietario).
-- ~~**Panel Partner** — sin visibilidad de comisiones pendientes/pagadas~~ ✅ **Resuelto 12/07/2026**: `ecosystem-store.ts` `mapPartner()` ahora consulta `partner_comisiones_historial`; `PartnerPanel.tsx` muestra totales pendiente/pagado + listado. Sigue pendiente: acceso al panel no se revoca al suspender (ver más abajo).
-- Ver la sección "Auditoría 12/07/2026 — Admin/Empresa/Partner" más abajo para el detalle completo de cada punto.
+- **Jerarquía Suscripción→Producto→Rol→Permisos** — solo implementada hasta la mitad (`MATRIZ_PERMISOS_APROBADA=false`). Activarla de verdad requiere decisión del propietario. Incluye: diferenciación de permisos Gerente/Técnico en Móvil tras invitar empleado, y que el Panel Partner no revoca acceso al suspender un partner (gatea por allowlist de email, no por `partners.estado`).
+- Admin Usuarios: sin construir (fuera de alcance, no pedido) — importar/exportar Excel-CSV, invitación masiva, "último contacto con soporte" (depende del backend de tickets, deshabilitado).
+- Empresa Ficha de Cliente: el botón "+ Nueva cotización" sigue enlazando al wizard de Móvil tal cual — el layout de 3 paneles de escritorio que pide `05-MODULO-COTIZACIONES-EMPRESA.md` §4 no se construyó (no es una regresión nueva, ya pasaba antes).
+- Detalle completo de todo lo de arriba: sección "Auditoría 12/07/2026 — Admin/Empresa/Partner" más abajo.
 
 ## Flujo de ramas (Git)
 
@@ -351,7 +355,7 @@ Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ve
 **Pendiente — hallazgos reales, no corregidos todavía (requieren más que un fix puntual, o una decisión de alcance):**
 
 - ~~**Admin — Usuarios**~~ ✅ **Resuelto 12/07/2026** — ver arriba.
-- **Admin — Partners:** falta la acción "Configurar tabla de comisiones" que `06-PANEL-ADMIN-PARTNERS.md` §5/§8 exige (hoy la tabla de hitos es una constante hardcodeada en `partners-types.ts`, no editable desde Admin).
+- ~~**Admin — Partners**~~ ✅ **Resuelto 12/07/2026** — ver arriba.
 - ~~**Empresa — Cotizaciones**~~ ✅ **Resuelto 12/07/2026** — ver arriba.
 - ~~**Empresa — Ficha de Cliente**~~ ✅ **Resuelto 12/07/2026**: panel lateral dentro de `EmpresaShell`, ver arriba.
 - **Nota relacionada, sin resolver:** el wizard de cotización sigue sin adaptarse al layout de 3 paneles de escritorio que pide `05-MODULO-COTIZACIONES-EMPRESA.md` §4 — tanto el CTA de Inicio como el botón "+ Nueva cotización" de la ficha enlazan al wizard Móvil (`/cotizaciones/nuevo`) tal cual. No es una regresión nueva (ya pasaba antes), pero sigue pendiente si se quiere una experiencia de escritorio completa.
