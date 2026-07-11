@@ -64,30 +64,6 @@ export async function listarEmpleadosEmpresa(
   return ((data ?? []) as EmpleadoRow[]).map(mapRow);
 }
 
-export async function crearEmpleadoEmpresa(
-  supabase: SupabaseClient,
-  empresaId: string,
-  input: { nombre: string; email: string; telefono?: string }
-): Promise<EmpleadoEmpresa> {
-  const { data, error } = await supabase
-    .from("empresa_empleados")
-    .insert({
-      empresa_id: empresaId,
-      nombre: input.nombre,
-      email: input.email,
-      telefono: input.telefono || null,
-      rol: "Técnico",
-      estado: "Pendiente",
-    })
-    .select(
-      "id, empresa_id, nombre, email, telefono, rol, estado, ultima_actividad, rol_personalizado_id, created_at"
-    )
-    .single();
-
-  if (error) throw error;
-  return mapRow(data as EmpleadoRow);
-}
-
 export async function actualizarEstadoEmpleado(
   supabase: SupabaseClient,
   empleadoId: string,

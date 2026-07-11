@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 3.3
+**Versión:** 3.4
 
-**Fecha:** 12/07/2026
+**Fecha:** 13/07/2026
 
 **Estado:** Documento técnico oficial — esquema V2 (34 tablas) · inicio producto
+
+**Cambio principal (v3.4 — 13/07/2026, autorizado por el propietario):** §4.8 — añadida `empresa_empleados.user_id` (migración `20260713100000_empresa_empleados_user_id.sql`, pendiente de ejecución por el propietario) para que "Invitar empleado" otorgue acceso real a Móvil (antes solo creaba una fila sin ningún mecanismo de auth — `10-MODULO-EMPLEADOS-EMPRESA.md` §6).
 
 **Cambio principal (v3.3 — 12/07/2026):** corregido §4.7 — `partner_comisiones` estaba documentada como "tabla de tarifas oficiales", contradiciendo la decisión de negocio ya cerrada que la derogó por completo (`06-PANEL-ADMIN-PARTNERS.md` §5.1, 07/07/2026). Marcada explícitamente como no usar. Sin cambios de schema.
 
@@ -314,7 +316,7 @@ Migraciones: baseline; `20260709180000_empresas_activo.sql` (columna `activo`).
 
 ### `empresa_empleados`
 
-Migraciones: baseline; `20260706140000_roles_personalizados.sql` (columna `rol_personalizado_id`).
+Migraciones: baseline; `20260706140000_roles_personalizados.sql` (columna `rol_personalizado_id`); `20260713100000_empresa_empleados_user_id.sql` (columna `user_id`, pendiente de ejecución por el propietario).
 
 | Columna | Tipo | Notas |
 |---|---|---|
@@ -323,11 +325,12 @@ Migraciones: baseline; `20260706140000_roles_personalizados.sql` (columna `rol_p
 | `nombre` / `email` / `telefono` | text | |
 | `rol` | text | `CHECK` solo permite `'Técnico'` |
 | `rol_personalizado_id` | uuid FK NULL | → `roles_personalizados(id)` ON DELETE SET NULL |
+| `user_id` | uuid FK NULL | → `auth.users(id)` ON DELETE SET NULL. Cuenta real vinculada tras aceptar la invitación (`invitarEmpleadoAction`) — `NULL` si la invitación nunca se completó o el empleado es anterior a esta migración. UNIQUE parcial (un usuario no puede ser Técnico de 2 empresas) |
 | `estado` | text | `Activo` \| `Inactivo` \| `Pendiente` |
 | `ultima_actividad` | timestamptz | |
 | `created_at` / `updated_at` | timestamptz | |
 
-**Índices:** `idx_empresa_empleados_empresa`, `idx_empresa_empleados_rol_personalizado`.
+**Índices:** `idx_empresa_empleados_empresa`, `idx_empresa_empleados_rol_personalizado`, `idx_empresa_empleados_user_id` (UNIQUE parcial).
 
 **RLS:** Gerente de la empresa dueña o Admin.
 
@@ -404,7 +407,7 @@ Añadida por `20260711120000_partner_comisiones_historial.sql` (`06-PANEL-ADMIN-
 
 **Trigger:** `on_pago_evento_generar_comision_venta` (`AFTER INSERT OR UPDATE OF estado ON pagos_eventos`) llama a `generar_comision_venta_partner()`.
 
-> ✅ **Corregido 12/07/2026** (migración `20260712100000_fix_comision_venta_trigger_estado.sql`, pendiente de ejecución por el propietario — ver informe de esa fecha): el trigger comparaba contra el placeholder `'exitoso'`, que nunca coincidía con los valores reales que ya usa el webhook de dLocal (`ESTADOS_PAGO_EXITOSO` en `pagos-suscripcion.ts`: `PAID`/`COMPLETED`/`CONFIRMED`/`ACTIVE`/`APPROVED`). Además, hasta el 11/07/2026 el webhook nunca insertaba en `pagos_eventos` — corregido en el mismo bloque (`registrarPagoEvento` en `route.ts`). `pagos_eventos.estado` sigue sin `CHECK` constraint (texto libre) — ver DT-02-06.
+> ✅ **Corregido 12/07/2026, ejecutado por el propietario 13/07/2026** (migración `20260712100000_fix_comision_venta_trigger_estado.sql`): el trigger comparaba contra el placeholder `'exitoso'`, que nunca coincidía con los valores reales que ya usa el webhook de dLocal (`ESTADOS_PAGO_EXITOSO` en `pagos-suscripcion.ts`: `PAID`/`COMPLETED`/`CONFIRMED`/`ACTIVE`/`APPROVED`). Además, hasta el 11/07/2026 el webhook nunca insertaba en `pagos_eventos` — corregido en el mismo bloque (`registrarPagoEvento` en `route.ts`). **Nota de verificación:** no fue posible confirmar de forma independiente que el trigger corregido dispara bien — `pagos_eventos`/`partner_comisiones_historial` siguen vacías (cero pagos reales todavía) y no hay forma de leer la definición de un trigger vía la API REST de Supabase. Verificar en el primer pago real. `pagos_eventos.estado` sigue sin `CHECK` constraint (texto libre) — ver DT-02-06.
 
 **RLS:** el partner solo lee sus propias comisiones (nunca inserta/edita directo); Admin control total.
 
@@ -583,7 +586,7 @@ darivo_admin_empleados (independiente — alimenta is_darivo_admin())
 | DT-02-03 | Tablas de empresas, suscripciones, partners | ✅ Resuelta — todas documentadas en §4.8–§4.11 |
 | DT-02-04 | Proveedor IA — OpenAI implementado (Tarea 07) | ✅ Resuelta |
 | DT-02-05 | `04-SIMBOLOS-Y-BOTONES.md` ausente | Documentación Móvil, sin fecha |
-| DT-02-06 | `pagos_eventos.estado` sigue siendo texto libre sin `CHECK` constraint (riesgo si se escribe un valor con otra capitalización/typo) | ✅ El trigger ya corregido (migración `20260712100000`, pendiente de ejecución por el propietario en Supabase). Falta decidir si vale la pena añadir un `CHECK` — no urgente, el webhook ya normaliza a mayúsculas antes de insertar |
+| DT-02-06 | `pagos_eventos.estado` sigue siendo texto libre sin `CHECK` constraint (riesgo si se escribe un valor con otra capitalización/typo) | ✅ El trigger ya corregido y ejecutado (migración `20260712100000`, 13/07/2026 — verificación independiente no posible, ver §4.9). Falta decidir si vale la pena añadir un `CHECK` — no urgente, el webhook ya normaliza a mayúsculas antes de insertar |
 | DT-02-07 | `productos_master` no tiene `orden` ni `updated_at` — el módulo Admin 05 no puede reordenar productos ni auditar cambios hasta decidir si se añaden (requiere migración, pendiente de confirmación de Mohamed) | Pendiente de decisión del propietario |
 | DT-02-08 | `roles_personalizados.permisos` es administrable desde la UI pero no gatea ninguna funcionalidad todavía (`MATRIZ_PERMISOS_APROBADA=false` en código) | Pendiente de decisión del propietario (activar RBAC de verdad) |
 
@@ -603,6 +606,9 @@ darivo_admin_empleados (independiente — alimenta is_darivo_admin())
 | 10/07/2026 | `20260710130000_drop_duplicate_empresas_index.sql` | Elimina `idx_empresas_gerente` (redundante) |
 | 11/07/2026 | `20260711120000_partner_comisiones_historial.sql` | Tabla `partner_comisiones_historial` (tabla 34) · función + trigger `generar_comision_venta_partner` |
 | 11/07/2026 | `20260711130000_plan_origen_partner.sql` | `perfiles.plan_origen_partner_id` |
+| 12/07/2026 | `20260712100000_fix_comision_venta_trigger_estado.sql` | Corrige `WHEN` del trigger de comisiones Partner (placeholder → valores reales dLocal) — ejecutada 13/07/2026 |
+| 12/07/2026 | `20260712110000_unify_partidas_propias_calc_type.sql` | `partidas_propias.tipo` → `calc_type` (traducción de valores) — ejecutada y verificada 13/07/2026 |
+| 13/07/2026 | `20260713100000_empresa_empleados_user_id.sql` | `empresa_empleados.user_id` (acceso real a Móvil vía invitación) — **pendiente de ejecución** |
 | — | `supabase/seed.sql` | Productos, planes, catálogo maestro, series |
 
 Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase/migrations/`.
@@ -611,9 +617,9 @@ Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase
 
 # 11. Estado del documento
 
-**Versión:** 3.3
+**Versión:** 3.4
 
-**Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (12/07/2026).
+**Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (13/07/2026).
 
 ---
 

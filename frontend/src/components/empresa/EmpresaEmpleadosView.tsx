@@ -6,11 +6,11 @@ import { AdminBadge } from "@/components/admin/AdminTabs";
 import { T } from "@/lib/design-system/tokens";
 import {
   actualizarEstadoEmpleado,
-  crearEmpleadoEmpresa,
   listarEmpleadosEmpresa,
   type EmpleadoEmpresa,
   type EstadoEmpleadoEmpresa,
 } from "@/lib/empresa-empleados-types";
+import { invitarEmpleadoAction } from "@/app/empresa/empleados/actions";
 import { obtenerEmpresaIdGerente } from "@/lib/roles-personalizados";
 import { createClient } from "@/lib/supabase/client";
 
@@ -54,23 +54,21 @@ export function EmpresaEmpleadosView() {
     if (!nombre.trim() || !email.trim() || !empresaId) return;
     setGuardando(true);
     setErrorForm(null);
-    try {
-      const supabase = createClient();
-      await crearEmpleadoEmpresa(supabase, empresaId, {
-        nombre: nombre.trim(),
-        email: email.trim(),
-        telefono: telefono.trim() || undefined,
-      });
+    const result = await invitarEmpleadoAction(empresaId, {
+      nombre: nombre.trim(),
+      email: email.trim(),
+      telefono: telefono.trim() || undefined,
+    });
+    if (result.ok) {
       setNombre("");
       setEmail("");
       setTelefono("");
       setMostrarForm(false);
       void cargar(empresaId);
-    } catch (e) {
-      setErrorForm(e instanceof Error ? e.message : "No se pudo guardar el empleado.");
-    } finally {
-      setGuardando(false);
+    } else {
+      setErrorForm(result.error);
     }
+    setGuardando(false);
   };
 
   const cambiarEstado = async (id: string, estado: EstadoEmpleadoEmpresa) => {
@@ -177,8 +175,9 @@ export function EmpresaEmpleadosView() {
             </button>
           </div>
           <p className="mt-2 text-xs" style={{ color: T.textLight }}>
-            El empleado se crea con estado «Pendiente» y queda disponible como Técnico asignable
-            en Roles y Permisos.
+            Se envía un correo real de invitación para que el técnico cree su contraseña y
+            acceda a Móvil. Queda con estado «Pendiente» hasta que acepte, y disponible como
+            Técnico asignable en Roles y Permisos.
           </p>
         </div>
       )}
