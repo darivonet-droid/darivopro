@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   PLANES,
-  CONTACTO_PRODUCTO_EMPRESA,
   fmtPrecio,
   type CicloPrecio,
   type Plan,
@@ -174,26 +173,6 @@ export function PreciosView() {
         {PLANES.map((plan) => (
           <PlanCard key={plan.id} plan={plan} ciclo={ciclo} extraTop={!!plan.badge} />
         ))}
-      </div>
-
-      {/* Producto Empresa — no es plan de suscripción (04 §6) */}
-      <div
-        className="rounded-2xl px-4 py-4 text-center"
-        style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}
-      >
-        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
-          {CONTACTO_PRODUCTO_EMPRESA.titulo}
-        </p>
-        <p className="mt-1 text-sm leading-relaxed" style={{ color: T.text }}>
-          {CONTACTO_PRODUCTO_EMPRESA.descripcion}
-        </p>
-        <a
-          href={CONTACTO_PRODUCTO_EMPRESA.ctaHref}
-          className="mt-3 inline-block text-sm font-bold"
-          style={{ color: T.blue }}
-        >
-          {CONTACTO_PRODUCTO_EMPRESA.cta} →
-        </a>
       </div>
 
       {/* Prueba gratuita al registrarse — no es plan comercial oficial */}

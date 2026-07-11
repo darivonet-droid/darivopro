@@ -19,6 +19,7 @@ export default async function MasPage() {
       <main className="px-4 py-4">
         <MasTabs
           email={user?.email ?? ""}
+          esBusiness={perfil?.plan_tipo === "business"}
           inicial={{
             razonSocial: perfil?.razon_social ?? "",
             ruc: perfil?.ruc ?? "",

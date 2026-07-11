@@ -70,7 +70,22 @@ const OPCIONES: MasOpcion[] = [
   },
 ];
 
-export function MasOpcionesList() {
+const OPCION_EMPRESA: MasOpcion = {
+  href: "/empresa",
+  titulo: "Darivo Pro Empresa",
+  subtitulo: "Empleados, roles personalizados y panel de escritorio",
+  emoji: "🏢",
+  color: T.blue,
+  bg: T.bluePale,
+};
+
+interface MasOpcionesListProps {
+  /** Plan Business da acceso al producto Darivo Pro Empresa (04 §6, nota de nomenclatura) */
+  esBusiness?: boolean;
+}
+
+export function MasOpcionesList({ esBusiness }: MasOpcionesListProps) {
+  const opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
   return (
     <div className="mt-6">
       <p
@@ -80,7 +95,7 @@ export function MasOpcionesList() {
         Más opciones
       </p>
       <div className="flex flex-col gap-2.5">
-        {OPCIONES.map((op) => (
+        {opciones.map((op) => (
           <Link
             key={op.href}
             href={op.href}

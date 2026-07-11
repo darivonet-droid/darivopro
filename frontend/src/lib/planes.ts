@@ -58,16 +58,24 @@ export const PLANES: Plan[] = [
     cta: "Empezar",
     ctaHref: "/registro",
   },
+  {
+    id: "business",
+    nombre: PRECIOS_OFICIALES.business.nombre,
+    precioMensual: PRECIOS_OFICIALES.business.mensual,
+    precioAnual: PRECIOS_OFICIALES.business.anual,
+    badge: "PARA EQUIPOS",
+    features: [
+      { texto: "Todo lo de Pro", incluido: true },
+      { texto: "Acceso a Darivo Pro Empresa (escritorio)", incluido: true },
+      { texto: "1 Gerente + hasta 5 Técnicos", incluido: true },
+      { texto: "Roles personalizados", incluido: true },
+      { texto: "Técnicos adicionales", incluido: false },
+    ],
+    cta: "Empezar",
+    ctaHref: "/registro",
+    ctaOutline: true,
+  },
 ];
-
-/** Darivo Pro Empresa es producto del ecosistema, NO plan de suscripción (04 §6) */
-export const CONTACTO_PRODUCTO_EMPRESA = {
-  titulo: "Darivo Pro Empresa",
-  descripcion:
-    "Entorno de escritorio para gestionar empleados, roles y permisos. Reutiliza la misma lógica de Móvil.",
-  cta: "Contactar",
-  ctaHref: "mailto:hola@darivo.pro?subject=Darivo%20Pro%20Empresa",
-} as const;
 
 export function fmtPrecio(n: number): string {
   return n.toLocaleString("es-PE");

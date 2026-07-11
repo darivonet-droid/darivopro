@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   const checkout = parseBody(body);
   if (!checkout) {
     return NextResponse.json(
-      { error: "Plan inválido — use basico|pro y mensual|anual" },
+      { error: "Plan inválido — use basico|pro|business y mensual|anual" },
       { status: 400 }
     );
   }

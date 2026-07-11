@@ -1,8 +1,17 @@
 "use client";
 import Link from "next/link";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
+import { fmtPrecio } from "@/lib/planes";
 import { CheckoutPlanButton } from "@/components/pagos/CheckoutPlanButton";
 import { T } from "@/lib/theme";
+
+function fmtPrecioMensual(plan: "basico" | "pro" | "business"): string {
+  return `S/${fmtPrecio(PRECIOS_OFICIALES[plan].mensual)}/mes`;
+}
+
+function fmtPrecioAnual(plan: "basico" | "pro" | "business"): string {
+  return `S/${fmtPrecio(PRECIOS_OFICIALES[plan].anual)}/año`;
+}
 
 const PLAN_LABELS: Record<PlanTipoPersistido, { nombre: string; desc: string }> = {
   gratis: {
@@ -11,15 +20,15 @@ const PLAN_LABELS: Record<PlanTipoPersistido, { nombre: string; desc: string }> 
   },
   basico: {
     nombre: `Plan ${PRECIOS_OFICIALES.basico.nombre}`,
-    desc: "20 cotizaciones/mes · Facturación no incluida · S/39/mes",
+    desc: `20 cotizaciones/mes · Facturación no incluida · ${fmtPrecioMensual("basico")}`,
   },
   pro: {
     nombre: `Plan ${PRECIOS_OFICIALES.pro.nombre}`,
-    desc: "Cotizaciones y facturas ilimitadas · S/79/mes",
+    desc: `Cotizaciones y facturas ilimitadas · ${fmtPrecioMensual("pro")}`,
   },
   business: {
     nombre: `Plan ${PRECIOS_OFICIALES.business.nombre}`,
-    desc: "Cotizaciones y facturas ilimitadas · hasta 5 Técnicos · S/115/mes",
+    desc: `Cotizaciones y facturas ilimitadas · acceso a Darivo Pro Empresa · hasta 5 Técnicos · ${fmtPrecioMensual("business")}`,
   },
 };
 
@@ -54,10 +63,15 @@ export function MiPlanCard({ planTipo }: MiPlanCardProps) {
 
       {planTipo === "gratis" && (
         <>
-          <CheckoutPlanButton plan="basico" label="Suscribirme a Básico — S/39/mes" />
+          <CheckoutPlanButton plan="basico" label={`Suscribirme a Básico — ${fmtPrecioMensual("basico")}`} />
           <CheckoutPlanButton
             plan="pro"
-            label="Suscribirme a Pro — S/79/mes"
+            label={`Suscribirme a Pro — ${fmtPrecioMensual("pro")}`}
+            outline
+          />
+          <CheckoutPlanButton
+            plan="business"
+            label={`Suscribirme a Business — ${fmtPrecioMensual("business")}`}
             outline
           />
         </>
@@ -65,22 +79,51 @@ export function MiPlanCard({ planTipo }: MiPlanCardProps) {
 
       {planTipo === "basico" && (
         <>
-          <CheckoutPlanButton plan="pro" label="Mejorar a Pro — S/79/mes" />
+          <CheckoutPlanButton plan="pro" label={`Mejorar a Pro — ${fmtPrecioMensual("pro")}`} />
+          <CheckoutPlanButton
+            plan="business"
+            label={`Mejorar a Business — ${fmtPrecioMensual("business")}`}
+            outline
+          />
           <CheckoutPlanButton
             plan="basico"
             ciclo="anual"
-            label="Pagar anual Básico — S/390/año"
+            label={`Pagar anual Básico — ${fmtPrecioAnual("basico")}`}
             outline
           />
         </>
       )}
 
       {planTipo === "pro" && (
-        <CheckoutPlanButton
-          plan="pro"
-          ciclo="anual"
-          label="Pagar anual Pro — S/790/año"
-        />
+        <>
+          <CheckoutPlanButton
+            plan="business"
+            label={`Mejorar a Business — ${fmtPrecioMensual("business")}`}
+          />
+          <CheckoutPlanButton
+            plan="pro"
+            ciclo="anual"
+            label={`Pagar anual Pro — ${fmtPrecioAnual("pro")}`}
+            outline
+          />
+        </>
+      )}
+
+      {planTipo === "business" && (
+        <>
+          <CheckoutPlanButton
+            plan="business"
+            ciclo="anual"
+            label={`Pagar anual Business — ${fmtPrecioAnual("business")}`}
+          />
+          <Link
+            href="/empresa"
+            className="block w-full rounded-2xl py-3.5 text-center text-sm font-bold"
+            style={{ background: T.bluePale, color: T.blue }}
+          >
+            Ir a Darivo Pro Empresa →
+          </Link>
+        </>
       )}
 
       <Link

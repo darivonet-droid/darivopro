@@ -20,6 +20,8 @@ const ENV_PLAN_TOKEN: Record<string, string | undefined> = {
   "basico:anual": process.env.DLOCALGO_PLAN_BASICO_ANUAL,
   "pro:mensual": process.env.DLOCALGO_PLAN_PRO_MENSUAL,
   "pro:anual": process.env.DLOCALGO_PLAN_PRO_ANUAL,
+  "business:mensual": process.env.DLOCALGO_PLAN_BUSINESS_MENSUAL,
+  "business:anual": process.env.DLOCALGO_PLAN_BUSINESS_ANUAL,
 };
 
 export function montoPlan(plan: PlanSuscripcionOficial, ciclo: CicloPago): number {
@@ -50,7 +52,7 @@ export interface ParsedOrderId {
 }
 
 export function parseOrderId(orderId: string): ParsedOrderId | null {
-  const m = /^darivo-([0-9a-f-]{36})-(basico|pro)-(mensual|anual)-\d+$/i.exec(
+  const m = /^darivo-([0-9a-f-]{36})-(basico|pro|business)-(mensual|anual)-\d+$/i.exec(
     orderId.trim()
   );
   if (!m) return null;

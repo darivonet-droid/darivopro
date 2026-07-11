@@ -16,9 +16,10 @@ type Tab = "categorias" | "tarifas" | "empresa";
 interface MasTabsProps {
   email: string;
   inicial: EmpresaForm;
+  esBusiness?: boolean;
 }
 
-export function MasTabs({ email, inicial }: MasTabsProps) {
+export function MasTabs({ email, inicial, esBusiness }: MasTabsProps) {
   const [tab, setTab] = useState<Tab>("categorias");
 
   const TABS: { id: Tab; label: string }[] = [
@@ -42,7 +43,7 @@ export function MasTabs({ email, inicial }: MasTabsProps) {
         {tab === "tarifas" && <TarifasEditTab />}
         {tab === "empresa" && <AjustesForm email={email} inicial={inicial} />}
 
-        <MasOpcionesList />
+        <MasOpcionesList esBusiness={esBusiness} />
       </div>
     </div>
   );

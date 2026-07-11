@@ -45,6 +45,7 @@ function extractEmail(payload: JsonRecord): string | undefined {
 function planDesdeNombre(name: string | undefined): PlanSuscripcionOficial | null {
   if (!name) return null;
   const n = name.toLowerCase();
+  if (n.includes("business")) return "business";
   if (n.includes("pro")) return "pro";
   if (n.includes("basico") || n.includes("básico") || n.includes("basic")) {
     return "basico";
