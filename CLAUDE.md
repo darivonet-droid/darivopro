@@ -172,7 +172,7 @@ Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificació
 
 ### Prioridad 4 — Documentación desactualizada (no bloquea producto)
 
-- [ ] `00-ECOSISTEMA-DARIVO-PRO.md` usa dominio obsoleto `darivo.net` y menciona producto "Multiempresa" (no existe en ningún otro sitio); no menciona Partner. Actualizar a `darivopro.com`, quitar "Multiempresa", añadir Partner. Corregir también la referencia rota a `01-VISION-DEL-PRODUCTO.md` (nombre de archivo incorrecto).
+- [x] `00-ECOSISTEMA-DARIVO-PRO.md` (`docs/00-ECOSISTEMA-DARIVO-PRO.md`, no en `.cursor/rules/`) — ✅ Resuelto (11/07/2026, sesión continua): dominio actualizado a `darivopro.com`, "Multiempresa" eliminado, Panel Partner añadido (`partner.darivopro.com`, aclarando que no es un producto), referencia rota a `01-VISION-DEL-PRODUCTO.md` corregida, rutas de carpetas de documentación verificadas contra el árbol real.
 - [ ] `02-BASE-DATOS.md` desactualizado: sigue documentando `presupuestos`/`presupuesto_items` (ya renombradas — ver arriba, esto sí está resuelto en código, falta reflejarlo en el MD); documenta columnas `perfiles.categorias` y `productos_master.orden/updated_at` que no existen; no documenta la tabla `roles_personalizados` ni ~8 tablas más. Regenerar el esquema documentado desde la BD real (33 tablas).
 - [ ] Versionados internos inconsistentes (ARQUITECTURA-MAESTRA con v2.9 en cabecera y v3.4 en §12, etc.) y referencias a docs eliminados en la Tarea 0 (22-25) o inexistentes (`04-SIMBOLOS-Y-BOTONES.md`). Bajo esfuerzo, limpiar cuando se toquen esos archivos por otra razón.
 - [ ] "Referidos" vs "Partners": Visión ya lo cerró (es "Partners"), pero ARQUITECTURA §11.4 lo presenta como "decisión abierta". Cerrar esa sección alineada con Visión.
