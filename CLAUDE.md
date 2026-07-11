@@ -48,7 +48,7 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - **Empresa Cotizaciones** — contradice el MD (sidebar + lista global cuando debe ser solo vía ficha de Cliente).
 - **Empresa Ficha de Cliente** — saca al Gerente del shell de escritorio hacia la UI de Móvil.
 - **Empresa Invitar empleado** — no otorga acceso real a Móvil, solo crea una fila.
-- **Panel Partner** — sin visibilidad de comisiones pendientes/pagadas pese a que el backend ya las genera; acceso no se revoca al suspender.
+- ~~**Panel Partner** — sin visibilidad de comisiones pendientes/pagadas~~ ✅ **Resuelto 12/07/2026**: `ecosystem-store.ts` `mapPartner()` ahora consulta `partner_comisiones_historial`; `PartnerPanel.tsx` muestra totales pendiente/pagado + listado. Sigue pendiente: acceso al panel no se revoca al suspender (ver más abajo).
 - Ver la sección "Auditoría 12/07/2026 — Admin/Empresa/Partner" más abajo para el detalle completo de cada punto.
 
 ## Flujo de ramas (Git)
@@ -356,7 +356,7 @@ Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ve
 - **Empresa — Ficha de Cliente:** al hacer clic en un cliente desde el panel Empresa, `empresa/clientes/page.tsx` reutiliza `ClienteFichaView` de Móvil sin adaptar, que navega a `/clientes/{id}` (ruta Móvil) — el Gerente sale del `EmpresaShell` (sidebar) por completo. `03-MODULO-CLIENTES-EMPRESA.md` §4/§6 pide un panel lateral (~360-400px) dentro del propio shell de escritorio. Combinado con el punto anterior, hoy no hay ninguna forma de ver el historial de cotizaciones de un cliente desde el panel de escritorio.
 - **Empresa — Invitar empleado:** el botón "Enviar invitación" solo hace un `INSERT` en `empresa_empleados` (sin `user_id` ni ningún mecanismo de auth) — no se envía ningún correo ni se otorga acceso real a Móvil. `10-MODULO-EMPLEADOS-EMPRESA.md` §6 exige que sí otorgue acceso real. Requiere diseño (¿tabla nueva con token de invitación? ¿email transaccional adicional, van 9 ya definidos?) — no improvisar sin decisión.
 - **Empresa — Empleados:** faltan las acciones "Editar" y "Permisos" por fila que pide el MD §5 (solo hay Activar/Desactivar); la columna "Última actividad" nunca se escribe (no hay evento de login Móvil que la alimente) y la tabla muestra "Alta" (`created_at`) en su lugar.
-- **Partner — visibilidad de comisiones:** el Partner no ve NINGÚN monto pendiente/pagado pese a que `partner_comisiones_historial` ya genera filas reales (trigger corregido el 12/07) — `ecosystem-store.ts` nunca consulta esa tabla. El backend ya produce el dato, el frontend nunca lo lee. Requiere una nueva query + sección en `PartnerPanel.tsx`.
+- ~~**Partner — visibilidad de comisiones**~~ ✅ **Resuelto 12/07/2026** (sesión continua siguiente): `mapPartner()` consulta `partner_comisiones_historial`, `PartnerPanel.tsx` muestra totales + listado.
 - **Partner — acceso tras suspensión:** `/partner` se gatea solo por allowlist de email (`DARIVO_PARTNER_EMAILS`), independiente de `partners.estado` — un Partner Suspendido con el email todavía en la allowlist conserva acceso de lectura completo al panel. Mismo gap de arquitectura ya documentado (jerarquía Suscripción→Producto→Rol→Permisos solo a medias, DT-04-02), no es una sorpresa nueva, pero vale la pena resolverlo si se activa esa jerarquía de verdad.
 
 ## Bloqueado — no iniciar sin confirmación explícita
