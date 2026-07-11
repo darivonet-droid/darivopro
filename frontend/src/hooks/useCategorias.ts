@@ -122,6 +122,43 @@ export function useCategorias() {
     [supabase]
   );
 
+  /** Crea una partida propia nueva (INSERT real — antes solo existía UPDATE de precio,
+   *  así que "Añadir partida" en Ajustes/Categorías guardaba en apariencia pero nunca
+   *  persistía, corregido 12/07/2026). */
+  const crearPartidaPropia = useCallback(
+    async (
+      capId: string,
+      nombre: string,
+      calcType: Partida["calcType"],
+      precio: number,
+      unidad: string
+    ): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        setError("Sesión expirada");
+        return false;
+      }
+      const { error } = await supabase.from("partidas_propias").insert({
+        user_id: user.id,
+        cap_id: capId,
+        nombre: nombre.trim(),
+        calc_type: calcType,
+        precio,
+        unidad,
+        activa: true,
+      });
+      setLoading(false);
+      if (error) setError(error.message);
+      return !error;
+    },
+    [supabase]
+  );
+
   /** Crea una categoría nueva: solo nombre; color automático y emoji por defecto. */
   const crearCategoria = useCallback(
     async (nombre: string, coloresUsados: string[]): Promise<boolean> => {
@@ -151,7 +188,7 @@ export function useCategorias() {
     [supabase]
   );
 
-  return { loading, error, editarNombreCategoria, editarPrecioPartida, crearCategoria };
+  return { loading, error, editarNombreCategoria, editarPrecioPartida, crearPartidaPropia, crearCategoria };
 }
 
 // ─── Historial de precios ─────────────────────────────────────────────────────

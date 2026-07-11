@@ -126,7 +126,7 @@ function NuevoSvcModal({ cap, onClose, onSave }: NuevoSvcModalProps) {
 // ─── CategoriasManager ────────────────────────────────────────────────────────
 export function CategoriasManager() {
   const { catalogo, recargar } = useCatalogo();
-  const { editarNombreCategoria, editarPrecioPartida, crearCategoria } = useCategorias();
+  const { editarNombreCategoria, crearPartidaPropia, crearCategoria } = useCategorias();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
 
   const [expandido, setExpandido]   = useState<string | null>(null);
@@ -157,9 +157,10 @@ export function CategoriasManager() {
           cap={addCatData}
           onClose={() => setAddingSvc(null)}
           onSave={async (label, calcType, precio) => {
-            // For custom services, save as partida_propia
-            const partida: Partida = { id: `custom_${Date.now()}`, nombre: label, calcType, precio, unidad: calcType === "m2" ? "m²" : calcType === "hour" ? "h" : calcType === "unit" ? "und" : "", esPropia: true };
-            const ok = await editarPrecioPartida(partida, precio);
+            // Partida nueva → INSERT real en partidas_propias (antes solo se
+            // intentaba un UPDATE sobre un id que no existía — nunca persistía).
+            const unidad = calcType === "m2" ? "m²" : calcType === "hour" ? "h" : calcType === "unit" ? "und" : "";
+            const ok = await crearPartidaPropia(addCatData!.id, label, calcType, precio, unidad);
             mostrarToast(ok ? `"${label}" añadida ✓` : "No se pudo guardar", ok ? "ok" : "error");
             setAddingSvc(null);
             if (ok) recargar();
