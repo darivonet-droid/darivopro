@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminBadge, AdminNotice, AdminTabs } from "@/components/admin/AdminTabs";
-import { AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
+import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
 import { T } from "@/lib/design-system/tokens";
 import {
   COMISION_VENTA_PORCENTAJE,
@@ -75,8 +75,13 @@ export function AdminPartnersView({ initialPartners }: AdminPartnersViewProps) {
   };
 
   const cambiarEstado = (id: string, estado: EstadoPartner) => {
+    setError(null);
     startTransition(async () => {
-      await setPartnerEstadoAction(id, estado);
+      const result = await setPartnerEstadoAction(id, estado);
+      if (!result.ok) {
+        setError("No se pudo actualizar el estado del partner");
+        return;
+      }
       setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, estado } : p)));
       refresh();
     });
@@ -95,6 +100,8 @@ export function AdminPartnersView({ initialPartners }: AdminPartnersViewProps) {
         Registro en tabla real <span className="font-mono">partners</span> (Supabase) —
         sincronizado con Panel Partner vía Server Actions (INC-A02 resuelto).
       </AdminNotice>
+
+      {error && !mostrarForm && <AdminErrorBanner mensaje={error} />}
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">
         <AdminKpiCard label="Total Partners" value={kpis.total} />

@@ -78,7 +78,17 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
           )}
         </dl>
         {partner ? (
-          <p className="mt-3 text-xs font-bold" style={{ color: T.greenD }}>
+          <p
+            className="mt-3 text-xs font-bold"
+            style={{
+              color:
+                partner.estado === "Activo"
+                  ? T.greenD
+                  : partner.estado === "Suspendido"
+                    ? T.red
+                    : T.amberD,
+            }}
+          >
             Estado: {partner.estado} — sincronizado con Admin
           </p>
         ) : (
@@ -219,6 +229,22 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
             ))}
           </tbody>
         </table>
+      </section>
+
+      <section
+        className="mb-4 rounded-2xl p-5"
+        style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+      >
+        <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+          Tiempos de pago
+        </h2>
+        {/* Copy oficial — PANEL-PARTNER.md v1.2 § Tiempos de pago, no modificar sin aprobación */}
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: T.textMid }}>
+          Las comisiones se calculan sobre facturas ya cobradas a tus clientes referidos. Cada
+          comisión pasa por un ciclo de verificación de pago antes de estar disponible para
+          retiro — habitualmente entre 15 y 30 días desde que se generó. Una vez el pago esté
+          listo, se transferirá a tu cuenta bancaria registrada en dLocal.
+        </p>
       </section>
 
       <div className="flex items-center justify-between">

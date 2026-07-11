@@ -14,7 +14,7 @@
 
 # 1. Objetivo
 
-Índice oficial de la documentación de **Darivo Pro Empresa** (`empresa.darivo.net`).
+Índice oficial de la documentación de **Darivo Pro Empresa** (`empresa.darivopro.com`).
 
 ---
 

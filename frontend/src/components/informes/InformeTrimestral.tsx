@@ -159,7 +159,7 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
       </button>
 
       <p className="text-center text-[10px]" style={{ color: T.textLight }}>
-        Generado con Darivo Pro · darivo.net
+        Generado con Darivo Pro · darivopro.com
       </p>
 
     </div>

@@ -33,6 +33,17 @@ export function AdminKpiCard({
   );
 }
 
+export function AdminErrorBanner({ mensaje }: { mensaje: string }) {
+  return (
+    <div
+      className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold"
+      style={{ background: T.redPale, color: T.red }}
+    >
+      ⚠️ {mensaje}
+    </div>
+  );
+}
+
 export function AdminServiceRoleNotice() {
   return (
     <div

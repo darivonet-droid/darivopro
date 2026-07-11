@@ -108,7 +108,7 @@ Todo trabajo en Empresa debe seguir `REGLAS-OFICIALES-DARIVO-PRO-EMPRESA.md` v2.
 
 # 1. OBJETIVO
 
-Sistema de diseño oficial de **Darivo Pro Empresa** — entorno de **escritorio** (`empresa.darivo.net`).
+Sistema de diseño oficial de **Darivo Pro Empresa** — entorno de **escritorio** (`empresa.darivopro.com`).
 
 Este documento **concreta** la referencia visual del Panel Administrador (Reglas §4.3) para el producto Empresa. No define lógica de negocio.
 

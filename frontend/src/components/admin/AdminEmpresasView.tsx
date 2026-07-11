@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { AdminBadge, AdminTabs } from "@/components/admin/AdminTabs";
-import { AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
+import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
 import { T } from "@/lib/design-system/tokens";
 import type { AdminEmpresaRow } from "@/lib/admin-queries";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
@@ -27,6 +27,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
   const [tab, setTab] = useState<(typeof TABS)[number]>("Empresas");
   const [buscar, setBuscar] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [errorAccion, setErrorAccion] = useState<string | null>(null);
 
   const filtradas = useMemo(() => {
     const q = buscar.trim().toLowerCase();
@@ -43,26 +44,44 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
   const activas = empresas.filter((e) => e.activa).length;
 
   const cambiarPlan = (id: string, gerenteUserId: string, plan: PlanTipoPersistido) => {
+    const anterior = empresas.find((e) => e.id === id)?.plan_tipo ?? null;
     setEmpresas((prev) => prev.map((e) => (e.id === id ? { ...e, plan_tipo: plan } : e)));
-    startTransition(() => {
-      void cambiarPlanEmpresaAction(gerenteUserId, plan);
+    setErrorAccion(null);
+    startTransition(async () => {
+      const result = await cambiarPlanEmpresaAction(gerenteUserId, plan);
+      if (!result.ok) {
+        setEmpresas((prev) => prev.map((e) => (e.id === id ? { ...e, plan_tipo: anterior } : e)));
+        setErrorAccion(`No se pudo cambiar el plan: ${result.error}`);
+      }
     });
   };
 
   const toggleActiva = (id: string, activa: boolean) => {
+    const anterior = empresas.find((e) => e.id === id)?.activa ?? !activa;
     setEmpresas((prev) => prev.map((e) => (e.id === id ? { ...e, activa } : e)));
-    startTransition(() => {
-      void setEmpresaActivaAction(id, activa);
+    setErrorAccion(null);
+    startTransition(async () => {
+      const result = await setEmpresaActivaAction(id, activa);
+      if (!result.ok) {
+        setEmpresas((prev) => prev.map((e) => (e.id === id ? { ...e, activa: anterior } : e)));
+        setErrorAccion(`No se pudo actualizar el estado: ${result.error}`);
+      }
     });
   };
 
   return (
     <div>
-      <div className="mb-6 grid gap-4 md:grid-cols-4">
+      {errorAccion && <AdminErrorBanner mensaje={errorAccion} />}
+      {/* 02-PANEL-ADMIN-EMPRESAS.md §7 documenta 6 KPIs (Total/Autónomos/Empresas/
+          Activas/Suspendidas/Inactivas); `empresas.activo` solo distingue 2 estados
+          hoy, así que "Autónomos" e "Inactivas" no se pueden calcular todavía sin
+          una columna/lógica nueva. Corregido 12/07/2026: la tarjeta "Onboarding
+          pendiente" duplicaba exactamente "Suspendidas" con una etiqueta que no
+          medía nada real — quitada en vez de dejar un dato engañoso. */}
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
         <AdminKpiCard label="Total empresas" value={empresas.length} />
         <AdminKpiCard label="Activas" value={activas} />
         <AdminKpiCard label="Suspendidas" value={empresas.length - activas} />
-        <AdminKpiCard label="Onboarding pendiente" value={empresas.length - activas} />
       </div>
 
       <AdminTabs tabs={[...TABS]} active={tab} onChange={(t) => setTab(t as (typeof TABS)[number])} />

@@ -97,7 +97,7 @@ export function InformeTrimestralPdf({ data }: { data: DatosTrimestre }) {
           </View>
 
           <Text style={s.footer}>
-            Generado con Darivo Pro · darivo.net
+            Generado con Darivo Pro · darivopro.com
           </Text>
         </View>
 

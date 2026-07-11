@@ -24,7 +24,7 @@
 
 # 1. Objetivo
 
-Pantalla de **bienvenida y resumen operativo** del **Gerente** en Darivo Pro Empresa (`empresa.darivo.net`).
+Pantalla de **bienvenida y resumen operativo** del **Gerente** en Darivo Pro Empresa (`empresa.darivopro.com`).
 
 Ofrece KPIs de actividad de cotizaciones e **atajos** a las acciones más frecuentes, sin duplicar Clientes, Facturas, Cierre ni Más.
 
@@ -49,7 +49,7 @@ La imagen es referencia visual derivada de este MD. Prevalece siempre este MD an
 | Elemento | Valor |
 |----------|-------|
 | Sidebar | Posición **Inicio** (1) — ítem activo por defecto |
-| Entrada | Pantalla por defecto al acceder a `empresa.darivo.net` |
+| Entrada | Pantalla por defecto al acceder a `empresa.darivopro.com` |
 | Equivalente Móvil | Bottom nav posición 1 (`01-VISION-DEL-PRODUCTO.md` §5) |
 
 **Sidebar visible:** los 6 módulos compartidos (Sistema Diseño §5.1) + módulos exclusivos Empresa cuando estén documentados. Inicio permanece en posición 1.

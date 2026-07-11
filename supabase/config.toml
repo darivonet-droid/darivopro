@@ -46,10 +46,10 @@ site_url = "http://localhost:3000"
 additional_redirect_urls = [
   "http://localhost:3000/auth/callback",
   "http://localhost:3000/nueva-contrasena",
-  "https://darivo.net/auth/callback",
-  "https://darivo.net/nueva-contrasena",
-  "https://www.darivo.net/auth/callback",
-  "https://www.darivo.net/nueva-contrasena",
+  "https://darivopro.com/auth/callback",
+  "https://darivopro.com/nueva-contrasena",
+  "https://www.darivopro.com/auth/callback",
+  "https://www.darivopro.com/nueva-contrasena",
 ]
 jwt_expiry = 3600
 enable_signup = true
