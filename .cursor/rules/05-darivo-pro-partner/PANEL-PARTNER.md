@@ -1,8 +1,10 @@
 # PANEL PARTNER
 
-**Versión:** 1.1
+**Versión:** 1.2
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.2 — 11/07/2026):** añadido texto de cara al Partner sobre tiempos de pago (§ Tiempos de pago) — lenguaje estándar de ciclo de liquidación, sin mencionar el proceso de revisión interna. Es solo copy visible al usuario; no cambia la lógica de `partner_comisiones_historial` ni el proceso de revisión manual mensual por Admin ya definidos.
 
 **Cambio principal (v1.1):** detallado qué ve el Partner de la tabla de comisiones (20% pago único + hitos 5/20/50/100+), referenciando `06-PANEL-ADMIN-PARTNERS.md` §5.1 como fuente única.
 
@@ -107,6 +109,14 @@ El Partner ve, como mínimo:
 * Progreso actual hacia su siguiente hito (ej. "38 de 50 clientes").
 
 Fuente y definición completa: `02-darivo-pro-admin/06-PANEL-ADMIN-PARTNERS.md` §5.1 — este panel solo la muestra, nunca la define ni la duplica.
+
+## Tiempos de pago
+
+Texto visible al Partner (copy oficial, no modificar sin aprobación):
+
+> "Las comisiones se calculan sobre facturas ya cobradas a tus clientes referidos. Cada comisión pasa por un ciclo de verificación de pago antes de estar disponible para retiro — habitualmente entre 15 y 30 días desde que se generó. Una vez el pago esté listo, se transferirá a tu cuenta bancaria registrada en dLocal."
+
+Este texto es únicamente de cara al usuario. No documenta ni implica el proceso interno de revisión (revisión manual mensual por Admin, ya definido fuera de este documento) — el Partner solo ve el resultado (pendiente/pagada) y el rango de tiempo esperado, nunca el mecanismo de verificación interno.
 
 ---
 
