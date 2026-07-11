@@ -1,10 +1,12 @@
 # DARIVO PRO — ARQUITECTURA MAESTRA
 
-**Versión:** 2.9
+**Versión:** 3.5
 
-**Fecha:** 06/07/2026
+**Fecha:** 11/07/2026
 
 **Estado:** Documento técnico oficial sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.14
+
+**Cambio principal (v3.5 — 11/07/2026, autorizado por el propietario):** corrección documental (auditoría 09/07/2026, Prioridad 4/§12.6). Cabecera desincronizada de §12 (decía 2.9 cuando el registro de versiones ya estaba en 3.4) — unificada. §3.2, §9.2 y §12.1 dejan de referenciar `22`–`25`/`23-A`/`23-B` (metodología y prompts de agentes Cursor, eliminados en la Tarea 0 del 06/07/2026 por no ser necesarios para Claude Code) — remitidos a `CLAUDE.md` como guía vigente. §11.4 cierra la fila "Referidos vs Partners" (Visión ya lo resolvió: es "Partners"). §4.6 aclara que la secuencia Suscripción→Producto→Rol→Permisos solo está implementada hasta la mitad (Producto por allowlist de email, no por tabla `suscripciones`; Rol→Permisos→Funcionalidades no gatea nada, `MATRIZ_PERMISOS_APROBADA=false`) — no es "vigente" sin más, es deuda técnica conocida (DT-04-02).
 
 **Cambio principal (v2.9):** corregida la lista de "Sistemas de diseño por producto" — Empresa ya no tiene diseño propio, reutiliza `16-SISTEMA-DE-DISEÑO-ADMIN.md` (Visión §10, v2.14).
 
@@ -200,12 +202,7 @@ Toda modificación técnica o funcional debe respetar la jerarquía y la regla d
 | Base de datos (esquema implementación) | `02-BASE-DATOS.md` v1.0 |
 | Autenticación (Supabase Auth — Móvil) | `03-AUTENTICACION-DARIVO-PRO.md` v1.0 |
 | Catálogo Maestro, Tarifa Pro y Motor de Cotización | `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO.md` |
-| Metodología Oficial de IA (desarrollo) | `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md` v1.2 |
-| Metodología UNA TAREA, DOS AGENTES | `23 – METODOLOGÍA OFICIAL – TRABAJO EN PARALELO CON DOS AGENTES IA – DARIVO PRO.md` v2.9 |
-| Catálogo oficial de tareas — implementación | `25 – CATÁLOGO OFICIAL DE TAREAS – IMPLEMENTACIÓN DARIVO PRO.md` v1.9 |
-| Prompt maestro — Producción e implementación | `24 – PROMPT OFICIAL – PRODUCCIÓN E IMPLEMENTACIÓN – DARIVO PRO.md` v1.8 |
-| Prompt Agente 1 — Producción | `23-A – PROMPT OFICIAL – AGENTE 1 – PRODUCCIÓN – DARIVO PRO.md` v2.9 |
-| Prompt Agente 2 — Auditoría | `23-B – PROMPT OFICIAL – AGENTE 2 – AUDITORÍA DEL ECOSISTEMA – DARIVO PRO.md` v2.9 |
+| Metodología y flujo de trabajo con IA (desarrollo) | `CLAUDE.md` (raíz del repo) — sustituye a los docs `22`–`25`/`23-A`/`23-B` de metodología Cursor, eliminados en la Tarea 0 (06/07/2026, handoff a Claude Code) |
 
 ### Darivo Pro Móvil
 
@@ -328,7 +325,11 @@ El **Programa Partner** es un **componente del ecosistema** administrado desde D
 
 La secuencia lógica del ecosistema (suscripción → producto → rol → permisos → funcionalidades → limitaciones) se define estratégicamente en `01-VISION-DEL-PRODUCTO.md` §8.
 
-A nivel técnico, cada capa de la secuencia se resuelve en backend (Supabase + reglas de aplicación) antes de exponer funcionalidades en la interfaz del producto correspondiente.
+**Estado real de implementación (no es una secuencia vigente de punta a punta — corregido 11/07/2026, auditoría 09/07/2026 Prioridad 5):**
+
+* **Suscripción → Producto:** resuelto solo parcialmente. El acceso a Producto se gatea hoy por allowlist de emails en variables de entorno (`DARIVO_ADMIN_EMAILS`, `DARIVO_PARTNER_EMAILS`), no por la tabla `suscripciones`.
+* **Rol → Permisos → Funcionalidades:** **no gatea nada todavía.** El RBAC de roles personalizados es administrable desde la UI pero inerte — `MATRIZ_PERMISOS_APROBADA = false` en código. Esto es deuda técnica ya registrada (DT-04-02 en `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md`), no una sorpresa.
+* Activar la jerarquía completa de verdad (que Rol→Permisos sí gatee funcionalidades) es una **decisión pendiente del propietario**, no un cambio a implementar por iniciativa propia.
 
 **Detalle de roles, planes y permisos:** `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` y `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
 
@@ -557,7 +558,7 @@ El ecosistema contempla **dos IA oficiales** con funciones técnicas distintas (
 * Debe respetar la jerarquía documental y la regla de sincronización (`01-VISION-DEL-PRODUCTO.md` §12).
 * No puede modificar documentos oficiales sin autorización expresa del propietario.
 
-**Metodología obligatoria:** `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`. Este documento no duplica su contenido.
+**Metodología obligatoria:** `CLAUDE.md` (raíz del repo). El doc `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md` (metodología Cursor) fue eliminado en la Tarea 0 (06/07/2026) al pasar el trabajo de código a Claude Code. Este documento no duplica el contenido de `CLAUDE.md`.
 
 ---
 
@@ -631,8 +632,9 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 
 | Referencia | Descripción |
 | ---------- | ----------- |
-| Referidos vs Partners | Sin definición de coexistencia (`INDICE-OFICIAL-PANEL-ADMIN.md` §6) |
 | `04-SIMBOLOS-Y-BOTONES.md` | Referenciado por MD Móvil; archivo ausente en repositorio |
+
+**Cerrado (11/07/2026):** "Referidos vs Partners" ya no es una decisión abierta — `01-VISION-DEL-PRODUCTO.md` lo resolvió: el programa se llama **Partners**, "Referidos" no existe en ningún producto ni documento oficial vigente.
 
 ---
 
@@ -640,10 +642,17 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 
 | Campo | Valor |
 | ----- | ----- |
-| Versión | 3.4 |
-| Fecha | 05/07/2026 |
-| Estado | Sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.11 y MD oficiales vigentes |
+| Versión | 3.5 |
+| Fecha | 11/07/2026 |
+| Estado | Sincronizado con `01-VISION-DEL-PRODUCTO.md` v2.14 y MD oficiales vigentes |
 | Tipo | Documento técnico exclusivo del ecosistema |
+
+## 12.14 Actualización v3.5 — Corrección documental (auditoría 09/07/2026, autorizado por el propietario)
+
+* Cabecera sincronizada con este registro (decía v2.9, aquí ya estaba en v3.4).
+* §3.2, §9.2 y §12.1 dejan de listar `22`–`25`/`23-A`/`23-B` (eliminados en la Tarea 0, 06/07/2026) como documentos vigentes; remitidos a `CLAUDE.md`.
+* §4.6 corregida: la secuencia Suscripción→Producto→Rol→Permisos no está vigente de punta a punta (Producto por allowlist de email, Rol→Permisos inerte — `MATRIZ_PERMISOS_APROBADA=false`, DT-04-02).
+* §11.4 cierra "Referidos vs Partners" — ya resuelto en Visión, no es una decisión abierta.
 
 ## 12.13 Actualización v3.4 — Sincronización Visión v2.11 (Productos y Programa Partner)
 
@@ -663,17 +672,12 @@ Agrupación del estado técnico pendiente derivado de la documentación oficial 
 * `07-INTELIGENCIA-ARTIFICIAL-DARIVO-PRO.md` v1.0
 * `08-PAGOS-DARIVO-PRO.md` v1.0
 * `09-FACTURACION-ELECTRONICA-DARIVO-PRO.md` v1.0 (omitida)
-* `informes/INFORME-FASE-FINAL-DARIVO-PRO-IMPLEMENTACION.md` v1.0
 * `02-darivo-pro-admin/INDICE-OFICIAL-PANEL-ADMIN.md` v1.2
 * `03-darivo-pro-empresa/INDICE-OFICIAL-DARIVO-PRO-EMPRESA.md`
 * `02-darivo-pro-admin/08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` v2.1
 * `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO.md`
-* `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md` v1.2
-* `23 – METODOLOGÍA OFICIAL – TRABAJO EN PARALELO CON DOS AGENTES IA – DARIVO PRO.md` v2.9
-* `24 – PROMPT OFICIAL – PRODUCCIÓN E IMPLEMENTACIÓN – DARIVO PRO.md` v1.8
 * `11-AUTORIZACION-MULTI-PRODUCTO-DARIVO-PRO.md` v1.0
-* `25 – CATÁLOGO OFICIAL DE TAREAS – IMPLEMENTACIÓN DARIVO PRO.md` v1.21
-* `informes/INFORME-06-TAREA-FRONTEND-ECOSISTEMA-FINAL.md` v1.0
+* `CLAUDE.md` (raíz del repo) — metodología de trabajo con IA vigente, sustituye a `22`–`25`/`23-A`/`23-B` y a toda la carpeta `informes/` (incluidos `INFORME-FASE-FINAL-DARIVO-PRO-IMPLEMENTACION.md` e `INFORME-06-TAREA-FRONTEND-ECOSISTEMA-FINAL.md`), eliminados en la Tarea 0 (06/07/2026)
 
 ## 12.12 Actualización v3.3 — Ampliación Frontend Ecosistema (T06-FE propietario)
 
