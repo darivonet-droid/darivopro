@@ -39,19 +39,19 @@ function parsePrecio(raw: string): number {
 interface NuevoSvcModalProps {
   cap: Capitulo;
   onClose: () => void;
-  onSave: (label: string, tipo: Partida["tipo"], precio: number) => void;
+  onSave: (label: string, calcType: Partida["calcType"], precio: number) => void;
 }
 function NuevoSvcModal({ cap, onClose, onSave }: NuevoSvcModalProps) {
-  const [label, setLabel]   = useState("");
-  const [tipo, setTipo]     = useState<Partida["tipo"]>("m2");
-  const [precio, setPrecio] = useState("");
+  const [label, setLabel]     = useState("");
+  const [calcType, setCalcType] = useState<Partida["calcType"]>("m2");
+  const [precio, setPrecio]   = useState("");
 
-  const TIPOS: [Partida["tipo"], string][] = [["m2","m²"],["unidad","unidad"],["hora","horas"],["fijo","fijo"]];
-  const UNIT_FOR: Record<Partida["tipo"], string> = { m2: "m²", unidad: "und", hora: "h", fijo: "" };
+  const TIPOS: [Partida["calcType"], string][] = [["m2","m²"],["unit","unidad"],["hour","horas"],["fixed","fijo"]];
+  const UNIT_FOR: Record<Partida["calcType"], string> = { m2: "m²", unit: "und", hour: "h", fixed: "" };
 
   const save = () => {
     if (!label.trim() || precio === "") { return; }
-    onSave(label.trim(), tipo, parsePrecio(precio));
+    onSave(label.trim(), calcType, parsePrecio(precio));
   };
 
   return (
@@ -78,14 +78,14 @@ function NuevoSvcModal({ cap, onClose, onSave }: NuevoSvcModalProps) {
         <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Tipo de cálculo</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 16 }}>
           {TIPOS.map(([tp, l]) => (
-            <button key={tp} type="button" onClick={() => setTipo(tp)} style={{ padding: "11px 4px", borderRadius: 11, border: `2px solid ${tipo === tp ? cap.color : T.slateD}`, background: tipo === tp ? cap.color + "10" : "none", cursor: "pointer", fontSize: 12, fontWeight: 800, color: tipo === tp ? cap.color : T.textMid, textAlign: "center" }}>
+            <button key={tp} type="button" onClick={() => setCalcType(tp)} style={{ padding: "11px 4px", borderRadius: 11, border: `2px solid ${calcType === tp ? cap.color : T.slateD}`, background: calcType === tp ? cap.color + "10" : "none", cursor: "pointer", fontSize: 12, fontWeight: 800, color: calcType === tp ? cap.color : T.textMid, textAlign: "center" }}>
               {l}
             </button>
           ))}
         </div>
 
         <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
-          Precio {tipo === "fijo" ? "cerrado" : tipo === "m2" ? "S//m²" : tipo === "unidad" ? "S//und" : "S//hora"}
+          Precio {calcType === "fixed" ? "cerrado" : calcType === "m2" ? "S//m²" : calcType === "unit" ? "S//und" : "S//hora"}
         </p>
         <div style={{ position: "relative", marginBottom: 20 }}>
           <input
@@ -107,7 +107,7 @@ function NuevoSvcModal({ cap, onClose, onSave }: NuevoSvcModalProps) {
               <p style={{ fontSize: 11, color: T.textMid }}>{cap.nombre}</p>
             </div>
             <p style={{ fontSize: 15, fontWeight: 900, color: cap.color }}>
-              S/ {precio}{tipo !== "fijo" ? `/${UNIT_FOR[tipo]}` : ""}
+              S/ {precio}{calcType !== "fixed" ? `/${UNIT_FOR[calcType]}` : ""}
             </p>
           </div>
         )}
@@ -156,9 +156,9 @@ export function CategoriasManager() {
         <NuevoSvcModal
           cap={addCatData}
           onClose={() => setAddingSvc(null)}
-          onSave={async (label, tipo, precio) => {
+          onSave={async (label, calcType, precio) => {
             // For custom services, save as partida_propia
-            const partida: Partida = { id: `custom_${Date.now()}`, nombre: label, tipo, precio, unidad: tipo === "m2" ? "m²" : tipo === "hora" ? "h" : tipo === "unidad" ? "und" : "", esPropia: true };
+            const partida: Partida = { id: `custom_${Date.now()}`, nombre: label, calcType, precio, unidad: calcType === "m2" ? "m²" : calcType === "hour" ? "h" : calcType === "unit" ? "und" : "", esPropia: true };
             const ok = await editarPrecioPartida(partida, precio);
             mostrarToast(ok ? `"${label}" añadida ✓` : "No se pudo guardar", ok ? "ok" : "error");
             setAddingSvc(null);
@@ -219,7 +219,7 @@ export function CategoriasManager() {
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                         <span style={{ fontSize: 12, color: cap.color, fontWeight: 800 }}>
-                          {p.tipo === "fijo" ? `S/ ${p.precio}` : `S/ ${p.precio}/${p.unidad}`}
+                          {p.calcType === "fixed" ? `S/ ${p.precio}` : `S/ ${p.precio}/${p.unidad}`}
                         </span>
                       </div>
                     </div>

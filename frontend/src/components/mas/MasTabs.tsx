@@ -60,7 +60,7 @@ function TarifasEditTab() {
     catColor: string;
     catEmoji: string;
     nombre: string;
-    tipo: string;
+    calcType: string;
     unidad: string;
     precio: number;
   };
@@ -168,7 +168,7 @@ function TarifasEditTab() {
                     catColor: cap.color,
                     catEmoji: cap.emoji,
                     nombre: p.nombre,
-                    tipo: p.tipo,
+                    calcType: p.calcType,
                     unidad: p.unidad,
                     precio: p.precio,
                   });
@@ -184,7 +184,7 @@ function TarifasEditTab() {
                     {p.nombre}
                   </p>
                   <p className="text-[11px]" style={{ color: T.textMid }}>
-                    {p.tipo === "fijo" ? "Precio cerrado" : `Por ${p.unidad}`}
+                    {p.calcType === "fixed" ? "Precio cerrado" : `Por ${p.unidad}`}
                   </p>
                 </div>
                 <span className="shrink-0 text-[17px] font-black" style={{ color: cap.color }}>

@@ -88,7 +88,7 @@ function TarifasEditTab() {
   const { editarPrecioPartida } = useCategorias();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
 
-  type EditingItem = { svcId: string; catLabel: string; catColor: string; catEmoji: string; nombre: string; tipo: string; unidad: string; precio: number };
+  type EditingItem = { svcId: string; catLabel: string; catColor: string; catEmoji: string; nombre: string; calcType: string; unidad: string; precio: number };
   const [editing, setEditing] = useState<EditingItem | null>(null);
   const [tempVal, setTempVal] = useState("");
 
@@ -116,7 +116,7 @@ function TarifasEditTab() {
               </div>
             </div>
             <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-              Precio {editing.tipo === "fijo" ? "cerrado" : `por ${editing.unidad}`}
+              Precio {editing.calcType === "fixed" ? "cerrado" : `por ${editing.unidad}`}
             </p>
             <div style={{ position: "relative", marginBottom: 20 }}>
               <input
@@ -153,12 +153,12 @@ function TarifasEditTab() {
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => { setEditing({ svcId: p.id, catLabel: cap.nombre, catColor: cap.color, catEmoji: cap.emoji, nombre: p.nombre, tipo: p.tipo, unidad: p.unidad, precio: p.precio }); setTempVal(String(p.precio)); }}
+                  onClick={() => { setEditing({ svcId: p.id, catLabel: cap.nombre, catColor: cap.color, catEmoji: cap.emoji, nombre: p.nombre, calcType: p.calcType, unidad: p.unidad, precio: p.precio }); setTempVal(String(p.precio)); }}
                   style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: i < cap.partidas.length - 1 ? `1px solid ${T.slateD}` : "none", background: "none", cursor: "pointer", textAlign: "left", gap: 8 }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.nombre}</p>
-                    <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>{p.tipo === "fijo" ? "Precio cerrado" : `Por ${p.unidad}`}</p>
+                    <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>{p.calcType === "fixed" ? "Precio cerrado" : `Por ${p.unidad}`}</p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
                     <span style={{ fontSize: 17, fontWeight: 900, color: cap.color }}>S/ {p.precio}</span>

@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 3.1
+**Versión:** 3.2
 
 **Fecha:** 12/07/2026
 
 **Estado:** Documento técnico oficial — esquema V2 (34 tablas) · inicio producto
+
+**Cambio principal (v3.2 — 12/07/2026, autorizado por el propietario):** unificado el vocabulario `tipo` (español) de `partidas_propias` al vocabulario `calc_type` (inglés) ya oficial de `catalogo_partidas_maestro`/`cotizacion_items` — §4.5. Migración `20260712110000_unify_partidas_propias_calc_type.sql` (pendiente de ejecución por el propietario). Código frontend ya actualizado (10 archivos) en la misma sesión.
 
 **Cambio principal (v3.1 — 12/07/2026, autorizado por el propietario):** corregido el trigger `on_pago_evento_generar_comision_venta` (§4.9, DT-02-06) — comparaba contra el placeholder `'exitoso'` en vez de los valores reales que ya usa el webhook de dLocal. Migración `20260712100000_fix_comision_venta_trigger_estado.sql` (pendiente de ejecución por el propietario). También se corrigió que el webhook nunca insertaba en `pagos_eventos` (código, no BD — sin migración).
 
@@ -218,7 +220,7 @@ Overlay **por usuario** sobre catálogo base en código (`catalog.ts`).
 
 ### `partidas_propias`
 
-Partidas custom del usuario. Columnas: `id`, `user_id`, `cap_id`, `nombre`, `tipo` (`m2`\|`unidad`\|`hora`\|`fijo`), `precio`, `unidad`, `activa`, `created_at`. Índice `idx_partidas_propias_user`.
+Partidas custom del usuario. Columnas: `id`, `user_id`, `cap_id`, `nombre`, `calc_type` (`m2`\|`unit`\|`hour`\|`fixed` — renombrada desde `tipo` en español por `20260712110000_unify_partidas_propias_calc_type.sql`, unificado con el vocabulario ya oficial de `catalogo_partidas_maestro.calc_type`/`cotizacion_items.calc_type`), `precio`, `unidad`, `activa`, `created_at`. Índice `idx_partidas_propias_user`.
 
 ### `precios_usuario`
 
@@ -607,7 +609,7 @@ Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase
 
 # 11. Estado del documento
 
-**Versión:** 3.1
+**Versión:** 3.2
 
 **Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (12/07/2026).
 

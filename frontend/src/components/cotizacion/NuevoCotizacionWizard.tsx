@@ -46,12 +46,6 @@ function Ic({ d, size = 18, color = "currentColor", sw = 2 }: { d: SvgPath; size
 
 // ─── Presets de cantidad por tipo ──────────────────────────────────────────────
 const PRESETS: Record<string, number[]> = { m2: [5, 10, 15, 20, 30, 50, 80], unit: [1, 2, 3, 4, 5, 8, 10], hour: [1, 2, 4, 6, 8], fixed: [] };
-function tipoToCalcType(tipo: string): string {
-  if (tipo === "unidad") return "unit";
-  if (tipo === "hora")   return "hour";
-  if (tipo === "fijo")   return "fixed";
-  return "m2";
-}
 
 // ─── Tipos locales ─────────────────────────────────────────────────────────────
 interface BasketItem {
@@ -314,7 +308,7 @@ export function NuevoCotizacionWizard() {
       setBasket((b) => b.filter((x) => x.svcId !== partida.id));
       return;
     }
-    const calcType = tipoToCalcType(partida.tipo) as LineaCotizacion["calcType"];
+    const calcType = partida.calcType;
     setBasket((b) => [...b, {
       svcId: partida.id,
       catLabel: cap.nombre,
@@ -508,7 +502,7 @@ export function NuevoCotizacionWizard() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 14, fontWeight: sel ? 800 : 600, color: sel ? cap.color : T.text, lineHeight: 1.3 }}>{p.nombre}</p>
               <p style={{ fontSize: 12, color: T.textMid, marginTop: 1 }}>
-                {p.tipo === "fijo" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
+                {p.calcType === "fixed" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
               </p>
             </div>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: sel ? cap.color : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s", boxShadow: sel ? `0 2px 8px ${cap.color}40` : "none" }}>

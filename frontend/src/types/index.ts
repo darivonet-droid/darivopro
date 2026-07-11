@@ -92,7 +92,7 @@ export interface EmpresaData {
 export interface Partida {
   id: string;
   nombre: string;
-  tipo: "m2" | "unidad" | "hora" | "fijo";
+  calcType: "m2" | "unit" | "hour" | "fixed";
   precio: number;
   unidad: string;
   esPropia?: boolean;

@@ -40,7 +40,7 @@ interface PartidaPropiaRow {
   id: string;
   cap_id: string;
   nombre: string;
-  tipo: Partida["tipo"];
+  calc_type: Partida["calcType"];
   precio: number | string;
   unidad: string | null;
   activa: boolean;
@@ -54,7 +54,7 @@ interface PrecioRow {
 const propiaALinea = (pp: PartidaPropiaRow): Partida => ({
   id: pp.id,
   nombre: pp.nombre,
-  tipo: pp.tipo,
+  calcType: pp.calc_type,
   precio: Number(pp.precio),
   unidad: pp.unidad ?? "",
   esPropia: true,
@@ -94,7 +94,7 @@ export function useCatalogo() {
     const [{ data: cats }, { data: precios }, { data: propias }] = await Promise.all([
       supabase.from("categorias").select("cat_id, nombre, emoji, color, es_base, activa").eq("activa", true),
       supabase.from("precios_usuario").select("svc_id, precio"),
-      supabase.from("partidas_propias").select("id, cap_id, nombre, tipo, precio, unidad, activa").eq("activa", true),
+      supabase.from("partidas_propias").select("id, cap_id, nombre, calc_type, precio, unidad, activa").eq("activa", true),
     ]);
 
     const precioMap = new Map<string, number>(

@@ -29,7 +29,7 @@ interface PartidaRow {
   id: string;
   cap_id: string;
   nombre: string;
-  tipo: Partida["tipo"];
+  calc_type: Partida["calcType"];
   precio: number | string;
   unidad: string | null;
   activa: boolean;
@@ -52,7 +52,7 @@ async function getMergedCatalog(
   const [{ data: cats }, { data: precios }, { data: propias }] = await Promise.all([
     supabase.from("categorias").select("cat_id, nombre, emoji, color, es_base, activa").eq("activa", true),
     supabase.from("precios_usuario").select("svc_id, precio"),
-    supabase.from("partidas_propias").select("id, cap_id, nombre, tipo, precio, unidad, activa").eq("activa", true),
+    supabase.from("partidas_propias").select("id, cap_id, nombre, calc_type, precio, unidad, activa").eq("activa", true),
   ]);
 
   const precioMap = new Map<string, number>(
@@ -77,7 +77,7 @@ async function getMergedCatalog(
           .map((pp) => ({
             id: pp.id,
             nombre: pp.nombre,
-            tipo: pp.tipo,
+            calcType: pp.calc_type,
             precio: Number(pp.precio),
             unidad: pp.unidad ?? "",
             esPropia: true as const,
@@ -98,7 +98,7 @@ async function getMergedCatalog(
         .map((pp) => ({
           id: pp.id,
           nombre: pp.nombre,
-          tipo: pp.tipo,
+          calcType: pp.calc_type,
           precio: Number(pp.precio),
           unidad: pp.unidad ?? "",
           esPropia: true as const,
@@ -130,11 +130,11 @@ function findPartida(catalog: Capitulo[], svcId: string): { cap: Capitulo; parti
   return null;
 }
 
-const TIPO_UNIDAD: Record<Partida["tipo"], string> = {
+const TIPO_UNIDAD: Record<Partida["calcType"], string> = {
   m2: "m²",
-  unidad: "und",
-  hora: "h",
-  fijo: "fijo",
+  unit: "und",
+  hour: "h",
+  fixed: "fijo",
 };
 
 export async function POST(req: NextRequest) {
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
       mappedItems.push({
         descripcion: partida.nombre + (ci.sugerida ? " — sugerida" : ""),
         cantidad: qty,
-        unidad: TIPO_UNIDAD[partida.tipo] ?? partida.unidad,
+        unidad: TIPO_UNIDAD[partida.calcType] ?? partida.unidad,
         precio_unit: price,
         total: Math.round(qty * price * 100) / 100,
         svcId: partida.id,
