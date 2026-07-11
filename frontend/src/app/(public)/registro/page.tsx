@@ -83,6 +83,10 @@ export default function RegistroPage() {
         id: data.user.id,
         razon_social: nombre.trim() || null,
       });
+      // Registra el referido de Partner si venía de /ref/{codigo}. Se espera
+      // (para que no se cancele por la navegación siguiente) pero un fallo
+      // nunca bloquea el registro — el catch garantiza que igual redirige.
+      await fetch("/api/partners/registrar-referido", { method: "POST" }).catch(() => {});
       window.location.assign("/onboarding/1");
       return;
     }

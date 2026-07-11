@@ -40,6 +40,10 @@ function generarCodigo() {
   return `DRV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
+/** Cookie de tracking de referido — /ref/[codigo] la setea, /registro la consume. */
+export const REF_COOKIE_NAME = "darivo_ref";
+export const REF_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 días (estándar de programas de afiliados)
+
 async function mapPartner(
   supabase: SupabaseClient,
   row: PartnerRow
@@ -136,4 +140,53 @@ export async function updatePartnerEstado(
 
   if (error || !data) return null;
   return mapPartner(admin, data as PartnerRow);
+}
+
+/**
+ * Busca un partner por código de enlace (/ref/[codigo]). Solo devuelve el id
+ * — es la única columna que necesita el flujo de tracking de referidos.
+ * Usa service role: se invoca desde /ref/[codigo] y desde el registro, antes
+ * de que exista sesión de usuario, así que no hay RLS de partner que aplicar.
+ */
+export async function findPartnerByCodigo(codigo: string): Promise<{ id: string } | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("partners")
+    .select("id")
+    .eq("codigo", codigo.trim().toUpperCase())
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return { id: (data as { id: string }).id };
+}
+
+/**
+ * Registra un referido en partner_referidos si el código sigue siendo válido
+ * en este momento (re-consulta partners, no confía en un valor cacheado).
+ * Nunca lanza — un código inválido o expirado simplemente no inserta nada,
+ * el registro del usuario nunca debe bloquearse por esto.
+ * Evita duplicados: si este referred_user_id ya tiene una fila, no inserta otra.
+ */
+export async function registrarReferidoSiCorresponde(
+  codigo: string,
+  email: string,
+  referredUserId: string
+): Promise<void> {
+  const partner = await findPartnerByCodigo(codigo);
+  if (!partner) return;
+
+  const admin = createAdminClient();
+
+  const { data: existente } = await admin
+    .from("partner_referidos")
+    .select("id")
+    .eq("referred_user_id", referredUserId)
+    .maybeSingle();
+  if (existente) return;
+
+  await admin.from("partner_referidos").insert({
+    partner_id: partner.id,
+    email: email.trim().toLowerCase(),
+    referred_user_id: referredUserId,
+  });
 }

@@ -20,7 +20,7 @@ interface PartnerPanelProps {
 }
 
 export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelProps) {
-  const enlace = partner?.enlace ?? "https://darivo.pro/ref/—";
+  const enlace = partner?.enlace ?? "https://darivopro.com/ref/—";
   const codigo = partner?.codigo ?? "—";
   const registros = partner?.registros ?? [];
   const progresoHitos = calcularProgresoHitos(registros.length);
