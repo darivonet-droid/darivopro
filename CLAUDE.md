@@ -308,6 +308,21 @@ Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, 
 
 **Bloqueado, no construido:** Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11 "No crear endpoints"), no existe ningún evento real de creación/resolución al que enganchar el envío. Las plantillas ya están listas en `templates.ts` para el día que se decida reconstruir ese backend.
 
+## Auditoría 12/07/2026 — Admin/Empresa/Partner (sesión continua, 3 agentes en paralelo)
+
+Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ver commit `fix: hallazgos de auditoría Admin/Empresa/Partner`): silent failures en `AdminEmpresasView`/`AdminPartnersView` (la UI daba por bueno un cambio que en realidad había fallado en Supabase), KPI "Onboarding pendiente" duplicado/engañoso, sección "Tiempos de pago" faltante en Panel Partner (el MD la agregó el 11/07 y nadie la había conectado a la UI todavía), color de estado "Suspendido" mostrado en verde.
+
+**Pendiente — hallazgos reales, no corregidos todavía (requieren más que un fix puntual, o una decisión de alcance):**
+
+- **Admin — Usuarios:** el módulo es de solo lectura; `03-PANEL-ADMIN-USUARIOS.md` §5 exige Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso + filtros — ninguno existe. Construcción de feature completa, no un bugfix.
+- **Admin — Partners:** falta la acción "Configurar tabla de comisiones" que `06-PANEL-ADMIN-PARTNERS.md` §5/§8 exige (hoy la tabla de hitos es una constante hardcodeada en `partners-types.ts`, no editable desde Admin).
+- **Empresa — Cotizaciones:** `empresa-modules.ts` la registra como ítem del sidebar y `empresa/cotizaciones/page.tsx` muestra una lista global — `05-MODULO-COTIZACIONES-EMPRESA.md` §1/§3 dice explícitamente lo contrario ("no es ítem del sidebar", "no existe lista global", solo consulta vía ficha de Cliente). Contradicción directa con el MD, no solo texto desactualizado.
+- **Empresa — Ficha de Cliente:** al hacer clic en un cliente desde el panel Empresa, `empresa/clientes/page.tsx` reutiliza `ClienteFichaView` de Móvil sin adaptar, que navega a `/clientes/{id}` (ruta Móvil) — el Gerente sale del `EmpresaShell` (sidebar) por completo. `03-MODULO-CLIENTES-EMPRESA.md` §4/§6 pide un panel lateral (~360-400px) dentro del propio shell de escritorio. Combinado con el punto anterior, hoy no hay ninguna forma de ver el historial de cotizaciones de un cliente desde el panel de escritorio.
+- **Empresa — Invitar empleado:** el botón "Enviar invitación" solo hace un `INSERT` en `empresa_empleados` (sin `user_id` ni ningún mecanismo de auth) — no se envía ningún correo ni se otorga acceso real a Móvil. `10-MODULO-EMPLEADOS-EMPRESA.md` §6 exige que sí otorgue acceso real. Requiere diseño (¿tabla nueva con token de invitación? ¿email transaccional adicional, van 9 ya definidos?) — no improvisar sin decisión.
+- **Empresa — Empleados:** faltan las acciones "Editar" y "Permisos" por fila que pide el MD §5 (solo hay Activar/Desactivar); la columna "Última actividad" nunca se escribe (no hay evento de login Móvil que la alimente) y la tabla muestra "Alta" (`created_at`) en su lugar.
+- **Partner — visibilidad de comisiones:** el Partner no ve NINGÚN monto pendiente/pagado pese a que `partner_comisiones_historial` ya genera filas reales (trigger corregido el 12/07) — `ecosystem-store.ts` nunca consulta esa tabla. El backend ya produce el dato, el frontend nunca lo lee. Requiere una nueva query + sección en `PartnerPanel.tsx`.
+- **Partner — acceso tras suspensión:** `/partner` se gatea solo por allowlist de email (`DARIVO_PARTNER_EMAILS`), independiente de `partners.estado` — un Partner Suspendido con el email todavía en la allowlist conserva acceso de lectura completo al panel. Mismo gap de arquitectura ya documentado (jerarquía Suscripción→Producto→Rol→Permisos solo a medias, DT-04-02), no es una sorpresa nueva, pero vale la pena resolverlo si se activa esa jerarquía de verdad.
+
 ## Bloqueado — no iniciar sin confirmación explícita
 
 - Conexión API Claude/Anthropic para los Agentes IA 1 y 2: decisión de arquitectura pendiente (¿sustituye o convive con OpenAI?).
