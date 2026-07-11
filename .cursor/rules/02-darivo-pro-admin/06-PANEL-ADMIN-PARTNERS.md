@@ -1,8 +1,12 @@
 ﻿# 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.4
+**Versión:** 1.6
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.6 — 11/07/2026):** §5.1 "Plan regalado" documenta ahora la revocación implementada: al suspender/desactivar un Partner, su Plan Business otorgado por esa vía se revoca automáticamente a `gratis`, salvo que tenga un pago real propio de Business (nunca se revoca un plan pagado). Requiere `perfiles.plan_origen_partner_id` (migración pendiente de ejecución — ver `supabase/migrations/20260711130000_plan_origen_partner.sql`).
+
+**Cambio principal (v1.5 — 11/07/2026):** añadida sección 5.3 — umbral mínimo de 3 clientes referidos activos en el ciclo para que un Partner reciba liquidación, como parte del proceso de revisión mensual manual.
 
 **Cambio principal (v1.4 — 11/07/2026):** añadida sección 5.2 — requisito de negocio: registro histórico y auditable de cada comisión generada (no solo cálculo en vivo del tramo actual). Decisión de negocio, sin diseño de tabla todavía (pendiente de fase técnica). §10 actualizado con referencia cruzada.
 
@@ -155,6 +159,14 @@ Bono adicional, calculado como **porcentaje sobre la facturación del tramo de c
 ### Plan regalado
 
 * Cada Partner activo recibe acceso gratuito al **Plan Business** mientras permanezca activo en el programa (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6).
+* El otorgamiento es automático: al activar un Partner desde este módulo (con cuenta de usuario vinculada), su plan pasa a Business.
+
+#### Revocación (implementado 11/07/2026)
+
+* Al **suspender o desactivar** un Partner, su Plan Business otorgado por esta vía **se revoca automáticamente a `gratis`**.
+* La revocación **nunca** afecta a un Partner que además tenga un **pago real y propio** de Plan Business — en ese caso el plan se queda en Business sin ningún cambio, aunque el Partner deje de estar activo.
+* El sistema distingue ambos casos con la columna `perfiles.plan_origen_partner_id`: no nula únicamente cuando el Business vigente fue otorgado por ser Partner activo (nunca cuando fue pagado directamente). Si el usuario paga Business por su cuenta en cualquier momento, esa marca se limpia automáticamente y el plan deja de ser revocable.
+* Esta lógica vive en `frontend/src/lib/activar-plan.ts` (`activarPlanUsuario`, `revocarBusinessSiFueRegaloPartner`) y se dispara desde `frontend/src/lib/ecosystem-store.ts` (`updatePartnerEstado`).
 
 ### Administración
 
@@ -184,6 +196,17 @@ El bono por hitos (§5.1) se calcula **"sobre la facturación del tramo de clien
 * Aplica a la comisión por venta (20% pago único) y a cada bono por hito (§5.1) — cada uno genera su propio registro histórico independiente.
 * El estado pendiente/pagada permite que Admin marque comisiones como pagadas sin perder el historial de cuándo y con qué porcentaje se generaron.
 * No se definen aquí nombres de tabla, columnas, tipos de dato ni relaciones — eso es diseño técnico, fuera del alcance de esta sección (ver §10).
+
+---
+
+## 5.3 Umbral mínimo de liquidación (aprobado por el propietario — 11/07/2026)
+
+Un Partner necesita **al menos 3 clientes referidos activos en el ciclo** para que se le pague la liquidación correspondiente a ese ciclo.
+
+* Este umbral es una condición del **proceso de revisión mensual manual por Admin** (comisiones generadas — §5.2 — quedan en estado `pendiente` hasta esa revisión), no un cálculo automático adicional.
+* No sustituye ni modifica los hitos de bono de §5.1 (5/20/50/100+) — es un requisito distinto: una puerta de entrada para que la liquidación del ciclo se procese, no un tramo de porcentaje.
+* Las comisiones generadas (§5.2) para un Partner que no alcanza el umbral en un ciclo permanecen en estado `pendiente` — no se eliminan ni se recalculan, se acumulan hasta que el Partner alcance el umbral en un ciclo posterior.
+* No documentar este umbral en `05-darivo-pro-partner/PANEL-PARTNER.md` sin aprobación — ese panel solo muestra el resultado (pendiente/pagada) y el rango de tiempo esperado, nunca el mecanismo de revisión interna (`PANEL-PARTNER.md` § Tiempos de pago).
 
 ---
 

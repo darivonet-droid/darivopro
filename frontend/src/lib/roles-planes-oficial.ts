@@ -69,7 +69,7 @@ export const PRECIOS_OFICIALES: Record<
 > = {
   basico: { mensual: 49, anual: 490, nombre: "BÁSICO" }, // provisional
   pro: { mensual: 79, anual: 790, nombre: "PRO" }, // provisional
-  business: { mensual: 115, anual: 1150, nombre: "BUSINESS" }, // provisional, rango 115-120
+  business: { mensual: 120, anual: 1200, nombre: "BUSINESS" }, // precio definitivo confirmado 11/07/2026
 };
 
 /** Usuario solo Móvil = Gerente + Técnico simultáneamente (Visión §5 excepción) */

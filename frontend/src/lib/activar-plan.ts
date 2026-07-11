@@ -10,6 +10,28 @@
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PlanSuscripcionOficial } from "@/lib/roles-planes-oficial";
+import { ESTADOS_PAGO_EXITOSO, parseOrderId } from "@/lib/pagos-suscripcion";
+
+/**
+ * ¿Este usuario tiene al menos un pago real y exitoso del plan Business?
+ * Se apoya en `pagos_eventos.dlocal_order_id`, que ya codifica el plan
+ * (`buildOrderId` — pagos-suscripcion.ts) — no hace falta columna nueva
+ * para esta comprobación.
+ */
+async function tienePagoRealBusiness(userId: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("pagos_eventos")
+    .select("dlocal_order_id, estado")
+    .eq("user_id", userId);
+
+  return (data ?? []).some((ev) => {
+    const estado = ev.estado?.toUpperCase();
+    if (!estado || !ESTADOS_PAGO_EXITOSO.has(estado)) return false;
+    if (!ev.dlocal_order_id) return false;
+    return parseOrderId(ev.dlocal_order_id)?.plan === "business";
+  });
+}
 
 async function asegurarEmpresaParaGerente(userId: string): Promise<void> {
   const admin = createAdminClient();
@@ -47,9 +69,17 @@ async function asegurarEmpresaParaGerente(userId: string): Promise<void> {
   await admin.from("perfiles").update({ empresa_id: empresa.id }).eq("id", userId);
 }
 
+/**
+ * @param opts.origenPartnerId — presente solo cuando el plan se otorga porque
+ * el usuario es un Partner activo (06-PANEL-ADMIN-PARTNERS.md §5.1 "Plan
+ * regalado"), nunca en una activación por pago real (webhook). Se usa para
+ * poder revocar el plan más adelante sin arriesgar a alguien que sí pagó
+ * — ver `revocarBusinessSiFueRegaloPartner`.
+ */
 export async function activarPlanUsuario(
   userId: string,
-  plan: PlanSuscripcionOficial
+  plan: PlanSuscripcionOficial,
+  opts?: { origenPartnerId?: string }
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const admin = createAdminClient();
@@ -65,6 +95,25 @@ export async function activarPlanUsuario(
 
     if (plan === "business") {
       await asegurarEmpresaParaGerente(userId);
+
+      if (opts?.origenPartnerId) {
+        // Otorgado por ser Partner activo — solo marca el origen si el
+        // usuario no tiene ya un pago real propio (nunca pisa un plan pagado).
+        const yaPago = await tienePagoRealBusiness(userId);
+        if (!yaPago) {
+          await admin
+            .from("perfiles")
+            .update({ plan_origen_partner_id: opts.origenPartnerId })
+            .eq("id", userId);
+        }
+      } else {
+        // Activación por pago real (webhook) — limpia cualquier marca de
+        // "regalo de Partner" previa: ahora es un plan pagado, no revocable.
+        await admin
+          .from("perfiles")
+          .update({ plan_origen_partner_id: null })
+          .eq("id", userId);
+      }
     }
 
     return { ok: true };
@@ -72,6 +121,37 @@ export async function activarPlanUsuario(
     console.error("activarPlanUsuario:", e);
     return { ok: false, error: "No se pudo actualizar el plan" };
   }
+}
+
+/**
+ * Revoca el Plan Business otorgado por ser Partner activo, cuando el Partner
+ * deja de estar Activo (Pendiente/Suspendido) — 06-PANEL-ADMIN-PARTNERS.md
+ * §5.1 "mientras permanezca activo". Solo revoca si:
+ * 1. El origen registrado (`plan_origen_partner_id`) es exactamente este Partner.
+ * 2. El usuario sigue en plan Business (si ya cambió, no hay nada que hacer).
+ * 3. No tiene un pago real propio de Business (`tienePagoRealBusiness`) —
+ *    si lo tiene, se queda en Business sin tocar nada.
+ */
+export async function revocarBusinessSiFueRegaloPartner(
+  partnerId: string,
+  userId: string
+): Promise<void> {
+  const admin = createAdminClient();
+  const { data: perfil } = await admin
+    .from("perfiles")
+    .select("plan_origen_partner_id, plan_tipo")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!perfil) return;
+  if (perfil.plan_origen_partner_id !== partnerId) return;
+  if (perfil.plan_tipo !== "business") return;
+  if (await tienePagoRealBusiness(userId)) return;
+
+  await admin
+    .from("perfiles")
+    .update({ plan_tipo: "gratis", plan_origen_partner_id: null })
+    .eq("id", userId);
 }
 
 /** Resuelve userId por email cuando el webhook de suscripción no trae order_id */
