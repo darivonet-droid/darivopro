@@ -14,6 +14,11 @@ export type AdminPerfilRow = {
   onboarding_done: boolean | null;
   created_at: string;
   email?: string;
+  /** `auth.users.banned_until` — futuro = usuario bloqueado (Admin §5 "Bloquear usuario") */
+  bannedUntil?: string | null;
+  lastSignInAt?: string | null;
+  /** Primer proveedor de auth.users.identities — "email" | "google" | etc. */
+  metodoAcceso?: string;
 };
 
 function adminClientOrNull() {
@@ -166,14 +171,18 @@ export async function fetchAdminUsuarios(): Promise<
     ),
   ]);
 
-  const emailById = new Map(
-    (authData?.users ?? []).map((u) => [u.id, u.email ?? ""])
-  );
+  const authById = new Map((authData?.users ?? []).map((u) => [u.id, u]));
 
-  const data: AdminPerfilRow[] = (perfiles ?? []).map((p) => ({
-    ...p,
-    email: emailById.get(p.id) ?? "",
-  }));
+  const data: AdminPerfilRow[] = (perfiles ?? []).map((p) => {
+    const u = authById.get(p.id);
+    return {
+      ...p,
+      email: u?.email ?? "",
+      bannedUntil: u?.banned_until ?? null,
+      lastSignInAt: u?.last_sign_in_at ?? null,
+      metodoAcceso: u?.identities?.[0]?.provider ?? "email",
+    };
+  });
 
   return { data };
 }
