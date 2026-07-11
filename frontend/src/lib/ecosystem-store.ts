@@ -17,6 +17,7 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { activarPlanUsuario } from "@/lib/activar-plan";
 import type { EstadoPartner, PartnerRegistro } from "@/lib/partners-types";
 
 interface PartnerRow {
@@ -126,6 +127,14 @@ export async function createPartnerRecord(
   return mapPartner(admin, data as PartnerRow);
 }
 
+/**
+ * Cada Partner activo recibe Plan Business gratis mientras permanezca activo
+ * (06-PANEL-ADMIN-PARTNERS.md §5.1 "Plan regalado"). Solo se otorga — no se
+ * revoca automáticamente al suspender, porque hoy no hay forma de distinguir
+ * un plan Business "regalado por ser Partner" de uno pagado directamente por
+ * el mismo usuario; revocar a ciegas podría bajar el plan a alguien que sí
+ * pagó. Ver informe final: propuesta de columna para resolver esto bien.
+ */
 export async function updatePartnerEstado(
   id: string,
   estado: EstadoPartner
@@ -139,7 +148,13 @@ export async function updatePartnerEstado(
     .maybeSingle();
 
   if (error || !data) return null;
-  return mapPartner(admin, data as PartnerRow);
+
+  const partner = data as PartnerRow;
+  if (estado === "Activo" && partner.user_id) {
+    await activarPlanUsuario(partner.user_id, "business");
+  }
+
+  return mapPartner(admin, partner);
 }
 
 /**
