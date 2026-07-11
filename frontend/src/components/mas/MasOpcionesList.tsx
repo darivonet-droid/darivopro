@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { T } from "@/lib/theme";
+import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 export interface MasOpcion {
   href: string;
@@ -129,6 +130,21 @@ export function MasOpcionesList({ esBusiness }: MasOpcionesListProps) {
             </svg>
           </Link>
         ))}
+        <div
+          className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+          style={{ background: T.redPale, border: `1.5px solid ${T.red}30` }}
+        >
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg"
+            style={{ background: T.white }}
+          >
+            🚪
+          </div>
+          <CerrarSesionButton
+            className="flex-1 text-left text-sm font-bold"
+            style={{ color: T.red }}
+          />
+        </div>
       </div>
     </div>
   );

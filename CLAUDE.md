@@ -161,9 +161,9 @@ Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificació
 
 ### Prioridad 2 — Incumplimiento de MD / bug funcional
 
-- [ ] **Bug de facturación:** `verificarLimiteFactura` (`lib/plan-limits.ts:106`) permite facturas al plan `gratis` pese a que `LIMITES_PLAN.gratis.facturasHabilitado = false`. Corregir la lógica para que respete el flag.
-- [ ] **Logout ausente en Admin/Empresa/Partner** — solo tienen "← Volver a Móvil", pese a que el MD de Admin lo exige explícitamente en §Sesión y §Panel lateral. Añadir botón real reutilizando `cerrarSesion` de `AjustesForm.tsx:53-57` en los 3 paneles.
-- [ ] **Logout enterrado en Móvil** — existe en `AjustesForm.tsx:141-147` pero solo dentro de Más → pestaña "Empresa" (3ª pestaña, con scroll); el menú principal `MasOpcionesList.tsx` (7 items) no tiene ninguno. Añadir botón al final de `MasOpcionesList.tsx` (mismo estilo de fila, reutilizando `cerrarSesion`). Actualizar la ubicación en el MD de autenticación si cambia.
+- [x] **Bug de facturación:** ✅ Ya resuelto (commit `0a61ae5`, verificado 11/07/2026): `verificarLimiteFactura` (`lib/plan-limits.ts:101-103`) ya bloquea `gratis` igual que `basico`. Sin cambios necesarios.
+- [x] **Logout ausente en Admin/Empresa/Partner** — ✅ Ya resuelto (commit `a750f1c`, verificado 11/07/2026): `CerrarSesionButton.tsx` compartido, montado en `AdminShell.tsx`, `EmpresaShell.tsx` y `PartnerPanel.tsx`.
+- [x] **Logout enterrado en Móvil** — ✅ Resuelto (11/07/2026, sesión continua): añadido botón real al final de `MasOpcionesList.tsx` (fila roja, mismo estilo de las demás opciones), reutilizando `CerrarSesionButton` (misma lógica que `cerrarSesion` de `AjustesForm.tsx`). Sigue existiendo también en Más → Empresa (`AjustesForm.tsx:141-147`), sin cambios ahí.
 
 ### Prioridad 3 — Contradicciones de precio/nombre entre MD
 
