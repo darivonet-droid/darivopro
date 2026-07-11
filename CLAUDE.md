@@ -11,6 +11,10 @@ Por defecto, tienes autorización para ejecutar tareas de forma autónoma, sin p
 
 Para todo lo demás (código de frontend/backend, commits a develop, buscar e implementar assets, build/lint/typecheck, correcciones de texto, etc.) actúa sin preguntar, salvo que tú mismo detectes una ambigüedad real que no puedas resolver razonablemente por tu cuenta.
 
+### Verificación obligatoria de schema en migraciones (11/07/2026)
+
+Toda migración que referencie columnas de una tabla ya existente debe incluir, como parte de la respuesta, el extracto literal del `CREATE TABLE` de esa tabla (con número de archivo y líneas), no solo la afirmación de que se verificó el schema. Si la tabla pudo haber sido modificada por `ALTER TABLE` en otra migración posterior, debe confirmarse explícitamente que no hay ningún `ALTER TABLE` que la afecte, listando el resultado de esa búsqueda. Sin este extracto, la migración no se considera verificada y no debe entregarse como final.
+
 ## Flujo de ramas (Git)
 
 Todo el trabajo se hace en la rama `develop`, nunca directamente en `main`. Cuando una tarea (o un conjunto de tareas relacionadas) esté lista y verificada, se abre un Pull Request de `develop` hacia `main` para que Mohamed lo revise antes de fusionar.
@@ -94,6 +98,15 @@ Estos documentos tienen protección explícita ("solo el propietario puede modif
 - Ninguna funcionalidad de marketing/anuncios dentro de la app (ni Admin, ni Empresa, ni Móvil). Las "APIs de marketing" documentadas en `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` son herramientas externas del propio negocio, no una feature del producto.
 - "Referidos" no existe — se llama "Partners".
 - Integración SUNAT real — todavía no hay proveedor OSE contratado (Vision §18). No inventar código de integración real hasta confirmarlo.
+
+## Migraciones de base de datos — cómo entregarlas (regla permanente, 11/07/2026)
+
+Cada vez que se genere una migración (SQL nuevo, cambios de schema, RLS, triggers, funciones):
+
+1. El SQL completo va **pegado directamente en la respuesta de chat**, dentro de un bloque de código, listo para copiar y pegar tal cual en el SQL Editor de Supabase.
+2. **Nunca** dar solo un enlace o ruta de archivo (ej. "revisa `supabase/migrations/xxx.sql`") como única forma de ver el contenido — Mohamed no puede abrir esos enlaces desde donde revisa esto.
+3. Si el archivo ya existe guardado en el repo, está bien mencionarlo, pero el contenido completo también debe aparecer pegado en el chat en el mismo mensaje.
+4. Aplica a toda migración futura, sin que haya que pedirlo cada vez.
 
 ## Seguridad — regla que se mantiene con el cambio de herramienta
 
@@ -245,7 +258,18 @@ Para probar cualquier feature (facturación, IA, roles personalizados, Empresa) 
 
 - **Email:** `demo@darivopro.com`
 - **Plan:** `business` (acceso total — facturación, IA ilimitada, roles personalizados, producto Empresa)
-- **Contraseña:** definida por Mohamed al crear el usuario, no versionada en este repo — no la pidas ni la escribas aquí si te la comparte.
+- **Credenciales (las 4 cuentas demo — admin/partner/empresa/móvil): en `.env.test` (raíz del repo), no versionado — pedir al owner si no está presente en el entorno local.** Formato del archivo:
+  ```
+  QA_ADMIN_EMAIL=
+  QA_ADMIN_PASSWORD=
+  QA_PARTNER_EMAIL=
+  QA_PARTNER_PASSWORD=
+  QA_EMPRESA_EMAIL=
+  QA_EMPRESA_PASSWORD=
+  QA_MOVIL_EMAIL=
+  QA_MOVIL_PASSWORD=
+  ```
+  `QA_MOVIL_EMAIL` corresponde a `demo@darivopro.com` de arriba. No pegar estos valores en el chat aunque se lean — usarlos solo para iniciar sesión en el navegador de la preview.
 - **Creación:** Supabase Dashboard → Authentication → Users → Add user (email de arriba, contraseña a elección, "Auto Confirm User"). El trigger `handle_new_user()` crea el `perfiles` automáticamente en plan `gratis`/`onboarding_done=false` — después de crear el usuario, correr en el SQL Editor:
   ```sql
   UPDATE public.perfiles
