@@ -27,16 +27,16 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - Migración de terminología `presupuesto`→`cotización` — BD y código, completa y confirmada.
 - Bug de facturación en plan `gratis` — ya bloqueaba correctamente antes de esta sesión.
 - Middleware de subdominios — preparado, apagado intencionalmente (DNS todavía no resuelve). No tocar hasta que se conecte el dominio.
-- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código ya migrado; falta solo ejecutar la migración SQL (ver abajo).
+- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código y BD migrados y verificados (13/07/2026: confirmado directamente que `calc_type` existe y `tipo` ya no).
 - Wizard de cotización de 4 pasos + migración a tokens de design-system compartidos.
 - `02-BASE-DATOS.md` (v3.3), `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` (v3.5), `00-ECOSISTEMA-DARIVO-PRO.md` (v1.1) — regenerados/sincronizados contra el esquema y código reales.
 
 ### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
 
 - **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados. Pendiente: (1) Mohamed reenvía los 9 textos aprobados — hoy es placeholder funcional; (2) setup manual de Google Cloud + Workspace (domain-wide delegation); (3) configurar el Database Webhook de Supabase para "comisión ganada". Ver sección "Email transaccional" más abajo para el detalle completo.
-- **2 migraciones SQL escritas, pendientes de que el propietario las ejecute** en Supabase SQL Editor (nunca las ejecuto yo — regla permanente):
-  1. `supabase/migrations/20260712100000_fix_comision_venta_trigger_estado.sql` — corrige el trigger de comisiones Partner (comparaba contra un placeholder que nunca coincidía con los valores reales de dLocal).
-  2. `supabase/migrations/20260712110000_unify_partidas_propias_calc_type.sql` — renombra `partidas_propias.tipo` → `calc_type` con traducción de valores, preservando datos.
+- **2 migraciones SQL — ejecutadas por el propietario el 13/07/2026, verificación mixta:**
+  1. `supabase/migrations/20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — **no se pudo verificar directamente**: `pagos_eventos` y `partner_comisiones_historial` están vacías (cero pagos reales procesados todavía), así que no hay ningún evento real que observar para confirmar que el trigger corregido dispara bien. No hay forma de leer la definición de un trigger vía la API REST de Supabase (solo lectura de tablas, no `pg_catalog`) sin una función RPC dedicada, que no existe. Se da por aplicado porque el propietario confirmó haberlo ejecutado, pero la primera vez que haya un pago real de Business vía Partner, verificar que sí se generó la fila en `partner_comisiones_historial`.
+  2. `supabase/migrations/20260712110000_unify_partidas_propias_calc_type.sql` (`partidas_propias.tipo`→`calc_type`) — ✅ **confirmado directamente contra la BD real** (13/07/2026): `select=calc_type` responde 200, `select=tipo` responde 400 "column does not exist". Columna renombrada correctamente.
 
 ### 🔴 Sin auditar / pendiente de decisión de negocio — no improvisar
 
