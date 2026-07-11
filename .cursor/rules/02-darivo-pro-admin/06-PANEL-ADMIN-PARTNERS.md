@@ -1,8 +1,10 @@
 ﻿# 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.4 — 11/07/2026):** añadida sección 5.2 — requisito de negocio: registro histórico y auditable de cada comisión generada (no solo cálculo en vivo del tramo actual). Decisión de negocio, sin diseño de tabla todavía (pendiente de fase técnica). §10 actualizado con referencia cruzada.
 
 **Cambio principal (v1.3 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
@@ -160,6 +162,31 @@ Este plan de comisiones se configura y edita exclusivamente desde este módulo (
 
 ---
 
+## 5.2 Registro histórico y auditable de comisiones (decisión de negocio — 11/07/2026)
+
+⚠️ Esta sección documenta un **requisito de negocio**, no un diseño técnico. La estructura de tabla, relaciones y campos exactos se define en una fase técnica posterior — ver §10.
+
+El sistema **debe llevar un registro histórico y auditable de cada comisión generada** por Partner. No es suficiente calcular el tramo/hito vigente en vivo a partir del conteo actual de clientes propios referidos: cada comisión generada (venta individual o bono de hito) debe quedar registrada como un evento propio, inmutable una vez creado.
+
+Cada registro de comisión debe conservar, como mínimo:
+
+* **Referidos que tenía el Partner en el momento** en que se generó esa comisión (el conteo histórico, no el conteo actual).
+* **Porcentaje aplicado** en ese momento (según el tramo/hito vigente entonces — §5.1).
+* **Monto en soles** resultante de aplicar ese porcentaje.
+* **Estado**: pendiente o pagada.
+
+### Por qué es necesario (no solo preferible)
+
+El bono por hitos (§5.1) se calcula **"sobre la facturación del tramo de clientes correspondiente a ese hito (no sobre el acumulado total)"**. Si el sistema recalculara el porcentaje en vivo cada vez que se consulta, un Partner que sube de tramo modificaría retroactivamente el porcentaje aplicado a comisiones de ventas ya ocurridas en un tramo anterior — un resultado incorrecto. Solo un registro persistido en el momento exacto de cada comisión evita este error.
+
+### Alcance de esta decisión
+
+* Aplica a la comisión por venta (20% pago único) y a cada bono por hito (§5.1) — cada uno genera su propio registro histórico independiente.
+* El estado pendiente/pagada permite que Admin marque comisiones como pagadas sin perder el historial de cuándo y con qué porcentaje se generaron.
+* No se definen aquí nombres de tabla, columnas, tipos de dato ni relaciones — eso es diseño técnico, fuera del alcance de esta sección (ver §10).
+
+---
+
 # 6. Información mostrada
 
 El listado principal muestra:
@@ -232,6 +259,8 @@ Pendiente de documentación oficial.
 No crear tablas.
 
 No crear relaciones.
+
+Cuando se diseñe, debe satisfacer el requisito de negocio de §5.2 (registro histórico y auditable de comisiones, con conteo de referidos/porcentaje/monto/estado por evento) — el diseño técnico de tabla sigue pendiente de una fase posterior.
 
 ---
 

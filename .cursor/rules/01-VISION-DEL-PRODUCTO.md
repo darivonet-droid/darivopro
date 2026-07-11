@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.14
+**Versión:** 2.15
 
 **Estado:** Visión oficial aprobada
 
@@ -75,6 +75,8 @@ El Programa Partner **no es un producto** del ecosistema (sección 3) ni forma p
 Su administración —partners, códigos, enlaces y tabla oficial de comisiones— corresponde exclusivamente a **Darivo Pro Admin**.
 
 Cada partner accede a su propio panel de consulta (**Panel Partner**) para ver su actividad y comisiones, sin capacidad de administración.
+
+Cada comisión generada debe quedar registrada de forma histórica y auditable, no solo como un cálculo en vivo del tramo vigente — detalle completo en `02-darivo-pro-admin/06-PANEL-ADMIN-PARTNERS.md` §5.2.
 
 **Nota terminológica:** "Referidos" es el nombre antiguo de este programa. Toda la documentación oficial y la interfaz deben usar únicamente "Partners" / "Programa Partner". "Referidos" queda eliminado del ecosistema.
 
@@ -930,9 +932,11 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.14
+**Versión:** 2.15
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.15):** §3.2 — añadida referencia cruzada corta a la decisión de negocio de registro histórico y auditable de comisiones (detalle completo en `06-PANEL-ADMIN-PARTNERS.md` §5.2, sin duplicar aquí).
 
 **Cambio principal (v2.14):** §10 corregido — Darivo Pro Admin y Darivo Pro Empresa comparten el mismo diseño visual (ambos son productos de escritorio); Empresa deja de tener diseño propio independiente. Solo Darivo Pro Móvil (Fable 5) mantiene diseño visual independiente. Corregido también el párrafo de Funcionalidad, que antes permitía aspecto visual distinto entre productos.
 
