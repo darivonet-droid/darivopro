@@ -1,13 +1,18 @@
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminPartnersView } from "@/components/admin/AdminPartnersView";
-import { listPartners } from "@/lib/ecosystem-store";
+import { listPartners, obtenerComisionesConfig } from "@/lib/ecosystem-store";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminPartnersPage() {
-  const partners = await listPartners();
+  const admin = createAdminClient();
+  const [partners, comisionesConfig] = await Promise.all([
+    listPartners(),
+    obtenerComisionesConfig(admin),
+  ]);
 
   return (
     <AdminShell titulo="Partners">
-      <AdminPartnersView initialPartners={partners} />
+      <AdminPartnersView initialPartners={partners} comisionesConfig={comisionesConfig} />
     </AdminShell>
   );
 }

@@ -1,10 +1,12 @@
 # 02 – BASE DE DATOS – DARIVO PRO (SUPABASE)
 
-**Versión:** 3.4
+**Versión:** 3.5
 
-**Fecha:** 13/07/2026
+**Fecha:** 12/07/2026
 
-**Estado:** Documento técnico oficial — esquema V2 (34 tablas) · inicio producto
+**Estado:** Documento técnico oficial — esquema V2 (35 tablas) · inicio producto
+
+**Cambio principal (v3.5 — 12/07/2026, autorizado por el propietario):** nueva tabla `partner_comisiones_config` (§4.7, tabla 35) — plan de comisiones Partner editable desde Admin (`06-PANEL-ADMIN-PARTNERS.md` §5/§8 "Configurar tabla de comisiones"), reemplaza la constante hardcodeada en `partners-types.ts`. `generar_comision_venta_partner()` actualizada para leer el porcentaje desde esta tabla. Migración `20260713110000_partner_comisiones_config.sql`, pendiente de ejecución por el propietario.
 
 **Cambio principal (v3.4 — 13/07/2026, autorizado por el propietario):** §4.8 — añadida `empresa_empleados.user_id` (migración `20260713100000_empresa_empleados_user_id.sql`, pendiente de ejecución por el propietario) para que "Invitar empleado" otorgue acceso real a Móvil (antes solo creaba una fila sin ningún mecanismo de auth — `10-MODULO-EMPLEADOS-EMPRESA.md` §6).
 
@@ -38,9 +40,9 @@ Documentar oficialmente la **estructura de base de datos implementada** en Supab
 
 # 2. Alcance actual
 
-## 2.1 Implementado (baseline + incrementales — 34 tablas)
+## 2.1 Implementado (baseline + incrementales — 35 tablas)
 
-Esquema completo del ecosistema Darivo Pro: Móvil, Empresa, Admin y Panel Partner. El baseline (`20260705120000_baseline_v2.sql`) creó 32 tablas; dos migraciones incrementales añadieron `roles_personalizados` y `partner_comisiones_historial` (34 en total, ninguna eliminada).
+Esquema completo del ecosistema Darivo Pro: Móvil, Empresa, Admin y Panel Partner. El baseline (`20260705120000_baseline_v2.sql`) creó 32 tablas; migraciones incrementales añadieron `roles_personalizados`, `partner_comisiones_historial` y `partner_comisiones_config` (35 en total, ninguna eliminada; `empresa_empleados.user_id` es una columna nueva, no tabla nueva).
 
 ## 2.2 Evolución del esquema
 
@@ -293,7 +295,26 @@ Metadata comercial: `id`, `slug` (UNIQUE), `nombre`, `precio_mensual`, `precio_a
 
 ### `partner_comisiones`
 
-⚠️ **Derogada oficialmente (`06-PANEL-ADMIN-PARTNERS.md` §5.1, 07/07/2026): "Sustituye y deroga por completo cualquier tabla de comisiones anterior por tramo de registros... queda oficialmente eliminada — no debe volver a documentarse ni configurarse en el sistema."** Corregido 12/07/2026 — una versión anterior de este documento la presentaba como "tabla de tarifas oficiales", contradiciendo esa decisión de negocio ya cerrada. La tabla sigue existiendo físicamente en el schema (creada en el baseline, nunca eliminada por migración) pero **no debe leerse, escribirse ni referenciarse desde código nuevo**. El modelo real de comisiones (20% por venta + bonos por hito) vive en `partner_comisiones_historial` (§4.9, registro histórico) y como constantes en `frontend/src/lib/partners-types.ts` — nunca en esta tabla. Columnas heredadas del baseline (sin uso): `id`, `rango_desde`, `rango_hasta`, `descripcion`, `comision_texto`, `orden`, `activo`, `created_at`.
+⚠️ **Derogada oficialmente (`06-PANEL-ADMIN-PARTNERS.md` §5.1, 07/07/2026): "Sustituye y deroga por completo cualquier tabla de comisiones anterior por tramo de registros... queda oficialmente eliminada — no debe volver a documentarse ni configurarse en el sistema."** Corregido 12/07/2026 — una versión anterior de este documento la presentaba como "tabla de tarifas oficiales", contradiciendo esa decisión de negocio ya cerrada. La tabla sigue existiendo físicamente en el schema (creada en el baseline, nunca eliminada por migración) pero **no debe leerse, escribirse ni referenciarse desde código nuevo**. El modelo real de comisiones (20% por venta + bonos por hito) vive en `partner_comisiones_config` (ver abajo) y en `partner_comisiones_historial` (§4.9, registro histórico) — nunca en esta tabla. Columnas heredadas del baseline (sin uso): `id`, `rango_desde`, `rango_hasta`, `descripcion`, `comision_texto`, `orden`, `activo`, `created_at`.
+
+### `partner_comisiones_config`
+
+Añadida por `20260713110000_partner_comisiones_config.sql` (12/07/2026, pendiente de ejecución por el propietario) — plan de comisiones **editable desde Admin** (`06-PANEL-ADMIN-PARTNERS.md` §5/§8 "Configurar tabla de comisiones"). Antes vivía como constante hardcodeada en `frontend/src/lib/partners-types.ts` (`COMISION_VENTA_PORCENTAJE`, `HITOS_COMISION_OFICIALES`), ahora eliminada de código — ese archivo solo mantiene los tipos.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | uuid PK | |
+| `tipo` | text | `venta` \| `hito` |
+| `hito` | integer NULL | `NULL` solo para `tipo='venta'` (comisión única, no por tramo) |
+| `porcentaje` | numeric(5,2) | **Editable desde Admin** — únicos valores que pueden cambiar; los umbrales de `hito` no son editables (lógica de "techo permanente" en `calcularProgresoHitos` asume los umbrales exactos sembrados) |
+| `orden` | integer | Orden de visualización |
+| `updated_at` | timestamptz | |
+
+Seed inicial: `venta`→20.00%, hitos `5`→10%, `20`→10%, `50`→15%, `100`→20% (mismos valores ya aprobados 07/07/2026 — no se inventó ningún número nuevo, solo se persistieron en BD).
+
+**RLS:** SELECT cualquier autenticado (el propio Partner necesita ver su plan); ALL solo Admin.
+
+**Consumida también por SQL:** `generar_comision_venta_partner()` (trigger de `pagos_eventos`, §4.9) fue actualizada en la misma migración para leer `porcentaje` desde aquí en vez de un literal `20.00` hardcodeado — una edición de Admin ahora sí afecta a las comisiones generadas automáticamente.
 
 ---
 
@@ -609,6 +630,7 @@ darivo_admin_empleados (independiente — alimenta is_darivo_admin())
 | 12/07/2026 | `20260712100000_fix_comision_venta_trigger_estado.sql` | Corrige `WHEN` del trigger de comisiones Partner (placeholder → valores reales dLocal) — ejecutada 13/07/2026 |
 | 12/07/2026 | `20260712110000_unify_partidas_propias_calc_type.sql` | `partidas_propias.tipo` → `calc_type` (traducción de valores) — ejecutada y verificada 13/07/2026 |
 | 13/07/2026 | `20260713100000_empresa_empleados_user_id.sql` | `empresa_empleados.user_id` (acceso real a Móvil vía invitación) — **pendiente de ejecución** |
+| 12/07/2026 | `20260713110000_partner_comisiones_config.sql` | Tabla `partner_comisiones_config` (tabla 35) · actualiza `generar_comision_venta_partner()` — **pendiente de ejecución** |
 | — | `supabase/seed.sql` | Productos, planes, catálogo maestro, series |
 
 Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase/migrations/`.
@@ -617,9 +639,9 @@ Migraciones incrementales futuras: `YYYYMMDDHHMMSS_descripcion.sql` en `supabase
 
 # 11. Estado del documento
 
-**Versión:** 3.4
+**Versión:** 3.5
 
-**Estado:** Documento Oficial — esquema V2 completo, 34 tablas, sincronizado con migraciones reales (13/07/2026).
+**Estado:** Documento Oficial — esquema V2 completo, 35 tablas, sincronizado con migraciones reales (12/07/2026).
 
 ---
 

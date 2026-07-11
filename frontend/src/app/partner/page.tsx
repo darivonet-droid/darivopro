@@ -1,5 +1,5 @@
 import { PartnerPanel } from "@/components/partner/PartnerPanel";
-import { getPartnerByEmail } from "@/lib/ecosystem-store";
+import { getPartnerByEmail, obtenerComisionesConfig } from "@/lib/ecosystem-store";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/design-system/tokens";
 
@@ -14,7 +14,10 @@ export default async function PartnerPage() {
     .single();
 
   const email = user?.email ?? "";
-  const partner = email ? await getPartnerByEmail(email, supabase) : null;
+  const [partner, comisionesConfig] = await Promise.all([
+    email ? getPartnerByEmail(email, supabase) : Promise.resolve(null),
+    obtenerComisionesConfig(supabase),
+  ]);
 
   const nombre =
     perfil?.razon_social ?? user?.user_metadata?.nombre_empresa ?? email.split("@")[0] ?? "Partner";
@@ -26,6 +29,7 @@ export default async function PartnerPage() {
         email={email}
         telefono={perfil?.telefono ?? undefined}
         partner={partner}
+        comisionesConfig={comisionesConfig}
       />
     </div>
   );

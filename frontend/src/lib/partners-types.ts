@@ -33,20 +33,23 @@ export interface ComisionPartner {
 }
 
 /**
- * Plan oficial de comisiones — 06-PANEL-ADMIN-PARTNERS.md §5.1 (aprobado por
- * el propietario 07/07/2026). Sustituye y deroga la tabla anterior por
- * tramo de registros (S/6–S/12) — esa tabla queda oficialmente eliminada,
- * no debe volver a documentarse ni configurarse.
+ * Plan de comisiones — 06-PANEL-ADMIN-PARTNERS.md §5.1 (aprobado por el
+ * propietario 07/07/2026). Sustituye y deroga la tabla anterior por tramo de
+ * registros (S/6–S/12) — esa tabla queda oficialmente eliminada, no debe
+ * volver a documentarse ni configurarse.
+ *
+ * Editable desde Admin (§5/§8 "Configurar tabla de comisiones") — persistido
+ * en `partner_comisiones_config` desde el 13/07/2026, ya NO es una constante
+ * de código. Usar `obtenerComisionesConfig()` (ecosystem-store.ts) para leer
+ * los valores vigentes; este archivo ya no define el plan, solo sus tipos.
  */
-export const COMISION_VENTA_PORCENTAJE = 20;
-
-/** Bono escalonado por hitos de clientes propios referidos (por Partner individual). */
-export const HITOS_COMISION_OFICIALES = [
-  { hito: 5, bonoPorcentaje: 10 },
-  { hito: 20, bonoPorcentaje: 10 },
-  { hito: 50, bonoPorcentaje: 15 },
-  { hito: 100, bonoPorcentaje: 20 },
-] as const;
+export interface ComisionConfigRow {
+  id: string;
+  tipo: "venta" | "hito";
+  /** null solo para tipo="venta" (comisión única, no por tramo) */
+  hito: number | null;
+  porcentaje: number;
+}
 
 export interface ProgresoHitosPartner {
   /** Clientes propios acumulados (registros del Partner). */
@@ -64,30 +67,42 @@ export interface ProgresoHitosPartner {
 }
 
 /**
- * Calcula el hito actual/siguiente de un Partner según §5.1: a partir de 100
- * clientes el bono se mantiene fijo en 20% (techo permanente), pero los
- * hitos de reconocimiento siguen marcándose cada 50 (150, 200, 250…).
+ * Calcula el hito actual/siguiente de un Partner según §5.1: a partir del
+ * último hito configurado el bono se mantiene fijo (techo permanente), pero
+ * los hitos de reconocimiento siguen marcándose cada (paso = distancia entre
+ * los 2 últimos hitos configurados).
+ *
+ * Los UMBRALES de hito (5/20/50/100 clientes propios) son estructurales, no
+ * editables desde Admin — solo los `bonoPorcentaje` vienen de
+ * `partner_comisiones_config` (§ "Configurar tabla de comisiones"). `hitos`
+ * debe venir ordenado ascendente por `hito`.
  */
-export function calcularProgresoHitos(clientes: number): ProgresoHitosPartner {
+export function calcularProgresoHitos(
+  clientes: number,
+  hitos: { hito: number; bonoPorcentaje: number }[]
+): ProgresoHitosPartner {
   let hitoActual = 0;
   let bonoActual = 0;
-  for (const h of HITOS_COMISION_OFICIALES) {
+  for (const h of hitos) {
     if (clientes >= h.hito) {
       hitoActual = h.hito;
       bonoActual = h.bonoPorcentaje;
     }
   }
-  if (clientes >= 100) {
-    hitoActual = 100 + Math.floor((clientes - 100) / 50) * 50;
-    bonoActual = 20;
+
+  const ultimo = hitos[hitos.length - 1];
+  const penultimo = hitos[hitos.length - 2];
+  const paso = ultimo && penultimo ? ultimo.hito - penultimo.hito : 0;
+
+  if (ultimo && clientes >= ultimo.hito && paso > 0) {
+    hitoActual = ultimo.hito + Math.floor((clientes - ultimo.hito) / paso) * paso;
+    bonoActual = ultimo.bonoPorcentaje;
   }
 
-  let hitoSiguiente: number;
-  if (clientes < 5) hitoSiguiente = 5;
-  else if (clientes < 20) hitoSiguiente = 20;
-  else if (clientes < 50) hitoSiguiente = 50;
-  else if (clientes < 100) hitoSiguiente = 100;
-  else hitoSiguiente = hitoActual + 50;
+  let hitoSiguiente = hitos.find((h) => clientes < h.hito)?.hito;
+  if (hitoSiguiente === undefined) {
+    hitoSiguiente = paso > 0 ? hitoActual + paso : hitoActual;
+  }
 
   const base = hitoActual;
   const rango = hitoSiguiente - base;

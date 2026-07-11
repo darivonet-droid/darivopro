@@ -6,9 +6,8 @@ import { T } from "@/lib/design-system/tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 import { fmtPEN } from "@/lib/utils";
 import {
-  COMISION_VENTA_PORCENTAJE,
-  HITOS_COMISION_OFICIALES,
   calcularProgresoHitos,
+  type ComisionConfigRow,
   type PartnerRegistro,
 } from "@/lib/partners-types";
 
@@ -18,14 +17,21 @@ interface PartnerPanelProps {
   telefono?: string;
   /** Registro sincronizado desde Admin (INC-A02 · servidor) */
   partner: PartnerRegistro | null;
+  /** Plan de comisiones vigente — 06-PANEL-ADMIN-PARTNERS.md §5.1, editable desde Admin */
+  comisionesConfig: ComisionConfigRow[];
 }
 
-export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelProps) {
+export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfig }: PartnerPanelProps) {
   const enlace = partner?.enlace ?? "https://darivopro.com/ref/—";
   const codigo = partner?.codigo ?? "—";
   const registros = partner?.registros ?? [];
   const comisiones = partner?.comisiones ?? [];
-  const progresoHitos = calcularProgresoHitos(registros.length);
+  const ventaConfig = comisionesConfig.find((c) => c.tipo === "venta");
+  const hitosConfig = comisionesConfig
+    .filter((c): c is ComisionConfigRow & { hito: number } => c.tipo === "hito" && c.hito !== null)
+    .sort((a, b) => a.hito - b.hito)
+    .map((c) => ({ hito: c.hito, bonoPorcentaje: c.porcentaje }));
+  const progresoHitos = calcularProgresoHitos(registros.length, hitosConfig);
   const [copiado, setCopiado] = useState(false);
 
   // Solo PEN se suma directo — si algún día hay comisiones en otra moneda,
@@ -246,7 +252,7 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
         </p>
 
         <p className="text-sm" style={{ color: T.text }}>
-          Comisión por venta: <strong>{COMISION_VENTA_PORCENTAJE}%, pago único</strong>, al
+          Comisión por venta: <strong>{ventaConfig?.porcentaje ?? "—"}%, pago único</strong>, al
           momento de la venta del cliente referido.
         </p>
 
@@ -287,23 +293,26 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
             </tr>
           </thead>
           <tbody>
-            {HITOS_COMISION_OFICIALES.map((h) => (
-              <tr key={h.hito} style={{ borderBottom: `1px solid ${T.slateD}` }}>
-                <td
-                  className="py-2"
-                  style={{
-                    color: progresoHitos.hitoActual >= h.hito ? T.blue : T.text,
-                    fontWeight: progresoHitos.hitoActual === h.hito ? 800 : 400,
-                  }}
-                >
-                  {h.hito === 100 ? "100 y cada 50 siguientes" : h.hito}
-                  {progresoHitos.hitoActual >= h.hito && h.hito !== 100 ? " ✓" : ""}
-                </td>
-                <td className="py-2 text-xs" style={{ color: T.textMid }}>
-                  {h.bonoPorcentaje}%{h.hito === 100 ? " — techo permanente" : ""}
-                </td>
-              </tr>
-            ))}
+            {hitosConfig.map((h, i) => {
+              const esUltimo = i === hitosConfig.length - 1;
+              return (
+                <tr key={h.hito} style={{ borderBottom: `1px solid ${T.slateD}` }}>
+                  <td
+                    className="py-2"
+                    style={{
+                      color: progresoHitos.hitoActual >= h.hito ? T.blue : T.text,
+                      fontWeight: progresoHitos.hitoActual === h.hito ? 800 : 400,
+                    }}
+                  >
+                    {esUltimo ? `${h.hito} y siguientes` : h.hito}
+                    {progresoHitos.hitoActual >= h.hito && !esUltimo ? " ✓" : ""}
+                  </td>
+                  <td className="py-2 text-xs" style={{ color: T.textMid }}>
+                    {h.bonoPorcentaje}%{esUltimo ? " — techo permanente" : ""}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </section>

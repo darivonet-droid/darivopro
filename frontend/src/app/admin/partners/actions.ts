@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  actualizarComisionConfig,
   createPartnerRecord,
   listPartners,
   updatePartnerEstado,
@@ -35,4 +36,17 @@ export async function setPartnerEstadoAction(
     revalidatePath("/partner");
   }
   return { ok: !!updated };
+}
+
+/** "Configurar tabla de comisiones" — 06-PANEL-ADMIN-PARTNERS.md §5/§8. */
+export async function actualizarComisionConfigAction(
+  id: string,
+  porcentaje: number
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const result = await actualizarComisionConfig(id, porcentaje);
+  if (result.ok) {
+    revalidatePath("/admin/partners");
+    revalidatePath("/partner");
+  }
+  return result;
 }

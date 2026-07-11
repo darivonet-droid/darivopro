@@ -7,7 +7,8 @@
  * VIEJO por tramos de registros, derogado oficialmente por
  * `06-PANEL-ADMIN-PARTNERS.md` §5.1 ("queda oficialmente eliminada, no
  * debe volver a documentarse ni configurarse"). El modelo real (20% + hitos)
- * vive como constantes en `frontend/src/lib/partners-types.ts`, no en BD.
+ * vive en `partner_comisiones_config` desde el 13/07/2026 (editable desde
+ * Admin — antes era una constante hardcodeada en `partners-types.ts`).
  *
  * Escrituras (crear partner, cambiar estado) usan siempre el cliente con
  * service role (`createAdminClient`), igual que el resto del panel Admin.
@@ -19,7 +20,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { activarPlanUsuario, revocarBusinessSiFueRegaloPartner } from "@/lib/activar-plan";
 import { enviarBienvenidaPartner } from "@/lib/email/send";
-import type { EstadoPartner, PartnerRegistro } from "@/lib/partners-types";
+import type { ComisionConfigRow, EstadoPartner, PartnerRegistro } from "@/lib/partners-types";
 
 interface PartnerRow {
   id: string;
@@ -251,4 +252,37 @@ export async function registrarReferidoSiCorresponde(
     email: email.trim().toLowerCase(),
     referred_user_id: referredUserId,
   });
+}
+
+/**
+ * Plan de comisiones vigente — 06-PANEL-ADMIN-PARTNERS.md §5.1/§5
+ * "Configurar tabla de comisiones". Lectura vía RLS (`_select`, cualquier
+ * autenticado) — el propio Partner también necesita ver su plan.
+ */
+export async function obtenerComisionesConfig(
+  supabase: SupabaseClient
+): Promise<ComisionConfigRow[]> {
+  const { data, error } = await supabase
+    .from("partner_comisiones_config")
+    .select("id, tipo, hito, porcentaje")
+    .order("orden", { ascending: true });
+
+  if (error) throw error;
+  return ((data ?? []) as { id: string; tipo: "venta" | "hito"; hito: number | null; porcentaje: number | string }[]).map(
+    (r) => ({ id: r.id, tipo: r.tipo, hito: r.hito, porcentaje: Number(r.porcentaje) })
+  );
+}
+
+/** Edita el porcentaje de un tramo — solo Admin (RLS `_admin`, service role aquí). */
+export async function actualizarComisionConfig(
+  id: string,
+  porcentaje: number
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("partner_comisiones_config")
+    .update({ porcentaje })
+    .eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }
