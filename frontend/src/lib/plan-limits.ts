@@ -98,12 +98,10 @@ export async function verificarLimiteFactura(
   if (!user) return { ok: false, razon: "facturas_basico" };
 
   const plan = await obtenerPlanTipo(supabase);
-  if (plan === "basico") {
+  if (plan === "basico" || plan === "gratis") {
     return { ok: false, razon: "facturas_basico" };
   }
   if (planTieneLimitesIlimitados(plan)) return { ok: true };
-
-  if (plan === "gratis") return { ok: true };
 
   return { ok: true };
 }

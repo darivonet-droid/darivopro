@@ -2,7 +2,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { verificarLimiteFactura } from "@/lib/plan-limits";
+import { verificarLimiteFactura, UPGRADE_MENSAJES } from "@/lib/plan-limits";
 import { buildWAMessage } from "@/lib/utils";
 import { nextNumeroComprobante } from "@/lib/factura-utils";
 import type { EmpresaData, Factura, InvStatus, LineaFactura, Cotizacion } from "@/types";
@@ -95,7 +95,7 @@ export function useFactura() {
     const limite = await verificarLimiteFactura(supabase);
     if (!limite.ok) {
       setLoading(false);
-      setError("Límite de facturas alcanzado");
+      setError(UPGRADE_MENSAJES[limite.razon].subtitulo);
       onUpgrade?.(limite.razon);
       return null;
     }
@@ -182,7 +182,7 @@ export function useFactura() {
     const limite = await verificarLimiteFactura(supabase);
     if (!limite.ok) {
       setLoading(false);
-      setError("Límite de facturas alcanzado");
+      setError(UPGRADE_MENSAJES[limite.razon].subtitulo);
       onUpgrade?.(limite.razon);
       return null;
     }
