@@ -15,8 +15,14 @@ const TABS_DER: { href: string; label: string; icon: IconName; match?: string[] 
   { href: "/mas", label: "Más", icon: "gear", match: ["/mas", "/ajustes"] },
 ];
 
+// Rutas de wizard a pantalla completa — el botón circular flotante (-top-5)
+// se solapa con el FloatBar del wizard (bottom:20, zIndex:200). Ver auditoría
+// del bug de overlap en /cotizaciones/nuevo (10/07/2026).
+const RUTAS_SIN_NAV = ["/cotizaciones/nuevo"];
+
 export function BottomNav() {
   const pathname = usePathname();
+  if (RUTAS_SIN_NAV.some((r) => pathname.startsWith(r))) return null;
 
   return (
     <nav
