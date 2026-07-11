@@ -43,7 +43,7 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - **Backend de tickets de soporte** (`/api/soporte/tickets`) — deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11). Decisión pendiente: ¿se reconstruye? Bloquea los eventos de email 8-9 (ticket recibido/resuelto).
 - **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen marcados "provisional" (protección de propietario, no tocado sin autorización explícita nueva).
 - **Jerarquía Suscripción→Producto→Rol→Permisos** — solo implementada hasta la mitad (`MATRIZ_PERMISOS_APROBADA=false`). Activarla de verdad requiere decisión del propietario.
-- **Admin Usuarios** — módulo de solo lectura, sin ninguna de las 5 acciones que exige el MD.
+- ~~**Admin Usuarios**~~ ✅ **Resuelto 12/07/2026**: `admin/usuarios/actions.ts` (Bloquear/Desbloquear vía `auth.admin` ban, Cambiar plan, Reenviar invitación, Restablecer acceso) + `AdminUsuariosView.tsx` con filtros plan/estado. Sin construir (fuera de alcance): importar/exportar Excel-CSV, invitación masiva, "último contacto con soporte" (backend de tickets deshabilitado).
 - **Admin Partners** — falta "Configurar tabla de comisiones" (hoy hardcodeado en código).
 - ~~**Empresa Cotizaciones**~~ ✅ **Resuelto 12/07/2026**: quitado el ítem del sidebar y la lista global (`empresa-modules.ts`, `EmpresaInicioView.tsx`); `/empresa/cotizaciones` ahora redirige a `/empresa/clientes`.
 - ~~**Empresa Ficha de Cliente**~~ ✅ **Resuelto 12/07/2026**: `EmpresaClientesPanel.tsx` nuevo (tabla + panel lateral dentro de `EmpresaShell`, reutiliza `ClienteFichaView`). Pendiente menor: el botón "+ Nueva cotización" dentro de la ficha sigue enlazando a `/cotizaciones/nuevo` (ruta/diseño Móvil) — el wizard de 3 paneles de escritorio (`05-MODULO-COTIZACIONES-EMPRESA.md` §4) no se construyó, fuera del alcance de este fix puntual.
@@ -350,7 +350,7 @@ Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ve
 
 **Pendiente — hallazgos reales, no corregidos todavía (requieren más que un fix puntual, o una decisión de alcance):**
 
-- **Admin — Usuarios:** el módulo es de solo lectura; `03-PANEL-ADMIN-USUARIOS.md` §5 exige Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso + filtros — ninguno existe. Construcción de feature completa, no un bugfix.
+- ~~**Admin — Usuarios**~~ ✅ **Resuelto 12/07/2026** — ver arriba.
 - **Admin — Partners:** falta la acción "Configurar tabla de comisiones" que `06-PANEL-ADMIN-PARTNERS.md` §5/§8 exige (hoy la tabla de hitos es una constante hardcodeada en `partners-types.ts`, no editable desde Admin).
 - ~~**Empresa — Cotizaciones**~~ ✅ **Resuelto 12/07/2026** — ver arriba.
 - ~~**Empresa — Ficha de Cliente**~~ ✅ **Resuelto 12/07/2026**: panel lateral dentro de `EmpresaShell`, ver arriba.
