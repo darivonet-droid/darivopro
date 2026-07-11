@@ -32,7 +32,7 @@ export const PLANES: Plan[] = [
       { texto: "Facturación no incluida", incluido: false },
       { texto: "PDF con tu nombre", incluido: true },
       { texto: "IGV automático", incluido: true },
-      { texto: "IA por voz", incluido: false },
+      { texto: "Calculadora inteligente por voz", incluido: false },
       { texto: "Logo personalizado", incluido: false },
       { texto: "Informes trimestrales", incluido: false },
     ],
@@ -50,7 +50,7 @@ export const PLANES: Plan[] = [
     features: [
       { texto: "Cotizaciones ilimitadas", incluido: true },
       { texto: "Facturas ilimitadas", incluido: true },
-      { texto: "IA texto + voz 🎤", incluido: true },
+      { texto: "Calculadora inteligente texto + voz 🎤", incluido: true },
       { texto: "Logo personalizado", incluido: true },
       { texto: "Informes trimestrales", incluido: true },
       { texto: "Compartir WhatsApp", incluido: true },

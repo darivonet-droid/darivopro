@@ -7,7 +7,7 @@ import { T } from "@/lib/theme";
 const PRO_FEATURES = [
   "Cotizaciones ilimitadas",
   "Facturas ilimitadas",
-  "IA texto + voz 🎤",
+  "Calculadora inteligente texto + voz 🎤",
   "Logo personalizado",
   "Compartir WhatsApp",
 ];

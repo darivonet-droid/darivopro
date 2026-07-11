@@ -104,7 +104,7 @@ export function IACotizacionFlow() {
 
   const generarConIA = useCallback(async (texto: string) => {
     if (modoOffline) {
-      mostrarToast("Sin conexión — la IA requiere internet", "error");
+      mostrarToast("Sin conexión — la Calculadora inteligente requiere internet", "error");
       return;
     }
     setProcesando(true);
@@ -120,12 +120,12 @@ export function IACotizacionFlow() {
         return;
       }
       if (!res.ok) {
-        mostrarToast(json.error ?? "Error con la IA", "error");
+        mostrarToast(json.error ?? "Error con la Calculadora inteligente", "error");
         return;
       }
       redirigirAResumen(json.data, texto);
     } catch {
-      mostrarToast("No se pudo conectar con la IA", "error");
+      mostrarToast("No se pudo conectar con la Calculadora inteligente", "error");
     } finally {
       setProcesando(false);
     }
@@ -186,7 +186,7 @@ export function IACotizacionFlow() {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm" style={{ color: T.textMid }}>
-          Describe el trabajo y la IA genera la cotización en segundos.
+          Describe el trabajo y la Calculadora inteligente genera la cotización en segundos.
         </p>
         <button
           type="button"
@@ -250,7 +250,7 @@ export function IACotizacionFlow() {
             className="rounded-2xl py-4 text-sm font-bold text-white disabled:opacity-50"
             style={{ background: T.blue }}
           >
-            Generar con IA ⚡
+            Generar cotización ⚡
           </button>
         )}
       </div>

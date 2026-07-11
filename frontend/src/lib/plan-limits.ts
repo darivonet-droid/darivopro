@@ -28,8 +28,8 @@ export const UPGRADE_MENSAJES: Record<UpgradeRazon, { titulo: string; subtitulo:
     subtitulo: "Facturación no disponible en tu plan. Pásate a Pro o Business para facturar.",
   },
   ia_limite: {
-    titulo: "Límite de IA diario",
-    subtitulo: "3 llamadas/día en prueba gratuita y plan Básico. Pro: IA ilimitada.",
+    titulo: "Límite diario de Calculadora inteligente",
+    subtitulo: "3 llamadas/día en prueba gratuita y plan Básico. Pro: Calculadora inteligente ilimitada.",
   },
   roles_personalizados_limite: {
     titulo: "Límite de roles personalizados",

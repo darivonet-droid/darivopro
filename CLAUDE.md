@@ -156,14 +156,8 @@ Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificació
 
 ### Prioridad 1 — Crítico (páginas públicas / venta)
 
-- [ ] **Plan Business ausente en `/precios`.** `frontend/src/lib/planes.ts:24-61` solo tiene Básico y Pro; `roles-planes-oficial.ts` sí tiene los 3. Metadata de la página dice *"Planes Básico y Pro"*. Sincronizar `planes.ts` con `roles-planes-oficial.ts` (fuente de verdad) y corregir metadata. *(Esto es lo mismo que el punto 3 del plan de mañana — al llegar ahí, usar esta descripción exacta, el bug sigue activo.)*
-- [ ] **"IA" visible al usuario en 16 archivos (31 apariciones)**, cuando la regla de negocio exige "Calculadora inteligente" (o el término aprobado). **Antes de tocar código:** confirmar con Mohamed si la regla es solo de landing (como dice `LANDING-PAGE-DARIVO-PRO.md` v1.3) o global de producto — si es global, los MD internos (`08-MODULO-IA.md`, etc.) también hay que renombrarlos.
-  - `components/ui/BottomNav.tsx:53` (botón central) · `(auth)/ia/page.tsx:9` (título)
-  - `components/cotizacion/IACotizacionFlow.tsx:107,123,128,189,253` (copys/toasts) — ojo: línea 94 persiste "Notas IA:" en la cotización, decidir si el dato guardado también cambia
-  - `lib/planes.ts:35,53` ("IA por voz", "IA texto + voz 🎤") · `components/plan/UpgradeModal.tsx:10` · `lib/plan-limits.ts:31-32`
-  - `components/mas/MasOpcionesList.tsx:49-50` ("IA — Preferencias") + pantalla de preferencias del asistente
-  - `CierreView.tsx:131,412` · label de navegación en Empresa · "IA cotizaciones/día" en Admin
-  - Casos límite a decidir explícitamente (no corregir sin decisión): rutas URL `/ia`, `/empresa/ia`, `/mas/ia-preferencias` — renombrar puede romper bookmarks, evaluar redirect 301.
+- [x] **Plan Business ausente en `/precios`.** ✅ Ya resuelto (verificado 11/07/2026): `planes.ts` ya trae los 3 planes desde `PRECIOS_OFICIALES`/`roles-planes-oficial.ts`, y la metadata de `/precios` ya dice "Planes Básico, Pro y Business". Sin cambios necesarios.
+- [x] **"IA" visible al usuario.** ✅ Empresa/Admin ya estaban migrados a "Calculadora inteligente" (commit `f1b329a`). Completado Móvil (11/07/2026, sesión continua): `BottomNav.tsx` (aria-label; caption "IA" retirado — no cabe en 7px, icono+aria-label bastan), `(auth)/ia/page.tsx`, `(auth)/mas/ia-preferencias/page.tsx`, `MasOpcionesList.tsx`, `IACotizacionFlow.tsx` (toasts/copys), `planes.ts`, `UpgradeModal.tsx`, `plan-limits.ts`, `PwaShell.tsx`, `CierreView.tsx`. Rutas (`/ia`, `/empresa/ia`, `/mas/ia-preferencias`) y nombres internos (`08-MODULO-IA.md`, `IACotizacionFlow`, etc.) **no se tocaron** — decisión ya implícita en el patrón de Empresa/Admin: solo copy visible cambia, arquitectura/rutas se quedan igual. Pendiente de decisión explícita (no tocado): el dato guardado `"Notas IA: ..."` dentro del texto de la cotización (`IACotizacionFlow.tsx:94`).
 
 ### Prioridad 2 — Incumplimiento de MD / bug funcional
 

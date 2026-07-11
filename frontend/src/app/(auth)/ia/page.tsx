@@ -6,7 +6,7 @@ export default function IAPage() {
   return (
     <div className="min-h-screen" style={{ background: "#F8FAFF" }}>
       <DarkHeader
-        titulo="IA"
+        titulo="Calculadora inteligente"
         subtitulo="Cotización en segundos con OpenAI"
         accion={
           <div

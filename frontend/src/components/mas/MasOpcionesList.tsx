@@ -46,8 +46,8 @@ const OPCIONES: MasOpcion[] = [
   },
   {
     href: "/mas/ia-preferencias",
-    titulo: "IA — Preferencias",
-    subtitulo: "Ajustes del asistente de IA",
+    titulo: "Calculadora inteligente — Preferencias",
+    subtitulo: "Ajustes del asistente",
     emoji: "🤖",
     color: T.purple,
     bg: T.purplePale,

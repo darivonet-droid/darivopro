@@ -75,7 +75,7 @@ export function PwaShell() {
           }}
         >
           {modoOffline
-            ? "📴 Modo offline — listas en caché. IA y PDF cuando vuelva la red."
+            ? "📴 Modo offline — listas en caché. Calculadora inteligente y PDF cuando vuelva la red."
             : "📶 Conexión lenta (2G/3G) — modo ahorro activo. Sincroniza al conectar WiFi."}
         </div>
       )}

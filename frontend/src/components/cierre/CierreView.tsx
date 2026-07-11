@@ -128,7 +128,7 @@ export function CierreView({ resumenExpediente }: CierreViewProps) {
               Registrar gasto
             </p>
             <p className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.75)" }}>
-              📷 La IA analizará tu documento automáticamente
+              📷 La Calculadora inteligente analizará tu documento automáticamente
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
@@ -409,7 +409,7 @@ function ModalGastoManual({
         </p>
         {prefill && (
           <p className="mt-1 text-xs font-semibold" style={{ color: T.greenD }}>
-            ✓ Documento analizado — La IA extrajo la información
+            ✓ Documento analizado — La Calculadora inteligente extrajo la información
           </p>
         )}
         <div className="mt-4 flex flex-col gap-3">

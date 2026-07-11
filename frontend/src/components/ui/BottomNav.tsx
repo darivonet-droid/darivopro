@@ -49,15 +49,12 @@ export function BottomNav() {
           background: GRADIENTS.ia,
           boxShadow: `0 4px 20px ${T.purple}55`,
         }}
-        aria-label="Asistente IA"
+        aria-label="Calculadora inteligente"
       >
         <Icon name="sparkle" size={20} color={T.white} />
-        <span
-          className="mt-0.5 text-[7px] font-extrabold tracking-wider"
-          style={{ color: "rgba(255,255,255,0.85)" }}
-        >
-          IA
-        </span>
+        {/* Sin caption: "Calculadora inteligente" no cabe en el espacio de 7px del
+            botón central (16-SISTEMA-DE-DISEÑO-FABLE5.md §6.8); "IA" ya no es texto
+            visible al usuario (regla de negocio) — icono + aria-label bastan. */}
       </Link>
 
       <div className="flex flex-1 justify-around">
