@@ -10,12 +10,26 @@ export interface PartnerRegistro {
   enlace: string;
   estado: EstadoPartner;
   registros: PartnerReferido[];
+  comisiones: ComisionPartner[];
   createdAt: string;
 }
 
 export interface PartnerReferido {
   email: string;
   fecha: string;
+}
+
+/** Fila real de `partner_comisiones_historial` — el Partner solo ve el
+ *  resultado (pendiente/pagada), nunca el mecanismo de revisión interno
+ *  (PANEL-PARTNER.md § Tiempos de pago). */
+export interface ComisionPartner {
+  id: string;
+  tipo: "venta" | "hito";
+  monto: number;
+  moneda: string;
+  estado: "pendiente" | "pagada";
+  pagadaAt?: string;
+  createdAt: string;
 }
 
 /**

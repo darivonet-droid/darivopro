@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { T } from "@/lib/design-system/tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
+import { fmtPEN } from "@/lib/utils";
 import {
   COMISION_VENTA_PORCENTAJE,
   HITOS_COMISION_OFICIALES,
@@ -23,8 +24,18 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
   const enlace = partner?.enlace ?? "https://darivopro.com/ref/—";
   const codigo = partner?.codigo ?? "—";
   const registros = partner?.registros ?? [];
+  const comisiones = partner?.comisiones ?? [];
   const progresoHitos = calcularProgresoHitos(registros.length);
   const [copiado, setCopiado] = useState(false);
+
+  // Solo PEN se suma directo — si algún día hay comisiones en otra moneda,
+  // mostrarlas por separado en vez de sumar montos de monedas distintas.
+  const sumaPorEstado = (estado: "pendiente" | "pagada") =>
+    comisiones
+      .filter((c) => c.estado === estado && c.moneda === "PEN")
+      .reduce((acc, c) => acc + c.monto, 0);
+  const totalPendiente = sumaPorEstado("pendiente");
+  const totalPagado = sumaPorEstado("pagada");
 
   const copiar = async () => {
     if (!partner) return;
@@ -153,6 +164,72 @@ export function PartnerPanel({ nombre, email, telefono, partner }: PartnerPanelP
         ) : (
           <p className="mt-3 text-xs" style={{ color: T.textLight }}>
             Aún no hay registros asociados a su enlace.
+          </p>
+        )}
+      </section>
+
+      <section
+        className="mb-4 rounded-2xl p-5"
+        style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+      >
+        <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+          Mis comisiones
+        </h2>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="rounded-xl px-3 py-2.5" style={{ background: T.amberPale }}>
+            <p className="text-[11px] font-bold uppercase" style={{ color: T.amberD }}>
+              Pendiente
+            </p>
+            <p className="text-lg font-black" style={{ color: T.amberD }}>
+              {fmtPEN(totalPendiente)}
+            </p>
+          </div>
+          <div className="rounded-xl px-3 py-2.5" style={{ background: T.greenPale }}>
+            <p className="text-[11px] font-bold uppercase" style={{ color: T.greenD }}>
+              Pagado
+            </p>
+            <p className="text-lg font-black" style={{ color: T.greenD }}>
+              {fmtPEN(totalPagado)}
+            </p>
+          </div>
+        </div>
+
+        {comisiones.length > 0 ? (
+          <ul className="mt-4 flex flex-col gap-2">
+            {comisiones.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm"
+                style={{ background: T.slate }}
+              >
+                <div>
+                  <span style={{ color: T.text }}>
+                    {c.tipo === "venta" ? "Venta referida" : "Bono por hito"}
+                  </span>
+                  <span className="ml-2 text-xs" style={{ color: T.textLight }}>
+                    {new Date(c.createdAt).toLocaleDateString("es-PE")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold" style={{ color: T.text }}>
+                    {c.moneda === "PEN" ? fmtPEN(c.monto) : `${c.moneda} ${c.monto}`}
+                  </span>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    style={{
+                      background: c.estado === "pagada" ? T.greenPale : T.amberPale,
+                      color: c.estado === "pagada" ? T.greenD : T.amberD,
+                    }}
+                  >
+                    {c.estado === "pagada" ? "Pagada" : "Pendiente"}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-xs" style={{ color: T.textLight }}>
+            Aún no tienes comisiones generadas.
           </p>
         )}
       </section>

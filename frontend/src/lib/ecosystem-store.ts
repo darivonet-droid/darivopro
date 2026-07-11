@@ -38,6 +38,16 @@ interface ReferidoRow {
   fecha: string;
 }
 
+interface ComisionHistorialRow {
+  id: string;
+  tipo: "venta" | "hito";
+  monto: number | string;
+  moneda: string;
+  estado: "pendiente" | "pagada";
+  pagada_at: string | null;
+  created_at: string;
+}
+
 function generarCodigo() {
   return `DRV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
@@ -50,11 +60,18 @@ async function mapPartner(
   supabase: SupabaseClient,
   row: PartnerRow
 ): Promise<PartnerRegistro> {
-  const { data: referidos } = await supabase
-    .from("partner_referidos")
-    .select("email, fecha")
-    .eq("partner_id", row.id)
-    .order("fecha", { ascending: false });
+  const [{ data: referidos }, { data: comisiones }] = await Promise.all([
+    supabase
+      .from("partner_referidos")
+      .select("email, fecha")
+      .eq("partner_id", row.id)
+      .order("fecha", { ascending: false }),
+    supabase
+      .from("partner_comisiones_historial")
+      .select("id, tipo, monto, moneda, estado, pagada_at, created_at")
+      .eq("partner_id", row.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
   return {
     id: row.id,
@@ -67,6 +84,15 @@ async function mapPartner(
     registros: ((referidos ?? []) as ReferidoRow[]).map((r) => ({
       email: r.email,
       fecha: r.fecha,
+    })),
+    comisiones: ((comisiones ?? []) as ComisionHistorialRow[]).map((c) => ({
+      id: c.id,
+      tipo: c.tipo,
+      monto: Number(c.monto),
+      moneda: c.moneda,
+      estado: c.estado,
+      pagadaAt: c.pagada_at ?? undefined,
+      createdAt: c.created_at,
     })),
     createdAt: row.created_at,
   };
