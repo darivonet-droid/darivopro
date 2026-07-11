@@ -60,10 +60,16 @@ export function AdminTable({
   headers,
   rows,
   vacio,
+  onRowClick,
+  filaActivaIndex,
 }: {
   headers: string[];
   rows: React.ReactNode[][];
   vacio?: string;
+  /** Fila clickeable completa — usado por el panel lateral de Empresa Clientes. */
+  onRowClick?: (index: number) => void;
+  /** Resalta la fila seleccionada (panel lateral abierto). */
+  filaActivaIndex?: number;
 }) {
   if (!rows.length) {
     return (
@@ -86,7 +92,15 @@ export function AdminTable({
         </thead>
         <tbody style={{ background: T.white }}>
           {rows.map((cells, i) => (
-            <tr key={i} style={{ borderTop: `1px solid ${T.slateD}` }}>
+            <tr
+              key={i}
+              onClick={onRowClick ? () => onRowClick(i) : undefined}
+              style={{
+                borderTop: `1px solid ${T.slateD}`,
+                cursor: onRowClick ? "pointer" : undefined,
+                background: filaActivaIndex === i ? T.bluePale : undefined,
+              }}
+            >
               {cells.map((cell, j) => (
                 <td key={j} className="px-4 py-3" style={{ color: T.text }}>
                   {cell}

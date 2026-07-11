@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { soloDigitos } from "@/lib/utils";
-import type { Cliente } from "@/types";
+import type { Cliente, Cotizacion, Factura, InvStatus, LineaCotizacion } from "@/types";
 
 interface ClienteRow {
   id: string;
@@ -104,5 +104,96 @@ export function useClientes() {
     return true;
   }, [supabase]);
 
-  return { loading, error, listar, crear, actualizar, eliminar };
+  /**
+   * Ficha completa de un cliente (cliente + cotizaciones + facturas) —
+   * misma consulta que `app/(auth)/clientes/[id]/page.tsx` (Server Component,
+   * Móvil), pero client-side para el panel lateral de Empresa
+   * (03-MODULO-CLIENTES-EMPRESA.md §4/§6 — panel sin navegar fuera del shell).
+   * Respeta RLS igual que el resto de este hook (cliente autenticado del navegador).
+   */
+  const obtenerFicha = useCallback(async (
+    id: string
+  ): Promise<{ cliente: Cliente; cotizaciones: Cotizacion[]; facturas: Factura[] } | null> => {
+    const { data: cliRow } = await supabase.from("clientes").select("*").eq("id", id).single();
+    if (!cliRow) return null;
+    const cliente = mapRow(cliRow as ClienteRow);
+
+    const { data: presRows } = await supabase
+      .from("cotizaciones")
+      .select(
+        "id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)"
+      )
+      .eq("cliente_id", id)
+      .order("created_at", { ascending: false });
+
+    const cotizaciones: Cotizacion[] = (presRows ?? []).map((row) => ({
+      id: row.id,
+      tenant_id: row.user_id,
+      cotNum: row.cot_num ?? undefined,
+      clientName: row.client_name,
+      phone: row.phone ?? undefined,
+      city: row.city ?? undefined,
+      items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
+        svcId: String(it.svc_id),
+        catLabel: String(it.cat_label ?? ""),
+        svcLabel: String(it.svc_label ?? ""),
+        calcType: (it.calc_type ?? "fixed") as LineaCotizacion["calcType"],
+        basePrice: Number(it.base_price ?? 0),
+        unit: String(it.unit ?? ""),
+        qty: Number(it.qty ?? 0),
+        unitPrice: Number(it.unit_price ?? 0),
+        subtotal: Number(it.subtotal ?? 0),
+      })),
+      margin: Number(row.margin ?? 0),
+      totalBase: Number(row.total_base ?? 0),
+      totalLabor: Number(row.total_labor ?? 0),
+      totalFinal: Number(row.total_final ?? 0),
+      status: row.status,
+      createdAt: row.created_at,
+      notes: row.notes ?? undefined,
+      pdfUrl: row.pdf_url ?? undefined,
+    }));
+
+    const quoteIds = cotizaciones.map((p) => p.id);
+    let facturas: Factura[] = [];
+    if (quoteIds.length > 0) {
+      const { data: facRows } = await supabase
+        .from("facturas")
+        .select("*")
+        .in("from_quote_id", quoteIds)
+        .order("created_at", { ascending: false });
+
+      facturas = (facRows ?? []).map((row) => ({
+        invId: row.inv_id,
+        tenant_id: row.user_id,
+        invNum: row.inv_num,
+        invDate: row.inv_date,
+        invStatus: row.inv_status as InvStatus,
+        tipoDoc: row.tipo_doc ?? "factura",
+        clientName: row.client_name,
+        clientRuc: row.client_ruc ?? undefined,
+        clientDni: row.client_dni ?? undefined,
+        clientDir: row.client_dir ?? undefined,
+        moneda: row.moneda ?? "PEN",
+        sym: row.sym ?? "S/",
+        items: row.items ?? [],
+        subtotalBase: Number(row.subtotal_base ?? 0),
+        igvAmount: Number(row.igv_amount ?? 0),
+        totalFinal: Number(row.total_final ?? 0),
+        detraccion: row.detraccion_tipo ? {
+          tipo: row.detraccion_tipo,
+          pct: Number(row.detraccion_pct ?? 0),
+          monto: Number(row.detraccion_monto ?? 0),
+          neto: Number(row.neto_cobrar ?? 0),
+          ctaDetracciones: row.cta_detracciones ?? undefined,
+        } : undefined,
+        fromQuoteId: row.from_quote_id ?? undefined,
+        bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
+      }));
+    }
+
+    return { cliente, cotizaciones, facturas };
+  }, [supabase]);
+
+  return { loading, error, listar, crear, actualizar, eliminar, obtenerFicha };
 }
