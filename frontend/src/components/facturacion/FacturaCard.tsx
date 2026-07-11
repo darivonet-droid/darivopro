@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { compartirPDF } from "@/lib/share";
-import { chipBg } from "@/lib/design-system/tokens";
+import { INV_STATUS_COLORS, RADII, T } from "@/lib/design-system/tokens";
+import { Pill } from "@/components/ui/Pill";
 import { fmtPEN } from "@/lib/utils";
-import { INV_STATUS_COLORS, T } from "@/lib/theme";
 import type { Factura } from "@/types";
 
 export function FacturaCard({ factura: f }: { factura: Factura }) {
@@ -45,7 +45,7 @@ export function FacturaCard({ factura: f }: { factura: Factura }) {
   const puedeMarcarCobrada = estado === "Emitida";
 
   return (
-    <div className="rounded-2xl bg-white px-4 py-4 shadow-sm">
+    <div className="px-4 py-4" style={{ background: T.white, border: `1px solid ${T.slateD}`, borderRadius: RADII.card }}>
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black" style={{ color: T.blue }}>{f.invNum}</p>
@@ -56,15 +56,9 @@ export function FacturaCard({ factura: f }: { factura: Factura }) {
           <p className="text-sm font-extrabold" style={{ color: T.blue }}>
             {fmtPEN(f.totalFinal, f.sym)}
           </p>
-          <span
-            className="mt-1 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold"
-            style={{
-              background: chipBg(colorEstado),
-              color: colorEstado,
-            }}
-          >
-            {estado}
-          </span>
+          <div className="mt-1">
+            <Pill label={estado} color={colorEstado} sm />
+          </div>
         </div>
       </div>
 

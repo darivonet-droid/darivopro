@@ -1,15 +1,13 @@
 // DARIVO PRO — Nuevo cotizacion
+// El wizard renderiza su propio DarkHeader (StepDots por fase) — no envolver
+// en PageHeader aquí, o se duplica el header oscuro (05-MODULO-COTIZACIONES.md §2).
 import { Suspense } from "react";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { NuevoCotizacionWizard } from "@/components/cotizacion/NuevoCotizacionWizard";
 
 export default function NuevoCotizacionPage() {
   return (
-    <div style={{ background: "#F8FAFF" }}>
-      <PageHeader titulo="Nueva cotización" subtitulo="Listo en menos de 60 segundos" backHref="/cotizaciones" />
-      <Suspense>
-        <NuevoCotizacionWizard />
-      </Suspense>
-    </div>
+    <Suspense>
+      <NuevoCotizacionWizard />
+    </Suspense>
   );
 }

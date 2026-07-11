@@ -1,8 +1,10 @@
 # 21 – ARQUITECTURA DEL CATÁLOGO MAESTRO, TARIFA PRO Y MOTOR DE COTIZACIÓN – DARIVO PRO
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Estado:** Arquitectura oficial propuesta
+
+**Cambio principal (v1.4):** corregida numeración de pasos del wizard de cotización en §13 y §15 (líneas antes referenciadas como "Paso 2 — Resumen") para alinear con la secuencia oficial de 4 pasos de `05-MODULO-COTIZACIONES.md` v1.6 (Paso 1 Selección, Paso 2 Cantidades, Paso 3 Resumen, Paso 4 Cliente). Sin cambio de contenido funcional.
 
 **Cambio principal (v1.3):** añadida sección 4.1 — incorporación de `productos_master` como nivel superior a Sectores en la jerarquía del Catálogo Maestro, sincronizado con `01-VISION-DEL-PRODUCTO.md` §3.1 y `02-BASE-DATOS.md` §4.7.
 
@@ -301,7 +303,7 @@ No existen otros tipos de cálculo.
 
 Cada partida conoce internamente su tipo de cálculo.
 
-Cuando el usuario completa el control correspondiente en el **Resumen** del wizard de cotización (`05-MODULO-COTIZACIONES.md` §2 Paso 2 · Reglas 4–7):
+Cuando el usuario completa el control correspondiente en el **Resumen** del wizard de cotización (`05-MODULO-COTIZACIONES.md` §2 Paso 3 · Reglas 4–7):
 
 Darivo Pro calcula automáticamente el importe.
 
@@ -508,7 +510,7 @@ Resumen
 
 ## Pasos comunes tras seleccionar partidas
 
-Una vez las partidas están seleccionadas, el usuario accede al **Resumen** (Paso 2 del wizard — `05-MODULO-COTIZACIONES.md`). El flujo continúa igual para todos los sectores:
+Una vez las partidas están seleccionadas, el usuario accede a **Cantidades** (Paso 2) y luego al **Resumen** (Paso 3 del wizard — `05-MODULO-COTIZACIONES.md`). El flujo continúa igual para todos los sectores:
 
 1. Introducir únicamente el dato necesario por partida (control según tipo)
 

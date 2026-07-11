@@ -1,8 +1,12 @@
 # DARIVO PRO — MÓDULO IA
 ## Diseño + Funcionalidad
-### Versión: 1.7 — 05/07/2026
+### Versión: 1.9 — 09/07/2026
 ### Fuente: diseño Fable 5 (`IAMenuScreen`, botón central nav) + regla `05-MODULO-COTIZACIONES.md` + `06-MODULO-FACTURAS.md` + funcionalidad real construida
 ### Relacionado: ver `01-VISION-DEL-PRODUCTO.md` §13 · ver `04-PANEL-ADMIN-SUSCRIPCIONES.md` · ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` · ver `05-MODULO-COTIZACIONES.md` · ver `06-MODULO-FACTURAS.md` · ver `07-MODULO-MAS.md` §6–§8
+
+**Cambio principal (v1.9):** §9 corregida por segunda vez en el mismo día — la corrección v1.8 ("Paso 2 (Resumen)" → "Paso 3 (Resumen)") fue incompleta: renumeró el paso pero conservó el nombre de pantalla equivocado. `05-MODULO-COTIZACIONES.md:34` (no modificado, ya correcto) especifica que el handoff de IA converge en **Cantidades — Paso 2**, no en Resumen: los items que entrega la IA llegan con mediciones (`qty`) pre-rellenadas pero editables, y solo la pantalla Cantidades admite edición de mediciones (Resumen es de solo presentación, sin controles — `05` §Paso 3). Corregido a "Paso 2 (Cantidades)"; "Paso 3 (Cliente)" de v1.8 pasa a "Paso 4 (Cliente)" para mantener la secuencia de 4 pasos.
+
+**Cambio principal (v1.8):** §9 corregida numeración de pasos ("Paso 2 (Resumen)" → "Paso 3 (Resumen)", "Paso 3 (Cliente)" → "Paso 4 (Cliente)") para alinear con la secuencia oficial de 4 pasos de `05-MODULO-COTIZACIONES.md` v1.6. Sin cambio de contenido funcional.
 
 **Cambio principal (v1.7):** §12 corregido — el modelo binario "Básico sin IA / Pro con IA" se sustituye por la matriz real: Básico tiene IA limitada solo para cotizaciones (sin IA para facturas); Pro y Business tienen IA amplia para ambos. Referencia de sección actualizada a §8.6 tras la reordenación de la Visión v2.13.
 
@@ -247,11 +251,12 @@ FUNCIONALIDAD:
 
 ```
 Los items generados por la IA:
-1. Se incorporan al Paso 2 (Resumen) del wizard normal como
+1. Se incorporan al Paso 2 (Cantidades) del wizard normal como
    partidas editables — controles por tipo según Catálogo Maestro
    (Reglas 5–7 de 05-MODULO-COTIZACIONES.md §4)
-2. El usuario completa el Resumen (Regla 8) y pasa al
-   Paso 3 (Cliente) — MISMO flujo que la creación manual
+2. El usuario completa Cantidades (Regla 8), revisa el Resumen
+   (Paso 3) y pasa al Paso 4 (Cliente) — MISMO flujo que la
+   creación manual
 3. Al confirmar (Guardar), recibe su número COT- normal
 4. NO existe un "tipo de documento IA" distinto
 5. Reglas 6–10 del módulo Cotizaciones aplican igualmente

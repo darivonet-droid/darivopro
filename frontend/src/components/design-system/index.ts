@@ -4,3 +4,4 @@ export { TabPillSelector } from "./TabPillSelector";
 export { StepDots } from "./StepDots";
 export { Toggle } from "./Toggle";
 export { MobileShell } from "./MobileShell";
+export { FloatBar } from "./FloatBar";

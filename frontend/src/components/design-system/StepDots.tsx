@@ -5,18 +5,19 @@ interface StepDotsProps {
   total?: number;
 }
 
-/** Fable 5 §2.4 — StepDots (wizard cotización, 3 pasos) */
-export function StepDots({ current, total = 3 }: StepDotsProps) {
+/** Fable 5 §6.11 — StepDots (wizard cotización, 4 pasos, variante header oscuro) */
+export function StepDots({ current, total = 4 }: StepDotsProps) {
   return (
-    <div className="flex items-center justify-center gap-2 py-3">
+    <div className="flex items-center justify-center gap-1.5">
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
-          className="rounded-full transition-all"
+          className="transition-all"
           style={{
-            width: i === current ? 22 : 8,
-            height: 8,
-            background: i <= current ? T.blue : T.slateD,
+            width: i === current ? 20 : 6,
+            height: 6,
+            borderRadius: 3,
+            background: i === current ? T.white : i < current ? T.green : "rgba(255,255,255,0.2)",
           }}
         />
       ))}

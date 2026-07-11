@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { TabPillSelector } from "@/components/design-system/TabPillSelector";
+import { Toggle } from "@/components/design-system/Toggle";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { boletaSchema, facturaSchema } from "@/lib/validations";
@@ -18,7 +20,7 @@ import {
   type TipoComprobante,
 } from "@/lib/factura-utils";
 import { calcIGV, fmtPEN, hoy } from "@/lib/utils";
-import { T } from "@/lib/theme";
+import { RADII, T, WHATSAPP } from "@/lib/design-system/tokens";
 import type {
   Cliente, Detraccion, EmpresaData, Factura, LineaFactura,
   Cotizacion, TipoDetraccion,
@@ -268,7 +270,7 @@ export function NuevaFacturaForm({
           <a href={waUrl}
             target="_blank" rel="noopener noreferrer"
             className="block rounded-2xl py-3.5 text-center text-sm font-bold text-white"
-            style={{ background: "#25D366" }}>
+            style={{ background: WHATSAPP.icon }}>
             💬 Compartir por WhatsApp
           </a>
         )}
@@ -293,7 +295,7 @@ export function NuevaFacturaForm({
 
   /* ── Formulario ────────────────────────────────────────── */
   return (
-    <div className="flex flex-col gap-4 px-4 py-4" style={{ background: "#F8FAFF" }}>
+    <div className="flex flex-col gap-4 px-4 py-4" style={{ background: T.slate }}>
       <Link href="/facturas" className="text-sm font-semibold" style={{ color: T.textMid }}>
         ← Volver
       </Link>
@@ -392,40 +394,25 @@ export function NuevaFacturaForm({
         <span className="mb-2 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
           Forma de pago
         </span>
-        <div className="grid grid-cols-2 gap-2">
-          {FORMAS_PAGO.map((fp) => (
-            <button key={fp} type="button" onClick={() => setFormaPago(fp)}
-              className="rounded-xl py-2.5 text-xs font-bold"
-              style={{
-                background: formaPago === fp ? T.bluePale : T.white,
-                color: formaPago === fp ? T.blue : T.textMid,
-                border: `1.5px solid ${formaPago === fp ? T.blue : T.slateD}`,
-              }}>
-              {fp}
-            </button>
-          ))}
-        </div>
+        <TabPillSelector
+          tabs={FORMAS_PAGO.map((fp) => ({ id: fp, label: fp }))}
+          active={formaPago}
+          onChange={setFormaPago}
+        />
       </div>
 
       {/* Estado */}
-      <div className="flex gap-2">
-        {([false, true] as const).map((p) => (
-          <button key={String(p)} type="button" onClick={() => setPagado(p)}
-            className="flex-1 rounded-xl py-3 text-sm font-bold"
-            style={{
-              background: pagado === p ? (p ? T.green : T.amberPale) : T.white,
-              color: pagado === p ? (p ? T.white : T.amberD) : T.textMid,
-              border: `1.5px solid ${pagado === p ? (p ? T.green : T.amber) : T.slateD}`,
-            }}>
-            {p ? "Pagado" : "Pendiente"}
-          </button>
-        ))}
+      <div className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
+        <span className="text-sm font-bold" style={{ color: pagado ? T.green : T.amberD }}>
+          {pagado ? "Pagado" : "Pendiente"}
+        </span>
+        <Toggle checked={pagado} onChange={setPagado} label="Marcar como pagado" />
       </div>
 
       {/* Líneas */}
       <div className="flex flex-col gap-2">
         {items.map((it, i) => (
-          <div key={i} className="rounded-2xl bg-white p-3 shadow-sm">
+          <div key={i} className="p-3" style={{ background: T.white, border: `1px solid ${T.slateD}`, borderRadius: RADII.card }}>
             <input placeholder="Descripción" value={it.desc}
               onChange={(e) => cambiarLinea(i, "desc", e.target.value)}
               className="w-full rounded-lg px-2.5 py-2 text-sm outline-none"
@@ -460,7 +447,7 @@ export function NuevaFacturaForm({
       </div>
 
       {/* Totales */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="p-4" style={{ background: T.white, border: `1px solid ${T.slateD}`, borderRadius: RADII.card }}>
         {tipo === "boleta" ? (
           // Boleta: IGV incluido, no desglosado
           <div className="flex justify-between text-lg font-black" style={{ color: T.blue }}>

@@ -1,5 +1,5 @@
 "use client";
-// DARIVO PRO — Wizard de cotización (diseño Fable 5 exacto)
+// DARIVO PRO — Wizard de cotización (diseño Fable 5 exacto — 4 pasos: 05-MODULO-COTIZACIONES.md v1.6 §2)
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCotizacion } from "@/hooks/useCotizacion";
@@ -13,11 +13,15 @@ import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
 import { compartirPDF } from "@/lib/share";
 import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
-import { T } from "@/lib/theme";
+import { T } from "@/lib/design-system/tokens";
+import { DarkHeader } from "@/components/design-system/DarkHeader";
+import { BackBtn } from "@/components/design-system/BackBtn";
+import { StepDots } from "@/components/design-system/StepDots";
+import { FloatBar } from "@/components/design-system/FloatBar";
+import { MobileShell } from "@/components/design-system/MobileShell";
 import type { LineaCotizacion, Capitulo, Partida } from "@/types";
-import Link from "next/link";
 
-// Navegación Construcción → subcategorías (05 v1.5 · Doc 21 §15 — solo UI, cat_ids de catalog.ts)
+// Navegación Construcción → subcategorías (05 v1.6 · Doc 21 §15 — solo UI, cat_ids de catalog.ts)
 const CONSTRUCCION_ID = "construccion";
 const CONSTRUCCION_META = { id: CONSTRUCCION_ID, nombre: "Construcción", emoji: "🏗️", color: "#F59E0B" };
 const SUBCATEGORIAS_CONSTRUCCION = [{ id: "albanileria", nombre: "Albañilería", emoji: "🧱" }];
@@ -37,49 +41,6 @@ function Ic({ d, size = 18, color = "currentColor", sw = 2 }: { d: SvgPath; size
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
       {paths.map((p, i) => <path key={i} d={p} />)}
     </svg>
-  );
-}
-
-// ─── StepDots ─────────────────────────────────────────────────────────────────
-function StepDots({ step, total }: { step: number; total: number }) {
-  return (
-    <div style={{ display: "flex", gap: 6, alignItems: "center", justifyContent: "center" }}>
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: i === step ? 20 : 6,
-            height: 6,
-            borderRadius: 3,
-            background: i === step ? T.white : i < step ? T.green : "rgba(255,255,255,0.2)",
-            transition: "all 0.3s",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── FloatBar (Selección — Regla 3: sin total ni cálculos) ───────────────────
-function FloatBar({ count, onContinue, onReset }: { count: number; onContinue: () => void; onReset: () => void }) {
-  if (!count) return null;
-  return (
-    <div className="pi" style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 28px)", maxWidth: 362, zIndex: 200 }}>
-      <div style={{ background: T.navyLight, borderRadius: 18, padding: "12px 14px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 10px 36px rgba(0,0,0,0.55)", display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ width: 38, height: 38, borderRadius: 11, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <span style={{ color: T.white, fontSize: 15, fontWeight: 900 }}>{count}</span>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.4 }}>
-            {count} partida{count !== 1 ? "s" : ""} seleccionada{count !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <button onClick={onReset} style={{ background: "rgba(255,255,255,0.07)", border: "none", cursor: "pointer", borderRadius: 9, padding: "7px 10px", color: T.textLight, fontSize: 12, fontWeight: 600, flexShrink: 0 }}>✕</button>
-        <button onClick={onContinue} style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})`, border: "none", cursor: "pointer", borderRadius: 13, padding: "11px 18px", color: T.white, fontSize: 14, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}50`, flexShrink: 0 }}>
-          Continuar → Resumen
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -120,7 +81,8 @@ export function NuevoCotizacionWizard() {
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
   const supabase = createClient();
 
-  type Phase = "cats" | "resumen" | "cliente";
+  // 4 pasos oficiales — 05-MODULO-COTIZACIONES.md §2: Selección → Cantidades → Resumen → Cliente
+  type Phase = "cats" | "cantidades" | "resumen" | "cliente";
   const [phase, setPhase] = useState<Phase>("cats");
   const [selCat, setSelCat] = useState<string | null>(null);
   const [selSubCat, setSelSubCat] = useState<string | null>(null);
@@ -188,7 +150,8 @@ export function NuevoCotizacionWizard() {
     const clienteParam = searchParams.get("cliente");
     const fromIA      = searchParams.get("fromIA");
 
-    // Handoff IA → Paso 2 Resumen (08-MODULO-IA.md §9)
+    // Handoff IA → Paso 2 Cantidades (05-MODULO-COTIZACIONES.md §Regla 1 · 08-MODULO-IA.md §9)
+    // Los items de la IA llegan con qty pre-rellenado pero editable — Resumen es solo lectura.
     if (fromIA && typeof window !== "undefined") {
       try {
         const raw = sessionStorage.getItem(WIZARD_IA_SESSION_KEY);
@@ -198,7 +161,7 @@ export function NuevoCotizacionWizard() {
             setBasket(handoff.basket);
             if (handoff.notes) setNotes(handoff.notes);
             if (handoff.margin != null) setMargin(handoff.margin);
-            setPhase("resumen");
+            setPhase("cantidades");
           }
           sessionStorage.removeItem(WIZARD_IA_SESSION_KEY);
         }
@@ -235,6 +198,7 @@ export function NuevoCotizacionWizard() {
     }
 
     // Helper: cargar cotizacion en el wizard (usado por ?from= y ?editar=)
+    // Mediciones en Cantidades (05-MODULO-COTIZACIONES.md §3 — "Editar"/"Re-cotizar")
     const cargarCotizacion = async (id: string, esEdicion: boolean) => {
       const { data } = await supabase
         .from("cotizaciones")
@@ -264,7 +228,7 @@ export function NuevoCotizacionWizard() {
       setCity(String(data.city ?? ""));
       setNotes(String(data.notes ?? ""));
       if (esEdicion) setEditandoId(id);
-      setPhase("resumen");
+      setPhase("cantidades");
     };
 
     // 2. Editar cotización existente (?editar=<id>) — actualiza el registro original
@@ -364,19 +328,28 @@ export function NuevoCotizacionWizard() {
     }]);
   };
 
-  const goToResumen = () => {
+  // Paso 1 → Paso 2 (Regla 3 — selección sin cálculo)
+  const goToCantidades = () => {
     if (!basket.length) return;
-    setPhase("resumen");
+    setPhase("cantidades");
   };
 
-  const resumenCompleto = basket.every((it) => {
+  // Regla 8 — completitud de Cantidades antes de continuar a Resumen
+  const cantidadesCompleto = basket.every((it) => {
     if (it.calcType === "fixed") return true;
     const q = parseFloat(it.qty);
     return !!it.qty && q > 0;
   });
 
+  // Paso 2 → Paso 3
+  const goToResumen = () => {
+    if (!cantidadesCompleto) return;
+    setPhase("resumen");
+  };
+
+  // Paso 3 → Paso 4
   const goToCliente = () => {
-    if (!resumenCompleto) return;
+    if (!cantidadesCompleto) return;
     setPhase("cliente");
   };
 
@@ -504,7 +477,16 @@ export function NuevoCotizacionWizard() {
     return g;
   }, {});
 
-  const phaseStep = phase === "cats" ? 0 : phase === "resumen" ? 1 : 2;
+  const phaseStep =
+    phase === "cats"       ? 0 :
+    phase === "cantidades" ? 1 :
+    phase === "resumen"    ? 2 : 3;
+
+  const phaseSubtitle =
+    phase === "cats"       ? "Selecciona categorías y partidas" :
+    phase === "cantidades" ? "Introduce las mediciones de cada partida" :
+    phase === "resumen"    ? "Revisa los totales y ajusta el margen" :
+    (editandoId ? "Modificando cotización existente" : "Datos del cliente y confirmación");
 
   /** Render lista de partidas (toggle) — reutilizado en categorías y subcategorías */
   const renderPartidas = (cap: Capitulo) => (
@@ -539,41 +521,26 @@ export function NuevoCotizacionWizard() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: T.slate, paddingBottom: 40 }}>
-      {/* DarkHeader */}
-      <div style={{ background: `linear-gradient(160deg,${T.navy} 0%,${T.navyLight} 100%)`, padding: "50px 18px 22px", borderBottomLeftRadius: 26, borderBottomRightRadius: 26 }}>
-        {/* Back */}
-        <Link href="/cotizaciones" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14, display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-          <Ic d={["M19 12H5","M12 19l-7-7 7-7"]} color={T.textLight} size={18} />
-          <span style={{ color: T.textLight, fontSize: 13, fontWeight: 600 }}>Volver</span>
-        </Link>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Ic d={zapPath} color={T.white} size={22} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ color: T.white, fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>
-              {editandoId ? "Editar cotización" : "Nueva cotización"}
-            </h2>
-            <p style={{ color: T.textLight, fontSize: 12, marginTop: 2 }}>
-              {phase === "cats"    && "Selecciona categorías y partidas"}
-              {phase === "resumen" && "Introduce mediciones y revisa totales"}
-              {phase === "cliente" && (editandoId ? "Modificando cotización existente" : "Datos del cliente y confirmación")}
-            </p>
-          </div>
-          {basket.length > 0 && phase === "cats" && (
+    <MobileShell>
+      <div style={{ minHeight: "100vh", background: T.slate, paddingBottom: 40 }}>
+        <DarkHeader
+          titulo={editandoId ? "Editar cotización" : "Nueva cotización"}
+          subtitulo={phaseSubtitle}
+          pt={50}
+          icono={<Ic d={zapPath} color={T.white} size={22} />}
+          preTitulo={<BackBtn href="/cotizaciones" label="Volver" />}
+          accion={basket.length > 0 && phase === "cats" ? (
             <div className="pi" style={{ width: 30, height: 30, borderRadius: 15, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: T.white, fontSize: 13, fontWeight: 900 }}>{basket.length}</span>
             </div>
-          )}
-        </div>
-        <StepDots step={phaseStep} total={3} />
-      </div>
+          ) : undefined}
+        >
+          <StepDots current={phaseStep} total={4} />
+        </DarkHeader>
 
       <div style={{ padding: "18px 16px 100px" }}>
 
-        {/* ══ FASE 1: ACORDEÓN ══ */}
+        {/* ══ PASO 1: SELECCIÓN (Regla 3 — sin cálculo) ══ */}
         {phase === "cats" && (
           <div className="su">
 
@@ -690,11 +657,11 @@ export function NuevoCotizacionWizard() {
           </div>
         )}
 
-        {/* ══ PASO 2: RESUMEN (Reglas 4–9) ══ */}
-        {phase === "resumen" && (
+        {/* ══ PASO 2: CANTIDADES (Reglas 4–8 — único punto de cálculo) ══ */}
+        {phase === "cantidades" && (
           <div className="su">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Resumen de cotización</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Introduce las mediciones</p>
               <button
                 type="button"
                 onClick={() => { setSelCat(null); setSelSubCat(null); setPhase("cats"); }}
@@ -702,23 +669,6 @@ export function NuevoCotizacionWizard() {
               >
                 ← Partidas
               </button>
-            </div>
-
-            <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 22, padding: "26px 22px 22px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: 90, background: "rgba(255,255,255,0.06)" }} />
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, position: "relative" }}>Total cotización</p>
-              <p style={{ color: T.white, fontSize: 54, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
-              <div style={{ display: "flex", gap: 20, marginTop: 14, position: "relative" }}>
-                <div>
-                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Ejecución material</p>
-                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalBase)}</p>
-                </div>
-                <div style={{ width: 1, background: "rgba(255,255,255,0.15)" }} />
-                <div>
-                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Mano de obra ({margin}%)</p>
-                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalLabor)}</p>
-                </div>
-              </div>
             </div>
 
             <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 12 }}>
@@ -777,6 +727,71 @@ export function NuevoCotizacionWizard() {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* ══ PASO 3: RESUMEN — presentación, sin controles de medición (Regla 7) ══ */}
+        {phase === "resumen" && (
+          <div className="su">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Resumen de cotización</p>
+              <button
+                type="button"
+                onClick={() => setPhase("cantidades")}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue }}
+              >
+                ← Cantidades
+              </button>
+            </div>
+
+            <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 22, padding: "26px 22px 22px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: 90, background: "rgba(255,255,255,0.06)" }} />
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, position: "relative" }}>Total cotización</p>
+              <p style={{ color: T.white, fontSize: 54, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
+              <div style={{ display: "flex", gap: 20, marginTop: 14, position: "relative" }}>
+                <div>
+                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Ejecución material</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalBase)}</p>
+                </div>
+                <div style={{ width: 1, background: "rgba(255,255,255,0.15)" }} />
+                <div>
+                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Mano de obra ({margin}%)</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalLabor)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 12 }}>
+              {Object.entries(groupedItems).map(([catLabel, its], gi) => {
+                const cap = sortedCatalogo.find((c) => c.nombre === catLabel);
+                const chapTotal = its.reduce((a, it) => a + calcItem(it).subtotal, 0);
+                return (
+                  <div key={catLabel}>
+                    <div style={{ background: (cap?.color || T.blue) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${T.slateD}` : "none" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 15 }}>{cap?.emoji || "📋"}</span>
+                        <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || T.blue, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
+                      </div>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || T.blue }}>{fmtPEN(chapTotal)}</p>
+                    </div>
+                    {its.map((it) => {
+                      const { subtotal } = calcItem(it);
+                      return (
+                        <div key={it.svcId} style={{ padding: "11px 16px", borderBottom: `1px solid ${T.slate}` }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1.3, flex: 1 }}>{it.svcLabel}</p>
+                            <p style={{ fontSize: 13, fontWeight: 800, color: T.text, flexShrink: 0 }}>{fmtPEN(subtotal)}</p>
+                          </div>
+                          <p style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>
+                            {it.calcType === "fixed" ? `Precio fijo · S/ ${it.basePrice}` : `${it.qty} ${it.unit} · S/ ${it.basePrice}/${it.unit}`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
 
             <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
@@ -803,15 +818,14 @@ export function NuevoCotizacionWizard() {
             <button
               type="button"
               onClick={goToCliente}
-              disabled={!resumenCompleto}
-              style={{ width: "100%", padding: 16, borderRadius: 14, border: "none", cursor: resumenCompleto ? "pointer" : "default", background: resumenCompleto ? `linear-gradient(135deg,${T.blue},${T.blueL})` : T.slateD, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: resumenCompleto ? `0 4px 16px ${T.blue}40` : "none" }}
+              style={{ width: "100%", padding: 16, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}40` }}
             >
               Continuar → Cliente
             </button>
           </div>
         )}
 
-        {/* ══ PASO 3: CLIENTE + CONFIRMACIÓN (Regla 10) ══ */}
+        {/* ══ PASO 4: CLIENTE + CONFIRMACIÓN (Regla 10) ══ */}
         {phase === "cliente" && (
           <div className="su">
             <button
@@ -894,9 +908,26 @@ export function NuevoCotizacionWizard() {
         )}
       </div>
 
-      {phase === "cats" && basket.length > 0 && (
-        <FloatBar count={basket.length} onContinue={goToResumen} onReset={() => setBasket([])} />
-      )}
-    </div>
+        {phase === "cats" && basket.length > 0 && (
+          <FloatBar
+            label={`${basket.length} partida${basket.length !== 1 ? "s" : ""} seleccionada${basket.length !== 1 ? "s" : ""}`}
+            badge={basket.length}
+            primaryLabel="Continuar → Cantidades"
+            onPrimary={goToCantidades}
+            onSecondary={() => setBasket([])}
+          />
+        )}
+
+        {phase === "cantidades" && basket.length > 0 && (
+          <FloatBar
+            label="Total parcial"
+            value={fmtPEN(totalFinal)}
+            primaryLabel="Continuar → Resumen"
+            onPrimary={goToResumen}
+            primaryDisabled={!cantidadesCompleto}
+          />
+        )}
+      </div>
+    </MobileShell>
   );
 }
