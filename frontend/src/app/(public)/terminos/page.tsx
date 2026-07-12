@@ -4,7 +4,7 @@ import { MarkdownLegal } from "@/components/legal/MarkdownLegal";
 
 export const dynamic = "force-static";
 export const metadata = {
-  title: "Términos y Condiciones — Darivo Pro",
+  title: "Términos y Condiciones",
   description: "Términos y condiciones de uso de Darivo Pro.",
 };
 

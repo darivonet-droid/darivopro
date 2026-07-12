@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PreciosView } from "@/components/precios/PreciosView";
 
 export const metadata: Metadata = {
-  title: "Precios — DARIVO PRO",
+  title: "Precios",
   description: "Planes Básico, Pro y Business para cotizaciones y facturas de obra en Perú.",
 };
 
