@@ -17,7 +17,7 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 
 ## ESTADO REAL DEL PROYECTO (única fuente de verdad — actualizar al final de cada bloque de trabajo)
 
-*Última actualización: 12/07/2026, sesión continua.*
+*Última actualización: 12/07/2026, sesión continua (verificación pre-merge develop→main).*
 
 ### 🟢 Congelado — verificado, no revisar de nuevo salvo que el código cambie
 
@@ -40,11 +40,11 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 ### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
 
 - **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados, **texto real ya conectado** (12/07/2026 — ya no es placeholder). Pendiente, todo del lado del propietario: (1) setup manual de Google Cloud + Workspace (domain-wide delegation); (2) configurar el Database Webhook de Supabase para "comisión ganada"; (3) pegar `supabase/templates/recovery.html` en el Dashboard hosted (evento 4, reset de contraseña). Ver sección "Email transaccional" más abajo para el detalle completo.
-- **4 migraciones SQL escritas — 2 ejecutadas y verificadas, 2 pendientes:**
-  1. `20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — ejecutada por el propietario, **no se pudo verificar directamente** (sin pagos reales todavía que observar, sin acceso a `pg_catalog` vía REST). Verificar en el primer pago real de Business vía Partner.
-  2. `20260712110000_unify_partidas_propias_calc_type.sql` — ✅ ejecutada y **confirmada directamente contra la BD real**.
-  3. `20260713100000_empresa_empleados_user_id.sql` — **pendiente de ejecución**.
-  4. `20260713110000_partner_comisiones_config.sql` — **pendiente de ejecución**.
+- **4 migraciones SQL escritas — las 4 ya ejecutadas en la BD real (verificado 12/07/2026, sesión continua, vía OpenAPI de PostgREST con service role key — conexión directa Postgres bloqueada por red del sandbox):**
+  1. `20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — ejecutada por el propietario, **el WHEN del trigger sigue sin poderse verificar directamente** (PostgREST no expone `pg_trigger`/`pg_catalog`, solo columnas). Verificar en el primer pago real de Business vía Partner.
+  2. `20260712110000_unify_partidas_propias_calc_type.sql` — ✅ ejecutada y confirmada directamente contra la BD real (ya confirmado antes, re-verificado ahora).
+  3. `20260713100000_empresa_empleados_user_id.sql` — ✅ **ejecutada** (corrección respecto al estado anterior, que la marcaba "pendiente"): columna `user_id` confirmada presente en `empresa_empleados` vía schema real.
+  4. `20260713110000_partner_comisiones_config.sql` — ✅ **ejecutada** (corrección respecto al estado anterior, que la marcaba "pendiente"): tabla `partner_comisiones_config` existe con los 5 valores semilla exactos esperados (venta 20% + hitos 10/10/15/20%).
 
 ### 🔴 Sin auditar / pendiente de decisión de negocio — no improvisar
 
