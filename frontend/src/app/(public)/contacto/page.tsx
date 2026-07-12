@@ -2,9 +2,12 @@
 import { useState } from "react";
 import { T } from "@/lib/theme";
 
-// Canal de contacto: email hola@darivo.pro — el mismo que ya usa el CTA de
-// precios (lib/planes.ts). Sin base de datos: el formulario compone un mailto.
-const CONTACTO_EMAIL = "hola@darivo.pro";
+// Canal de contacto: info@darivopro.com — mismo alias general que ya usa el
+// footer de la landing (frontend/src/app/page.tsx). "darivo.pro" (dominio
+// distinto de "darivopro.com", que sí es el real) era un typo, no un dominio
+// que la empresa posea — corregido 12/07/2026. Sin base de datos: el
+// formulario compone un mailto.
+const CONTACTO_EMAIL = "info@darivopro.com";
 
 export default function ContactoPage() {
   const [nombre, setNombre] = useState("");
