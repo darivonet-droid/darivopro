@@ -76,3 +76,31 @@ export async function actualizarEstadoEmpleado(
 
   if (error) throw error;
 }
+
+/** Edita nombre/teléfono — no toca email (identidad ligada a auth.users) ni rol. */
+export async function actualizarDatosEmpleado(
+  supabase: SupabaseClient,
+  empleadoId: string,
+  datos: { nombre: string; telefono: string | null }
+): Promise<void> {
+  const { error } = await supabase
+    .from("empresa_empleados")
+    .update({ nombre: datos.nombre, telefono: datos.telefono })
+    .eq("id", empleadoId);
+
+  if (error) throw error;
+}
+
+/** Asigna/quita el rol personalizado de un empleado directo desde la fila. */
+export async function asignarRolPersonalizadoEmpleado(
+  supabase: SupabaseClient,
+  empleadoId: string,
+  rolPersonalizadoId: string | null
+): Promise<void> {
+  const { error } = await supabase
+    .from("empresa_empleados")
+    .update({ rol_personalizado_id: rolPersonalizadoId })
+    .eq("id", empleadoId);
+
+  if (error) throw error;
+}

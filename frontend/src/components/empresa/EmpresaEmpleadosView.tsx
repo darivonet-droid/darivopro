@@ -5,17 +5,35 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminBadge } from "@/components/admin/AdminTabs";
 import { T } from "@/lib/design-system/tokens";
 import {
+  actualizarDatosEmpleado,
   actualizarEstadoEmpleado,
+  asignarRolPersonalizadoEmpleado,
   listarEmpleadosEmpresa,
   type EmpleadoEmpresa,
   type EstadoEmpleadoEmpresa,
 } from "@/lib/empresa-empleados-types";
 import { invitarEmpleadoAction } from "@/app/empresa/empleados/actions";
-import { obtenerEmpresaIdGerente } from "@/lib/roles-personalizados";
+import {
+  listarRolesPersonalizados,
+  obtenerEmpresaIdGerente,
+  type RolPersonalizado,
+} from "@/lib/roles-personalizados";
 import { createClient } from "@/lib/supabase/client";
+
+function formatoUltimaActividad(iso: string | null): string {
+  if (!iso) return "Nunca";
+  return new Date(iso).toLocaleDateString("es-PE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export function EmpresaEmpleadosView() {
   const [empleados, setEmpleados] = useState<EmpleadoEmpresa[]>([]);
+  const [roles, setRoles] = useState<RolPersonalizado[]>([]);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -26,11 +44,20 @@ export function EmpresaEmpleadosView() {
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editNombre, setEditNombre] = useState("");
+  const [editTelefono, setEditTelefono] = useState("");
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+
   const cargar = useCallback(async (eid: string) => {
     try {
       const supabase = createClient();
-      const lista = await listarEmpleadosEmpresa(supabase, eid);
+      const [lista, listaRoles] = await Promise.all([
+        listarEmpleadosEmpresa(supabase, eid),
+        listarRolesPersonalizados(supabase, eid),
+      ]);
       setEmpleados(lista);
+      setRoles(listaRoles);
     } catch {
       setEmpleados([]);
     } finally {
@@ -49,6 +76,32 @@ export function EmpresaEmpleadosView() {
       }
     });
   }, [cargar]);
+
+  const abrirEdicion = (e: EmpleadoEmpresa) => {
+    setEditandoId(e.id);
+    setEditNombre(e.nombre);
+    setEditTelefono(e.telefono ?? "");
+  };
+
+  const guardarEdicion = async () => {
+    if (!editandoId || !editNombre.trim() || !empresaId) return;
+    setGuardandoEdicion(true);
+    const supabase = createClient();
+    await actualizarDatosEmpleado(supabase, editandoId, {
+      nombre: editNombre.trim(),
+      telefono: editTelefono.trim() || null,
+    });
+    setGuardandoEdicion(false);
+    setEditandoId(null);
+    void cargar(empresaId);
+  };
+
+  const cambiarRolPersonalizado = async (empleadoId: string, rolId: string) => {
+    if (!empresaId) return;
+    const supabase = createClient();
+    await asignarRolPersonalizadoEmpleado(supabase, empleadoId, rolId || null);
+    void cargar(empresaId);
+  };
 
   const invitar = async () => {
     if (!nombre.trim() || !email.trim() || !empresaId) return;
@@ -198,10 +251,10 @@ export function EmpresaEmpleadosView() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl" style={{ border: `1px solid ${T.slateD}` }}>
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead style={{ background: T.navyLight }}>
               <tr>
-                {["Empleado", "Contacto", "Rol", "Estado", "Alta", "Acciones"].map((h) => (
+                {["Empleado", "Contacto", "Rol", "Permisos", "Estado", "Última actividad", "Acciones"].map((h) => (
                   <th key={h} className="px-4 py-3 text-xs font-bold text-white">
                     {h}
                   </th>
@@ -220,6 +273,21 @@ export function EmpresaEmpleadosView() {
                   </td>
                   <td className="px-4 py-3">{e.rol}</td>
                   <td className="px-4 py-3">
+                    <select
+                      value={e.rol_personalizado_id ?? ""}
+                      onChange={(ev) => void cambiarRolPersonalizado(e.id, ev.target.value)}
+                      className="rounded-lg border px-2 py-1.5 text-xs"
+                      style={{ borderColor: T.slateD, color: T.text }}
+                    >
+                      <option value="">Sin rol personalizado</option>
+                      {roles.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-3">
                     <AdminBadge
                       label={e.estado}
                       tone={
@@ -232,10 +300,17 @@ export function EmpresaEmpleadosView() {
                     />
                   </td>
                   <td className="px-4 py-3 text-xs" style={{ color: T.textLight }}>
-                    {new Date(e.createdAt).toLocaleDateString("es-PE")}
+                    {formatoUltimaActividad(e.ultima_actividad)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2 text-xs font-bold">
+                      <button
+                        type="button"
+                        style={{ color: T.blue }}
+                        onClick={() => abrirEdicion(e)}
+                      >
+                        Editar
+                      </button>
                       {e.estado !== "Activo" && (
                         <button
                           type="button"
@@ -260,6 +335,55 @@ export function EmpresaEmpleadosView() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {editandoId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(10,22,40,0.5)" }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-5"
+            style={{ background: T.white }}
+          >
+            <h2 className="mb-3 text-sm font-bold" style={{ color: T.text }}>
+              Editar empleado
+            </h2>
+            <input
+              placeholder="Nombre"
+              value={editNombre}
+              onChange={(ev) => setEditNombre(ev.target.value)}
+              className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
+              style={{ borderColor: T.slateD }}
+            />
+            <input
+              placeholder="Teléfono (opcional)"
+              value={editTelefono}
+              onChange={(ev) => setEditTelefono(ev.target.value)}
+              className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
+              style={{ borderColor: T.slateD }}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEditandoId(null)}
+                className="flex-1 rounded-xl py-2 text-sm font-bold"
+                style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={guardandoEdicion || !editNombre.trim()}
+                onClick={() => void guardarEdicion()}
+                className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
+                style={{ background: T.blue }}
+              >
+                {guardandoEdicion ? "Guardando…" : "Guardar cambios"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

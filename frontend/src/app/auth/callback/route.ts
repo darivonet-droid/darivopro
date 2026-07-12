@@ -12,6 +12,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { registrarReferidoSiCorresponde, REF_COOKIE_NAME } from "@/lib/ecosystem-store";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -52,6 +53,20 @@ export async function GET(request: Request) {
   const refCodigo = cookieStore.get(REF_COOKIE_NAME)?.value;
   if (refCodigo && data.user) {
     await registrarReferidoSiCorresponde(refCodigo, data.user.email ?? "", data.user.id).catch(() => {});
+  }
+
+  // Última actividad de Empleados Empresa (Técnico) — best-effort, nunca
+  // bloquea el login. Cubre Google OAuth y aceptar invitación por correo.
+  if (data.user) {
+    try {
+      const admin = createAdminClient();
+      await admin
+        .from("empresa_empleados")
+        .update({ ultima_actividad: new Date().toISOString() })
+        .eq("user_id", data.user.id);
+    } catch {
+      /* no crítico */
+    }
   }
 
   const destino = next.startsWith("/") ? next : "/onboarding/1";
