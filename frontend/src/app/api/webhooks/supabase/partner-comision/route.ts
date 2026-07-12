@@ -19,6 +19,7 @@ interface SupabaseWebhookPayload {
     tipo: "venta" | "hito";
     monto: number;
     moneda: string;
+    referidos_en_momento: number;
   } | null;
 }
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, action: "ignored" });
   }
 
-  const { partner_id, tipo, monto, moneda } = body.record;
+  const { partner_id, tipo, monto, moneda, referidos_en_momento } = body.record;
   const admin = createAdminClient();
   const { data: partner } = await admin
     .from("partners")
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
     monto,
     moneda,
     tipo,
+    totalReferidos: referidos_en_momento,
   });
 
   return NextResponse.json({ received: true, action: "email_enviado" });

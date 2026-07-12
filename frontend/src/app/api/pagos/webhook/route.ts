@@ -13,6 +13,8 @@ import {
   type PlanSuscripcionOficial,
 } from "@/lib/roles-planes-oficial";
 import { enviarPagoConfirmado, enviarPagoFallido, enviarCambioPlan } from "@/lib/email/send";
+import { appBaseUrl } from "@/lib/dlocal";
+import type { CicloPago } from "@/lib/pagos-suscripcion";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -161,12 +163,14 @@ export async function POST(req: NextRequest) {
   const orderId = extractOrderId(payload);
   let userId: string | undefined;
   let plan: PlanSuscripcionOficial | null = null;
+  let ciclo: CicloPago | undefined;
 
   if (orderId) {
     const parsed = parseOrderId(orderId);
     if (parsed) {
       userId = parsed.userId;
       plan = parsed.plan;
+      ciclo = parsed.ciclo;
     }
   }
 
@@ -194,6 +198,7 @@ export async function POST(req: NextRequest) {
         monto: extractAmount(payload),
         moneda: extractMoneda(payload),
         plan: plan ? PRECIOS_OFICIALES[plan].nombre : "Darivo Pro",
+        enlaceActualizar: `${appBaseUrl()}/mas/plan`,
       });
     }
   }
@@ -226,11 +231,24 @@ export async function POST(req: NextRequest) {
   // Emails best-effort — nunca bloquean la respuesta del webhook.
   const contacto = await obtenerContactoUsuario(userId, payload);
   if (contacto) {
+    const hoy = new Date();
+    const fechaTxt = hoy.toLocaleDateString("es-PE");
+    // Próximo cobro solo si el order_id nos dio el ciclo real (mensual/anual)
+    // — no se inventa una fecha cuando no la conocemos con certeza.
+    let proximoCobro: string | undefined;
+    if (ciclo) {
+      const siguiente = new Date(hoy);
+      siguiente.setMonth(siguiente.getMonth() + (ciclo === "anual" ? 12 : 1));
+      proximoCobro = siguiente.toLocaleDateString("es-PE");
+    }
+
     await enviarPagoConfirmado(contacto.email, {
       nombre: contacto.nombre,
       monto: extractAmount(payload) ?? PRECIOS_OFICIALES[plan].mensual,
       moneda: extractMoneda(payload),
       plan: PRECIOS_OFICIALES[plan].nombre,
+      fecha: fechaTxt,
+      proximoCobro,
     });
     if (planAnterior && planAnterior !== plan) {
       await enviarCambioPlan(contacto.email, {
@@ -238,6 +256,9 @@ export async function POST(req: NextRequest) {
         planAnterior:
           planAnterior === "gratis" ? "Gratis" : PRECIOS_OFICIALES[planAnterior].nombre,
         planNuevo: PRECIOS_OFICIALES[plan].nombre,
+        monto: extractAmount(payload) ?? PRECIOS_OFICIALES[plan].mensual,
+        moneda: extractMoneda(payload),
+        fecha: fechaTxt,
       });
     }
   }

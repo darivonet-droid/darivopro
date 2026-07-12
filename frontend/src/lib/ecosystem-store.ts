@@ -195,10 +195,13 @@ export async function updatePartnerEstado(
   // Email de Bienvenida Partner — solo en la transición real a Activo, no en
   // cada guardado repetido del mismo estado.
   if (estado === "Activo" && estadoAnterior !== "Activo") {
+    const config = await obtenerComisionesConfig(admin);
+    const porcentajeVenta = config.find((c) => c.tipo === "venta")?.porcentaje ?? 20;
     await enviarBienvenidaPartner(partner.email, {
       nombre: partner.nombre,
       codigo: partner.codigo,
       enlace: partner.enlace,
+      porcentajeVenta,
     });
   }
 

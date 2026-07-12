@@ -1,0 +1,29 @@
+<!--
+  DARIVO PRO — Plantilla real de "Restablecer contraseña" (noreply@darivopro.com)
+  Texto aprobado por Mohamed (12/07/2026). Este archivo alimenta el entorno
+  LOCAL de Supabase vía supabase/config.toml ([auth.email.template.recovery]).
+
+  ⚠️ NO se sincroniza solo con esto al proyecto Supabase hosted (producción):
+  el propietario debe copiar este mismo HTML en el Dashboard del proyecto real
+  → Authentication → Email Templates → "Reset Password", pegando el cuerpo
+  de abajo. config.toml solo controla el stack local (`supabase start`).
+
+  Variables disponibles (sintaxis Go template de Supabase Auth):
+  {{ .ConfirmationURL }} — enlace real de restablecimiento (ya incluye el token)
+  {{ .Email }}            — correo del usuario
+  No hay variable para "nombre" — Supabase Auth no expone razon_social/nombre
+  en este contexto, así que el saludo es genérico ("Hola,") en vez de
+  interpolar un nombre que no está disponible aquí.
+-->
+<div style="font-family:system-ui,-apple-system,sans-serif;max-width:480px;margin:0 auto;color:#0A1628;line-height:1.6;">
+  <p style="font-size:12px;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;">Darivo Pro</p>
+  <p>Hola,</p>
+  <p>Nos pidieron cambiar la contraseña de tu cuenta. Si fuiste tú, dale click aquí:</p>
+  <p><a href="{{ .ConfirmationURL }}" style="color:#2563EB;font-weight:bold;">Restablecer contraseña</a></p>
+  <p>Este enlace es válido por un tiempo limitado. Pasado ese tiempo tienes que pedir uno nuevo.</p>
+  <p>Si no fuiste tú quien lo pidió, no hagas nada — tu contraseña sigue igual y no pasa nada.</p>
+  <p style="margin-top:24px;">Equipo Darivo Pro<br/>noreply@darivopro.com</p>
+  <hr style="border:none;border-top:1px solid #E5E7EB;margin:24px 0 12px;" />
+  <p style="font-size:11px;color:#9CA3AF;">[Datos legales pendientes]</p>
+  <p style="font-size:11px;color:#9CA3AF;">Este correo es automático, no lo respondas.</p>
+</div>

@@ -59,6 +59,14 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 
+# Texto real aprobado (12/07/2026) — ver supabase/templates/recovery.html.
+# Solo aplica al entorno LOCAL (`supabase start`); el proyecto hosted requiere
+# pegar el mismo HTML en el Dashboard (Authentication → Email Templates →
+# Reset Password), config.toml no lo sincroniza automáticamente.
+[auth.email.template.recovery]
+subject = "Restablece tu contraseña de Darivo Pro"
+content_path = "./templates/recovery.html"
+
 [edge_runtime]
 enabled = true
 policy = "oneshot"

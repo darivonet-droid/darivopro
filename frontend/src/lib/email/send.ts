@@ -1,12 +1,17 @@
 // DARIVO PRO — Despachador de email transaccional (9 eventos oficiales)
 //
+// Texto real aprobado por Mohamed conectado 12/07/2026 (templates.ts) — las
+// firmas de datos de abajo cambiaron para reflejar lo que cada plantilla
+// necesita ahora; los call-sites (webhook, ecosystem-store, rutas de email)
+// se actualizaron en el mismo commit.
+//
 // Reset de contraseña (evento 4, noreply@) NO tiene función aquí: Supabase
 // Auth ya envía ese correo por su cuenta (`supabase.auth.resetPasswordForEmail`,
-// ver frontend/src/app/(public)/recuperar/page.tsx). Personalizar su plantilla
-// se hace en Supabase Dashboard → Authentication → Email Templates → "Reset
-// Password" (o en supabase/config.toml → [auth.email.template.recovery] para
-// entornos donde se gestione por config-as-code) — es configuración de
-// Supabase, no código de este módulo, y no requiere credenciales de Gmail.
+// ver frontend/src/app/(public)/recuperar/page.tsx). El texto real ya se
+// aplicó en `supabase/templates/recovery.html` (referenciado desde
+// config.toml para el entorno local) — falta que el propietario pegue el
+// mismo HTML en el Dashboard del proyecto hosted (Authentication → Email
+// Templates → Reset Password), config.toml no sincroniza eso automáticamente.
 //
 // Ticket recibido/resuelto (eventos 8 y 9, soporte@) NO están conectados:
 // el backend de tickets (/api/soporte/tickets) fue deshabilitado (INC-A01,
@@ -50,7 +55,10 @@ async function enviarSeguro(opts: {
 }
 
 // 1. Bienvenida — info@
-export async function enviarBienvenida(to: string, datos: { nombre: string }): Promise<void> {
+export async function enviarBienvenida(
+  to: string,
+  datos: { nombre: string; enlaceAcceso: string; plan: string; monto?: number }
+): Promise<void> {
   const { subject, html } = plantillaBienvenida(datos);
   await enviarSeguro({ cuenta: "info", to, subject, html, evento: "bienvenida" });
 }
@@ -58,7 +66,14 @@ export async function enviarBienvenida(to: string, datos: { nombre: string }): P
 // 2. Pago confirmado — facturacion@
 export async function enviarPagoConfirmado(
   to: string,
-  datos: { nombre: string; monto: number; moneda: string; plan: string }
+  datos: {
+    nombre: string;
+    monto: number;
+    moneda: string;
+    plan: string;
+    fecha: string;
+    proximoCobro?: string;
+  }
 ): Promise<void> {
   const { subject, html } = plantillaPagoConfirmado(datos);
   await enviarSeguro({ cuenta: "facturacion", to, subject, html, evento: "pago_confirmado" });
@@ -67,7 +82,7 @@ export async function enviarPagoConfirmado(
 // 3. Pago fallido — facturacion@
 export async function enviarPagoFallido(
   to: string,
-  datos: { nombre: string; monto?: number; moneda?: string; plan: string }
+  datos: { nombre: string; monto?: number; moneda?: string; plan: string; enlaceActualizar: string }
 ): Promise<void> {
   const { subject, html } = plantillaPagoFallido(datos);
   await enviarSeguro({ cuenta: "facturacion", to, subject, html, evento: "pago_fallido" });
@@ -76,7 +91,14 @@ export async function enviarPagoFallido(
 // 5. Cambio de plan — noreply@
 export async function enviarCambioPlan(
   to: string,
-  datos: { nombre: string; planAnterior: string; planNuevo: string }
+  datos: {
+    nombre: string;
+    planAnterior: string;
+    planNuevo: string;
+    monto: number;
+    moneda: string;
+    fecha: string;
+  }
 ): Promise<void> {
   const { subject, html } = plantillaCambioPlan(datos);
   await enviarSeguro({ cuenta: "noreply", to, subject, html, evento: "cambio_plan" });
@@ -85,7 +107,7 @@ export async function enviarCambioPlan(
 // 6. Bienvenida Partner — partners@
 export async function enviarBienvenidaPartner(
   to: string,
-  datos: { nombre: string; codigo: string; enlace: string }
+  datos: { nombre: string; codigo: string; enlace: string; porcentajeVenta: number }
 ): Promise<void> {
   const { subject, html } = plantillaBienvenidaPartner(datos);
   await enviarSeguro({ cuenta: "partners", to, subject, html, evento: "bienvenida_partner" });
@@ -94,7 +116,7 @@ export async function enviarBienvenidaPartner(
 // 7. Comisión ganada — partners@
 export async function enviarComisionGanada(
   to: string,
-  datos: { nombre: string; monto: number; moneda: string; tipo: "venta" | "hito" }
+  datos: { nombre: string; monto: number; moneda: string; tipo: "venta" | "hito"; totalReferidos: number }
 ): Promise<void> {
   const { subject, html } = plantillaComisionGanada(datos);
   await enviarSeguro({ cuenta: "partners", to, subject, html, evento: "comision_ganada" });

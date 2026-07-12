@@ -39,7 +39,7 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 
 ### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
 
-- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados. Pendiente: (1) Mohamed reenvía los 9 textos aprobados — sigue sin llegar, hoy es placeholder funcional; (2) setup manual de Google Cloud + Workspace (domain-wide delegation); (3) configurar el Database Webhook de Supabase para "comisión ganada". Ver sección "Email transaccional" más abajo para el detalle completo.
+- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados, **texto real ya conectado** (12/07/2026 — ya no es placeholder). Pendiente, todo del lado del propietario: (1) setup manual de Google Cloud + Workspace (domain-wide delegation); (2) configurar el Database Webhook de Supabase para "comisión ganada"; (3) pegar `supabase/templates/recovery.html` en el Dashboard hosted (evento 4, reset de contraseña). Ver sección "Email transaccional" más abajo para el detalle completo.
 - **4 migraciones SQL escritas — 2 ejecutadas y verificadas, 2 pendientes:**
   1. `20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — ejecutada por el propietario, **no se pudo verificar directamente** (sin pagos reales todavía que observar, sin acceso a `pg_catalog` vía REST). Verificar en el primer pago real de Business vía Partner.
   2. `20260712110000_unify_partidas_propias_calc_type.sql` — ✅ ejecutada y **confirmada directamente contra la BD real**.
@@ -329,24 +329,26 @@ Para probar cualquier feature (facturación, IA, roles personalizados, Empresa) 
   La factura de prueba es mejor crearla en vivo desde la app (prueba el flujo real de numeración/detracción/PDF) en vez de insertarla directo en BD.
 - No documentar aquí ninguna otra cuenta de prueba — reutilizar siempre `demo@darivopro.com` para que quede permanente entre sesiones.
 
-## Email transaccional (Gmail API) — construido 12/07/2026, pendiente de contenido y setup
+## Email transaccional (Gmail API) — construido 12/07/2026, texto real conectado 12/07/2026
 
-Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, `templates.ts`, `send.ts`) — domain-wide delegation (1 credencial de Google Cloud sirve para las 5 cuentas info@/facturacion@/noreply@/partners@/soporte@, no 5 OAuth consent flows separados).
+Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, `templates.ts`, `send.ts`) — domain-wide delegation (1 credencial de Google Cloud sirve para las 5 cuentas info@/facturacion@/noreply@/partners@/soporte@, no 5 OAuth consent flows separados). **`templates.ts` ya tiene el texto real aprobado por Mohamed (ya no es placeholder)** — 9 plantillas completas.
 
 **Conectado a eventos reales (7 de 9):**
-1. Bienvenida (info@) — `registro/page.tsx`, solo en el flujo de sesión inmediata (ver nota en `auth/callback/route.ts` sobre por qué el flujo de confirmación por correo no está cubierto — comparte ruta con el login de Google, sin señal fiable para distinguir registro nuevo de login recurrente).
-2–3. Pago confirmado / Pago fallido (facturacion@) — `api/pagos/webhook/route.ts`.
+1. Bienvenida (info@) — `registro/page.tsx`, solo en el flujo de sesión inmediata (ver nota en `auth/callback/route.ts` sobre por qué el flujo de confirmación por correo no está cubierto — comparte ruta con el login de Google, sin señal fiable para distinguir registro nuevo de login recurrente). Plan mostrado: "Prueba gratuita" sin monto si `plan_tipo='gratis'`, o el plan pagado real si no.
+2. Pago confirmado (facturacion@) — `api/pagos/webhook/route.ts`. "Próximo cobro" solo se muestra si el `order_id` trae el ciclo (mensual/anual) — si no, se omite esa línea en vez de inventar una fecha.
+3. Pago fallido (facturacion@) — mismo webhook. La plantilla real pedía "fecha límite" de pago — se omitió esa línea porque no hay ningún dato real de "cuándo se corta el acceso" en el sistema (no inventado).
 5. Cambio de plan (noreply@) — mismo webhook, solo si el plan realmente cambió.
-6. Bienvenida Partner (partners@) — `ecosystem-store.ts` `updatePartnerEstado`, solo en la transición real a Activo.
-7. Comisión ganada (partners@) — `api/webhooks/supabase/partner-comision/route.ts`, nuevo endpoint.
+6. Bienvenida Partner (partners@) — `ecosystem-store.ts` `updatePartnerEstado`, solo en la transición real a Activo. El "20% de comisión" del texto real se lee de `partner_comisiones_config` en vez de estar hardcodeado (consistente con la tarea de "Configurar tabla de comisiones").
+7. Comisión ganada (partners@) — `api/webhooks/supabase/partner-comision/route.ts`. El campo "Total de clientes referidos hasta hoy" usa `referidos_en_momento` (snapshot ya guardado en `partner_comisiones_historial`, no un recálculo en vivo).
+
+**Reset de contraseña (evento 4, noreply@):** el texto real ya se aplicó en `supabase/templates/recovery.html`, referenciado desde `supabase/config.toml` (`[auth.email.template.recovery]`) — pero eso **solo afecta el entorno local** (`supabase start`). Falta un paso manual: **Mohamed debe pegar el mismo HTML en el Dashboard del proyecto real** (Authentication → Email Templates → Reset Password) para que el texto real llegue en producción — config.toml no sincroniza esto automáticamente al proyecto hosted.
 
 **Pendiente, no se puede resolver desde código — requiere que Mohamed:**
 - Complete el setup de Google Cloud + Workspace (cuenta de servicio, domain-wide delegation) — pasos exactos documentados en `gmail-client.ts`. Sin esto, cualquier envío falla con error claro (no en silencio).
 - Configure el Database Webhook de Supabase para el evento 7 (Dashboard → Database → Webhooks → tabla `partner_comisiones_historial`, INSERT) — pasos en `partner-comision/route.ts`.
-- Reenvíe los 9 textos aprobados — `templates.ts` tiene copy funcional pero **placeholder**, no el texto final.
-- Confirme la plantilla de reset de contraseña (evento 4, noreply@): ya la envía Supabase Auth automáticamente; personalizarla es config de Supabase Dashboard → Authentication → Email Templates, no código.
+- Pegue `supabase/templates/recovery.html` en el Dashboard del proyecto hosted (evento 4, ver arriba).
 
-**Bloqueado, no construido:** Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11 "No crear endpoints"), no existe ningún evento real de creación/resolución al que enganchar el envío. Las plantillas ya están listas en `templates.ts` para el día que se decida reconstruir ese backend.
+**Bloqueado, no construido:** Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11 "No crear endpoints"), no existe ningún evento real de creación/resolución al que enganchar el envío. Las plantillas ya tienen el texto real en `templates.ts`, listas para conectar el día que se decida reconstruir ese backend.
 
 ## Auditoría 12/07/2026 — Admin/Empresa/Partner (sesión continua, 3 agentes en paralelo)
 
