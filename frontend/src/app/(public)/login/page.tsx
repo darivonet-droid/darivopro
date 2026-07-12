@@ -41,6 +41,8 @@ export default function LoginPage() {
       setError(mensajeError(error.code));
       return;
     }
+    // Best-effort — nunca bloquea el login si falla (ver route.ts).
+    void fetch("/api/empleados/marcar-actividad", { method: "POST" }).catch(() => {});
     router.push("/dashboard");
     router.refresh();
   };

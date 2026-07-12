@@ -7,9 +7,22 @@ const withPWA = withPWAInit({
   reloadOnOnline: true,
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
+  // Sin esto, el runtimeCaching de abajo REEMPLAZA por completo el de next-pwa
+  // por defecto (imágenes, fuentes, JS/CSS, páginas) en vez de extenderlo — la
+  // landing y el resto de páginas fuera de la lista de abajo se quedaban sin
+  // ninguna estrategia de caché offline.
+  extendDefaultRuntimeCaching: true,
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
+      // Admin y Empresa son paneles de escritorio, no PWA instalable — deben
+      // comportarse como páginas web normales, sin caché offline. Esta regla
+      // va primero (gana la primera coincidencia) para excluirlos antes de
+      // que apliquen las reglas de abajo o el caching por defecto de next-pwa.
+      {
+        urlPattern: /^https?:\/\/[^/]+\/(admin|empresa)(\/.*)?$/i,
+        handler: "NetworkOnly",
+      },
       {
         urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(cotizaciones|facturas|clientes).*/i,
         handler: "NetworkFirst",

@@ -1,6 +1,7 @@
 "use client";
 import { useAppStore } from "@/store/useAppStore";
 import { UPGRADE_MENSAJES, type UpgradeRazon } from "@/lib/plan-limits";
+import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
 import { CheckoutPlanButton } from "@/components/pagos/CheckoutPlanButton";
 import { T } from "@/lib/theme";
 
@@ -50,7 +51,9 @@ export function UpgradeModal() {
           >
             MÁS USADO
           </span>
-          <p className="text-base font-black" style={{ color: T.white }}>PRO · S/79/mes</p>
+          <p className="text-base font-black" style={{ color: T.white }}>
+            {PRECIOS_OFICIALES.pro.nombre} · S/{PRECIOS_OFICIALES.pro.mensual}/mes
+          </p>
           <ul className="mt-3 flex flex-col gap-1.5">
             {PRO_FEATURES.map((f) => (
               <li key={f} className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.92)" }}>

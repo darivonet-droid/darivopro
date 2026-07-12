@@ -4,10 +4,19 @@
 
 Por defecto, tienes autorización para ejecutar tareas de forma autónoma, sin pedir permiso paso a paso ni confirmación intermedia.
 
+### Autonomía total sobre main/producción (vigente desde 12/07/2026, mientras no haya clientes reales)
+
+El propietario autorizó explícitamente mergear `develop` → `main` y hacer push a producción **sin pedir confirmación cada vez**, mientras el sistema no tenga clientes reales usándolo todavía. En cuanto el propietario avise que ya hay clientes reales, este permiso se revierte automáticamente y vuelve a aplicar la excepción de "Deploy" de abajo (pedir confirmación antes de tocar `main`) — no asumas que sigue vigente sin que te lo reconfirmen si ha pasado mucho tiempo o el contexto sugiere que el producto ya está en manos de usuarios reales.
+
+Bajo esta autonomía: cuando un cambio en `develop` esté listo y verificado (build/lint/typecheck limpios, sin regresiones), mergéalo a `main` y sube a producción tú mismo — luego avisa con un resumen breve de qué cambió.
+
+**Las 2 excepciones de abajo siguen intactas, sin excepción, ahora y siempre** (la autonomía sobre main NO las anula):
+
 ÚNICAS EXCEPCIONES — debes parar y pedir confirmación explícita antes de actuar cuando la tarea implique:
 
-1. **Base de datos**: cualquier cambio en schema, migraciones, o datos (Supabase).
-2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente).
+1. **Base de datos**: cualquier cambio en schema, migraciones, o datos (Supabase). Las migraciones siempre se entregan como SQL escrito, sin ejecutar — el propietario las corre él mismo en el SQL Editor.
+2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente) — **salvo mientras esté vigente la autonomía total de arriba**, en cuyo caso procede sin preguntar.
+3. **Nunca contraseñas en ningún login** — ni en formularios de navegador de preview, ni en ningún otro flujo de autenticación, sin importar la fuente (incluso archivos de credenciales QA propios del proyecto).
 
 Para todo lo demás (código de frontend/backend, commits a develop, buscar e implementar assets, build/lint/typecheck, correcciones de texto, etc.) actúa sin preguntar, salvo que tú mismo detectes una ambigüedad real que no puedas resolver razonablemente por tu cuenta.
 
@@ -17,43 +26,89 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 
 ## ESTADO REAL DEL PROYECTO (única fuente de verdad — actualizar al final de cada bloque de trabajo)
 
-*Última actualización: 12/07/2026, sesión continua (verificación pre-merge develop→main).*
+*Última actualización: 12/07/2026 — chequeo completo end-to-end: `main` limpiado desde cero (`tsc`/`lint`/`build`) + 6 auditorías de código en paralelo (Móvil/Empresa/Admin/Partner/Supabase-Vercel/Email) + investigación del bug de reset-password. Sustituye todo el estado anterior.*
 
-### 🟢 Congelado — verificado, no revisar de nuevo salvo que el código cambie
+### ⚠️ CRÍTICO — `main` (producción real) va muy por detrás de `develop`
 
-- Planes Básico (S/49, provisional) / Pro (S/79, provisional) / Business (S/120·S/1200, **definitivo**) — código, `/precios`, `04-ROLES-PLANES-PERMISOS-DARIVO-PRO.md`, `08-PAGOS-DARIVO-PRO.md`.
-- Terminología "IA" → "Calculadora inteligente" en todo el copy visible al usuario (Móvil, Empresa, Admin). Rutas y nombres internos (`/ia`, `08-MODULO-IA.md`) deliberadamente sin cambiar.
-- Logout real en los 4 paneles (Admin, Empresa, Partner, Móvil incl. menú principal de Más).
-- Migración de terminología `presupuesto`→`cotización` — BD y código, completa y confirmada.
-- Bug de facturación en plan `gratis` — ya bloqueaba correctamente antes de esta sesión.
-- Middleware de subdominios — preparado, apagado intencionalmente (DNS todavía no resuelve). No tocar hasta que se conecte el dominio.
-- Vocabulario `tipo`/`calc_type` unificado a inglés en `partidas_propias` — código y BD migrados y **verificados directamente** (12/07/2026: confirmado que `calc_type` existe y `tipo` ya no).
-- Wizard de cotización de 4 pasos + migración a tokens de design-system compartidos.
-- Admin Usuarios: Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso + filtros (`admin/usuarios/actions.ts`, `AdminUsuariosView.tsx`).
-- Admin Partners: "Configurar tabla de comisiones" — nueva tabla `partner_comisiones_config`, editable desde Admin, leída también por Panel Partner y por el trigger de comisiones (ya no hay valores duplicados en 3 sitios).
-- Empresa Cotizaciones: quitado el ítem de sidebar y la lista global que contradecían `05-MODULO-COTIZACIONES-EMPRESA.md` — acceso ahora solo vía Inicio y ficha de Cliente, como exige el MD.
-- Empresa Ficha de Cliente: panel lateral real dentro de `EmpresaShell` (`EmpresaClientesPanel.tsx`) — ya no saca al Gerente a la UI de Móvil.
-- Empresa Invitar empleado: `invitarEmpleadoAction` otorga acceso real a Móvil (`auth.admin.inviteUserByEmail` + vínculo `empresa_empleados.user_id`), ya no es solo una fila decorativa.
-- Panel Partner: visibilidad de comisiones pendientes/pagadas (`mapPartner()` consulta `partner_comisiones_historial`).
-- `02-BASE-DATOS.md` (v3.5, 35 tablas), `DARIVO-PRO-ARQUITECTURA-MAESTRA.md` (v3.5), `00-ECOSISTEMA-DARIVO-PRO.md` (v1.1) — regenerados/sincronizados contra el esquema y código reales.
+`main` local == `origin/main` exacto (0 commits de diferencia) — es fiel a lo que está desplegado. Pero **`develop` tiene trabajo real que nunca llegó a `main`, y parte de ese trabajo ni siquiera estaba comprometido como commit** (estaba solo en el working tree, sin `git commit`, hasta hoy):
+
+1. 1 commit de `develop` sin mergear a `main`: `a6e8123 fix(plan): leer precio Pro de PRECIOS_OFICIALES en UpgradeModal`.
+2. Toda la sesión "Landing page y PWA — mejoras técnicas 12/07/2026" (ver sección propia más abajo) — apple-touch-icon, íconos PWA 192/512/512-maskable, `metadataBase`+OG/Twitter, `aria-hidden` en iconos decorativos, migración de `<a>` a `next/link`, y **el fix del bug real de caché offline** (`extendDefaultRuntimeCaching: true` faltante) — **estuvo sin comitear hasta hoy**. Esto significa que **el bug de caché offline roto sigue vivo en producción ahora mismo** (verificado: `main` no tiene `extendDefaultRuntimeCaching` en `next.config.mjs`).
+3. La separación de PWA Admin/Empresa vs Móvil (pedida y construida hoy mismo, ver sección "Problemas abiertos" más abajo) — tampoco comiteada todavía.
+4. `develop` está 39 commits por delante de `origin/develop` (tampoco pusheado al remoto) — todo el trabajo vive únicamente en esta máquina local.
+
+**Acción pendiente de decisión del propietario:** revisar el diff de `develop` (los 3 bloques de arriba), decidir si se comitea/pushea/mergea a `main`, y en qué orden. Nada de esto se comiteó en esta sesión de diagnóstico (era solo lectura, según lo pedido).
+
+### 🟢 Sólido y verificado — confirmado leyendo el código real en `main`
+
+- **Build/lint/typecheck limpios en `main` desde cero**: `tsc --noEmit` sin errores, `next lint` sin errores (solo 2 warnings preexistentes en `useCotizacion.ts`, sin relación con nada reciente), `next build` compila las 69 rutas sin errores.
+- **Móvil — wizard, cotizaciones, facturas, PDF**: los 4 pasos del wizard completos sin TODOs; CRUD de cotizaciones completo con buen manejo de errores; los 6 estados oficiales de factura confirmados textualmente en código; numeración correcta; cálculo de detracción es local (sin integración SUNAT real, correcto — no hay proveedor OSE contratado); generación de PDF funciona end-to-end vía `@react-pdf/renderer` + Supabase Storage; plan `gratis` bloquea facturas correctamente.
+- **Admin — Usuarios/Partners/Productos**: las 5 acciones de Usuarios (Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso) verifican el `error` de Supabase y no tienen silent failures; filtros funcionales. "Configurar tabla de comisiones" de Partners edita `partner_comisiones_config` real, leída también por el trigger de comisiones y por el Panel Partner (sin valores duplicados). Edición de Productos (nombre/descripción/activo) funciona, sin crear/eliminar (correcto, fuera de alcance documentado). Allowlist de acceso (`DARIVO_ADMIN_EMAILS`) falla cerrado si la lista está vacía.
+- **Empresa — Invitar empleado y Cotizaciones**: `invitarEmpleadoAction` da acceso real a Móvil (`inviteUserByEmail` + `empresa_empleados.user_id`), no es decorativo. Acceso a cotizaciones correctamente restringido a Inicio + ficha de Cliente (sin sidebar/lista global). Middleware de `/empresa` gatea por `plan_tipo` consultado en vivo en cada request (no allowlist estático).
+- **Partner — comisiones y referidos**: `mapPartner()` trae comisiones pendientes/pagadas reales desde `partner_comisiones_historial`. El flujo de link de referido (`/ref/[codigo]` → cookie → `registrar-referido`) funciona end-to-end con protección contra duplicados.
+- **RLS**: 35 tablas con RLS habilitado, 62 políticas (`CREATE POLICY`) en total. No se encontró ninguna tabla de usuario sin RLS.
+- **Vocabulario `tipo`/`calc_type`, terminología cotización, logout en los 4 paneles, bug de facturación plan `gratis`** — siguen verificados, sin cambios desde la última auditoría.
 
 ### 🟡 En progreso — construido, con una pieza externa pendiente del propietario
 
-- **Email transaccional** (`frontend/src/lib/email/`): infraestructura Gmail API completa, 7 de 9 eventos conectados, **texto real ya conectado** (12/07/2026 — ya no es placeholder). Pendiente, todo del lado del propietario: (1) setup manual de Google Cloud + Workspace (domain-wide delegation); (2) configurar el Database Webhook de Supabase para "comisión ganada"; (3) pegar `supabase/templates/recovery.html` en el Dashboard hosted (evento 4, reset de contraseña). Ver sección "Email transaccional" más abajo para el detalle completo.
-- **4 migraciones SQL escritas — las 4 ya ejecutadas en la BD real (verificado 12/07/2026, sesión continua, vía OpenAPI de PostgREST con service role key — conexión directa Postgres bloqueada por red del sandbox):**
-  1. `20260712100000_fix_comision_venta_trigger_estado.sql` (trigger comisiones Partner) — ejecutada por el propietario, **el WHEN del trigger sigue sin poderse verificar directamente** (PostgREST no expone `pg_trigger`/`pg_catalog`, solo columnas). Verificar en el primer pago real de Business vía Partner.
-  2. `20260712110000_unify_partidas_propias_calc_type.sql` — ✅ ejecutada y confirmada directamente contra la BD real (ya confirmado antes, re-verificado ahora).
-  3. `20260713100000_empresa_empleados_user_id.sql` — ✅ **ejecutada** (corrección respecto al estado anterior, que la marcaba "pendiente"): columna `user_id` confirmada presente en `empresa_empleados` vía schema real.
-  4. `20260713110000_partner_comisiones_config.sql` — ✅ **ejecutada** (corrección respecto al estado anterior, que la marcaba "pendiente"): tabla `partner_comisiones_config` existe con los 5 valores semilla exactos esperados (venta 20% + hitos 10/10/15/20%).
+- **Email transaccional**: 7 de 9 eventos conectados a disparadores reales en código (confirmado archivo:línea por auditoría) — Bienvenida, Pago confirmado, Pago fallido, Cambio de plan, Bienvenida Partner, Comisión ganada, y Reset de contraseña (este último vía Supabase Auth nativo, no Gmail API). Pendiente del propietario: (1) setup de Google Cloud + Workspace (domain-wide delegation, `GMAIL_SERVICE_ACCOUNT_JSON` vacío en `.env.example`); (2) Database Webhook de Supabase para "comisión ganada" (tabla `partner_comisiones_historial`, evento INSERT); (3) pegar `supabase/templates/recovery.html` en el Dashboard hosted — **ver "Problemas abiertos" más abajo, esto puede no ser suficiente**.
+- **Trigger de comisión por venta** (`20260712100000_fix_comision_venta_trigger_estado.sql`): el `WHEN` ya compara correctamente contra `pagos_eventos.estado` en inglés (`PAID`/`COMPLETED`/etc. — el bug original comparaba contra el literal español `'exitoso'`, que nunca coincidía). Corregido en código, pero **todavía sin verificar contra un pago real de Business vía Partner** (depende de que el webhook de dLocal inserte correctamente en `pagos_eventos`, sin `CHECK constraint` de por medio).
+- **Admin Suscripciones**: solo lectura (planes oficiales + conteo real de usuarios por plan vía `fetchAdminSuscripciones()`) — no hay gestión individual de suscripciones. No es un bug, es alcance incompleto ya documentado.
 
 ### 🔴 Sin auditar / pendiente de decisión de negocio — no improvisar
 
-- **Backend de tickets de soporte** (`/api/soporte/tickets`) — deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11). Decisión pendiente: ¿se reconstruye? Bloquea los eventos de email 8-9 (ticket recibido/resuelto).
-- **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen marcados "provisional" (protección de propietario, no tocado sin autorización explícita nueva).
-- **Jerarquía Suscripción→Producto→Rol→Permisos** — solo implementada hasta la mitad (`MATRIZ_PERMISOS_APROBADA=false`). Activarla de verdad requiere decisión del propietario. Incluye: diferenciación de permisos Gerente/Técnico en Móvil tras invitar empleado, y que el Panel Partner no revoca acceso al suspender un partner (gatea por allowlist de email, no por `partners.estado`).
-- Admin Usuarios: sin construir (fuera de alcance, no pedido) — importar/exportar Excel-CSV, invitación masiva, "último contacto con soporte" (depende del backend de tickets, deshabilitado).
-- Empresa Ficha de Cliente: el botón "+ Nueva cotización" sigue enlazando al wizard de Móvil tal cual — el layout de 3 paneles de escritorio que pide `05-MODULO-COTIZACIONES-EMPRESA.md` §4 no se construyó (no es una regresión nueva, ya pasaba antes).
-- Detalle completo de todo lo de arriba: sección "Auditoría 12/07/2026 — Admin/Empresa/Partner" más abajo.
+- **Backend de tickets de soporte** deshabilitado — bloquea los eventos de email 8-9 (ticket recibido/resuelto), confirmado que ni siquiera están conectados en `send.ts` (solo la plantilla existe).
+- **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen "provisional" (protegido).
+- **RBAC de roles personalizados sigue inerte** — `MATRIZ_PERMISOS_APROBADA = false` (`roles-planes-oficial.ts`) confirmado en código: la UI de `RolesPermisosView.tsx` existe pero no hay evidencia de que middleware o Server Actions consulten esos roles para bloquear nada real.
+- **Empresa Empleados** — sin diferenciación de permisos Gerente/Técnico en Móvil (jerarquía de roles sigue pendiente de activación real, `MATRIZ_PERMISOS_APROBADA=false`, decisión de negocio, no tocado). El resto de huecos de este punto (Editar/Permisos por fila, Última actividad real) **se corrigieron el 12/07/2026**, ver "Cambios mergeados a main" más abajo.
+- ~~Panel Partner — acceso tras suspensión~~ ✅ **Corregido el 12/07/2026** — ver "Cambios mergeados a main" más abajo.
+- **`comprobante_series`**: tiene RLS habilitado pero sin ninguna política (`CREATE POLICY`) — es intencional (acceso exclusivo vía función `asignar_inv_num()` SECURITY DEFINER, documentado en el propio SQL), no un bug, pero cualquier acceso directo a esa tabla fuera de esa función fallará en silencio por RLS.
+- Empresa Ficha de Cliente: "+ Nueva cotización" sigue enlazando al wizard de Móvil tal cual, sin el layout de 3 paneles que pide el MD — no es regresión nueva.
+- Middleware de subdominios: preparado, apagado por defecto (`SUBDOMAIN_ROUTING_ENABLED` no es `"1"`). No hay `vercel.json`, dominio sin conectar — sin cambios.
+
+## Cambios mergeados a main — 12/07/2026 (bajo autonomía total temporal, sin clientes reales todavía)
+
+- **Fix de seguridad — Partner suspendido conservaba acceso**: `esPartnerAutorizado()` (`frontend/src/lib/acceso-producto.ts`) ahora es async y, además de la allowlist de email, consulta `partners.estado` real vía Supabase — deniega si `estado === 'Suspendido'`. Si no existe fila en `partners` para ese email, se mantiene el comportamiento anterior (solo allowlist), para no introducir un nuevo motivo de bloqueo en ese caso límite. Actualizados los 3 call sites: `middleware.ts`, `verificarAccesoProducto()` (usado por `requireProducto` en los layouts) y `ProductosEcosistemaLinks.tsx` (componente sin usar todavía en ninguna página, actualizado solo para que compile con la nueva firma).
+- **Empresa Empleados — acciones por fila y última actividad real**:
+  - Nuevas acciones "Editar" (nombre/teléfono, `actualizarDatosEmpleado()`) y "Permisos" (select inline de `rol_personalizado_id`, `asignarRolPersonalizadoEmpleado()`) en `EmpresaEmpleadosView.tsx` — antes solo existían Activar/Desactivar. El link "Editar permisos →" a `/empresa/roles` se mantiene para gestión completa de roles (crear/editar definiciones); el select inline es solo para asignar rápido desde la fila.
+  - Columna "Alta" (mostraba `created_at`) reemplazada por "Última actividad" real, usando la columna `ultima_actividad` que **ya existía en el schema** (`empresa_empleados`, migración baseline) pero nunca se escribía. Se actualiza en cada login real: contraseña (`login/page.tsx` → `POST /api/empleados/marcar-actividad`, best-effort) y Google OAuth/aceptar invitación (`auth/callback/route.ts`, inline con cliente admin porque el Técnico no tiene RLS propio sobre `empresa_empleados`). Ningún cambio de schema — no requirió migración.
+- Verificado: `tsc --noEmit`, `next lint` y `next build` limpios (mismos 2 warnings preexistentes de siempre, sin relación). No verificado con sesión real logueada (mismo bloqueo de credenciales en navegador de preview que en la sesión anterior) — el código y los tipos están correctos, pero recomienda una prueba manual rápida de "Editar"/"Permisos" en Empresa y del acceso de un Partner suspendido cuando puedas.
+
+## Problemas abiertos — chequeo 12/07/2026
+
+### 1. Correo de reset-password: a veces muestra la plantilla genérica de Supabase
+
+Investigado (código + búsqueda de issues conocidos de Supabase). Dos causas posibles, no excluyentes:
+
+- **Confirmado por la comunidad de Supabase** (GitHub Discussion #29976): hay un bug conocido donde las plantillas personalizadas configuradas vía el Dashboard **no siempre se aplican en producción** al flujo normal (`resetPasswordForEmail()`), aunque sí funcionan cuando se envía manualmente desde el propio Dashboard (Authentication → Users → "Send password recovery"). Una causa documentada: un error de sintaxis en la plantilla personalizada hace que Supabase caiga en silencio a la plantilla por defecto.
+- **Posible bloqueo de plan, más grave si aplica aquí**: desde el 3 de junio de 2026, los proyectos **nuevos** en el tier gratuito de Supabase que usan el proveedor de email por defecto de Supabase **ya no pueden personalizar sus plantillas de Auth en absoluto** — se usan las plantillas por defecto tal cual, sin excepción. Los proyectos gratuitos creados *antes* de esa fecha conservan su plantilla personalizada. **No verificado**: en qué fecha se creó el proyecto `vyrtokggypcmpforglch` y en qué plan está — si se creó después del 3 de junio de 2026 y sigue en tier gratuito con el proveedor de email por defecto, la plantilla personalizada de reset-password simplemente no se puede aplicar vía Dashboard, sin importar cuántas veces se pegue el HTML.
+
+**Acción pendiente del propietario:**
+1. Confirmar en Supabase Dashboard → Settings → Billing la fecha de creación del proyecto y el plan actual.
+2. Si el proyecto es gratuito y nació después del 3/06/2026: la única forma de tener el texto de marca real en el correo de reset es configurar **SMTP personalizado** (Dashboard → Authentication → SMTP Settings, con las credenciales de `noreply@darivopro.com`) — Supabase sí respeta plantillas personalizadas cuando el envío pasa por SMTP propio, incluso en tier gratuito.
+3. Si el proyecto es de pago o nació antes de esa fecha: validar sintaxis de `recovery.html` (sin errores de Go template) y volver a pegarlo, luego probar con un reset real y revisar que llegue con el texto de marca.
+
+No pude verificar la fecha de creación ni el plan desde código — requiere entrar al Dashboard.
+
+### 2. Separación de PWA Móvil vs Admin/Empresa
+
+**Construida y verificada hoy** (build/lint/typecheck limpios + inspección del `sw.js` compilado confirmando el orden correcto de las reglas de caché), **pero todavía sin comitear** — vive solo en el working tree de `develop` en esta máquina, no en ningún commit, no en `main`. Falta:
+1. Confirmación visual con sesión real logueada (Admin/Empresa/Móvil) de que el `<head>` trae o no `<link rel="manifest">` según corresponda — bloqueado hoy porque el sistema no permite escribir contraseñas en formularios del navegador de preview sin permiso explícito del propietario.
+2. Comitear los cambios (`frontend/src/app/layout.tsx`, `(auth)/layout.tsx`, `onboarding/layout.tsx`, `next.config.mjs`) — junto con el resto del trabajo sin comitear listado en "CRÍTICO" arriba.
+
+## Landing page y PWA — mejoras técnicas 12/07/2026 (autonomía total, sin tocar copy/diseño ya cerrado) — ⚠️ sin comitear, ver "CRÍTICO" arriba
+
+Sesión enfocada solo en `darivopro.com` (landing) y configuración PWA — sin tocar ningún panel autenticado. No se cambió ni una palabra de copy ni la estructura visual de `LANDING-PAGE-DARIVO-PRO.md` v1.3; todo lo de abajo es infraestructura/SEO/accesibilidad/rendimiento. Verificado con `tsc --noEmit`, `next lint` y `next build` limpios, más revisión visual real en el navegador (Móvil dev server).
+
+- **Bug real encontrado y corregido — caché offline de la PWA estaba rota:** `next.config.mjs` tenía un `runtimeCaching` personalizado (para listas de cotizaciones/facturas/clientes) sin `extendDefaultRuntimeCaching: true`. Sin ese flag, ese array **reemplaza por completo** — no extiende — el caching por defecto de `next-pwa` (imágenes, fuentes, JS/CSS, resto de páginas). En la práctica: la landing y cualquier página fuera de esas 4 rutas no tenían ninguna estrategia de caché offline desde que se añadió esa configuración. Corregido con una sola línea.
+- **Faltaba apple-touch-icon por completo** — "Añadir a pantalla de inicio" en iOS usaba una miniatura de la página en vez de un icono real. Añadido `frontend/src/app/apple-icon.png` (convención de archivo estático de Next, mismo patrón que `icon.png`).
+  - Nota técnica para la próxima vez que se toque esto: **no uses la convención `apple-icon.tsx` con `ImageResponse` de `next/og`** — en este entorno Windows, `@vercel/og` falla con `TypeError: Invalid URL` tanto en `next build` como en cada request de `next dev` (bug de bundling de Next 14.2 mezclando `path.join` con una URL `file://`, reproducible incluso pasando `fonts: []`). Se generaron los PNG una sola vez con `sharp` (instalado temporalmente con `--no-save`, no quedó en `package.json`) y se dejaron como archivos estáticos reales.
+- **`manifest.json` solo tenía un icono SVG "any maskable"** — insuficiente para el prompt de instalación en varios navegadores/Android. Añadidos `icon-192.png`, `icon-512.png` y `icon-512-maskable.png` (este último con zona de seguridad real, no solo el mismo diseño escalado) + `id`, `scope`, `categories`.
+- **SEO/Open Graph:** `layout.tsx` no tenía `metadataBase` — la imagen de `opengraph-image.png` se resolvía con URL relativa, así que compartir el link por WhatsApp podía no mostrar la vista previa. Añadido `metadataBase` + bloques `openGraph`/`twitter` (raíz y landing), `alternates.canonical` en la landing, y JSON-LD `SoftwareApplication` (sin precios ni datos inventados, solo nombre/descripción/categoría).
+- **Accesibilidad:** los iconos decorativos de `components/landing/Icons.tsx` no tenían `aria-hidden` — un lector de pantalla los anunciaba por separado del texto que ya los acompaña (redundante). Corregido en el componente base, aplica a todos los usos.
+- **Rendimiento:** los enlaces internos repetidos del header/CTAs (`/login`, `/registro`) usaban `<a>` en vez de `next/link` — sin precarga, recarga completa de página en cada clic. Migrados a `Link`. Añadido `sizes` a las imágenes de categoría (grid responsive) y a la foto del hero para que Next sirva el tamaño correcto según viewport en vez del más grande del set.
+
+**Contradicción encontrada, no resuelta — decisión de diseño, no mía:** `frontend/public/icons/icon.svg` (el icono base de la PWA, del que se generaron los 3 PNG nuevos) es un candado/padlock, no una calculadora. `LANDING-PAGE-DARIVO-PRO.md` §3 exige que el ícono oficial (`icon.png` de la landing, un archivo distinto y ya documentado como pendiente/corrupto) sea "solo la calculadora, sin texto" — mismo espíritu de marca que debería aplicar al icono de instalación de la app. No rediseñé este ícono (es una decisión visual de marca, no una mejora técnica) — dejé los 3 PNG nuevos como reproducción fiel del SVG existente para no romper la instalación mientras tanto. Cuando exista el ícono real de calculadora, solo hay que regenerar esos 3 PNG desde el nuevo diseño (mismo proceso: SVG → `sharp` → `public/icon-*.png` + `src/app/apple-icon.png`), no hace falta tocar `manifest.json` ni el código de nuevo.
 
 ## Flujo de ramas (Git)
 

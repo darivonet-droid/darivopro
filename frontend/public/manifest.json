@@ -1,19 +1,40 @@
 {
+  "id": "/dashboard",
   "name": "Darivo Pro",
   "short_name": "Darivo",
   "description": "Cotizaciones y facturas de reformas en Perú",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#2563EB",
   "background_color": "#0A1628",
   "lang": "es-PE",
+  "categories": ["business", "productivity", "finance"],
   "icons": [
     {
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

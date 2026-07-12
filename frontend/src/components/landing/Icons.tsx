@@ -2,6 +2,9 @@
 // de Fable5/Admin/Empresa (LANDING-PAGE-DARIVO-PRO.md §1: "no comparte diseño").
 
 function Svg({ children }: { children: React.ReactNode }) {
+  // Todos los usos van junto a un texto visible (label, título) — son
+  // decorativos, así que se ocultan de lectores de pantalla para no
+  // duplicar el anuncio del mismo contenido dos veces.
   return (
     <svg
       width="22"
@@ -12,6 +15,7 @@ function Svg({ children }: { children: React.ReactNode }) {
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
       {children}
     </svg>
