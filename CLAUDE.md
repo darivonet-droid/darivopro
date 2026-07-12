@@ -4,10 +4,19 @@
 
 Por defecto, tienes autorización para ejecutar tareas de forma autónoma, sin pedir permiso paso a paso ni confirmación intermedia.
 
+### Autonomía total sobre main/producción (vigente desde 12/07/2026, mientras no haya clientes reales)
+
+El propietario autorizó explícitamente mergear `develop` → `main` y hacer push a producción **sin pedir confirmación cada vez**, mientras el sistema no tenga clientes reales usándolo todavía. En cuanto el propietario avise que ya hay clientes reales, este permiso se revierte automáticamente y vuelve a aplicar la excepción de "Deploy" de abajo (pedir confirmación antes de tocar `main`) — no asumas que sigue vigente sin que te lo reconfirmen si ha pasado mucho tiempo o el contexto sugiere que el producto ya está en manos de usuarios reales.
+
+Bajo esta autonomía: cuando un cambio en `develop` esté listo y verificado (build/lint/typecheck limpios, sin regresiones), mergéalo a `main` y sube a producción tú mismo — luego avisa con un resumen breve de qué cambió.
+
+**Las 2 excepciones de abajo siguen intactas, sin excepción, ahora y siempre** (la autonomía sobre main NO las anula):
+
 ÚNICAS EXCEPCIONES — debes parar y pedir confirmación explícita antes de actuar cuando la tarea implique:
 
-1. **Base de datos**: cualquier cambio en schema, migraciones, o datos (Supabase).
-2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente).
+1. **Base de datos**: cualquier cambio en schema, migraciones, o datos (Supabase). Las migraciones siempre se entregan como SQL escrito, sin ejecutar — el propietario las corre él mismo en el SQL Editor.
+2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente) — **salvo mientras esté vigente la autonomía total de arriba**, en cuyo caso procede sin preguntar.
+3. **Nunca contraseñas en ningún login** — ni en formularios de navegador de preview, ni en ningún otro flujo de autenticación, sin importar la fuente (incluso archivos de credenciales QA propios del proyecto).
 
 Para todo lo demás (código de frontend/backend, commits a develop, buscar e implementar assets, build/lint/typecheck, correcciones de texto, etc.) actúa sin preguntar, salvo que tú mismo detectes una ambigüedad real que no puedas resolver razonablemente por tu cuenta.
 
@@ -51,11 +60,19 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - **Backend de tickets de soporte** deshabilitado — bloquea los eventos de email 8-9 (ticket recibido/resuelto), confirmado que ni siquiera están conectados en `send.ts` (solo la plantilla existe).
 - **`04-PANEL-ADMIN-SUSCRIPCIONES.md`** — Básico/Pro siguen "provisional" (protegido).
 - **RBAC de roles personalizados sigue inerte** — `MATRIZ_PERMISOS_APROBADA = false` (`roles-planes-oficial.ts`) confirmado en código: la UI de `RolesPermisosView.tsx` existe pero no hay evidencia de que middleware o Server Actions consulten esos roles para bloquear nada real.
-- **Empresa Empleados — huecos confirmados por auditoría de hoy**: no existen las acciones "Editar"/"Permisos" por fila (solo Activar/Desactivar; "Editar permisos →" es un link genérico a `/empresa/roles`, no una acción por empleado). La columna que debería ser "Última actividad" literalmente se llama "Alta" en el código y muestra `created_at`, no un evento de login real. Sin diferenciación de permisos Gerente/Técnico (admitido en comentario propio del código).
-- **Panel Partner — acceso tras suspensión, confirmado con código exacto**: `esPartnerAutorizado()` en `frontend/src/lib/acceso-producto.ts:26-31` gatea solo por `DARIVO_PARTNER_EMAILS`, nunca consulta `partners.estado`. Un partner "Suspendido" con el email aún en la variable de entorno conserva acceso completo de lectura al panel, incluidas sus comisiones.
+- **Empresa Empleados** — sin diferenciación de permisos Gerente/Técnico en Móvil (jerarquía de roles sigue pendiente de activación real, `MATRIZ_PERMISOS_APROBADA=false`, decisión de negocio, no tocado). El resto de huecos de este punto (Editar/Permisos por fila, Última actividad real) **se corrigieron el 12/07/2026**, ver "Cambios mergeados a main" más abajo.
+- ~~Panel Partner — acceso tras suspensión~~ ✅ **Corregido el 12/07/2026** — ver "Cambios mergeados a main" más abajo.
 - **`comprobante_series`**: tiene RLS habilitado pero sin ninguna política (`CREATE POLICY`) — es intencional (acceso exclusivo vía función `asignar_inv_num()` SECURITY DEFINER, documentado en el propio SQL), no un bug, pero cualquier acceso directo a esa tabla fuera de esa función fallará en silencio por RLS.
 - Empresa Ficha de Cliente: "+ Nueva cotización" sigue enlazando al wizard de Móvil tal cual, sin el layout de 3 paneles que pide el MD — no es regresión nueva.
 - Middleware de subdominios: preparado, apagado por defecto (`SUBDOMAIN_ROUTING_ENABLED` no es `"1"`). No hay `vercel.json`, dominio sin conectar — sin cambios.
+
+## Cambios mergeados a main — 12/07/2026 (bajo autonomía total temporal, sin clientes reales todavía)
+
+- **Fix de seguridad — Partner suspendido conservaba acceso**: `esPartnerAutorizado()` (`frontend/src/lib/acceso-producto.ts`) ahora es async y, además de la allowlist de email, consulta `partners.estado` real vía Supabase — deniega si `estado === 'Suspendido'`. Si no existe fila en `partners` para ese email, se mantiene el comportamiento anterior (solo allowlist), para no introducir un nuevo motivo de bloqueo en ese caso límite. Actualizados los 3 call sites: `middleware.ts`, `verificarAccesoProducto()` (usado por `requireProducto` en los layouts) y `ProductosEcosistemaLinks.tsx` (componente sin usar todavía en ninguna página, actualizado solo para que compile con la nueva firma).
+- **Empresa Empleados — acciones por fila y última actividad real**:
+  - Nuevas acciones "Editar" (nombre/teléfono, `actualizarDatosEmpleado()`) y "Permisos" (select inline de `rol_personalizado_id`, `asignarRolPersonalizadoEmpleado()`) en `EmpresaEmpleadosView.tsx` — antes solo existían Activar/Desactivar. El link "Editar permisos →" a `/empresa/roles` se mantiene para gestión completa de roles (crear/editar definiciones); el select inline es solo para asignar rápido desde la fila.
+  - Columna "Alta" (mostraba `created_at`) reemplazada por "Última actividad" real, usando la columna `ultima_actividad` que **ya existía en el schema** (`empresa_empleados`, migración baseline) pero nunca se escribía. Se actualiza en cada login real: contraseña (`login/page.tsx` → `POST /api/empleados/marcar-actividad`, best-effort) y Google OAuth/aceptar invitación (`auth/callback/route.ts`, inline con cliente admin porque el Técnico no tiene RLS propio sobre `empresa_empleados`). Ningún cambio de schema — no requirió migración.
+- Verificado: `tsc --noEmit`, `next lint` y `next build` limpios (mismos 2 warnings preexistentes de siempre, sin relación). No verificado con sesión real logueada (mismo bloqueo de credenciales en navegador de preview que en la sesión anterior) — el código y los tipos están correctos, pero recomienda una prueba manual rápida de "Editar"/"Permisos" en Empresa y del acceso de un Partner suspendido cuando puedas.
 
 ## Problemas abiertos — chequeo 12/07/2026
 
