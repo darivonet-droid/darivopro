@@ -110,6 +110,14 @@ Sesión enfocada solo en `darivopro.com` (landing) y configuración PWA — sin 
 
 **Contradicción encontrada, no resuelta — decisión de diseño, no mía:** `frontend/public/icons/icon.svg` (el icono base de la PWA, del que se generaron los 3 PNG nuevos) es un candado/padlock, no una calculadora. `LANDING-PAGE-DARIVO-PRO.md` §3 exige que el ícono oficial (`icon.png` de la landing, un archivo distinto y ya documentado como pendiente/corrupto) sea "solo la calculadora, sin texto" — mismo espíritu de marca que debería aplicar al icono de instalación de la app. No rediseñé este ícono (es una decisión visual de marca, no una mejora técnica) — dejé los 3 PNG nuevos como reproducción fiel del SVG existente para no romper la instalación mientras tanto. Cuando exista el ícono real de calculadora, solo hay que regenerar esos 3 PNG desde el nuevo diseño (mismo proceso: SVG → `sharp` → `public/icon-*.png` + `src/app/apple-icon.png`), no hace falta tocar `manifest.json` ni el código de nuevo.
 
+## CI/CD — job de Supabase eliminado a propósito (12/07/2026)
+
+`deploy.yml` **ya no tiene** un job `supabase-migrate` (que hacía `supabase db push` automático en cada push a `main`). Se eliminó deliberadamente, no se rompió por error — si en el futuro aparece un fallo de CI mencionando Supabase/migraciones, **no reconstruyas ese job**, primero confirma con el propietario.
+
+Motivo: ese job saltaba en silencio la regla permanente de este documento ("Migraciones de base de datos — cómo entregarlas") de que el SQL se entrega escrito en el chat y **Mohamed lo corre él mismo en el SQL Editor** — nunca un push automático a la BD real. Además fallaba en cada ejecución por un bug de resolución de ruta (`content_path` de `supabase/config.toml` se resolvía relativo al directorio de ejecución del CLI, no al de `config.toml`, así que nunca encontraba `supabase/templates/recovery.html` aunque el archivo sí existía y estaba comiteado). Se decidió eliminar el job en vez de arreglar la ruta, porque el flujo automático en sí ya no se usa y viola la política de "Base de datos" de más arriba (una de las 2 excepciones que siempre requieren confirmación explícita).
+
+`test-frontend`, `test-backend` y `deploy-backend` (Railway) siguen intactos — no tocan la base de datos.
+
 ## Flujo de ramas (Git)
 
 Todo el trabajo se hace en la rama `develop`, nunca directamente en `main`. Cuando una tarea (o un conjunto de tareas relacionadas) esté lista y verificada, se abre un Pull Request de `develop` hacia `main` para que Mohamed lo revise antes de fusionar.

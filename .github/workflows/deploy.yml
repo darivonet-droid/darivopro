@@ -96,39 +96,11 @@ jobs:
         if: env.RAILWAY_TOKEN != ''
         run: railway up --service darivo-pro-api --detach --ci
 
-  # ─── SUPABASE MIGRATIONS ────────────────────────────────────────────────────
-  supabase-migrate:
-    name: Supabase Migrations
-    needs: [test-frontend, test-backend]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD:  ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_REF:  ${{ secrets.SUPABASE_PROJECT_REF }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Verificar estructura supabase/
-        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
-        run: |
-          test -f supabase/config.toml || (echo "Falta supabase/config.toml" && exit 1)
-          test -d supabase/migrations || (echo "Falta supabase/migrations/" && exit 1)
-          ls -la supabase/migrations/
-
-      - name: Vincular proyecto Supabase
-        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes
-
-      - name: Aplicar migraciones (db push)
-        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD != ''
-        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --yes
+  # NOTA: Las migraciones de Supabase NO se aplican automáticamente en CI.
+  # Se entregan como SQL escrito y el propietario las corre a mano en el
+  # SQL Editor del Dashboard (regla permanente, ver CLAUDE.md). El job
+  # "supabase-migrate" (db push automático) se eliminó el 12/07/2026 por
+  # ese motivo — no se rompió por error, no hace falta reconstruirlo.
 
   # NOTA: El deploy del frontend en Vercel es automático
   # por la integración nativa GitHub ↔ Vercel
