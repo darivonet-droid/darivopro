@@ -3,15 +3,16 @@ import {
   esAdministradorDarivo,
   esPartnerAutorizado,
 } from "@/lib/acceso-producto";
+import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
 
 interface Props {
   email: string | null | undefined;
 }
 
-export function ProductosEcosistemaLinks({ email }: Props) {
+export async function ProductosEcosistemaLinks({ email }: Props) {
   const admin = esAdministradorDarivo(email);
-  const partner = esPartnerAutorizado(email);
+  const partner = await esPartnerAutorizado(email, createServerClient());
 
   return (
     <div

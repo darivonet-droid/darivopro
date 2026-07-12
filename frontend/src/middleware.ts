@@ -92,7 +92,7 @@ export async function middleware(req: NextRequest) {
       url.searchParams.set("acceso", "admin_denegado");
       return NextResponse.redirect(url);
     }
-    if (path.startsWith("/partner") && !esPartnerAutorizado(user.email)) {
+    if (path.startsWith("/partner") && !(await esPartnerAutorizado(user.email, supabase))) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
       url.searchParams.set("acceso", "partner_denegado");
