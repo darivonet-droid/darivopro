@@ -2,9 +2,11 @@
 
 # DARIVO PRO — LANDING PAGE PÚBLICA (darivopro.com)
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Estado:** ✅ Documento oficial — actualizado por el propietario (09/07/2026)
+
+**Cambio principal (v1.4, 12/07/2026):** corregido typo en §7 (Footer) — el email de contacto real es `info@darivopro.com`, no `hola@darivo.pro` (dominio distinto de `darivopro.com`, que la empresa no posee — era un error de tipeo, no una decisión de negocio). Alineado con el código (`frontend/src/app/(public)/contacto/page.tsx`), que usaba el mismo typo.
 
 **Cambio principal (v1.3):** el propietario reemplazó la estructura simple de 2 bloques (v1.1/v1.2) por una landing completa de estilo SaaS tradicional, a partir de un diseño de referencia entregado directamente. Esto **deroga explícitamente** la regla de la v1.1 "nada de scroll largo multi-sección al estilo landing SaaS tradicional" — ver §2 actualizado. Cambios: (1) header ampliado con nav "Precios"/"¿Cómo funciona?" y 3 botones (Iniciar sesión, Registrarse, Empieza gratis); (2) el bloque Planes deja de vivir en la landing — ahora se accede vía el enlace "Precios" del header a la página `/precios` ya existente; (3) se añaden las secciones "Así de fácil", "Hecho para tu chamba" (categorías) y "Todo lo que necesitas en tu celular" (features), antes eliminadas en v1.1; (4) vídeo del hero pospuesto — sección omitida por completo en esta versión, sin placeholder, hasta que se grabe sobre la app real; (5) testimonios: la prohibición de la v1.1 (§4.1) **se mantiene vigente sin cambios** — la sección "Maestros que ya lo usan" del diseño de referencia se omite por completo en esta versión, no se implementa con datos de ejemplo; (6) regla nueva de producto: el término "IA" no puede aparecer en ningún texto de cara al usuario — usar siempre "Calculadora inteligente" (ver §5); (7) nuevas imágenes requeridas: foto de maestro de obra en el hero + 4 fotos de categoría (§3) — pendientes, la implementación actual usa placeholders visuales marcados en el código.
 
@@ -136,7 +138,7 @@ No se fija todavía ruta/nombre de archivo exacto para estas 5 — pendiente de 
 7. FOOTER (fondo navy)
    - Logo + tagline
    - Contacto: hasta que exista un número de WhatsApp real confirmado,
-     enlaza a /contacto (canal real: hola@darivo.pro) — nunca inventar
+     enlaza a /contacto (canal real: info@darivopro.com) — nunca inventar
      un número
    - Horario de atención
    - Términos y condiciones · Política de privacidad

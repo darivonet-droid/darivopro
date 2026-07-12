@@ -4,7 +4,7 @@ import { MarkdownLegal } from "@/components/legal/MarkdownLegal";
 
 export const dynamic = "force-static";
 export const metadata = {
-  title: "Política de Privacidad — Darivo Pro",
+  title: "Política de Privacidad",
   description: "Política de privacidad y tratamiento de datos de Darivo Pro.",
 };
 
