@@ -9,14 +9,32 @@ const inter = Inter({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://darivopro.com";
+
 export const metadata: Metadata = {
-  title: "DARIVO PRO",
+  // Sin esto, la imagen de opengraph-image.png se resolvía con una URL
+  // relativa al compartir el enlace — WhatsApp/redes no la mostraban.
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "DARIVO PRO",
+    template: "%s — Darivo Pro",
+  },
   description: "Cotizaciones y facturas de reformas en menos de 60 segundos",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Darivo Pro",
+  // apple-touch-icon: usa la convención de archivo estático de Next
+  // (src/app/apple-icon.png, igual que icon.png) en vez de metadata.icons
+  // manual — Next sobrescribe metadata.icons por completo cuando detecta un
+  // icon.png de convención y no encuentra su contraparte apple-icon, así que
+  // un override manual aquí quedaba silenciosamente descartado.
+  // manifest y appleWebApp: movidos a (auth)/layout.tsx y onboarding/layout.tsx
+  // (solo Móvil) — Admin y Empresa son paneles de escritorio, no deben ser
+  // instalables como PWA.
+  openGraph: {
+    siteName: "Darivo Pro",
+    locale: "es_PE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

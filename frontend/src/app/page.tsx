@@ -25,9 +25,23 @@ import {
 // Testimonios y vídeo del hero: omitidos a propósito en esta versión — pendientes
 // de contenido real (clientes verificados / grabación sobre la app real).
 
+const LANDING_TITLE = "Darivo Pro — Una factura en un minuto";
+const LANDING_DESCRIPTION =
+  "Cotizaciones y facturas de obra para maestros de obra y constructoras en Perú, desde el celular.";
+
 export const metadata: Metadata = {
-  title: "Darivo Pro — Una factura en un minuto",
-  description: "Cotizaciones y facturas de obra para maestros de obra y constructoras en Perú, desde el celular.",
+  title: LANDING_TITLE,
+  description: LANDING_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: LANDING_TITLE,
+    description: LANDING_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    title: LANDING_TITLE,
+    description: LANDING_DESCRIPTION,
+  },
 };
 
 const NAVY = "#0A1628";
@@ -70,9 +84,25 @@ const FEATURES = [
 ];
 
 
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Darivo Pro",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web, Android, iOS",
+  description: LANDING_DESCRIPTION,
+  url: "https://darivopro.com",
+};
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
+
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -86,25 +116,25 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-1 whitespace-nowrap sm:gap-2">
-            <a
+            <Link
               href="/login"
               className="rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 sm:px-4 sm:py-2 sm:text-sm"
             >
               Iniciar sesión
-            </a>
-            <a
+            </Link>
+            <Link
               href="/registro"
               className="rounded-xl border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-700 sm:px-4 sm:py-2 sm:text-sm"
             >
               Registrarse
-            </a>
-            <a
+            </Link>
+            <Link
               href="/registro"
               className="rounded-xl px-2 py-1.5 text-xs font-bold text-white sm:px-4 sm:py-2 sm:text-sm"
               style={{ background: BLUE }}
             >
               Empieza gratis
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -139,13 +169,13 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <a
+            <Link
               href="/registro"
               className="mt-8 inline-block rounded-2xl px-8 py-4 text-base font-bold text-white transition-transform active:scale-[0.97]"
               style={{ background: BLUE }}
             >
               Empieza gratis
-            </a>
+            </Link>
             <p className="mt-3 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
               Sin tarjeta • Sin compromiso • Empieza en 1 minuto
             </p>
@@ -160,6 +190,7 @@ export default function LandingPage() {
               alt="Trabajador de construcción sonriendo con su celular en obra"
               width={448}
               height={288}
+              sizes="224px"
               className="absolute -right-4 bottom-0 hidden h-72 w-56 rounded-3xl object-cover shadow-xl sm:block"
             />
 
@@ -291,6 +322,7 @@ export default function LandingPage() {
                     alt={`${cat.nombre} — ${cat.texto}`}
                     width={400}
                     height={400}
+                    sizes="(min-width: 1024px) 25vw, 50vw"
                     className="aspect-square w-full rounded-2xl object-cover"
                   />
                   <span
@@ -345,13 +377,13 @@ export default function LandingPage() {
               Sin tarjeta, sin compromiso. Crea tu primera factura en 1 minuto.
             </p>
           </div>
-          <a
+          <Link
             href="/registro"
             className="shrink-0 rounded-2xl px-7 py-3.5 text-sm font-bold transition-transform active:scale-[0.97]"
             style={{ background: "white", color: BLUE }}
           >
             Empieza gratis →
-          </a>
+          </Link>
         </div>
       </section>
 

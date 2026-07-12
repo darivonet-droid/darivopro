@@ -1,7 +1,19 @@
 // DARIVO PRO — Layout de onboarding (sin BottomNav)
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
+
+// manifest/appleWebApp: onboarding es parte del flujo de Móvil (previo al
+// dashboard) — mismo criterio que (auth)/layout.tsx, ver ese archivo.
+export const metadata: Metadata = {
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Darivo Pro",
+  },
+};
 
 export default async function OnboardingLayout({
   children,
