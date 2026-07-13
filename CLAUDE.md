@@ -490,8 +490,20 @@ Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de reto
 1. ✅ Dashboard (00) — completo, ver arriba
 2. ✅ Configuración (11) — completo, ver arriba
 3. ✅ Empleados (07) — completo, ver arriba
-4. Partners (06) — toolbar + panel lateral — en curso
-4. Partners (06) — toolbar de acciones masivas + panel lateral
+4. Partners (06) — código de UI completo (toolbar, panel lateral, paginación), pero **bloqueado en producción por un hallazgo de infraestructura, no de código** — ver sección propia abajo
+
+### ⚠️ Hallazgo 13/07/2026 — /admin/partners caído en producción, requiere decisión del propietario
+
+`/admin/partners` da error 500 ("Invalid API key") en producción real, reproducido de forma consistente (primer registro 12/07/2026, o sea preexistente, no causado por el trabajo de hoy). Diagnóstico exhaustivo con logging temporal (ya retirado) confirmó:
+
+- La `SUPABASE_SERVICE_ROLE_KEY` de producción es válida — otras pantallas Admin (Dashboard, Empleados, Configuración, Empresas) la usan sin problema contra el mismo proyecto.
+- El proyecto Supabase real de producción es **`kyckjapprmtfahnkuucz`** — confirmado extrayendo el bundle JS servido en vivo (`NEXT_PUBLIC_SUPABASE_URL`, ya público del lado cliente), usado consistentemente en toda la app, no solo en Partners.
+- **`frontend/.env.local` (entorno local de esta sesión) apunta a un proyecto Supabase distinto: `vyrtokggypcmpforglch`.** Todas las verificaciones directas que hice contra ese proyecto (REST y `supabase-js`) funcionaron perfectamente — por eso el código en sí parece correcto y el bug no es reproducible fuera de producción.
+- Los queries que fallan son exactamente los de las tablas `partners` / `partner_comisiones_config` (Doc 06) — el resto de tablas Admin (`perfiles`, `empresas`, `darivo_admin_empleados`, etc.) sí responden bien en `kyckjapprmtfahnkuucz`, aunque con datos vacíos (0 filas), consistente con que no hay clientes reales todavía.
+
+**Hipótesis mejor sustentada (sin confirmar 100%, requiere que el propietario la verifique):** las migraciones que crean las tablas de Partners (`20260705120000_baseline_v2.sql` §partners/partner_referidos, `20260711120000_partner_comisiones_historial.sql`, `20260713110000_partner_comisiones_config.sql`) se ejecutaron alguna vez contra `vyrtokggypcmpforglch` (quizás un proyecto de prueba local) pero nunca contra `kyckjapprmtfahnkuucz`, el proyecto realmente conectado a Vercel/producción — o existe alguna otra causa a nivel de PostgREST (caché de esquema, grants) que hace que ese proyecto responda "Invalid API key" en vez del error más específico "relation does not exist" para esas tablas puntuales.
+
+**No se tocó ninguna migración ni se ejecutó SQL alguno contra producción** — solo lectura (vía REST/`supabase-js` con la key local) y diagnóstico de logs de Vercel. Pendiente de decisión del propietario: confirmar cuál es el proyecto Supabase real vigente, y si las tablas de Partners existen en `kyckjapprmtfahnkuucz` (se puede verificar con una consulta de solo lectura en el SQL Editor).
 5. Empresas (02) — botones + panel lateral + filtros
 6. Suscripciones (04) — rediseño completo (tarjetas/paginación), sigue de solo lectura
 7. Catálogo Maestro (10) — CRUD completo, deuda técnica mayor, la más grande — al final
