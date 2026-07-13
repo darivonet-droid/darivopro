@@ -3,6 +3,8 @@ import { AdminEmpleadosInternosView } from "@/components/admin/AdminEmpleadosInt
 import { AdminServiceRoleNotice } from "@/components/admin/AdminUi";
 import { fetchAdminEmpleadosInternos } from "@/lib/admin-queries";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminEmpleadosPage() {
   const result = await fetchAdminEmpleadosInternos();
 

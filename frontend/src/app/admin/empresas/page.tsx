@@ -3,6 +3,8 @@ import { AdminEmpresasView } from "@/components/admin/AdminEmpresasView";
 import { AdminServiceRoleNotice } from "@/components/admin/AdminUi";
 import { fetchAdminEmpresas } from "@/lib/admin-queries";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminEmpresasPage() {
   const result = await fetchAdminEmpresas();
 
