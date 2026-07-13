@@ -22,9 +22,12 @@ export const ADMIN_NAV = [
 
 export function AdminShell({
   titulo,
+  headerExtra,
   children,
 }: {
   titulo: string;
+  /** Slot opcional a la derecha del título en el header — hoy solo lo usa Dashboard (00-PANEL-ADMIN-DASHBOARD.md §5 "Barra superior"). */
+  headerExtra?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -84,15 +87,18 @@ export function AdminShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="border-b px-6 py-4"
+          className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4"
           style={{ background: ADMIN_LAYOUT.headerBg, borderColor: ADMIN_LAYOUT.headerBorder }}
         >
-          <h1 className="text-xl font-black" style={{ color: ADMIN_COLORS.text }}>
-            {titulo}
-          </h1>
-          <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
-            Panel Administrador
-          </p>
+          <div>
+            <h1 className="text-xl font-black" style={{ color: ADMIN_COLORS.text }}>
+              {titulo}
+            </h1>
+            <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
+              Panel Administrador
+            </p>
+          </div>
+          {headerExtra}
         </header>
         <main className="flex-1" style={{ padding: ADMIN_LAYOUT.contentPadding }}>
           {children}

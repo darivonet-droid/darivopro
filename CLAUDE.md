@@ -465,7 +465,9 @@ Corregido el hallazgo raíz (color de marca), sin tocar aún botones/paneles lat
 - `AdminShell.tsx` y `AdminUi.tsx` migrados de `T` (tokens.ts/Fable 5) a `ADMIN_COLORS`: sidebar ahora claro con ítem activo en morado pálido/texto morado, encabezado de tabla claro con texto oscuro (antes navy con texto blanco), resaltado de fila activa en morado pálido (antes azul pálido).
 - Alcance intencionalmente limitado a estos 2 archivos compartidos (según lo acordado) — `AdminTabs.tsx` y las vistas por pantalla (`AdminEmpresasView.tsx`, etc.) siguen usando `T.blue` para pestañas activas y no se tocaron todavía; quedan para el siguiente paso.
 
-**Verificación:** `tsc --noEmit` limpio, `next lint` limpio (mismos 2 warnings preexistentes de `useCotizacion.ts`, sin relación), `next build` compila las 70 rutas sin errores. Verificación visual con sesión real logueada **no realizada** — bloqueada por la regla permanente de no escribir contraseñas en el navegador de preview (mismo bloqueo ya documentado en sesiones anteriores). Se intentó una ruta de previsualización temporal sin guard de auth para verificar solo el color; el clasificador de seguridad la bloqueó correctamente por debilitar el middleware de autenticación — revertida de inmediato, sin dejar rastro (`middleware.ts` y la ruta temporal ambos confirmados limpios). Pendiente: confirmación visual real la próxima vez que haya una sesión Admin logueada disponible.
+**Verificación:** `tsc --noEmit` limpio, `next lint` limpio (mismos 2 warnings preexistentes de `useCotizacion.ts`, sin relación), `next build` compila las 70 rutas sin errores. Se intentó una ruta de previsualización temporal sin guard de auth para verificar solo el color; el clasificador de seguridad la bloqueó correctamente por debilitar el middleware de autenticación — revertida de inmediato, sin dejar rastro (`middleware.ts` y la ruta temporal ambos confirmados limpios).
+
+✅ **Verificación visual real completada 13/07/2026** — sesión Admin logueada real (Mohamed inició sesión en el navegador conectado), confirmado por Claude Code vía Chrome MCP: Dashboard, Usuarios y Configuración muestran sidebar blanco con ítem activo morado, botones primarios morados (`Cambiar contraseña`), sin ningún resto de navy/azul de Fable 5.
 
 ### Siguiente paso — actualizado 13/07/2026 (sesión continua)
 
@@ -474,7 +476,23 @@ Corregido el hallazgo raíz (color de marca), sin tocar aún botones/paneles lat
 Además, en el mismo bloque:
 - **Precio anual Básico/Pro ya no se muestra como definido**: `admin/suscripciones/page.tsx` y `AdminRolesView.tsx` (pestaña Planes) ahora muestran "Pendiente" para Básico/Pro (Business sigue mostrando su precio real S/1200) — antes mostraban S/490/S/790, un cálculo mensual×10 sin confirmar por el propietario, contradiciendo `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 ("Pendiente"). **Hallazgo relacionado sin corregir, fuera de alcance de este fix:** ese mismo precio "inventado" (`PRECIOS_OFICIALES.basico.anual`/`.pro.anual` en `roles-planes-oficial.ts:70-71`) sigue **activo en checkout real** — `MiPlanCard.tsx` (Móvil) ofrece botones reales "Pagar anual Básico/Pro" que cobrarían ese monto vía dLocal, y `/precios` también lo muestra. Antes de que exista un cliente real pagando anual, el propietario debe confirmar el precio anual real de Básico/Pro (o decidir ocultar esos botones hasta tenerlo).
 - **`darivo_admin_empleados` ya conectado**: `fetchAdminEmpleadosInternos()` (`admin-queries.ts`) ya no filtra `perfiles` por el allowlist `DARIVO_ADMIN_EMAILS` — consulta la tabla real, mostrando nombre/cargo/departamento/activo reales + último acceso. Acciones por fila (Editar, Cambiar departamento) siguen pendientes.
-- **Usuarios (pantalla 03) ya tiene panel lateral derecho** (identidad + datos + acciones de administración, `16-SISTEMA-DE-DISEÑO-ADMIN.md` §7), columnas Contacto/Último acceso añadidas, filtro por método de acceso + "Limpiar filtros", y las 3 acciones por fila pasaron de enlaces de texto a botones-tarjeta (§9). Resto de pantallas (00, 02, 04, 06, 07, 08, 10, 11) **sin empezar todavía** — construir botones/acciones faltantes y paneles laterales derechos, en orden de prioridad a definir con el propietario.
+- **Usuarios (pantalla 03) ya tiene panel lateral derecho** (identidad + datos + acciones de administración, `16-SISTEMA-DE-DISEÑO-ADMIN.md` §7), columnas Contacto/Último acceso añadidas, filtro por método de acceso + "Limpiar filtros", y las 3 acciones por fila pasaron de enlaces de texto a botones-tarjeta (§9).
+
+### Siguiente paso — orden confirmado por el propietario 13/07/2026 (prioridad sobre Empresa)
+
+Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de retomar Empresa (Cotizaciones/Facturas/Cierre, pausado). Orden de ejecución (criterio del ejecutor, de más rápida a más grande):
+
+1. Dashboard (00) — bloques faltantes del header/gráfico/donut/acciones rápidas/footer
+2. Configuración (11) — secciones faltantes + panel lateral
+3. Empleados (07) — resto de botones/paneles (tabla ya conectada a `darivo_admin_empleados`)
+4. Partners (06) — toolbar de acciones masivas + panel lateral
+5. Empresas (02) — botones + panel lateral + filtros
+6. Suscripciones (04) — rediseño completo (tarjetas/paginación), sigue de solo lectura
+7. Catálogo Maestro (10) — CRUD completo, deuda técnica mayor, la más grande — al final
+
+Config. de APIs (08) **no** está en esta lista — la auditoría confirmó que su alcance de solo lectura es correcto según el MD, no es un gap real.
+
+Cada pantalla se verifica con `tsc`/`lint`/`build` + verificación visual real (sesión Admin logueada, Chrome MCP) antes de darse por cerrada.
 
 ## Bloqueado — no iniciar sin confirmación explícita
 
@@ -508,8 +526,33 @@ Primera auditoría de este tipo para Darivo Pro Empresa (no existía precedente 
 | 10 | Empleados | Columna extra "Permisos" no documentada en el MD (mejora real ya construida el 12/07, el MD nunca se actualizó). Etiquetas de estado no coinciden con el MD ("Pendiente"/"Inactivo" en vez de "Invitación pendiente"/"Desactivado"). | Diferencias reales — el sidebar de la imagen muestra módulos completamente ficticios (Equipos, Órdenes de servicio, Inventario, etc.) que no existen en el producto real. |
 | 11 | Roles y Permisos | La matriz base (§5.2) refleja correctamente que sigue inerte (`MATRIZ_PERMISOS_APROBADA=false`). Pero "Roles personalizados" (§6.1) — que el propio MD marca como *propuesta pendiente de aprobación, sin imagen oficial* — está completamente construido y en producción (crear/editar/eliminar rol, toggles reales, persistido en `roles_personalizados`), presentándose como si ya estuviera aprobado. Confirmado que nada (middleware/Server Actions) aplica esos permisos a una ruta real todavía — coincide con "RBAC inerte" ya documentado, pero ahora se sabe que es específicamente §6.1 el que se muestra activo sin autorización. | Diferencias cosméticas menores en lo que la imagen sí cubre (falta banner "exclusivo Gerente" + badge "Solo lectura"); §6.1 no tiene imagen de referencia por decisión ya documentada del propio MD, no por bug. |
 
-### Siguiente paso (pendiente, no iniciado)
+### Siguiente paso — plan confirmado por el propietario 13/07/2026
 
-Nada se corrigió en esta auditoría (alcance: solo lectura). Antes de tocar código en Empresa, el propietario debe decidir: (1) confirmar que Empresa debe migrar a `ADMIN_COLORS` igual que Admin (y en ese caso, quién actualiza `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §3, documento protegido); (2) priorizar qué pantalla adaptar primero al layout de escritorio real (Cotizaciones y Facturas son las más rotas — sacan al usuario del layout de Empresa por completo); (3) decidir sobre "Roles personalizados" (§6.1 de Doc 11): ¿aprobarlo formalmente ahora que ya está construido, o desactivarlo hasta la aprobación?
+Mohamed confirmó el orden de trabajo (sesión continua, mismo día de la auditoría):
+
+1. **Prioridad máxima:** reconstruir la capa de presentación (no la lógica) de las 3 pantallas que sacan al Gerente al wizard Móvil sin adaptación de escritorio — **Cotizaciones**, **Facturas** y **Cierre** — en layout de escritorio real (2-3 columnas, como el resto de Empresa), reutilizando toda la lógica de negocio/cálculo/guardado ya probada en Móvil. Empezar por Cotizaciones (la más cara).
+2. Documentar explícitamente en este CLAUDE.md los elementos de las imágenes de referencia que **no** aplican al producto real (módulos de sidebar ficticios que no están en `empresa-modules.ts` ni en ningún MD funcional: Inventario, Calendario, Órdenes de servicio, Equipos, Catálogo genérico, etc.) — para que no se construyan por error.
+3. En cola, sin bloquear lo anterior, priorizadas por criterio del ejecutor: paneles laterales, toolbars de acciones masivas, Dashboard, Catálogo Maestro CRUD.
+
+Migración de Empresa a `ADMIN_COLORS` y decisión sobre "Roles personalizados" (§6.1 de Doc 11) siguen sin resolver — no forman parte de este bloque de trabajo.
+
+**⏸️ Pausado 13/07/2026 (mismo día):** Mohamed cambió la prioridad — terminar primero las 7 pantallas restantes de **Admin** (ver "Siguiente paso" en la sección de Admin, arriba) antes de retomar esto. Ningún código de Cotizaciones se llegó a escribir (se pausó en fase de plan, ver punto 1 arriba). Retomar aquí cuando Admin esté completo.
+
+### Elementos de mockup descartados — no aplican al producto real
+
+Los 8 módulos reales del sidebar de Empresa son, en este orden, exactamente los de `frontend/src/lib/empresa-modules.ts` (`EMPRESA_NAV`): **Inicio, Clientes, Facturas, Cierre, Calculadora inteligente (IA), Más, Empleados, Roles y Permisos**. "Cotizaciones" no es ítem de sidebar por diseño (§1/§3 de `05-MODULO-COTIZACIONES-EMPRESA.md`: acceso solo vía CTA en Inicio o ficha de Cliente).
+
+Varias de las imágenes de referencia oficiales (Inicio, Empleados, Cotizaciones, Más, Empleados-10) muestran un sidebar con módulos genéricos que **no existen en el producto real y no deben construirse** si aparecen en una imagen o mockup futuro:
+
+- Dashboard (como ítem de sidebar separado — sí existe como página, pero no es "Inicio")
+- Proyectos
+- Contactos (el módulo real equivalente es "Clientes")
+- Catálogo (genérico) — el único catálogo real es "Catálogo Maestro" de Admin, no un módulo de Empresa
+- Inventario
+- Calendario
+- Órdenes de servicio
+- Equipos
+
+Si una imagen de referencia futura muestra cualquiera de estos (o cualquier otro ítem que no esté en `EMPRESA_NAV` ni en un MD funcional aprobado de `.cursor/rules/03-darivo-pro-empresa/`), es la imagen la que está desactualizada/es un mockup placeholder — no una instrucción para ampliar el sidebar. Confirmar con el propietario antes de construir cualquier módulo nuevo de sidebar.
 
 
