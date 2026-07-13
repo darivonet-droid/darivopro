@@ -314,16 +314,80 @@ export async function fetchAdminEmpleadosInternos(): Promise<
   return { data };
 }
 
+export type AdminSectorRow = { id: string; slug: string; nombre: string; emoji: string | null; orden: number };
+
+export type AdminCategoriaMaestroRow = {
+  id: string;
+  sector_id: string;
+  producto_id: string;
+  cat_id: string;
+  nombre: string;
+  emoji: string | null;
+  color: string | null;
+  activo: boolean;
+  created_at: string;
+  sectorNombre: string;
+  partidasCount: number;
+};
+
+export type AdminPartidaMaestroRow = {
+  id: string;
+  categoria_maestro_id: string;
+  svc_id: string;
+  nombre: string;
+  calc_type: "m2" | "unit" | "hour" | "fixed";
+  precio_tarifa_pro: number;
+  unidad: string | null;
+  activo: boolean;
+  created_at: string;
+  categoriaNombre: string;
+};
+
+/** Catálogo Maestro completo (Doc 10/21) — sectores + categorías + partidas, sin tablas nuevas. */
 export async function fetchAdminCatalogo() {
   const admin = adminClientOrNull();
   if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" as const };
 
-  const [{ data: productos }, { data: categorias }] = await Promise.all([
-    admin.from("productos_master").select("slug, nombre, descripcion").order("nombre"),
-    admin.from("catalogo_categorias_maestro").select("cat_id, nombre").order("nombre"),
+  const [{ data: productos }, { data: sectores }, { data: categorias }, { data: partidas }] = await Promise.all([
+    admin.from("productos_master").select("id, slug, nombre, descripcion").order("nombre"),
+    admin.from("catalogo_sectores").select("id, slug, nombre, emoji, orden").order("orden"),
+    admin
+      .from("catalogo_categorias_maestro")
+      .select("id, sector_id, producto_id, cat_id, nombre, emoji, color, activo, created_at")
+      .order("nombre"),
+    admin
+      .from("catalogo_partidas_maestro")
+      .select("id, categoria_maestro_id, svc_id, nombre, calc_type, precio_tarifa_pro, unidad, activo, created_at")
+      .order("nombre"),
   ]);
 
-  return { data: { productos: productos ?? [], categorias: categorias ?? [] } };
+  const sectoresRows = (sectores ?? []) as AdminSectorRow[];
+  const sectorNombreById = new Map(sectoresRows.map((s) => [s.id, s.nombre]));
+  const partidasPorCategoria = new Map<string, number>();
+  for (const p of partidas ?? []) {
+    partidasPorCategoria.set(p.categoria_maestro_id, (partidasPorCategoria.get(p.categoria_maestro_id) ?? 0) + 1);
+  }
+
+  const categoriasRows: AdminCategoriaMaestroRow[] = (categorias ?? []).map((c) => ({
+    ...c,
+    sectorNombre: sectorNombreById.get(c.sector_id) ?? "—",
+    partidasCount: partidasPorCategoria.get(c.id) ?? 0,
+  }));
+  const categoriaNombreById = new Map(categoriasRows.map((c) => [c.id, c.nombre]));
+
+  const partidasRows: AdminPartidaMaestroRow[] = (partidas ?? []).map((p) => ({
+    ...p,
+    categoriaNombre: categoriaNombreById.get(p.categoria_maestro_id) ?? "—",
+  }));
+
+  return {
+    data: {
+      productos: productos ?? [],
+      sectores: sectoresRows,
+      categorias: categoriasRows,
+      partidas: partidasRows,
+    },
+  };
 }
 
 /**
