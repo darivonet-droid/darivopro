@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ADMIN_LAYOUT } from "@/lib/design-system/admin-tokens";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_LAYOUT, ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 /** Navegación oficial — 00-PANEL-ADMIN-DASHBOARD.md §4 */
@@ -37,10 +36,13 @@ export function AdminShell({
         style={{
           width: ADMIN_LAYOUT.sidebarWidth,
           background: ADMIN_LAYOUT.sidebarBg,
-          borderColor: T.navyLight,
+          borderColor: ADMIN_COLORS.sidebarBorder,
         }}
       >
-        <p className="mb-6 text-sm font-black tracking-wide text-white">
+        <p
+          className="mb-6 text-sm font-black tracking-wide"
+          style={{ color: ADMIN_COLORS.sidebarText }}
+        >
           DARIVO PRO ADMIN
         </p>
         <nav className="flex flex-col gap-1">
@@ -55,8 +57,8 @@ export function AdminShell({
                 href={item.href}
                 className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors"
                 style={{
-                  background: activo ? T.blue : "transparent",
-                  color: activo ? T.white : T.textLight,
+                  background: activo ? ADMIN_COLORS.sidebarActiveBg : "transparent",
+                  color: activo ? ADMIN_COLORS.sidebarActiveText : ADMIN_COLORS.sidebarTextMuted,
                 }}
               >
                 <span>{item.icon}</span>
@@ -66,10 +68,17 @@ export function AdminShell({
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-2 pt-6">
-          <Link href="/dashboard" className="text-xs font-bold" style={{ color: T.textLight }}>
+          <Link
+            href="/dashboard"
+            className="text-xs font-bold"
+            style={{ color: ADMIN_COLORS.sidebarTextMuted }}
+          >
             ← Volver a Móvil
           </Link>
-          <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: T.red }} />
+          <CerrarSesionButton
+            className="text-left text-xs font-bold"
+            style={{ color: ADMIN_COLORS.red }}
+          />
         </div>
       </aside>
 
@@ -78,10 +87,10 @@ export function AdminShell({
           className="border-b px-6 py-4"
           style={{ background: ADMIN_LAYOUT.headerBg, borderColor: ADMIN_LAYOUT.headerBorder }}
         >
-          <h1 className="text-xl font-black" style={{ color: T.text }}>
+          <h1 className="text-xl font-black" style={{ color: ADMIN_COLORS.text }}>
             {titulo}
           </h1>
-          <p className="text-xs" style={{ color: T.textMid }}>
+          <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
             Panel Administrador
           </p>
         </header>
@@ -97,12 +106,12 @@ function PlaceholderModulo({ md }: { md: string }) {
   return (
     <div
       className="rounded-2xl p-6"
-      style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
     >
-      <p className="text-sm" style={{ color: T.textMid }}>
+      <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
         Módulo en construcción conforme documentación oficial.
       </p>
-      <p className="mt-2 text-xs font-mono" style={{ color: T.textLight }}>
+      <p className="mt-2 text-xs font-mono" style={{ color: ADMIN_COLORS.textLight }}>
         MD: {md}
       </p>
     </div>
