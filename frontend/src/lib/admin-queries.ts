@@ -207,26 +207,41 @@ export async function fetchAdminSuscripciones() {
   };
 }
 
+export type AdminEmpleadoInternoRow = {
+  id: string;
+  user_id: string;
+  email: string;
+  nombre: string | null;
+  cargo: string | null;
+  departamento: string | null;
+  activo: boolean;
+  created_at: string;
+  lastSignInAt?: string | null;
+};
+
+/** Empleados internos Darivo — fuente real `darivo_admin_empleados` (Doc 07 §6, §9). */
 export async function fetchAdminEmpleadosInternos(): Promise<
-  { data: AdminPerfilRow[] } | { error: string }
+  { data: AdminEmpleadoInternoRow[] } | { error: string }
 > {
-  const usuarios = await fetchAdminUsuarios();
-  if ("error" in usuarios) return usuarios;
+  const admin = adminClientOrNull();
+  if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
 
-  const adminEmails = new Set(
-    (process.env.DARIVO_ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean)
-  );
+  const [{ data: empleados }, { data: authData }] = await Promise.all([
+    admin
+      .from("darivo_admin_empleados")
+      .select("id, user_id, email, nombre, cargo, departamento, activo, created_at")
+      .order("created_at", { ascending: false }),
+    admin.auth.admin.listUsers({ perPage: 200 }),
+  ]);
 
-  if (adminEmails.size === 0) {
-    return { data: [] };
-  }
+  const authById = new Map((authData?.users ?? []).map((u) => [u.id, u]));
 
-  return {
-    data: usuarios.data.filter((u) => adminEmails.has((u.email ?? "").toLowerCase())),
-  };
+  const data: AdminEmpleadoInternoRow[] = (empleados ?? []).map((e) => ({
+    ...e,
+    lastSignInAt: authById.get(e.user_id)?.last_sign_in_at ?? null,
+  }));
+
+  return { data };
 }
 
 export async function fetchAdminCatalogo() {
