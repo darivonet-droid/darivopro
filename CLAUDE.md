@@ -495,7 +495,11 @@ Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de reto
 4. Partners (06) — código de UI completo (toolbar, panel lateral, paginación), pero **bloqueado en producción por un hallazgo de infraestructura, no de código** — ver sección propia abajo
 5. Empresas (02) — código de UI completo (toolbar, panel lateral, filtros, "Nueva empresa"), **bloqueado por el mismo hallazgo de infraestructura que Partners** — ver sección propia abajo
 6. ✅ Suscripciones (04) — completo, ver arriba
-7. Catálogo Maestro (10) — CRUD completo — en curso, la más grande
+7. ✅ Catálogo Maestro (10) — CRUD completo, desplegado y verificado visualmente en producción — ver nota de datos abajo
+
+**TODO Admin queda cerrado** (7/7 pantallas), con la excepción de Partners y Empresas bloqueadas por el hallazgo de infraestructura de producción (ver sección propia abajo) — no son bugs de código, están a la espera de que el propietario confirme el proyecto Supabase real.
+
+**Nota de datos — Catálogo Maestro:** en producción, `/admin/catalogo` renderiza correctamente (confirmado: es el código nuevo desplegado, no una versión en caché) pero muestra el estado vacío "No hay ningún producto registrado en `productos_master`" en vez de un error — a diferencia de Partners/Empresas, la consulta a Supabase **no falla**, simplemente devuelve 0 filas. Esto es distinto del hallazgo "Invalid API key": puede ser que a `kyckjapprmtfahnkuucz` (el proyecto real de producción) le falte la fila semilla (`slug: 'darivo-pro'`) que Doc 21 espera, o puede estar relacionado con el mismo tema de proyecto Supabase — no investigado más a fondo por la misma razón que Partners/Empresas (no seguir con debugging especulativo sin input del propietario). Si el propietario confirma que corresponde sembrar esa fila, puedo dar el SQL del INSERT (no lo ejecuto yo).
 
 ### ⚠️ Hallazgo 13/07/2026 — `/admin/partners` Y `/admin/empresas` caídos en producción, requiere decisión del propietario
 
