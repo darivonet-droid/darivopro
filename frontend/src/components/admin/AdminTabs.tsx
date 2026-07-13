@@ -1,6 +1,6 @@
 "use client";
 
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 export function AdminTabs({
   tabs,
@@ -12,7 +12,7 @@ export function AdminTabs({
   onChange: (tab: string) => void;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap gap-2 border-b pb-3" style={{ borderColor: T.slateD }}>
+    <div className="mb-6 flex flex-wrap gap-2 border-b pb-3" style={{ borderColor: ADMIN_COLORS.slateD }}>
       {tabs.map((tab) => (
         <button
           key={tab}
@@ -20,8 +20,8 @@ export function AdminTabs({
           onClick={() => onChange(tab)}
           className="rounded-lg px-4 py-2 text-sm font-bold transition-colors"
           style={{
-            background: active === tab ? T.blue : T.slate,
-            color: active === tab ? T.white : T.textMid,
+            background: active === tab ? ADMIN_COLORS.purple : ADMIN_COLORS.slate,
+            color: active === tab ? ADMIN_COLORS.white : ADMIN_COLORS.textMid,
           }}
         >
           {tab}
@@ -35,7 +35,7 @@ export function AdminNotice({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="mb-4 rounded-xl px-4 py-3 text-xs"
-      style={{ background: T.amberPale, color: T.amberD }}
+      style={{ background: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD }}
     >
       {children}
     </div>
@@ -50,10 +50,10 @@ export function AdminBadge({
   tone?: "success" | "warning" | "danger" | "neutral";
 }) {
   const styles = {
-    success: { bg: T.greenPale, color: T.greenD },
-    warning: { bg: T.amberPale, color: T.amberD },
+    success: { bg: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD },
+    warning: { bg: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD },
     danger: { bg: "#FEE2E2", color: "#B91C1C" },
-    neutral: { bg: T.slate, color: T.textMid },
+    neutral: { bg: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid },
   }[tone];
   return (
     <span

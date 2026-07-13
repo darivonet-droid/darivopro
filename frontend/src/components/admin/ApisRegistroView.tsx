@@ -1,6 +1,6 @@
 "use client";
 
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 /** Registro oficial 08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md §5.1–§5.3 */
 const APIS_OFICIALES = [
@@ -35,7 +35,7 @@ const PENDIENTES = [
 export function ApisRegistroView() {
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm" style={{ color: T.textMid }}>
+      <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
         Registro oficial de APIs — solo lectura. Fuente:{" "}
         <span className="font-mono text-xs">08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md</span>
       </p>
@@ -44,37 +44,37 @@ export function ApisRegistroView() {
           <div
             key={api.nombre}
             className="rounded-2xl p-5"
-            style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+            style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="font-extrabold" style={{ color: T.text }}>
+              <p className="font-extrabold" style={{ color: ADMIN_COLORS.text }}>
                 {api.nombre}
               </p>
               <span
                 className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                style={{ background: T.greenPale, color: T.greenD }}
+                style={{ background: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD }}
               >
                 {api.estado}
               </span>
             </div>
-            <p className="mt-2 text-sm" style={{ color: T.textMid }}>
+            <p className="mt-2 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               {api.uso}
             </p>
-            <p className="mt-1 text-xs" style={{ color: T.textLight }}>
+            <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               Módulos: {api.modulos}
             </p>
           </div>
         ))}
       </div>
       <div>
-        <p className="mb-2 text-xs font-bold uppercase" style={{ color: T.textMid }}>
+        <p className="mb-2 text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
           Pendientes §5.4
         </p>
         {PENDIENTES.map((p) => (
           <div
             key={p.nombre}
             className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: T.amberPale, color: T.amberD }}
+            style={{ background: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD }}
           >
             {p.nombre} — {p.estado}
           </div>

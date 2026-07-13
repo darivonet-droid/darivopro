@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminBadge, AdminNotice, AdminTabs } from "@/components/admin/AdminTabs";
 import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import {
   type ComisionConfigRow,
   type EstadoPartner,
@@ -150,7 +150,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
           onClick={() => setMostrarForm(true)}
           disabled={pending}
           className="rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-          style={{ background: T.blue }}
+          style={{ background: ADMIN_COLORS.purple }}
         >
           + Nuevo partner
         </button>
@@ -160,21 +160,21 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           className="min-w-[180px] flex-1 rounded-xl border px-4 py-2 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         />
       </div>
 
       {mostrarForm && (
         <div
           className="mb-4 rounded-2xl p-4"
-          style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
           <input
             placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           <input
             placeholder="Correo"
@@ -182,10 +182,10 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           {error && (
-            <p className="mb-2 text-xs" style={{ color: T.red }}>
+            <p className="mb-2 text-xs" style={{ color: ADMIN_COLORS.red }}>
               {error}
             </p>
           )}
@@ -194,7 +194,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
               type="button"
               onClick={() => setMostrarForm(false)}
               className="flex-1 rounded-xl py-2 text-sm font-bold"
-              style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+              style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
             >
               Cancelar
             </button>
@@ -203,7 +203,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
               onClick={crearPartner}
               disabled={pending}
               className="flex-[2] rounded-xl py-2 text-sm font-bold text-white"
-              style={{ background: T.blue }}
+              style={{ background: ADMIN_COLORS.purple }}
             >
               Crear partner
             </button>
@@ -219,7 +219,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
         rows={filtrados.map((p) => [
           <div key={p.id}>
             <p className="font-semibold">{p.nombre}</p>
-            <p className="text-xs" style={{ color: T.textLight }}>
+            <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               {p.email}
             </p>
           </div>,
@@ -246,7 +246,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
                 disabled={pending}
                 onClick={() => cambiarEstado(p.id, "Activo")}
                 className="text-xs font-bold"
-                style={{ color: T.greenD }}
+                style={{ color: ADMIN_COLORS.greenD }}
               >
                 Activar
               </button>
@@ -257,7 +257,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
                 disabled={pending}
                 onClick={() => cambiarEstado(p.id, "Suspendido")}
                 className="text-xs font-bold"
-                style={{ color: T.red }}
+                style={{ color: ADMIN_COLORS.red }}
               >
                 Suspender
               </button>
@@ -267,10 +267,10 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
       />
 
       <section className="mt-8">
-        <h2 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>
+        <h2 className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
           Configurar tabla de comisiones (Doc 06 §5.1)
         </h2>
-        <p className="mb-3 text-xs" style={{ color: T.textLight }}>
+        <p className="mb-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
           Comisión por venta: pago único sobre el primer pago del cliente referido. Además, bono
           escalonado por hitos de clientes propios (calculado por Partner individual, nunca de
           forma agregada). Los porcentajes son editables aquí — los umbrales de hito (clientes
@@ -281,9 +281,9 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
         {ventaConfig && (
           <div
             className="mb-3 flex items-center justify-between rounded-xl px-4 py-3"
-            style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+            style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
           >
-            <span className="text-sm font-semibold" style={{ color: T.text }}>
+            <span className="text-sm font-semibold" style={{ color: ADMIN_COLORS.text }}>
               Comisión por venta (pago único)
             </span>
             <ComisionEditor
@@ -351,7 +351,7 @@ function ComisionEditor({
         type="button"
         onClick={onEditar}
         className="text-xs font-bold"
-        style={{ color: T.blue }}
+        style={{ color: ADMIN_COLORS.purple }}
       >
         Editar {config.porcentaje}%
       </button>
@@ -365,13 +365,13 @@ function ComisionEditor({
         value={valor}
         onChange={(e) => onCambiar(e.target.value)}
         className="w-16 rounded-lg border px-2 py-1 text-xs font-bold"
-        style={{ borderColor: T.slateD }}
+        style={{ borderColor: ADMIN_COLORS.slateD }}
         autoFocus
       />
-      <button type="button" disabled={pending} onClick={onGuardar} className="text-xs font-bold" style={{ color: T.greenD }}>
+      <button type="button" disabled={pending} onClick={onGuardar} className="text-xs font-bold" style={{ color: ADMIN_COLORS.greenD }}>
         Guardar
       </button>
-      <button type="button" onClick={onCancelar} className="text-xs font-bold" style={{ color: T.textMid }}>
+      <button type="button" onClick={onCancelar} className="text-xs font-bold" style={{ color: ADMIN_COLORS.textMid }}>
         Cancelar
       </button>
     </div>

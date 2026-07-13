@@ -30,7 +30,7 @@ export default async function AdminSuscripcionesPage() {
         rows={planes.map(([id, plan]) => [
           plan.nombre,
           fmtPEN(plan.mensual),
-          fmtPEN(plan.anual),
+          id === "business" ? fmtPEN(plan.anual) : <em key="anual">Pendiente</em>,
           String(
             id === "basico"
               ? usuariosPorPlan.basico

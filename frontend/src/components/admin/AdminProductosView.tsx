@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminBadge, AdminNotice } from "@/components/admin/AdminTabs";
 import { AdminKpiCard, AdminServiceRoleNotice, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { AdminProductoRow } from "@/lib/admin-queries";
 import { updateProductoAction } from "@/app/admin/productos/actions";
 
@@ -122,7 +122,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           className="min-w-[180px] flex-1 rounded-xl border px-4 py-2 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         />
       </div>
 
@@ -133,7 +133,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
           <div key="n">
             <p className="font-semibold">{p.nombre}</p>
             {p.descripcion && (
-              <p className="text-xs" style={{ color: T.textLight }}>
+              <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                 {p.descripcion}
               </p>
             )}
@@ -153,7 +153,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
             disabled={pending}
             onClick={() => abrirEdicion(p)}
             className="text-xs font-bold"
-            style={{ color: T.blue }}
+            style={{ color: ADMIN_COLORS.purple }}
           >
             Editar
           </button>,
@@ -163,28 +163,28 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
       {seleccionado && (
         <section
           className="mt-6 rounded-2xl p-5"
-          style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+            <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
               Editar producto
             </h2>
-            <span className="font-mono text-xs" style={{ color: T.textLight }}>
+            <span className="font-mono text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               {seleccionado.slug}
             </span>
           </div>
 
-          <label className="mb-1 block text-xs font-bold" style={{ color: T.textMid }}>
+          <label className="mb-1 block text-xs font-bold" style={{ color: ADMIN_COLORS.textMid }}>
             Nombre
           </label>
           <input
             value={form.nombre}
             onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
 
-          <label className="mb-1 block text-xs font-bold" style={{ color: T.textMid }}>
+          <label className="mb-1 block text-xs font-bold" style={{ color: ADMIN_COLORS.textMid }}>
             Descripción
           </label>
           <textarea
@@ -192,10 +192,10 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
             onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
             rows={3}
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
 
-          <label className="mb-4 flex items-center gap-2 text-sm" style={{ color: T.text }}>
+          <label className="mb-4 flex items-center gap-2 text-sm" style={{ color: ADMIN_COLORS.text }}>
             <input
               type="checkbox"
               checked={form.activo}
@@ -204,7 +204,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
             Producto activo
           </label>
 
-          <dl className="mb-4 grid grid-cols-2 gap-2 text-xs" style={{ color: T.textMid }}>
+          <dl className="mb-4 grid grid-cols-2 gap-2 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
             <div>
               <dt className="font-bold">Categorías asociadas</dt>
               <dd>{seleccionado.categorias}</dd>
@@ -218,7 +218,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
           {msg && (
             <p
               className="mb-3 text-xs font-semibold"
-              style={{ color: msg.tone === "ok" ? T.greenD : T.red }}
+              style={{ color: msg.tone === "ok" ? ADMIN_COLORS.greenD : ADMIN_COLORS.red }}
             >
               {msg.texto}
             </p>
@@ -230,7 +230,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
               onClick={cerrarEdicion}
               disabled={pending}
               className="flex-1 rounded-xl py-2 text-sm font-bold"
-              style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+              style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
             >
               Cancelar
             </button>
@@ -239,7 +239,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
               onClick={guardar}
               disabled={pending}
               className="flex-[2] rounded-xl py-2 text-sm font-bold text-white"
-              style={{ background: T.blue }}
+              style={{ background: ADMIN_COLORS.purple }}
             >
               {pending ? "Guardando…" : "Guardar cambios"}
             </button>
@@ -248,7 +248,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
       )}
 
       <section className="mt-8">
-        <h2 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>
+        <h2 className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
           Historial de cambios
         </h2>
         <AdminNotice>
