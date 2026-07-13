@@ -174,6 +174,8 @@ export type AdminEmpresaRow = {
   /** Columna dedicada `empresas.activo` (migración 20260709180000). */
   activa: boolean;
   email: string;
+  /** "Última actividad" (Doc 02 §6) — proxy real: último acceso del gerente. */
+  lastSignInAt: string | null;
 };
 
 export async function fetchAdminEmpresas(): Promise<
@@ -199,10 +201,11 @@ export async function fetchAdminEmpresas(): Promise<
   ]);
 
   const perfilById = new Map((perfiles ?? []).map((p) => [p.id, p]));
-  const emailById = new Map((authData?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+  const authById = new Map((authData?.users ?? []).map((u) => [u.id, u]));
 
   const data: AdminEmpresaRow[] = (empresas ?? []).map((e) => {
     const perfil = perfilById.get(e.gerente_user_id);
+    const authUser = authById.get(e.gerente_user_id);
     return {
       id: e.id,
       gerente_user_id: e.gerente_user_id,
@@ -213,7 +216,8 @@ export async function fetchAdminEmpresas(): Promise<
       created_at: e.created_at,
       plan_tipo: perfil?.plan_tipo ?? null,
       activa: e.activo,
-      email: emailById.get(e.gerente_user_id) ?? "",
+      email: authUser?.email ?? "",
+      lastSignInAt: authUser?.last_sign_in_at ?? null,
     };
   });
 
