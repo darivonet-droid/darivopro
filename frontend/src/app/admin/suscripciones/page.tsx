@@ -3,6 +3,8 @@ import { AdminServiceRoleNotice, AdminTable } from "@/components/admin/AdminUi";
 import { fetchAdminSuscripciones } from "@/lib/admin-queries";
 import { fmtPEN } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSuscripcionesPage() {
   const result = await fetchAdminSuscripciones();
 

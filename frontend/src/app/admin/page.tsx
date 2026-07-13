@@ -20,6 +20,8 @@ const ACCIONES_RAPIDAS = [
   { label: "Ver Partners", href: "/admin/partners", icon: "🤝" },
 ] as const;
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage({
   searchParams,
 }: {

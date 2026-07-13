@@ -2,6 +2,8 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminProductosView } from "@/components/admin/AdminProductosView";
 import { fetchAdminProductos } from "@/lib/admin-queries";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminProductosPage() {
   const res = await fetchAdminProductos();
 

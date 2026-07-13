@@ -21,6 +21,8 @@ function iniciales(nombre: string) {
   );
 }
 
+export const dynamic = "force-dynamic";
+
 /** 11-PANEL-ADMIN-CONFIGURACION.md §5/§6/§7 — solo cuenta propia del administrador. */
 export default async function AdminConfiguracionPage() {
   const supabase = createServerClient();

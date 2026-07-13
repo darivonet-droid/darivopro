@@ -2,6 +2,8 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminServiceRoleNotice, AdminTable } from "@/components/admin/AdminUi";
 import { fetchAdminCatalogo } from "@/lib/admin-queries";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCatalogoPage() {
   const result = await fetchAdminCatalogo();
 
