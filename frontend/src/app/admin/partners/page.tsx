@@ -5,10 +5,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function AdminPartnersPage() {
   const admin = createAdminClient();
-  const [partners, comisionesConfig] = await Promise.all([
-    listPartners(admin),
-    obtenerComisionesConfig(admin),
-  ]);
+  let partners, comisionesConfig;
+  try {
+    partners = await listPartners(admin);
+  } catch (e) {
+    console.error("DIAG listPartners failed:", JSON.stringify(e), e);
+    throw e;
+  }
+  try {
+    comisionesConfig = await obtenerComisionesConfig(admin);
+  } catch (e) {
+    console.error("DIAG obtenerComisionesConfig failed:", JSON.stringify(e), e);
+    throw e;
+  }
 
   return (
     <AdminShell titulo="Partners">
