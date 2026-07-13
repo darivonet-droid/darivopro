@@ -33,7 +33,15 @@ export function adminServiceRoleDisponible(): boolean {
   return adminClientOrNull() !== null;
 }
 
-export async function fetchAdminDashboard() {
+/** Serie diaria para el bloque "Actividad de la plataforma" — 00-PANEL-ADMIN-DASHBOARD.md §5/§6. */
+export type AdminActividadDia = {
+  fecha: string; // "DD/MM"
+  registros: number;
+  cotizaciones: number;
+  facturas: number;
+};
+
+export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
   const admin = adminClientOrNull();
   if (!admin) {
     return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" as const };
@@ -44,11 +52,18 @@ export async function fetchAdminDashboard() {
   inicioMes.setHours(0, 0, 0, 0);
   const isoMes = inicioMes.toISOString();
 
+  const inicioActividad = new Date();
+  inicioActividad.setDate(inicioActividad.getDate() - (diasActividad - 1));
+  inicioActividad.setHours(0, 0, 0, 0);
+  const isoActividad = inicioActividad.toISOString();
+
   const [
     { count: totalUsuarios },
     { data: perfiles },
     { data: facturasMes },
     { data: recientes },
+    { data: cotizacionesActividad },
+    { data: facturasActividad },
   ] = await Promise.all([
     admin.from("perfiles").select("*", { count: "exact", head: true }),
     admin.from("perfiles").select("id, plan_tipo, onboarding_done, created_at"),
@@ -58,6 +73,8 @@ export async function fetchAdminDashboard() {
       .select("client_name, total_final, status, created_at")
       .order("created_at", { ascending: false })
       .limit(5),
+    admin.from("cotizaciones").select("created_at").gte("created_at", isoActividad),
+    admin.from("facturas").select("created_at").gte("created_at", isoActividad),
   ]);
 
   const rows = perfiles ?? [];
@@ -73,6 +90,13 @@ export async function fetchAdminDashboard() {
   /** INC-A01: pipeline soporte detenido — KPI no disponible hasta DOC-01 */
   const ticketsAbiertos: string | number = "—";
 
+  const actividad = construirSerieActividad(
+    diasActividad,
+    rows.map((p) => p.created_at),
+    (cotizacionesActividad ?? []).map((c) => c.created_at),
+    (facturasActividad ?? []).map((f) => f.created_at)
+  );
+
   return {
     data: {
       totalUsuarios: totalUsuarios ?? 0,
@@ -83,6 +107,7 @@ export async function fetchAdminDashboard() {
       ticketsAbiertos,
       ticketsAbiertosHint: "INC-A01 · DOC-01 pendiente",
       recientes: recientes ?? [],
+      actividad,
       distribucion: {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
         pro: rows.filter((p) => p.plan_tipo === "pro").length,
@@ -91,6 +116,43 @@ export async function fetchAdminDashboard() {
       },
     },
   };
+}
+
+function construirSerieActividad(
+  dias: number,
+  fechasRegistros: string[],
+  fechasCotizaciones: string[],
+  fechasFacturas: string[]
+): AdminActividadDia[] {
+  const claveDia = (iso: string) => iso.slice(0, 10); // "YYYY-MM-DD"
+  const contarPorDia = (fechas: string[]) => {
+    const mapa = new Map<string, number>();
+    for (const f of fechas) {
+      const k = claveDia(f);
+      mapa.set(k, (mapa.get(k) ?? 0) + 1);
+    }
+    return mapa;
+  };
+
+  const registrosPorDia = contarPorDia(fechasRegistros);
+  const cotizacionesPorDia = contarPorDia(fechasCotizaciones);
+  const facturasPorDia = contarPorDia(fechasFacturas);
+
+  const serie: AdminActividadDia[] = [];
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  for (let i = dias - 1; i >= 0; i--) {
+    const d = new Date(hoy);
+    d.setDate(d.getDate() - i);
+    const iso = d.toISOString().slice(0, 10);
+    serie.push({
+      fecha: `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`,
+      registros: registrosPorDia.get(iso) ?? 0,
+      cotizaciones: cotizacionesPorDia.get(iso) ?? 0,
+      facturas: facturasPorDia.get(iso) ?? 0,
+    });
+  }
+  return serie;
 }
 
 /**

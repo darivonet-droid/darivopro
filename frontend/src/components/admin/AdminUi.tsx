@@ -8,19 +8,31 @@ export function AdminKpiCard({
   label,
   value,
   hint,
+  icon,
 }: {
   label: string;
   value: string | number;
   hint?: string;
+  icon?: React.ReactNode;
 }) {
   return (
     <div
       className="rounded-2xl p-5"
       style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
     >
-      <p className="text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
-        {label}
-      </p>
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+          {label}
+        </p>
+        {icon && (
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            style={{ background: ADMIN_COLORS.purplePale, color: ADMIN_COLORS.purple }}
+          >
+            {icon}
+          </span>
+        )}
+      </div>
       <p className="mt-2 text-2xl font-black" style={{ color: ADMIN_COLORS.text }}>
         {value}
       </p>
@@ -29,6 +41,38 @@ export function AdminKpiCard({
           {hint}
         </p>
       )}
+    </div>
+  );
+}
+
+/** Card genérica reutilizable — mismo estilo que se repetía copy-pasteado en cada pantalla. */
+export function AdminCard({
+  title,
+  action,
+  children,
+  className,
+}: {
+  title?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-2xl p-5 ${className ?? ""}`}
+      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
+    >
+      {(title || action) && (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          {title && (
+            <p className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
+              {title}
+            </p>
+          )}
+          {action}
+        </div>
+      )}
+      {children}
     </div>
   );
 }
