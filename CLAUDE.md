@@ -478,14 +478,15 @@ Además, en el mismo bloque:
 - **`darivo_admin_empleados` ya conectado**: `fetchAdminEmpleadosInternos()` (`admin-queries.ts`) ya no filtra `perfiles` por el allowlist `DARIVO_ADMIN_EMAILS` — consulta la tabla real, mostrando nombre/cargo/departamento/activo reales + último acceso. Acciones por fila (Editar, Cambiar departamento) siguen pendientes.
 - **Usuarios (pantalla 03) ya tiene panel lateral derecho** (identidad + datos + acciones de administración, `16-SISTEMA-DE-DISEÑO-ADMIN.md` §7), columnas Contacto/Último acceso añadidas, filtro por método de acceso + "Limpiar filtros", y las 3 acciones por fila pasaron de enlaces de texto a botones-tarjeta (§9).
 - **Dashboard (pantalla 00) completo** — barra superior (buscador → redirige a Usuarios con `?q=`, selector de rango 7/30/90 días real vía `?dias=`, notificaciones placeholder honesto, ayuda → `mailto:soporte@darivopro.com`, usuario admin con iniciales → Configuración), gráfico "Actividad de la plataforma" (`recharts`, serie diaria real de registros/cotizaciones/facturas vía nueva `construirSerieActividad()` en `admin-queries.ts`), donut "Distribución de suscripciones" (reemplaza la lista de texto plano, con estado vacío honesto), "Estado de soporte" (Abiertos/En proceso/Resueltos — sin backend real todavía, mismo patrón INC-A01 que el KPI de tickets, no se inventó data), 7 "Acciones rápidas" del MD, footer, e iconos SVG inline (sin dependencia nueva) en las 5 tarjetas KPI. Nuevo `AdminCard` reutilizable en `AdminUi.tsx`; `AdminShell` gana un slot `headerExtra` opcional (solo lo usa Dashboard). Verificado: `tsc`/`lint`/`build` limpios + visual real en producción (sesión yatriye@gmail.com), incluyendo el selector de rango probado en vivo (7d → el eje del gráfico cambió correctamente).
+- **Configuración (pantalla 11) completa** — reconstruida siguiendo §5/§6/§7 del MD: "Mi perfil" (avatar iniciales, nombre, correo), "Acceso" (método real vía `auth.users.identities`, Cambiar/Recuperar contraseña), "Sesión" (Cerrar sesión propia del módulo, antes solo vivía en el sidebar), panel lateral derecho con Información de la cuenta (nombre/correo/fecha de registro real) + Acciones rápidas. "Teléfono" retirado de la vista por no estar en la lista de campos autorizados del MD §6. Verificado: `tsc`/`lint`/`build` limpios + visual real en producción.
 
 ### Siguiente paso — orden confirmado por el propietario 13/07/2026 (prioridad sobre Empresa)
 
-Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de retomar Empresa (Cotizaciones/Facturas/Cierre, pausado). Orden de ejecución (criterio del ejecutor, de más rápida a más grande):
+Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de retomar Empresa (Cotizaciones/Facturas/Cierre, pausado). Orden de ejecución (criterio del ejecutor, de más rápida a más grande). **Autonomía total reconfirmada explícitamente 13/07/2026** para push a GitHub, deploy a producción y verificación visual con Claude in Chrome — sin pedir permiso por pantalla, solo avisar al final con resumen (única excepción: SQL de base de datos y contraseñas, ver "⚠️ CRÍTICO — main" arriba):
 
 1. ✅ Dashboard (00) — completo, ver arriba
-2. Configuración (11) — secciones faltantes + panel lateral (en curso)
-3. Empleados (07) — resto de botones/paneles (tabla ya conectada a `darivo_admin_empleados`)
+2. ✅ Configuración (11) — completo, ver arriba
+3. Empleados (07) — resto de botones/paneles (tabla ya conectada a `darivo_admin_empleados`) — en curso
 4. Partners (06) — toolbar de acciones masivas + panel lateral
 5. Empresas (02) — botones + panel lateral + filtros
 6. Suscripciones (04) — rediseño completo (tarjetas/paginación), sigue de solo lectura
