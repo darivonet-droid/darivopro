@@ -24,7 +24,11 @@ export type AdminPerfilRow = {
 function adminClientOrNull() {
   try {
     return createAdminClient();
-  } catch {
+  } catch (e) {
+    // No silenciar: sin esto, un fallo real de createAdminClient() (env var
+    // vacía en un runtime específico, etc.) se ve idéntico a "no configurado"
+    // en los logs, indistinguible de una config local incompleta.
+    console.error("adminClientOrNull(): createAdminClient() falló", e);
     return null;
   }
 }
