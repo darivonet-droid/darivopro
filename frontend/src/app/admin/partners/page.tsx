@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export default async function AdminPartnersPage() {
   const admin = createAdminClient();
   const [partners, comisionesConfig] = await Promise.all([
-    listPartners(),
+    listPartners(admin),
     obtenerComisionesConfig(admin),
   ]);
 

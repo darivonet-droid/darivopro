@@ -99,9 +99,9 @@ async function mapPartner(
   };
 }
 
-/** Listado completo — uso Admin (service role). */
-export async function listPartners(): Promise<PartnerRegistro[]> {
-  const admin = createAdminClient();
+/** Listado completo — uso Admin (service role). Reutiliza el cliente del caller si se pasa uno. */
+export async function listPartners(supabase?: SupabaseClient): Promise<PartnerRegistro[]> {
+  const admin = supabase ?? createAdminClient();
   const { data, error } = await admin
     .from("partners")
     .select("*")
