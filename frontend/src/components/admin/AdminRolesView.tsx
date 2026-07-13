@@ -2,7 +2,7 @@
 
 import { AdminBadge, AdminTabs } from "@/components/admin/AdminTabs";
 import { AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import {
   LIMITES_PLAN,
   PRECIOS_OFICIALES,
@@ -25,12 +25,12 @@ export function AdminRolesView() {
         <div className="grid gap-6 lg:grid-cols-2">
           <section
             className="rounded-2xl p-5"
-            style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+            style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
           >
-            <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+            <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
               Roles de plataforma
             </h2>
-            <p className="mt-1 text-xs" style={{ color: T.textMid }}>
+            <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
               Doc 12 §6.1 — equipo Darivo
             </p>
             <ul className="mt-4 flex flex-col gap-2">
@@ -38,10 +38,10 @@ export function AdminRolesView() {
                 <li
                   key={rol}
                   className="rounded-xl px-4 py-3 text-sm font-semibold"
-                  style={{ background: T.slate, color: T.text }}
+                  style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
                 >
                   Administrador Darivo
-                  <span className="ml-2 font-mono text-xs" style={{ color: T.textLight }}>
+                  <span className="ml-2 font-mono text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                     ({rol})
                   </span>
                 </li>
@@ -50,33 +50,33 @@ export function AdminRolesView() {
           </section>
           <section
             className="rounded-2xl p-5"
-            style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+            style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
           >
-            <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+            <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
               Roles del cliente
             </h2>
-            <p className="mt-1 text-xs" style={{ color: T.textMid }}>
+            <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
               Doc 12 §6.2–§6.3 · Visión §8
             </p>
             <ul className="mt-4 flex flex-col gap-2">
-              <li className="rounded-xl px-4 py-3" style={{ background: T.slate }}>
-                <p className="text-sm font-bold" style={{ color: T.text }}>
+              <li className="rounded-xl px-4 py-3" style={{ background: ADMIN_COLORS.slate }}>
+                <p className="text-sm font-bold" style={{ color: ADMIN_COLORS.text }}>
                   Gerente de Empresa
                 </p>
-                <p className="text-xs" style={{ color: T.textMid }}>
+                <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                   Administra empleados y permisos dentro de su empresa
                 </p>
               </li>
-              <li className="rounded-xl px-4 py-3" style={{ background: T.slate }}>
-                <p className="text-sm font-bold" style={{ color: T.text }}>
+              <li className="rounded-xl px-4 py-3" style={{ background: ADMIN_COLORS.slate }}>
+                <p className="text-sm font-bold" style={{ color: ADMIN_COLORS.text }}>
                   Empleado / Técnico
                 </p>
-                <p className="text-xs" style={{ color: T.textMid }}>
+                <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                   Trabajo diario en Móvil según permisos asignados
                 </p>
               </li>
             </ul>
-            <p className="mt-3 font-mono text-xs" style={{ color: T.textLight }}>
+            <p className="mt-3 font-mono text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               IDs: {ROLES_CLIENTE.join(" · ")}
             </p>
           </section>
@@ -85,7 +85,7 @@ export function AdminRolesView() {
 
       {tab === "Planes" && (
         <div>
-          <p className="mb-4 text-sm" style={{ color: T.textMid }}>
+          <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
             Catálogo oficial — administración completa en{" "}
             <strong>Gestión de Suscripciones</strong> (Doc 04 §6).
           </p>
@@ -98,24 +98,24 @@ export function AdminRolesView() {
                   <div
                     key={plan}
                     className="rounded-2xl p-5"
-                    style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+                    style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
                   >
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-black" style={{ color: T.text }}>
+                      <h3 className="text-lg font-black" style={{ color: ADMIN_COLORS.text }}>
                         {p.nombre}
                       </h3>
                       <AdminBadge label={plan} />
                     </div>
-                    <p className="mt-2 text-2xl font-black" style={{ color: T.blue }}>
+                    <p className="mt-2 text-2xl font-black" style={{ color: ADMIN_COLORS.purple }}>
                       S/ {p.mensual}
-                      <span className="text-sm font-bold" style={{ color: T.textMid }}>
+                      <span className="text-sm font-bold" style={{ color: ADMIN_COLORS.textMid }}>
                         /mes
                       </span>
                     </p>
-                    <p className="text-xs" style={{ color: T.textLight }}>
-                      Anual: S/ {p.anual}
+                    <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+                      Anual: {plan === "business" ? `S/ ${p.anual}` : "Pendiente"}
                     </p>
-                    <ul className="mt-4 text-xs" style={{ color: T.textMid }}>
+                    <ul className="mt-4 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                       {"cotizacionesMes" in limites && (
                         <li>Cotizaciones/mes: {limites.cotizacionesMes}</li>
                       )}
@@ -151,15 +151,15 @@ export function AdminRolesView() {
       {tab === "Permisos" && (
         <div
           className="rounded-2xl p-6"
-          style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
-          <h2 className="text-sm font-extrabold" style={{ color: T.text }}>
+          <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
             Matriz de permisos
           </h2>
           {MATRIZ_PERMISOS_APROBADA ? (
             <AdminTable headers={["Permiso", "Estado"]} rows={[]} vacio="Sin permisos configurados" />
           ) : (
-            <p className="mt-3 text-sm" style={{ color: T.textMid }}>
+            <p className="mt-3 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               Matriz detallada fila a fila — pendiente aprobación del propietario (Doc 12 §8).
               Gestión desde Empresa → Roles y Permisos cuando esté aprobada.
             </p>

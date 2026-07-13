@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { AdminBadge, AdminTabs } from "@/components/admin/AdminTabs";
 import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { AdminEmpresaRow } from "@/lib/admin-queries";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 import { cambiarPlanEmpresaAction, setEmpresaActivaAction } from "@/app/admin/empresas/actions";
@@ -95,7 +95,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
               value={buscar}
               onChange={(e) => setBuscar(e.target.value)}
               className="min-w-[200px] flex-1 rounded-xl border px-4 py-2.5 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             />
           </div>
           <AdminTable
@@ -111,7 +111,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
                   cambiarPlan(e.id, e.gerente_user_id, ev.target.value as PlanTipoPersistido)
                 }
                 className="rounded-lg border px-2 py-1 text-xs font-bold"
-                style={{ borderColor: T.slateD }}
+                style={{ borderColor: ADMIN_COLORS.slateD }}
               >
                 {PLANES_SELECCIONABLES.map((p) => (
                   <option key={p} value={p}>
@@ -133,13 +133,13 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
                 disabled={isPending}
                 onClick={() => toggleActiva(e.id, !e.activa)}
                 className="text-xs font-bold"
-                style={{ color: e.activa ? T.red : T.greenD }}
+                style={{ color: e.activa ? ADMIN_COLORS.red : ADMIN_COLORS.greenD }}
               >
                 {e.activa ? "Desactivar" : "Activar"}
               </button>,
             ])}
           />
-          <p className="mt-3 text-xs" style={{ color: T.textLight }}>
+          <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
             Fuente: tabla <span className="font-mono">empresas</span> (Supabase) — el estado
             activo/suspendida vive en <span className="font-mono">empresas.activo</span>, el plan
             en <span className="font-mono">perfiles.plan_tipo</span> vía{" "}
@@ -151,10 +151,10 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
       {tab === "Solicitudes" && (
         <div
           className="rounded-2xl p-8 text-center"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           <p className="text-sm">No hay solicitudes de empresa pendientes.</p>
-          <p className="mt-2 text-xs" style={{ color: T.textLight }}>
+          <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
             Flujo solicitudes — pendiente definición oficial (Doc 02 §9).
           </p>
         </div>
@@ -163,7 +163,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
       {tab === "Historial" && (
         <div
           className="rounded-2xl p-8 text-center"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           <p className="text-sm">Historial de cambios — pendiente auditoría BD.</p>
         </div>

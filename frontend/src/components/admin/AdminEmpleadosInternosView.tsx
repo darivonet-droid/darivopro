@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { AdminBadge, AdminTabs } from "@/components/admin/AdminTabs";
 import { AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { AdminPerfilRow } from "@/lib/admin-queries";
 
 const TABS = ["Empleados", "Invitaciones", "Actividad", "Historial"] as const;
@@ -45,7 +45,7 @@ export function AdminEmpleadosInternosView({ empleados }: AdminEmpleadosInternos
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
             className="mb-4 w-full max-w-md rounded-xl border px-4 py-2.5 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           <AdminTable
             headers={["Empleado", "Correo", "Estado", "Alta", "Acciones"]}
@@ -58,7 +58,7 @@ export function AdminEmpleadosInternosView({ empleados }: AdminEmpleadosInternos
               "—",
             ])}
           />
-          <p className="mt-3 text-xs" style={{ color: T.textLight }}>
+          <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
             Empleados internos Darivo — tabla dedicada pendiente BD (Doc 07 §9).
           </p>
         </>
@@ -67,7 +67,7 @@ export function AdminEmpleadosInternosView({ empleados }: AdminEmpleadosInternos
       {(tab === "Invitaciones" || tab === "Actividad" || tab === "Historial") && (
         <div
           className="rounded-2xl p-8 text-center text-sm"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           {tab} — pendiente tabla empleados internos BD.
         </div>

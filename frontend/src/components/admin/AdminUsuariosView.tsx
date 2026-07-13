@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { AdminBadge } from "@/components/admin/AdminTabs";
 import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { AdminPerfilRow } from "@/lib/admin-queries";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 import {
@@ -103,7 +103,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
     <div>
       {error && <AdminErrorBanner mensaje={error} />}
       {mensaje && !error && (
-        <div className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: T.greenPale, color: T.greenD }}>
+        <div className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD }}>
           ✓ {mensaje}
         </div>
       )}
@@ -122,13 +122,13 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           className="min-w-[220px] flex-1 rounded-xl border px-4 py-2.5 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         />
         <select
           value={filtroPlan}
           onChange={(e) => setFiltroPlan(e.target.value)}
           className="rounded-xl border px-3 py-2.5 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         >
           <option value="todos">Todos los planes</option>
           {PLANES_SELECCIONABLES.map((p) => (
@@ -139,7 +139,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
           value={filtroEstado}
           onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)}
           className="rounded-xl border px-3 py-2.5 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         >
           <option value="todos">Todos los estados</option>
           <option value="activo">Activos</option>
@@ -154,8 +154,8 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
           const bloqueado = estaBloqueado(u.bannedUntil);
           return [
             <div key="u">
-              <p className="font-semibold" style={{ color: T.text }}>{u.email || "—"}</p>
-              {u.razon_social && <p className="text-xs" style={{ color: T.textMid }}>{u.razon_social}</p>}
+              <p className="font-semibold" style={{ color: ADMIN_COLORS.text }}>{u.email || "—"}</p>
+              {u.razon_social && <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>{u.razon_social}</p>}
             </div>,
             <select
               key="plan"
@@ -163,7 +163,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
               disabled={isPending}
               onChange={(ev) => cambiarPlan(u, ev.target.value as PlanTipoPersistido)}
               className="rounded-lg border px-2 py-1 text-xs font-bold"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             >
               {PLANES_SELECCIONABLES.map((p) => (
                 <option key={p} value={p}>{labelPlan(p)}</option>
@@ -180,7 +180,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
                 disabled={isPending}
                 onClick={() => (bloqueado ? desbloquear(u) : bloquear(u))}
                 className="text-xs font-bold"
-                style={{ color: bloqueado ? T.greenD : T.red }}
+                style={{ color: bloqueado ? ADMIN_COLORS.greenD : ADMIN_COLORS.red }}
               >
                 {bloqueado ? "Desbloquear" : "Bloquear"}
               </button>
@@ -189,7 +189,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
                 disabled={isPending}
                 onClick={() => reenviarInvitacion(u)}
                 className="text-xs font-bold"
-                style={{ color: T.blue }}
+                style={{ color: ADMIN_COLORS.purple }}
               >
                 Reenviar invitación
               </button>
@@ -198,7 +198,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
                 disabled={isPending}
                 onClick={() => restablecerAcceso(u)}
                 className="text-xs font-bold"
-                style={{ color: T.amberD }}
+                style={{ color: ADMIN_COLORS.amberD }}
               >
                 Restablecer acceso
               </button>
@@ -206,7 +206,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
           ];
         })}
       />
-      <p className="mt-3 text-xs" style={{ color: T.textLight }}>
+      <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
         Fuente: <span className="font-mono">auth.users</span> (Supabase Auth) +{" "}
         <span className="font-mono">perfiles</span> — bloqueo vía{" "}
         <span className="font-mono">banned_until</span>, plan vía{" "}
