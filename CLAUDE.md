@@ -476,7 +476,23 @@ Corregido el hallazgo raíz (color de marca), sin tocar aún botones/paneles lat
 Además, en el mismo bloque:
 - **Precio anual Básico/Pro ya no se muestra como definido**: `admin/suscripciones/page.tsx` y `AdminRolesView.tsx` (pestaña Planes) ahora muestran "Pendiente" para Básico/Pro (Business sigue mostrando su precio real S/1200) — antes mostraban S/490/S/790, un cálculo mensual×10 sin confirmar por el propietario, contradiciendo `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 ("Pendiente"). **Hallazgo relacionado sin corregir, fuera de alcance de este fix:** ese mismo precio "inventado" (`PRECIOS_OFICIALES.basico.anual`/`.pro.anual` en `roles-planes-oficial.ts:70-71`) sigue **activo en checkout real** — `MiPlanCard.tsx` (Móvil) ofrece botones reales "Pagar anual Básico/Pro" que cobrarían ese monto vía dLocal, y `/precios` también lo muestra. Antes de que exista un cliente real pagando anual, el propietario debe confirmar el precio anual real de Básico/Pro (o decidir ocultar esos botones hasta tenerlo).
 - **`darivo_admin_empleados` ya conectado**: `fetchAdminEmpleadosInternos()` (`admin-queries.ts`) ya no filtra `perfiles` por el allowlist `DARIVO_ADMIN_EMAILS` — consulta la tabla real, mostrando nombre/cargo/departamento/activo reales + último acceso. Acciones por fila (Editar, Cambiar departamento) siguen pendientes.
-- **Usuarios (pantalla 03) ya tiene panel lateral derecho** (identidad + datos + acciones de administración, `16-SISTEMA-DE-DISEÑO-ADMIN.md` §7), columnas Contacto/Último acceso añadidas, filtro por método de acceso + "Limpiar filtros", y las 3 acciones por fila pasaron de enlaces de texto a botones-tarjeta (§9). Resto de pantallas (00, 02, 04, 06, 07, 08, 10, 11) **sin empezar todavía** — construir botones/acciones faltantes y paneles laterales derechos, en orden de prioridad a definir con el propietario.
+- **Usuarios (pantalla 03) ya tiene panel lateral derecho** (identidad + datos + acciones de administración, `16-SISTEMA-DE-DISEÑO-ADMIN.md` §7), columnas Contacto/Último acceso añadidas, filtro por método de acceso + "Limpiar filtros", y las 3 acciones por fila pasaron de enlaces de texto a botones-tarjeta (§9).
+
+### Siguiente paso — orden confirmado por el propietario 13/07/2026 (prioridad sobre Empresa)
+
+Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de retomar Empresa (Cotizaciones/Facturas/Cierre, pausado). Orden de ejecución (criterio del ejecutor, de más rápida a más grande):
+
+1. Dashboard (00) — bloques faltantes del header/gráfico/donut/acciones rápidas/footer
+2. Configuración (11) — secciones faltantes + panel lateral
+3. Empleados (07) — resto de botones/paneles (tabla ya conectada a `darivo_admin_empleados`)
+4. Partners (06) — toolbar de acciones masivas + panel lateral
+5. Empresas (02) — botones + panel lateral + filtros
+6. Suscripciones (04) — rediseño completo (tarjetas/paginación), sigue de solo lectura
+7. Catálogo Maestro (10) — CRUD completo, deuda técnica mayor, la más grande — al final
+
+Config. de APIs (08) **no** está en esta lista — la auditoría confirmó que su alcance de solo lectura es correcto según el MD, no es un gap real.
+
+Cada pantalla se verifica con `tsc`/`lint`/`build` + verificación visual real (sesión Admin logueada, Chrome MCP) antes de darse por cerrada.
 
 ## Bloqueado — no iniciar sin confirmación explícita
 
@@ -519,6 +535,8 @@ Mohamed confirmó el orden de trabajo (sesión continua, mismo día de la audito
 3. En cola, sin bloquear lo anterior, priorizadas por criterio del ejecutor: paneles laterales, toolbars de acciones masivas, Dashboard, Catálogo Maestro CRUD.
 
 Migración de Empresa a `ADMIN_COLORS` y decisión sobre "Roles personalizados" (§6.1 de Doc 11) siguen sin resolver — no forman parte de este bloque de trabajo.
+
+**⏸️ Pausado 13/07/2026 (mismo día):** Mohamed cambió la prioridad — terminar primero las 7 pantallas restantes de **Admin** (ver "Siguiente paso" en la sección de Admin, arriba) antes de retomar esto. Ningún código de Cotizaciones se llegó a escribir (se pausó en fase de plan, ver punto 1 arriba). Retomar aquí cuando Admin esté completo.
 
 ### Elementos de mockup descartados — no aplican al producto real
 
