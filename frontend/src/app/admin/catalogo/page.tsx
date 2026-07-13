@@ -1,5 +1,6 @@
 import { AdminShell } from "@/components/admin/AdminShell";
-import { AdminServiceRoleNotice, AdminTable } from "@/components/admin/AdminUi";
+import { AdminServiceRoleNotice } from "@/components/admin/AdminUi";
+import { AdminCatalogoView } from "@/components/admin/AdminCatalogoView";
 import { fetchAdminCatalogo } from "@/lib/admin-queries";
 
 export const dynamic = "force-dynamic";
@@ -15,25 +16,27 @@ export default async function AdminCatalogoPage() {
     );
   }
 
-  const { productos, categorias } = result.data;
+  const { productos, sectores, categorias, partidas } = result.data;
+  const productoId = productos[0]?.id;
+
+  if (!productoId) {
+    return (
+      <AdminShell titulo="Catálogo Maestro">
+        <p className="text-sm" style={{ color: "#64748B" }}>
+          No hay ningún producto registrado en <span className="font-mono">productos_master</span> —
+          el Catálogo Maestro necesita al menos uno para crear categorías (Doc 21).
+        </p>
+      </AdminShell>
+    );
+  }
 
   return (
     <AdminShell titulo="Catálogo Maestro">
-      <p className="mb-4 text-sm" style={{ color: "#64748B" }}>
-        Vista lectura — tablas `productos_master` y `catalogo_categorias_maestro`.
-        CRUD completo Catálogo Maestro pendiente Doc 21 (DT-02-02).
-      </p>
-      <p className="mb-2 text-sm font-extrabold">Productos ecosistema</p>
-      <AdminTable
-        headers={["Slug", "Nombre", "Descripción"]}
-        vacio="Sin productos"
-        rows={productos.map((p) => [p.slug, p.nombre, p.descripcion ?? "—"])}
-      />
-      <p className="mb-2 mt-6 text-sm font-extrabold">Categorías de servicio</p>
-      <AdminTable
-        headers={["ID", "Nombre"]}
-        vacio="Sin categorías"
-        rows={categorias.map((c) => [c.cat_id, c.nombre])}
+      <AdminCatalogoView
+        productoId={productoId}
+        sectores={sectores}
+        categoriasIniciales={categorias}
+        partidasIniciales={partidas}
       />
     </AdminShell>
   );
