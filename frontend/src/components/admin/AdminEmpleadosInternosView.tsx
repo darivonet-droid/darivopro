@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminBadge, AdminTabs, AdminNotice } from "@/components/admin/AdminTabs";
 import { AdminKpiCard, AdminTable, AdminCard } from "@/components/admin/AdminUi";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
+import { descargarCsv } from "@/lib/csv-export";
 import type { AdminEmpleadoInternoRow } from "@/lib/admin-queries";
 import {
   nuevoEmpleadoAction,
@@ -16,17 +17,6 @@ import {
 } from "@/app/admin/empleados/actions";
 
 const TABS = ["Empleados", "Invitaciones", "Actividad", "Historial de cambios"] as const;
-
-function descargarCsv(filename: string, filas: string[][]) {
-  const csv = filas.map((f) => f.map((c) => `"${(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 export function AdminEmpleadosInternosView({ empleados }: { empleados: AdminEmpleadoInternoRow[] }) {
   const router = useRouter();
