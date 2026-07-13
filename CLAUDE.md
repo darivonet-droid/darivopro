@@ -429,6 +429,46 @@ Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ve
 - ~~**Partner — visibilidad de comisiones**~~ ✅ **Resuelto 12/07/2026** (sesión continua siguiente): `mapPartner()` consulta `partner_comisiones_historial`, `PartnerPanel.tsx` muestra totales + listado.
 - **Partner — acceso tras suspensión:** `/partner` se gatea solo por allowlist de email (`DARIVO_PARTNER_EMAILS`), independiente de `partners.estado` — un Partner Suspendido con el email todavía en la allowlist conserva acceso de lectura completo al panel. Mismo gap de arquitectura ya documentado (jerarquía Suscripción→Producto→Rol→Permisos solo a medias, DT-04-02), no es una sorpresa nueva, pero vale la pena resolverlo si se activa esa jerarquía de verdad.
 
+## Auditoría MD↔código Admin (funcional + visual) — 13/07/2026
+
+Auditoría de las 11 pantallas oficiales de `.cursor/rules/02-darivo-pro-admin/` (00, 02–11). Aclaración de alcance confirmada por el propietario: **Admin tiene su propio diseño visual, separado de Fable 5** (que sigue siendo exclusivo de Móvil) — el diseño real de cada pantalla de Admin debe seguir la imagen oficial embebida en su MD, no un estilo genérico ni el de Fable 5.
+
+### Funcional (resumen — el detalle completo ya vive en las secciones de auditoría de arriba, 09/07 y 12/07/2026)
+
+Sin cambios respecto a lo ya registrado: Usuarios/Partners/Productos sólidos y verificados; Suscripciones correctamente de solo lectura (alcance documentado, no bug); Empleados internos usa `perfiles` genérico sin tabla dedicada (placeholder reconocido en el propio código, Doc 07 §9); Catálogo Maestro sin CRUD, reconocido como pendiente (Doc 21, DT-02-02); Configuración de APIs muestra correctamente las 3 APIs reales del MD (Supabase/OpenAI/dLocal), no las de marketing.
+
+### Visual — 9 de 11 pantallas con imagen oficial embebida auditadas (imagen vs. código real)
+
+Pantallas **05** (Edición de Productos) y **09** (Soporte) no tienen imagen embebida en su MD — 09 solo menciona el nombre de archivo con la nota "la imagen oficial será añadida por el propietario", nunca se llegó a insertar.
+
+**Hallazgo raíz, común a las 9 pantallas:** `frontend/src/lib/design-system/tokens.ts` es la paleta exclusiva de **Fable 5** (documentado en su propio encabezado) y `AdminShell.tsx`/`AdminUi.tsx` la importaban directamente sin tokens propios de color para Admin. Resultado: las 9 imágenes oficiales muestran sidebar claro/blanco con acento morado/violeta (`#7C3AED`), pero el código real renderizaba sidebar navy oscuro (`#0A1628`) + acento azul (`#2563EB`) — el mismo esquema de Fable 5/Móvil. Veredicto en las 9: **Diferencias reales** (no cosméticas menores).
+
+| # | Pantalla | Hallazgo visual principal (además del color raíz de arriba) |
+|---|---|---|
+| 00 | Dashboard | Faltan ~mitad de los bloques: buscador/notificaciones/avatar del header, gráfico de actividad, "Estado de soporte", donut de planes, "Acciones rápidas", footer. KPIs sin íconos. |
+| 02 | Empresas | Faltan casi todos los botones (Nueva empresa, Importar/Exportar, Publicar cambios, menú por fila). Sin panel lateral, sin filtro de estado/orden. Solo 2 estados en código vs. 3 en la imagen. |
+| 03 | Usuarios | Las 5 acciones del MD existen pero como enlaces de texto, no botones-tarjeta. Faltan columnas (Empresa, Contacto, Último acceso, Método), sin paginación, sin panel lateral. |
+| 04 | Suscripciones | Alcance de solo lectura correcto, pero visualmente es tabla de texto plano vs. mockup con tarjetas/iconos por plan/pestañas/panel lateral/paginación. |
+| 06 | Partners | Faltan botones globales Activar/Suspender/Filtros/Exportar y panel lateral "Información del partner". Nota aparte: la tabla de comisiones de la imagen usa el modelo viejo ya derogado por el propio MD — el código sigue correctamente el MD, no la imagen, en ese punto. |
+| 07 | Empleados | Columna "Acciones" de la tabla renderiza literalmente `—` (sin menú real). Faltan botones principales, header funcional, panel lateral, paginación. |
+| 08 | Config. de APIs | Sin ningún botón (Conectar/Ver estado/Desconectar de la imagen no existen — pantalla de solo lectura). La imagen oficial en sí muestra 4 APIs de marketing (Meta/TikTok/WhatsApp/ManyChat) que el propio MD excluye — el código sigue el MD correctamente, la imagen de referencia quedó desactualizada en ese punto. |
+| 10 | Catálogo Maestro | Módulo prácticamente sin construir: solo 2 tablas de solo lectura, sin pestañas/banner/acciones/panel lateral. |
+| 11 | Configuración | Solo 2 botones existen de los ~7 de la imagen. Faltan secciones completas (Acceso, Sesión, panel lateral). El propio MD dice "No modificar diseño/colores" respecto a la imagen — el desajuste de color contradice esa cláusula explícitamente. |
+
+### Fix aplicado — tokens de diseño propios de Admin (13/07/2026)
+
+Corregido el hallazgo raíz (color de marca), sin tocar aún botones/paneles laterales (siguiente paso, pantalla por pantalla):
+
+- **Nuevo** `ADMIN_COLORS` en `frontend/src/lib/design-system/admin-tokens.ts` — paleta propia de Admin (sidebar blanco `#FFFFFF`, acento morado `#7C3AED`/`#6D28D9`/pálido `#F5F3FF`, encabezado de tabla claro, resto de neutros/estado), completamente independiente de `tokens.ts` (que **no se tocó**, sigue siendo exclusivo de Fable 5/Móvil).
+- `AdminShell.tsx` y `AdminUi.tsx` migrados de `T` (tokens.ts/Fable 5) a `ADMIN_COLORS`: sidebar ahora claro con ítem activo en morado pálido/texto morado, encabezado de tabla claro con texto oscuro (antes navy con texto blanco), resaltado de fila activa en morado pálido (antes azul pálido).
+- Alcance intencionalmente limitado a estos 2 archivos compartidos (según lo acordado) — `AdminTabs.tsx` y las vistas por pantalla (`AdminEmpresasView.tsx`, etc.) siguen usando `T.blue` para pestañas activas y no se tocaron todavía; quedan para el siguiente paso.
+
+**Verificación:** `tsc --noEmit` limpio, `next lint` limpio (mismos 2 warnings preexistentes de `useCotizacion.ts`, sin relación), `next build` compila las 70 rutas sin errores. Verificación visual con sesión real logueada **no realizada** — bloqueada por la regla permanente de no escribir contraseñas en el navegador de preview (mismo bloqueo ya documentado en sesiones anteriores). Se intentó una ruta de previsualización temporal sin guard de auth para verificar solo el color; el clasificador de seguridad la bloqueó correctamente por debilitar el middleware de autenticación — revertida de inmediato, sin dejar rastro (`middleware.ts` y la ruta temporal ambos confirmados limpios). Pendiente: confirmación visual real la próxima vez que haya una sesión Admin logueada disponible.
+
+### Siguiente paso (pendiente, no iniciado)
+
+Por pantalla, en orden de prioridad a definir con el propietario: construir los botones/acciones faltantes y los paneles laterales derechos de cada una de las 9 pantallas, y extender `ADMIN_COLORS` a `AdminTabs.tsx` y a las vistas individuales (`AdminEmpresasView.tsx`, `AdminUsuariosView.tsx`, `AdminPartnersView.tsx`, `AdminEmpleadosInternosView.tsx`, etc.) para que las pestañas activas y demás acentos también usen el morado en vez del azul de Fable 5.
+
 ## Bloqueado — no iniciar sin confirmación explícita
 
 - Conexión API Claude/Anthropic para los Agentes IA 1 y 2: decisión de arquitectura pendiente (¿sustituye o convive con OpenAI?).
