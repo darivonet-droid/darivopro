@@ -571,6 +571,10 @@ Migración de Empresa a `ADMIN_COLORS` y decisión sobre "Roles personalizados" 
 
 **⏸️ Pausado 13/07/2026 (mismo día):** Mohamed cambió la prioridad — terminar primero las 7 pantallas restantes de **Admin** (ver "Siguiente paso" en la sección de Admin, arriba) antes de retomar esto. Ningún código de Cotizaciones se llegó a escribir (se pausó en fase de plan, ver punto 1 arriba). Retomar aquí cuando Admin esté completo.
 
+**▶️ Retomado 14/07/2026:** Mohamed autorizó continuar con Empresa aunque Partners/Empresas/Catálogo Maestro sigan bloqueados por el hallazgo de infraestructura (no es código, ver sección Admin). Orden: Cotizaciones → Facturas → Cierre.
+
+- ✅ **Cotizaciones (05)** — capa de presentación de escritorio reconstruida: wizard de 4 pasos dentro de `EmpresaShell`, Paso 1 con panel categorías (~240px) + panel partidas simultáneos (`05-MODULO-COTIZACIONES-EMPRESA.md` §4/§5.1), Pasos 2-4 en columna central. Toda la lógica de `NuevoCotizacionWizard.tsx` (Móvil) reutilizada sin tocar — nuevo componente `NuevoCotizacionWizardEscritorio.tsx` + ruta `/empresa/cotizaciones/nuevo`. Los 3 puntos de entrada reales (CTA/pills Inicio, "+ Nueva cotización"/Editar/Re-cotizar en ficha Cliente) ya enlazan ahí; Móvil no se tocó (prop `nuevaCotizacionHref` con default a su ruta). tsc/lint/build limpios. **Verificación visual interactiva pendiente**: no hay sesión de rol Gerente/Empresa en el navegador de esta sesión (solo Admin), y no corresponde iniciar sesión por credenciales — pendiente de que el propietario la confirme con su propia sesión.
+
 ### Elementos de mockup descartados — no aplican al producto real
 
 Los 8 módulos reales del sidebar de Empresa son, en este orden, exactamente los de `frontend/src/lib/empresa-modules.ts` (`EMPRESA_NAV`): **Inicio, Clientes, Facturas, Cierre, Calculadora inteligente (IA), Más, Empleados, Roles y Permisos**. "Cotizaciones" no es ítem de sidebar por diseño (§1/§3 de `05-MODULO-COTIZACIONES-EMPRESA.md`: acceso solo vía CTA en Inicio o ficha de Cliente).
