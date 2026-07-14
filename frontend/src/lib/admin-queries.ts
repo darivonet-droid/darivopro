@@ -4,6 +4,7 @@
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
+import { codeLine } from "@/lib/error-catalog";
 
 export type AdminPerfilRow = {
   id: string;
@@ -109,7 +110,7 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
       ingresosMes,
       nuevosRegistros,
       ticketsAbiertos,
-      ticketsAbiertosHint: "INC-A01 · DOC-01 pendiente",
+      ticketsAbiertosHint: codeLine("INC-A01"),
       recientes: recientes ?? [],
       actividad,
       distribucion: {

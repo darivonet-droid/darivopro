@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { CodeNotice } from "@/components/common/CodeNotice";
 import { T } from "@/lib/theme";
 import type { EstadoTicket } from "@/lib/soporte-types";
 
@@ -111,9 +112,7 @@ export function SoporteTicketsView({
                 Enviar
               </button>
             </div>
-            <p className="mt-2 text-[10px]" style={{ color: T.textLight }}>
-              Almacenamiento local — sincronización Admin pendiente (INC-A01 · DOC-01).
-            </p>
+            <CodeNotice code="INC-A01" className="mt-2" />
           </div>
         )}
 

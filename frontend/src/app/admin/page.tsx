@@ -5,6 +5,7 @@ import { AdminDashboardToolbar } from "@/components/admin/AdminDashboardToolbar"
 import { AdminActividadChart } from "@/components/admin/AdminActividadChart";
 import { AdminPlanesDonut } from "@/components/admin/AdminPlanesDonut";
 import { IconUsers, IconCreditCard, IconCash, IconUserPlus, IconTicket } from "@/components/admin/AdminIcons";
+import { CodeNotice } from "@/components/common/CodeNotice";
 import { fetchAdminDashboard } from "@/lib/admin-queries";
 import { fmtPEN } from "@/lib/utils";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
@@ -88,9 +89,7 @@ export default async function AdminDashboardPage({
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-            INC-A01 · pipeline de soporte pendiente de conectar (DOC-01)
-          </p>
+          <CodeNotice code="INC-A01" className="mt-3" />
         </AdminCard>
       </div>
 

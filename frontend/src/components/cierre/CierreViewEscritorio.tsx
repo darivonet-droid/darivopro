@@ -16,6 +16,7 @@
 import { useMemo, useRef, useState } from "react";
 import { fmtPEN } from "@/lib/utils";
 import { T, CIERRE_ACCENT } from "@/lib/design-system/tokens";
+import { CodeNotice } from "@/components/common/CodeNotice";
 import { useGastos, type Gasto } from "@/hooks/useGastos";
 import { CATEGORIAS_GASTO } from "@/components/cierre/CierreView";
 import type { GastoIAExtraccion } from "@/lib/gasto-ia";
@@ -306,6 +307,7 @@ function PanelDetalleGasto({ gasto, onCerrar }: { gasto: Gasto; onCerrar: () => 
         <p style={{ fontSize: 14, fontWeight: 900, color: T.text }}>Gasto</p>
         <button type="button" onClick={onCerrar} style={{ fontSize: 12, fontWeight: 700, color: T.textMid, background: "none", border: "none", cursor: "pointer" }}>✕ Cerrar</button>
       </div>
+      <CodeNotice code="PEND-001" detalle className="mb-3" />
       <div className="flex flex-col gap-3">
         {[
           ["Proveedor", gasto.proveedor],

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AdminNotice } from "@/components/admin/AdminTabs";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
+import { CodeNotice } from "@/components/common/CodeNotice";
 
 /**
  * Admin Soporte — INC-A01: API /api/soporte/tickets detenida (09-PANEL-ADMIN-SOPORTE.md §11).
@@ -11,12 +11,7 @@ import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 export function AdminSoporteView() {
   return (
     <div>
-      <AdminNotice>
-        <strong>INC-A01 — Detención conforme auditoría:</strong> el endpoint{" "}
-        <code className="font-mono text-xs">/api/soporte/tickets</code> fue eliminado por
-        contradicción con <code className="font-mono text-xs">09-PANEL-ADMIN-SOPORTE.md</code> §11
-        («No crear endpoints»). Devuelto al Agente 1 para decisión del propietario.
-      </AdminNotice>
+      <CodeNotice code="INC-A01" detalle className="mb-4" />
 
       <div
         className="rounded-2xl p-6"
@@ -30,10 +25,10 @@ export function AdminSoporteView() {
           local del dispositivo). La sincronización con Admin requiere decisión del propietario
           sobre DOC-01 antes de implementar cualquier mecanismo servidor.
         </p>
-        <p className="mt-3 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-          Acciones documentadas pendientes (INC-M01): Ver ticket · Responder ticket · Historial.
-          Filtro por plan (INC-B01). No implementables sin pipeline autorizado.
-        </p>
+        <div className="mt-3 flex flex-col gap-2">
+          <CodeNotice code="INC-M01" />
+          <CodeNotice code="INC-B01" />
+        </div>
         <Link
           href="/mas/soporte"
           className="mt-4 inline-block text-sm font-bold"
