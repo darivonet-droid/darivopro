@@ -11,7 +11,8 @@ import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { INV_STATUSES } from "@/lib/factura-utils";
-import { INV_STATUS_COLORS, T } from "@/lib/design-system/tokens";
+import { INV_STATUS_COLORS } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { fmtPEN } from "@/lib/utils";
 import type { Factura, InvStatus, Cotizacion } from "@/types";
 
@@ -61,16 +62,16 @@ function FilaFactura({ factura: f }: { factura: Factura }) {
     }
   };
 
-  const colorEstado = INV_STATUS_COLORS[f.invStatus] ?? T.textMid;
+  const colorEstado = INV_STATUS_COLORS[f.invStatus] ?? ADMIN_COLORS.textMid;
   const doc = f.clientRuc || f.clientDni || "—";
 
   return (
-    <tr style={{ borderBottom: `1px solid ${T.slateD}` }}>
-      <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: 12, color: T.textMid, fontWeight: 700 }}>{f.invNum}</td>
-      <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: T.text }}>{f.clientName}</td>
-      <td style={{ padding: "12px 16px", fontSize: 12, color: T.textMid }}>{doc}</td>
-      <td style={{ padding: "12px 16px", fontSize: 12, color: T.textMid }}>{f.invDate}</td>
-      <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 800, color: T.blue }}>{fmtPEN(f.totalFinal, f.sym)}</td>
+    <tr style={{ borderBottom: `1px solid ${ADMIN_COLORS.slateD}` }}>
+      <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: 12, color: ADMIN_COLORS.textMid, fontWeight: 700 }}>{f.invNum}</td>
+      <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.text }}>{f.clientName}</td>
+      <td style={{ padding: "12px 16px", fontSize: 12, color: ADMIN_COLORS.textMid }}>{doc}</td>
+      <td style={{ padding: "12px 16px", fontSize: 12, color: ADMIN_COLORS.textMid }}>{f.invDate}</td>
+      <td style={{ padding: "12px 16px", fontSize: 13, fontWeight: 800, color: ADMIN_COLORS.purple }}>{fmtPEN(f.totalFinal, f.sym)}</td>
       <td style={{ padding: "12px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 800, background: colorEstado + "18", color: colorEstado }}>
@@ -81,7 +82,7 @@ function FilaFactura({ factura: f }: { factura: Factura }) {
               type="button"
               onClick={marcarCobrada}
               disabled={cambiando}
-              style={{ fontSize: 11, fontWeight: 700, color: T.green, background: "none", border: "none", cursor: "pointer" }}
+              style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.green, background: "none", border: "none", cursor: "pointer" }}
             >
               {cambiando ? "…" : "→ Cobrada"}
             </button>
@@ -93,7 +94,7 @@ function FilaFactura({ factura: f }: { factura: Factura }) {
           type="button"
           onClick={verFactura}
           disabled={viendo}
-          style={{ padding: "7px 14px", borderRadius: 10, border: `1.5px solid ${T.slateD}`, background: T.white, color: T.text, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+          style={{ padding: "7px 14px", borderRadius: 10, border: `1.5px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white, color: ADMIN_COLORS.text, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
         >
           {viendo ? "Generando…" : "📄 Ver factura"}
         </button>
@@ -118,13 +119,13 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
       {/* Header (§5.1) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: 18, fontWeight: 900, color: T.text }}>Facturación</p>
-          <p style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
+          <p style={{ fontSize: 18, fontWeight: 900, color: ADMIN_COLORS.text }}>Facturación</p>
+          <p style={{ fontSize: 12, color: ADMIN_COLORS.textMid, marginTop: 2 }}>
             {facturas.length} factura{facturas.length !== 1 ? "s" : ""} · {fmtPEN(totalMonto)}
           </p>
         </div>
         {rucEmpresa && (
-          <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 800, background: T.greenPale, color: T.greenD, border: `1px solid ${T.green}44` }}>
+          <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 800, background: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD, border: `1px solid ${ADMIN_COLORS.green}44` }}>
             {rucEmpresa}
           </span>
         )}
@@ -139,7 +140,7 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
               key={c.label}
               type="button"
               onClick={() => setFiltro(c.status)}
-              style={{ flexShrink: 0, padding: "8px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, background: activo ? T.blue : T.slate, color: activo ? T.white : T.textMid }}
+              style={{ flexShrink: 0, padding: "8px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, background: activo ? ADMIN_COLORS.purple : ADMIN_COLORS.slate, color: activo ? ADMIN_COLORS.white : ADMIN_COLORS.textMid }}
             >
               {c.label}
             </button>
@@ -149,22 +150,22 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
 
       {/* Banner cotizaciones aprobadas (§5.3) */}
       {aprobados.length > 0 && (
-        <div style={{ borderRadius: 16, padding: 16, background: T.amberPale, border: `1.5px solid ${T.amber}` }}>
-          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, color: T.amberD }}>
+        <div style={{ borderRadius: 16, padding: 16, background: ADMIN_COLORS.amberPale, border: `1.5px solid ${ADMIN_COLORS.amber}` }}>
+          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.5, color: ADMIN_COLORS.amberD }}>
             ⚡ COTIZACIONES APROBADAS — CONVERTIR EN FACTURA
           </p>
           <div className="flex flex-col gap-2" style={{ marginTop: 10 }}>
             {aprobados.slice(0, 3).map((p) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 12, padding: "10px 14px", background: T.white }}>
+              <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 12, padding: "10px 14px", background: ADMIN_COLORS.white }}>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{p.clientName}</p>
-                  <p style={{ fontSize: 11, color: T.textMid }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.text }}>{p.clientName}</p>
+                  <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid }}>
                     {new Date(p.createdAt).toLocaleDateString("es-PE", { day: "numeric", month: "short" })} · {fmtPEN(p.totalFinal)}
                   </p>
                 </div>
                 <Link
                   href={`${nuevaFacturaHref}?cotizacion=${p.id}`}
-                  style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, color: T.white, background: T.green }}
+                  style={{ flexShrink: 0, padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.white, background: ADMIN_COLORS.green }}
                 >
                   ↺ Facturar
                 </Link>
@@ -178,7 +179,7 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
       <div>
         <Link
           href={nuevaFacturaHref}
-          style={{ display: "inline-flex", alignItems: "center", gap: 10, borderRadius: 14, padding: "12px 20px", background: T.blue, color: T.white, fontWeight: 800, fontSize: 13 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 10, borderRadius: 14, padding: "12px 20px", background: ADMIN_COLORS.purple, color: ADMIN_COLORS.white, fontWeight: 800, fontSize: 13 }}
         >
           + Nueva factura
           <span style={{ fontWeight: 500, fontSize: 11, opacity: 0.8 }}>Crear desde cero en 60 seg</span>
@@ -187,17 +188,17 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
 
       {/* Tabla principal (§5.5) */}
       {filtradas.length === 0 ? (
-        <div style={{ borderRadius: 16, padding: 48, textAlign: "center", background: T.white, border: `1px solid ${T.slateD}` }}>
+        <div style={{ borderRadius: 16, padding: 48, textAlign: "center", background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
           <p style={{ fontSize: 28, marginBottom: 8 }}>🧾</p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: T.textMid }}>Sin facturas todavía</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.textMid }}>Sin facturas todavía</p>
         </div>
       ) : (
-        <div style={{ borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", background: T.white }}>
+        <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", background: ADMIN_COLORS.white }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: T.slate, borderBottom: `1px solid ${T.slateD}` }}>
+              <tr style={{ background: ADMIN_COLORS.slate, borderBottom: `1px solid ${ADMIN_COLORS.slateD}` }}>
                 {["Número", "Cliente", "Doc.", "Fecha", "Total", "Estado", ""].map((h) => (
-                  <th key={h} style={{ padding: "10px 16px", textAlign: h === "" ? "right" : "left", fontSize: 10, fontWeight: 800, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  <th key={h} style={{ padding: "10px 16px", textAlign: h === "" ? "right" : "left", fontSize: 10, fontWeight: 800, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>
                     {h}
                   </th>
                 ))}

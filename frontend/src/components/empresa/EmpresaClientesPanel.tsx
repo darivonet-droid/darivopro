@@ -9,7 +9,7 @@ import { ClienteFichaView } from "@/components/clientes/ClienteFichaView";
 import { useClientes } from "@/hooks/useClientes";
 import { useAppStore } from "@/store/useAppStore";
 import { soloDigitos, fmtPEN } from "@/lib/utils";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { Cliente, Cotizacion, Factura } from "@/types";
 
 export interface EmpresaClienteRow {
@@ -100,7 +100,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
   return (
     <div className="flex items-start gap-4">
       <div className="min-w-0 flex-1">
-        <p className="mb-3 text-xs font-semibold" style={{ color: T.textMid }}>
+        <p className="mb-3 text-xs font-semibold" style={{ color: ADMIN_COLORS.textMid }}>
           {clientes.length} contacto{clientes.length !== 1 ? "s" : ""}
         </p>
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -110,13 +110,13 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
             className="min-w-[200px] flex-1 rounded-xl border px-4 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           <button
             type="button"
             onClick={() => setMostrandoForm((v) => !v)}
             className="rounded-xl px-4 py-2 text-sm font-bold text-white"
-            style={{ background: T.blue }}
+            style={{ background: ADMIN_COLORS.purple }}
           >
             + Nuevo cliente
           </button>
@@ -125,14 +125,14 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
         {mostrandoForm && (
           <div
             className="mb-4 flex flex-col gap-2 rounded-2xl p-4"
-            style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+            style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
           >
             <input
               placeholder="Nombre *"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               className="rounded-xl border px-3 py-2 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
               autoFocus
             />
             <input
@@ -140,22 +140,22 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
               value={form.telefono}
               onChange={(e) => setForm({ ...form, telefono: e.target.value })}
               className="rounded-xl border px-3 py-2 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             />
             <input
               placeholder="Ciudad (opcional)"
               value={form.ciudad}
               onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
               className="rounded-xl border px-3 py-2 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             />
-            {errorForm && <p className="text-xs font-semibold" style={{ color: T.red }}>{errorForm}</p>}
+            {errorForm && <p className="text-xs font-semibold" style={{ color: ADMIN_COLORS.red }}>{errorForm}</p>}
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => { setMostrandoForm(false); setErrorForm(null); }}
                 className="flex-1 rounded-xl px-3 py-2 text-sm font-bold"
-                style={{ background: T.slate, color: T.textMid }}
+                style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
               >
                 Cancelar
               </button>
@@ -164,7 +164,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
                 disabled={loading}
                 onClick={guardarNuevo}
                 className="flex-1 rounded-xl px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
-                style={{ background: T.blue }}
+                style={{ background: ADMIN_COLORS.purple }}
               >
                 {loading ? "Guardando…" : "Guardar cliente"}
               </button>
@@ -181,7 +181,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
             <div key="nombre" className="flex items-center gap-2.5">
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black text-white"
-                style={{ background: `linear-gradient(135deg, ${T.blue}, ${T.blueL})` }}
+                style={{ background: `linear-gradient(135deg, ${ADMIN_COLORS.purple}, #9333EA)` }}
               >
                 {c.nombre.slice(0, 2).toUpperCase()}
               </div>
@@ -190,7 +190,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
             c.ciudad ?? "—",
             c.cotizacionesCount,
             c.aprobadasCount,
-            <span key="total" className="font-bold" style={{ color: T.blue }}>
+            <span key="total" className="font-bold" style={{ color: ADMIN_COLORS.purple }}>
               {fmtPEN(c.totalFinal)}
             </span>,
           ])}
@@ -200,19 +200,19 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
       {selectedId && (
         <div
           className="w-[380px] shrink-0 rounded-2xl p-4"
-          style={{ background: T.slate, border: `1px solid ${T.slateD}`, maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}
+          style={{ background: ADMIN_COLORS.slate, border: `1px solid ${ADMIN_COLORS.slateD}`, maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}
         >
           <button
             type="button"
             onClick={cerrarFicha}
             className="mb-3 text-sm font-bold"
-            style={{ color: T.blue }}
+            style={{ color: ADMIN_COLORS.purple }}
           >
             ← Clientes
           </button>
 
           {fichaLoading || !ficha ? (
-            <p className="py-8 text-center text-sm" style={{ color: T.textMid }}>
+            <p className="py-8 text-center text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               Cargando ficha…
             </p>
           ) : (
@@ -220,16 +220,16 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
               <div className="mb-4 flex items-center gap-3">
                 <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-black text-white"
-                  style={{ background: `linear-gradient(135deg, ${T.blue}, ${T.blueL})` }}
+                  style={{ background: `linear-gradient(135deg, ${ADMIN_COLORS.purple}, #9333EA)` }}
                 >
                   {ficha.cliente.nombre.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-base font-black" style={{ color: T.text }}>
+                  <p className="text-base font-black" style={{ color: ADMIN_COLORS.text }}>
                     {ficha.cliente.nombre}
                   </p>
                   {ficha.cliente.ciudad && (
-                    <p className="text-xs" style={{ color: T.textMid }}>{ficha.cliente.ciudad}</p>
+                    <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>{ficha.cliente.ciudad}</p>
                   )}
                 </div>
               </div>

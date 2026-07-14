@@ -3,7 +3,7 @@ import { MasOpcionesList } from "@/components/mas/MasOpcionesList";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 export default async function EmpresaMasPage() {
   const mod = empresaModulo("mas");
@@ -16,7 +16,7 @@ export default async function EmpresaMasPage() {
 
   return (
     <EmpresaShell titulo={mod.label}>
-      <p className="mb-4 text-sm" style={{ color: T.textMid }}>
+      <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
         Categorías · Mis Tarifas · Empresa — reutiliza flujo Móvil
       </p>
       {/* Layout 2 columnas (07-MODULO-MAS-EMPRESA.md §4): contenido + panel

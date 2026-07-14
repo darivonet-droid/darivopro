@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CATEGORIAS } from "@/lib/catalog";
 import { fmtPEN } from "@/lib/utils";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 type CotizacionReciente = {
   id: string;
@@ -40,16 +40,16 @@ export function EmpresaInicioView({
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <p className="text-xs font-semibold" style={{ color: T.textMid }}>
+        <p className="text-xs font-semibold" style={{ color: ADMIN_COLORS.textMid }}>
           ¡Hola de nuevo!
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h2 className="text-2xl font-black" style={{ color: T.text }}>
+          <h2 className="text-2xl font-black" style={{ color: ADMIN_COLORS.text }}>
             {nombre}
           </h2>
           <span
             className="rounded-full px-3 py-1 text-[10px] font-extrabold tracking-wider text-white"
-            style={{ background: T.blue }}
+            style={{ background: ADMIN_COLORS.purple }}
           >
             DARIVO PRO
           </span>
@@ -57,15 +57,15 @@ export function EmpresaInicioView({
       </header>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <KpiCard label="Aprobados" value={aprobados} color={T.green} />
-        <KpiCard label="Pendientes" value={pendientes} color={T.amber} />
-        <KpiCard label="Ingresos S/" value={fmtPEN(ingresos)} color={T.blue} small />
+        <KpiCard label="Aprobados" value={aprobados} color={ADMIN_COLORS.green} />
+        <KpiCard label="Pendientes" value={pendientes} color={ADMIN_COLORS.amber} />
+        <KpiCard label="Ingresos S/" value={fmtPEN(ingresos)} color={ADMIN_COLORS.purple} small />
       </div>
 
       <Link
         href="/empresa/cotizaciones/nuevo"
         className="flex items-center gap-4 rounded-2xl p-5"
-        style={{ background: `linear-gradient(135deg, ${T.blue}, ${T.blueL})` }}
+        style={{ background: `linear-gradient(135deg, ${ADMIN_COLORS.purple}, #9333EA)` }}
       >
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl"
@@ -89,12 +89,12 @@ export function EmpresaInicioView({
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>
+        <h3 className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
           Capítulos de obra
         </h3>
         <div className="flex flex-wrap gap-2">
           {CATEGORIAS.map((cat) => {
-            const chip = CHIP[cat.id] ?? { bg: T.slate, color: T.textMid };
+            const chip = CHIP[cat.id] ?? { bg: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid };
             return (
               <Link
                 key={cat.id}
@@ -112,15 +112,15 @@ export function EmpresaInicioView({
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-extrabold" style={{ color: T.text }}>
+          <h3 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
             Últimas cotizaciones
           </h3>
-          <Link href="/empresa/clientes" className="text-xs font-bold" style={{ color: T.blue }}>
+          <Link href="/empresa/clientes" className="text-xs font-bold" style={{ color: ADMIN_COLORS.purple }}>
             Ver todos →
           </Link>
         </div>
         {recientes.length === 0 ? (
-          <p className="rounded-2xl py-8 text-center text-sm" style={{ color: T.textMid, background: T.slate }}>
+          <p className="rounded-2xl py-8 text-center text-sm" style={{ color: ADMIN_COLORS.textMid, background: ADMIN_COLORS.slate }}>
             Aún no tienes cotizaciones
           </p>
         ) : (
@@ -145,9 +145,9 @@ function KpiCard({
   return (
     <div
       className="rounded-2xl p-5"
-      style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
     >
-      <p className="text-xs font-bold uppercase" style={{ color: T.textMid }}>
+      <p className="text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
         {label}
       </p>
       <p
@@ -165,10 +165,10 @@ function QuickLink({ href, label, emoji }: { href: string; label: string; emoji:
     <Link
       href={href}
       className="flex items-center gap-3 rounded-2xl px-4 py-4"
-      style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
     >
       <span className="text-xl">{emoji}</span>
-      <span className="text-sm font-extrabold" style={{ color: T.text }}>
+      <span className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
         {label}
       </span>
     </Link>
@@ -177,29 +177,33 @@ function QuickLink({ href, label, emoji }: { href: string; label: string; emoji:
 
 function AdminStyleTable({ recientes }: { recientes: CotizacionReciente[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl" style={{ border: `1px solid ${T.slateD}` }}>
+    <div className="overflow-hidden rounded-2xl" style={{ border: `1px solid ${ADMIN_COLORS.slateD}` }}>
       <table className="w-full text-left text-sm">
-        <thead style={{ background: T.navyLight }}>
+        <thead style={{ background: ADMIN_COLORS.tableHeaderBg }}>
           <tr>
             {["Cliente", "Resumen", "Importe S/", "Estado"].map((h) => (
-              <th key={h} className="px-4 py-3 text-xs font-bold text-white">
+              <th
+                key={h}
+                className="px-4 py-3 text-xs font-bold uppercase"
+                style={{ color: ADMIN_COLORS.tableHeaderText }}
+              >
                 {h}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody style={{ background: T.white }}>
+        <tbody style={{ background: ADMIN_COLORS.white }}>
           {recientes.map((p) => (
-            <tr key={p.id} style={{ borderTop: `1px solid ${T.slateD}` }}>
-              <td className="px-4 py-3 font-bold" style={{ color: T.text }}>
+            <tr key={p.id} style={{ borderTop: `1px solid ${ADMIN_COLORS.slateD}` }}>
+              <td className="px-4 py-3 font-bold" style={{ color: ADMIN_COLORS.text }}>
                 {p.client_name}
               </td>
-              <td className="px-4 py-3" style={{ color: T.textMid }}>
+              <td className="px-4 py-3" style={{ color: ADMIN_COLORS.textMid }}>
                 {p.itemCount > 0
                   ? `${p.itemCount} partida${p.itemCount !== 1 ? "s" : ""}`
                   : new Date(p.created_at).toLocaleDateString("es-PE")}
               </td>
-              <td className="px-4 py-3 font-extrabold" style={{ color: T.blue }}>
+              <td className="px-4 py-3 font-extrabold" style={{ color: ADMIN_COLORS.purple }}>
                 {fmtPEN(Number(p.total_final ?? 0))}
               </td>
               <td className="px-4 py-3">
@@ -215,9 +219,9 @@ function AdminStyleTable({ recientes }: { recientes: CotizacionReciente[] }) {
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string; label: string }> = {
-    Aprobado: { bg: T.greenPale, color: T.greenD, label: "Aprobado" },
-    "Pendiente de firma": { bg: T.amberPale, color: T.amberD, label: "Pendiente" },
-    Borrador: { bg: T.slate, color: T.textMid, label: "Borrador" },
+    Aprobado: { bg: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD, label: "Aprobado" },
+    "Pendiente de firma": { bg: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD, label: "Pendiente" },
+    Borrador: { bg: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid, label: "Borrador" },
   };
   const s = map[status] ?? map.Borrador;
   return (

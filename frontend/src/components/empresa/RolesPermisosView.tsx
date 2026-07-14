@@ -17,7 +17,7 @@ import {
 } from "@/lib/roles-personalizados";
 import { UPGRADE_MENSAJES, verificarLimiteRolesPersonalizados } from "@/lib/plan-limits";
 import { createClient } from "@/lib/supabase/client";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 function labelPlan(plan: PlanTipoPersistido): string {
   if (plan === "basico") return `Plan ${PRECIOS_OFICIALES.basico.nombre}`;
@@ -31,12 +31,12 @@ function PlanLimiteAlert({ razon }: { razon: keyof typeof UPGRADE_MENSAJES }) {
   return (
     <div
       className="rounded-xl px-4 py-3"
-      style={{ background: T.amberPale, border: `1px solid ${T.amber}44` }}
+      style={{ background: ADMIN_COLORS.amberPale, border: `1px solid ${ADMIN_COLORS.amber}44` }}
     >
-      <p className="text-sm font-extrabold" style={{ color: T.amberD }}>
+      <p className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.amberD }}>
         {msg.titulo}
       </p>
-      <p className="mt-1 text-xs leading-relaxed" style={{ color: T.textMid }}>
+      <p className="mt-1 text-xs leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
         {msg.subtitulo}
       </p>
     </div>
@@ -250,26 +250,26 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
       <div>
         <span
           className="inline-block rounded-full px-3 py-1 text-xs font-bold"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           🔒 Solo lectura
         </span>
       </div>
       <div
         className="flex items-start gap-3 rounded-2xl p-4"
-        style={{ background: T.purplePale, border: `1px solid ${T.purple}33` }}
+        style={{ background: ADMIN_COLORS.purplePale, border: `1px solid ${ADMIN_COLORS.purple}33` }}
       >
         <span
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black text-white"
-          style={{ background: T.purple }}
+          style={{ background: ADMIN_COLORS.purple }}
         >
           i
         </span>
         <div>
-          <p className="text-sm font-extrabold" style={{ color: T.text }}>
+          <p className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
             Este módulo es exclusivo para el rol de Gerente.
           </p>
-          <p className="mt-0.5 text-xs" style={{ color: T.textMid }}>
+          <p className="mt-0.5 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
             Solo los gerentes pueden ver y administrar los permisos de los empleados.
           </p>
         </div>
@@ -277,19 +277,19 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
 
       <div
         className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4"
-        style={{ background: T.bluePale, border: `1px solid ${T.blue}33` }}
+        style={{ background: ADMIN_COLORS.purplePale, border: `1px solid ${ADMIN_COLORS.purple}33` }}
       >
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
+          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: ADMIN_COLORS.textMid }}>
             Plan contratado (consulta)
           </p>
-          <p className="text-lg font-black" style={{ color: T.text }}>
+          <p className="text-lg font-black" style={{ color: ADMIN_COLORS.text }}>
             {labelPlan(planTipo)}
           </p>
         </div>
         <span
           className="rounded-full px-3 py-1 text-xs font-bold"
-          style={{ background: T.white, color: T.blue }}
+          style={{ background: ADMIN_COLORS.white, color: ADMIN_COLORS.purple }}
         >
           Fuente: Admin Suscripciones · 04 §6
         </span>
@@ -298,19 +298,19 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
       {esBusiness && (
         <div
           className="rounded-2xl p-5"
-          style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-extrabold" style={{ color: T.text }}>
+              <p className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
                 Roles personalizados
               </p>
-              <p className="mt-1 text-xs leading-relaxed" style={{ color: T.textMid }}>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
                 Solo plan Business. Crea plantillas de permisos reutilizables y asígnalas a uno o
                 varios Técnicos (Doc 11 §6.1).
               </p>
               {limiteInfo && (
-                <p className="mt-2 text-xs font-semibold" style={{ color: T.textLight }}>
+                <p className="mt-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.textLight }}>
                   Roles activos: {limiteInfo.activos}
                   {limiteInfo.limite !== null ? ` / ${limiteInfo.limite}` : " (sin límite configurado)"}
                 </p>
@@ -321,7 +321,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                 type="button"
                 onClick={() => void abrirCrear()}
                 className="rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-                style={{ background: T.blue }}
+                style={{ background: ADMIN_COLORS.purple }}
               >
                 + Crear rol personalizado
               </button>
@@ -331,7 +331,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
           {alertaLimite && <div className="mt-4"><PlanLimiteAlert razon="roles_personalizados_limite" /></div>}
 
           {!empresaId && !cargando && (
-            <p className="mt-4 text-sm" style={{ color: T.textMid }}>
+            <p className="mt-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               No se encontró la entidad empresa vinculada a tu cuenta. Completa el onboarding o
               contacta soporte.
             </p>
@@ -340,9 +340,9 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
           {mostrarForm && (
             <div
               className="mt-4 rounded-xl p-4"
-              style={{ background: T.slate, border: `1px solid ${T.slateD}` }}
+              style={{ background: ADMIN_COLORS.slate, border: `1px solid ${ADMIN_COLORS.slateD}` }}
             >
-              <p className="mb-3 text-sm font-extrabold" style={{ color: T.text }}>
+              <p className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
                 {editandoId ? "Editar rol personalizado" : "Nuevo rol personalizado"}
               </p>
               <input
@@ -350,7 +350,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
-                style={{ borderColor: T.slateD, background: T.white }}
+                style={{ borderColor: ADMIN_COLORS.slateD, background: ADMIN_COLORS.white }}
               />
               <textarea
                 placeholder="Descripción (opcional)"
@@ -358,9 +358,9 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={2}
                 className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-                style={{ borderColor: T.slateD, background: T.white }}
+                style={{ borderColor: ADMIN_COLORS.slateD, background: ADMIN_COLORS.white }}
               />
-              <p className="mb-2 text-xs font-bold" style={{ color: T.textMid }}>
+              <p className="mb-2 text-xs font-bold" style={{ color: ADMIN_COLORS.textMid }}>
                 Permisos (catálogo §5.2 — toggles sobre funcionalidades existentes)
               </p>
               <div className="mb-3 flex flex-col gap-2">
@@ -368,7 +368,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                   <label
                     key={mod}
                     className="flex cursor-pointer items-center gap-2 text-sm"
-                    style={{ color: T.text }}
+                    style={{ color: ADMIN_COLORS.text }}
                   >
                     <input
                       type="checkbox"
@@ -380,7 +380,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                 ))}
               </div>
               {errorForm && (
-                <p className="mb-2 text-xs font-semibold" style={{ color: T.red }}>
+                <p className="mb-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.red }}>
                   {errorForm}
                 </p>
               )}
@@ -389,7 +389,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                   type="button"
                   onClick={resetForm}
                   className="flex-1 rounded-xl py-2 text-sm font-bold"
-                  style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+                  style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
                 >
                   Cancelar
                 </button>
@@ -398,7 +398,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                   disabled={guardando}
                   onClick={() => void guardarRol()}
                   className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
-                  style={{ background: T.blue }}
+                  style={{ background: ADMIN_COLORS.purple }}
                 >
                   {guardando ? "Guardando…" : editandoId ? "Guardar cambios" : "Crear rol"}
                 </button>
@@ -409,15 +409,15 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
           {asignacionRolId && (
             <div
               className="mt-4 rounded-xl p-4"
-              style={{ background: T.bluePale, border: `1px solid ${T.blue}33` }}
+              style={{ background: ADMIN_COLORS.purplePale, border: `1px solid ${ADMIN_COLORS.purple}33` }}
             >
-              <p className="mb-2 text-sm font-extrabold" style={{ color: T.text }}>
+              <p className="mb-2 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
                 Asignar técnicos a «{roles.find((r) => r.id === asignacionRolId)?.nombre}»
               </p>
               {tecnicos.length === 0 ? (
-                <p className="text-xs" style={{ color: T.textMid }}>
+                <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                   No hay técnicos en la base de datos.{" "}
-                  <Link href="/empresa/empleados" className="font-bold underline" style={{ color: T.blue }}>
+                  <Link href="/empresa/empleados" className="font-bold underline" style={{ color: ADMIN_COLORS.purple }}>
                     Ir a Empleados
                   </Link>
                 </p>
@@ -427,7 +427,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                     <label
                       key={t.id}
                       className="flex cursor-pointer items-center gap-2 text-sm"
-                      style={{ color: T.text }}
+                      style={{ color: ADMIN_COLORS.text }}
                     >
                       <input
                         type="checkbox"
@@ -436,7 +436,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                       />
                       {t.nombre} · {t.email}
                       {t.estado !== "Activo" && (
-                        <span className="text-xs" style={{ color: T.textLight }}>
+                        <span className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                           ({t.estado})
                         </span>
                       )}
@@ -449,7 +449,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                   type="button"
                   onClick={() => setAsignacionRolId(null)}
                   className="flex-1 rounded-xl py-2 text-sm font-bold"
-                  style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+                  style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
                 >
                   Cancelar
                 </button>
@@ -458,7 +458,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                   disabled={guardando || tecnicos.length === 0}
                   onClick={() => void guardarAsignacion()}
                   className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
-                  style={{ background: T.blue }}
+                  style={{ background: ADMIN_COLORS.purple }}
                 >
                   {guardando ? "Guardando…" : "Guardar asignación"}
                 </button>
@@ -467,13 +467,13 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
           )}
 
           {cargando ? (
-            <p className="mt-4 text-sm" style={{ color: T.textMid }}>
+            <p className="mt-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               Cargando roles…
             </p>
           ) : roles.length === 0 && empresaId ? (
             <p
               className="mt-4 rounded-xl px-3 py-3 text-xs font-semibold"
-              style={{ background: T.slate, color: T.textMid }}
+              style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
             >
               Aún no hay roles personalizados. Crea el primero para especializar permisos de tus
               Técnicos.
@@ -482,9 +482,9 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead>
-                  <tr style={{ borderBottom: `2px solid ${T.slateD}` }}>
+                  <tr style={{ borderBottom: `2px solid ${ADMIN_COLORS.slateD}` }}>
                     {["Rol", "Permisos activos", "Técnicos", "Estado", "Acciones"].map((h) => (
-                      <th key={h} className="py-2 pr-3 text-xs font-extrabold" style={{ color: T.textMid }}>
+                      <th key={h} className="py-2 pr-3 text-xs font-extrabold" style={{ color: ADMIN_COLORS.textMid }}>
                         {h}
                       </th>
                     ))}
@@ -495,21 +495,21 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                     const activos = MODULOS_PERMISO_ROL.filter((m) => rol.permisos[m]).length;
                     const asignados = tecnicos.filter((t) => t.rol_personalizado_id === rol.id).length;
                     return (
-                      <tr key={rol.id} style={{ borderBottom: `1px solid ${T.slateD}` }}>
+                      <tr key={rol.id} style={{ borderBottom: `1px solid ${ADMIN_COLORS.slateD}` }}>
                         <td className="py-3 pr-3">
-                          <p className="font-semibold" style={{ color: T.text }}>
+                          <p className="font-semibold" style={{ color: ADMIN_COLORS.text }}>
                             {rol.nombre}
                           </p>
                           {rol.descripcion && (
-                            <p className="text-xs" style={{ color: T.textLight }}>
+                            <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                               {rol.descripcion}
                             </p>
                           )}
                         </td>
-                        <td className="py-3 pr-3 text-xs" style={{ color: T.textMid }}>
+                        <td className="py-3 pr-3 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                           {activos} / {MODULOS_PERMISO_ROL.length}
                         </td>
-                        <td className="py-3 pr-3 text-xs font-semibold" style={{ color: T.blue }}>
+                        <td className="py-3 pr-3 text-xs font-semibold" style={{ color: ADMIN_COLORS.purple }}>
                           {asignados}
                         </td>
                         <td className="py-3 pr-3">
@@ -520,13 +520,13 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                         </td>
                         <td className="py-3">
                           <div className="flex flex-wrap gap-2 text-xs font-bold">
-                            <button type="button" style={{ color: T.blue }} onClick={() => abrirEditar(rol)}>
+                            <button type="button" style={{ color: ADMIN_COLORS.purple }} onClick={() => abrirEditar(rol)}>
                               Editar
                             </button>
-                            <button type="button" style={{ color: T.greenD }} onClick={() => abrirAsignacion(rol.id)}>
+                            <button type="button" style={{ color: ADMIN_COLORS.greenD }} onClick={() => abrirAsignacion(rol.id)}>
                               Asignar
                             </button>
-                            <button type="button" style={{ color: T.red }} onClick={() => void eliminarRol(rol.id)}>
+                            <button type="button" style={{ color: ADMIN_COLORS.red }} onClick={() => void eliminarRol(rol.id)}>
                               Eliminar
                             </button>
                           </div>
@@ -543,18 +543,18 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
 
       <div
         className="rounded-2xl p-5"
-        style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+        style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
       >
-        <p className="text-sm font-extrabold" style={{ color: T.text }}>
+        <p className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
           Matriz de permisos por empleado
         </p>
-        <p className="mt-1 text-xs leading-relaxed" style={{ color: T.textMid }}>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
           El Gerente activa o desactiva permisos de cada Técnico. Los permisos nunca superan
           el plan contratado (Visión §8 · Admin §16).
         </p>
         <p
           className="mt-3 rounded-xl px-3 py-2 text-xs font-semibold"
-          style={{ background: T.amberPale, color: T.amberD }}
+          style={{ background: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD }}
         >
           Matriz detallada fila a fila — pendiente aprobación del propietario (Doc 11 §5.2 · Admin §8).
           No se inventan permisos en código hasta dicha aprobación.
@@ -563,25 +563,25 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead>
-              <tr style={{ borderBottom: `2px solid ${T.slateD}` }}>
-                <th className="py-3 pr-4 font-extrabold" style={{ color: T.text }}>
+              <tr style={{ borderBottom: `2px solid ${ADMIN_COLORS.slateD}` }}>
+                <th className="py-3 pr-4 font-extrabold" style={{ color: ADMIN_COLORS.text }}>
                   Funcionalidad
                 </th>
-                <th className="py-3 font-extrabold" style={{ color: T.textMid }}>
+                <th className="py-3 font-extrabold" style={{ color: ADMIN_COLORS.textMid }}>
                   Técnicos (columnas al activar empleados)
                 </th>
               </tr>
             </thead>
             <tbody>
               {MODULOS_PERMISO_ROL.map((mod) => (
-                <tr key={mod} style={{ borderBottom: `1px solid ${T.slateD}` }}>
-                  <td className="py-3 pr-4 font-semibold" style={{ color: T.text }}>
+                <tr key={mod} style={{ borderBottom: `1px solid ${ADMIN_COLORS.slateD}` }}>
+                  <td className="py-3 pr-4 font-semibold" style={{ color: ADMIN_COLORS.text }}>
                     {mod}
                   </td>
                   <td className="py-3">
                     <span
                       className="inline-block rounded-lg px-3 py-1 text-xs font-bold"
-                      style={{ background: T.slate, color: T.textLight }}
+                      style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textLight }}
                     >
                       Toggle — pendiente matriz
                     </span>
@@ -593,7 +593,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
         </div>
       </div>
 
-      <p className="text-xs" style={{ color: T.textLight }}>
+      <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
         Entrada alternativa: Módulo Empleados → «Editar permisos» (Doc 10 · pendiente implementación).
       </p>
     </div>

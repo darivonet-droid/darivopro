@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AdminBadge } from "@/components/admin/AdminTabs";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import {
   actualizarDatosEmpleado,
   actualizarEstadoEmpleado,
@@ -147,7 +147,7 @@ export function EmpresaEmpleadosView() {
 
   return (
     <div>
-      <p className="mb-4 text-sm" style={{ color: T.textMid }}>
+      <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
         Gestión de técnicos de su empresa — Doc 10-MODULO-EMPLEADOS-EMPRESA.
       </p>
 
@@ -156,7 +156,7 @@ export function EmpresaEmpleadosView() {
           type="button"
           onClick={() => setMostrarForm(true)}
           className="rounded-xl px-4 py-2.5 text-sm font-bold text-white"
-          style={{ background: T.blue }}
+          style={{ background: ADMIN_COLORS.purple }}
         >
           + Invitar empleado
         </button>
@@ -166,19 +166,19 @@ export function EmpresaEmpleadosView() {
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
           className="min-w-[200px] flex-1 rounded-xl border px-4 py-2 text-sm"
-          style={{ borderColor: T.slateD }}
+          style={{ borderColor: ADMIN_COLORS.slateD }}
         />
         <Link
           href="/empresa/roles"
           className="rounded-xl px-4 py-2.5 text-sm font-bold"
-          style={{ border: `1px solid ${T.slateD}`, color: T.blue }}
+          style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.purple }}
         >
           Editar permisos →
         </Link>
       </div>
 
       {!empresaId && !cargando && (
-        <p className="mb-4 text-sm" style={{ color: T.textMid }}>
+        <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
           No se encontró la entidad empresa vinculada a tu cuenta. Completa el onboarding o
           contacta soporte.
         </p>
@@ -187,14 +187,14 @@ export function EmpresaEmpleadosView() {
       {mostrarForm && (
         <div
           className="mb-4 rounded-2xl p-4"
-          style={{ background: T.white, border: `1px solid ${T.slateD}` }}
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
           <input
             placeholder="Nombre"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           <input
             placeholder="Email"
@@ -202,17 +202,17 @@ export function EmpresaEmpleadosView() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           <input
             placeholder="Teléfono (opcional)"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-            style={{ borderColor: T.slateD }}
+            style={{ borderColor: ADMIN_COLORS.slateD }}
           />
           {errorForm && (
-            <p className="mb-2 text-xs font-semibold" style={{ color: T.red }}>
+            <p className="mb-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.red }}>
               {errorForm}
             </p>
           )}
@@ -221,7 +221,7 @@ export function EmpresaEmpleadosView() {
               type="button"
               onClick={() => setMostrarForm(false)}
               className="flex-1 rounded-xl py-2 text-sm font-bold"
-              style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+              style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
             >
               Cancelar
             </button>
@@ -230,12 +230,12 @@ export function EmpresaEmpleadosView() {
               disabled={guardando || !empresaId}
               onClick={() => void invitar()}
               className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
-              style={{ background: T.blue }}
+              style={{ background: ADMIN_COLORS.purple }}
             >
               {guardando ? "Guardando…" : "Enviar invitación"}
             </button>
           </div>
-          <p className="mt-2 text-xs" style={{ color: T.textLight }}>
+          <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
             Se envía un correo real de invitación para que el técnico cree su contraseña y
             acceda a Móvil. Queda con estado «Invitación pendiente» hasta que acepte, y disponible
             como Técnico asignable en Roles y Permisos.
@@ -246,36 +246,40 @@ export function EmpresaEmpleadosView() {
       {cargando ? (
         <div
           className="rounded-2xl py-12 text-center text-sm"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           Cargando empleados…
         </div>
       ) : filtrados.length === 0 ? (
         <div
           className="rounded-2xl py-12 text-center text-sm"
-          style={{ background: T.slate, color: T.textMid }}
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
         >
           No hay empleados registrados
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl" style={{ border: `1px solid ${T.slateD}` }}>
+        <div className="overflow-x-auto rounded-2xl" style={{ border: `1px solid ${ADMIN_COLORS.slateD}` }}>
           <table className="w-full min-w-[760px] text-left text-sm">
-            <thead style={{ background: T.navyLight }}>
+            <thead style={{ background: ADMIN_COLORS.tableHeaderBg }}>
               <tr>
                 {["Empleado", "Contacto", "Rol", "Permisos", "Estado", "Última actividad", "Acciones"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-xs font-bold text-white">
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-xs font-bold uppercase"
+                    style={{ color: ADMIN_COLORS.tableHeaderText }}
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody style={{ background: T.white }}>
+            <tbody style={{ background: ADMIN_COLORS.white }}>
               {filtrados.map((e) => (
-                <tr key={e.id} style={{ borderTop: `1px solid ${T.slateD}` }}>
-                  <td className="px-4 py-3 font-semibold" style={{ color: T.text }}>
+                <tr key={e.id} style={{ borderTop: `1px solid ${ADMIN_COLORS.slateD}` }}>
+                  <td className="px-4 py-3 font-semibold" style={{ color: ADMIN_COLORS.text }}>
                     {e.nombre}
                   </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: T.textMid }}>
+                  <td className="px-4 py-3 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                     {e.email}
                     {e.telefono && <span className="block">{e.telefono}</span>}
                   </td>
@@ -285,7 +289,7 @@ export function EmpresaEmpleadosView() {
                       value={e.rol_personalizado_id ?? ""}
                       onChange={(ev) => void cambiarRolPersonalizado(e.id, ev.target.value)}
                       className="rounded-lg border px-2 py-1.5 text-xs"
-                      style={{ borderColor: T.slateD, color: T.text }}
+                      style={{ borderColor: ADMIN_COLORS.slateD, color: ADMIN_COLORS.text }}
                     >
                       <option value="">Sin rol personalizado</option>
                       {roles.map((r) => (
@@ -307,14 +311,14 @@ export function EmpresaEmpleadosView() {
                       }
                     />
                   </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: T.textLight }}>
+                  <td className="px-4 py-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                     {formatoUltimaActividad(e.ultima_actividad)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2 text-xs font-bold">
                       <button
                         type="button"
-                        style={{ color: T.blue }}
+                        style={{ color: ADMIN_COLORS.purple }}
                         onClick={() => abrirEdicion(e)}
                       >
                         Editar
@@ -322,7 +326,7 @@ export function EmpresaEmpleadosView() {
                       {e.estado !== "Activo" && (
                         <button
                           type="button"
-                          style={{ color: T.greenD }}
+                          style={{ color: ADMIN_COLORS.greenD }}
                           onClick={() => void cambiarEstado(e.id, "Activo")}
                         >
                           Activar
@@ -331,7 +335,7 @@ export function EmpresaEmpleadosView() {
                       {e.estado !== "Inactivo" && (
                         <button
                           type="button"
-                          style={{ color: T.red }}
+                          style={{ color: ADMIN_COLORS.red }}
                           onClick={() => void cambiarEstado(e.id, "Inactivo")}
                         >
                           Desactivar
@@ -353,9 +357,9 @@ export function EmpresaEmpleadosView() {
         >
           <div
             className="w-full max-w-sm rounded-2xl p-5"
-            style={{ background: T.white }}
+            style={{ background: ADMIN_COLORS.white }}
           >
-            <h2 className="mb-3 text-sm font-bold" style={{ color: T.text }}>
+            <h2 className="mb-3 text-sm font-bold" style={{ color: ADMIN_COLORS.text }}>
               Editar empleado
             </h2>
             <input
@@ -363,21 +367,21 @@ export function EmpresaEmpleadosView() {
               value={editNombre}
               onChange={(ev) => setEditNombre(ev.target.value)}
               className="mb-2 w-full rounded-xl border px-3 py-2 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             />
             <input
               placeholder="Teléfono (opcional)"
               value={editTelefono}
               onChange={(ev) => setEditTelefono(ev.target.value)}
               className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
-              style={{ borderColor: T.slateD }}
+              style={{ borderColor: ADMIN_COLORS.slateD }}
             />
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setEditandoId(null)}
                 className="flex-1 rounded-xl py-2 text-sm font-bold"
-                style={{ border: `1px solid ${T.slateD}`, color: T.textMid }}
+                style={{ border: `1px solid ${ADMIN_COLORS.slateD}`, color: ADMIN_COLORS.textMid }}
               >
                 Cancelar
               </button>
@@ -386,7 +390,7 @@ export function EmpresaEmpleadosView() {
                 disabled={guardandoEdicion || !editNombre.trim()}
                 onClick={() => void guardarEdicion()}
                 className="flex-[2] rounded-xl py-2 text-sm font-bold text-white disabled:opacity-60"
-                style={{ background: T.blue }}
+                style={{ background: ADMIN_COLORS.purple }}
               >
                 {guardandoEdicion ? "Guardando…" : "Guardar cambios"}
               </button>

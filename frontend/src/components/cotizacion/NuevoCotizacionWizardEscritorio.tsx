@@ -17,7 +17,7 @@ import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
 import { compartirPDF } from "@/lib/share";
 import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
-import { T } from "@/lib/design-system/tokens";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { LineaCotizacion, Capitulo, Partida } from "@/types";
 
 // Navegación Construcción → subcategorías (05 v1.6 · Doc 21 §15 — solo UI, cat_ids de catalog.ts)
@@ -67,7 +67,7 @@ function StepDotsClaro({ current, total = 4 }: { current: number; total?: number
             width: i === current ? 20 : 6,
             height: 6,
             borderRadius: 3,
-            background: i === current ? T.blue : i < current ? T.green : T.slateD,
+            background: i === current ? ADMIN_COLORS.purple : i < current ? ADMIN_COLORS.green : ADMIN_COLORS.slateD,
             transition: "all 0.15s",
           }}
         />
@@ -207,7 +207,7 @@ export function NuevoCotizacionWizardEscritorio() {
           basePrice: Number(it.base_price ?? 0),
           unit: String(it.unit ?? ""),
           qty: String(it.qty ?? (it.calc_type === "fixed" ? 1 : "")),
-          catColor: cap?.color ?? T.blue,
+          catColor: cap?.color ?? ADMIN_COLORS.purple,
           catEmoji: cap?.emoji ?? "📋",
         };
       });
@@ -459,7 +459,7 @@ export function NuevoCotizacionWizardEscritorio() {
   /** Panel de categorías — izquierda, ~240px (MD §4/§5.1) */
   const renderPanelCategorias = () => (
     <div style={{ width: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: 6 }}>
-      <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>
         Categorías
       </p>
 
@@ -468,27 +468,27 @@ export function NuevoCotizacionWizardEscritorio() {
         const isOpen = selCat === CONSTRUCCION_ID;
         const selCount = basket.filter((b) => construccionSubs.some((s) => s.partidas.some((p) => p.id === b.svcId))).length;
         return (
-          <div key={CONSTRUCCION_ID} style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : T.slateD}` }}>
+          <div key={CONSTRUCCION_ID} style={{ borderRadius: 12, overflow: "hidden", border: `1.5px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : ADMIN_COLORS.slateD}` }}>
             <button
               type="button"
               onClick={() => { setSelCat(isOpen ? null : CONSTRUCCION_ID); setSelSubCat(null); }}
-              style={{ width: "100%", padding: "10px 12px", background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : T.white, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
+              style={{ width: "100%", padding: "10px 12px", background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : ADMIN_COLORS.white, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
             >
               <span style={{ fontSize: 20, lineHeight: 1 }}>{cap.emoji}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
-                <p style={{ fontSize: 10, color: T.textMid }}>
+                <p style={{ fontSize: 13, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : ADMIN_COLORS.text }}>{cap.nombre}</p>
+                <p style={{ fontSize: 10, color: ADMIN_COLORS.textMid }}>
                   {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""}` : `${construccionSubs.length} subcategorías`}
                 </p>
               </div>
               {selCount > 0 && (
-                <div style={{ width: 18, height: 18, borderRadius: 9, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Ic d={checkPath} color={T.white} size={10} />
+                <div style={{ width: 18, height: 18, borderRadius: 9, background: ADMIN_COLORS.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Ic d={checkPath} color={ADMIN_COLORS.white} size={10} />
                 </div>
               )}
             </button>
             {isOpen && (
-              <div style={{ background: T.white, borderTop: `1px solid ${cap.color}20`, padding: "6px 8px 8px" }}>
+              <div style={{ background: ADMIN_COLORS.white, borderTop: `1px solid ${cap.color}20`, padding: "6px 8px 8px" }}>
                 {SUBCATEGORIAS_CONSTRUCCION.filter((sub) => construccionSubs.some((c) => c.id === sub.id)).map((sub) => {
                   const subCap = construccionSubs.find((c) => c.id === sub.id)!;
                   const subSel = basket.filter((b) => subCap.partidas.some((p) => p.id === b.svcId)).length;
@@ -498,12 +498,12 @@ export function NuevoCotizacionWizardEscritorio() {
                       key={sub.id}
                       type="button"
                       onClick={() => setSelSubCat(sub.id)}
-                      style={{ width: "100%", padding: "9px 10px", marginBottom: 4, borderRadius: 10, border: `1.5px solid ${active ? subCap.color : subSel > 0 ? subCap.color + "50" : T.slateD}`, background: active ? subCap.color + "10" : subSel > 0 ? subCap.color + "08" : T.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}
+                      style={{ width: "100%", padding: "9px 10px", marginBottom: 4, borderRadius: 10, border: `1.5px solid ${active ? subCap.color : subSel > 0 ? subCap.color + "50" : ADMIN_COLORS.slateD}`, background: active ? subCap.color + "10" : subSel > 0 ? subCap.color + "08" : ADMIN_COLORS.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}
                     >
                       <span style={{ fontSize: 17 }}>{sub.emoji}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 12, fontWeight: 800, color: T.text }}>{sub.nombre}</p>
-                        <p style={{ fontSize: 10, color: T.textMid }}>{subCap.partidas.length} partidas</p>
+                        <p style={{ fontSize: 12, fontWeight: 800, color: ADMIN_COLORS.text }}>{sub.nombre}</p>
+                        <p style={{ fontSize: 10, color: ADMIN_COLORS.textMid }}>{subCap.partidas.length} partidas</p>
                       </div>
                       {subSel > 0 && <span style={{ fontSize: 11, fontWeight: 800, color: subCap.color }}>{subSel}</span>}
                     </button>
@@ -523,18 +523,18 @@ export function NuevoCotizacionWizardEscritorio() {
             key={cap.id}
             type="button"
             onClick={() => { setSelCat(isOpen ? null : cap.id); setSelSubCat(null); }}
-            style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : T.slateD}`, background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : T.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
+            style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : ADMIN_COLORS.slateD}`, background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : ADMIN_COLORS.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
           >
             <span style={{ fontSize: 20, lineHeight: 1 }}>{cap.emoji}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
-              <p style={{ fontSize: 10, color: T.textMid }}>
+              <p style={{ fontSize: 13, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : ADMIN_COLORS.text }}>{cap.nombre}</p>
+              <p style={{ fontSize: 10, color: ADMIN_COLORS.textMid }}>
                 {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""}` : `${cap.partidas.length} partidas`}
               </p>
             </div>
             {selCount > 0 && (
-              <div style={{ width: 18, height: 18, borderRadius: 9, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Ic d={checkPath} color={T.white} size={10} />
+              <div style={{ width: 18, height: 18, borderRadius: 9, background: ADMIN_COLORS.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Ic d={checkPath} color={ADMIN_COLORS.white} size={10} />
               </div>
             )}
           </button>
@@ -547,16 +547,16 @@ export function NuevoCotizacionWizardEscritorio() {
   const renderPanelPartidas = () => {
     if (!catActiva) {
       return (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 16, border: `1.5px dashed ${T.slateD}`, minHeight: 320, background: T.white }}>
-          <p style={{ fontSize: 13, color: T.textMid }}>Selecciona una categoría a la izquierda para ver sus partidas.</p>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 16, border: `1.5px dashed ${ADMIN_COLORS.slateD}`, minHeight: 320, background: ADMIN_COLORS.white }}>
+          <p style={{ fontSize: 13, color: ADMIN_COLORS.textMid }}>Selecciona una categoría a la izquierda para ver sus partidas.</p>
         </div>
       );
     }
     return (
-      <div style={{ flex: 1, background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", borderBottom: `1px solid ${T.slateD}`, display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ flex: 1, background: ADMIN_COLORS.white, borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: `1px solid ${ADMIN_COLORS.slateD}`, display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 18 }}>{catActiva.emoji}</span>
-          <p style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{catActiva.nombre}</p>
+          <p style={{ fontSize: 14, fontWeight: 800, color: ADMIN_COLORS.text }}>{catActiva.nombre}</p>
         </div>
         <div>
           {catActiva.partidas.map((p, i) => {
@@ -568,19 +568,19 @@ export function NuevoCotizacionWizardEscritorio() {
                 onClick={() => toggleSvc(catActiva, p)}
                 style={{
                   width: "100%", padding: "13px 16px",
-                  borderBottom: i < catActiva.partidas.length - 1 ? `1px solid ${T.slate}` : "none",
-                  border: "none", background: sel ? catActiva.color + "0A" : T.white,
+                  borderBottom: i < catActiva.partidas.length - 1 ? `1px solid ${ADMIN_COLORS.slate}` : "none",
+                  border: "none", background: sel ? catActiva.color + "0A" : ADMIN_COLORS.white,
                   cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, textAlign: "left",
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: sel ? 800 : 600, color: sel ? catActiva.color : T.text }}>{p.nombre}</p>
-                  <p style={{ fontSize: 12, color: T.textMid, marginTop: 1 }}>
+                  <p style={{ fontSize: 14, fontWeight: sel ? 800 : 600, color: sel ? catActiva.color : ADMIN_COLORS.text }}>{p.nombre}</p>
+                  <p style={{ fontSize: 12, color: ADMIN_COLORS.textMid, marginTop: 1 }}>
                     {p.calcType === "fixed" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
                   </p>
                 </div>
-                <div style={{ width: 30, height: 30, borderRadius: 9, background: sel ? catActiva.color : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Ic d={sel ? checkPath : plusPath} color={sel ? T.white : T.textMid} size={14} />
+                <div style={{ width: 30, height: 30, borderRadius: 9, background: sel ? catActiva.color : ADMIN_COLORS.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Ic d={sel ? checkPath : plusPath} color={sel ? ADMIN_COLORS.white : ADMIN_COLORS.textMid} size={14} />
                 </div>
               </button>
             );
@@ -597,20 +597,20 @@ export function NuevoCotizacionWizardEscritorio() {
       {/* Toolbar del wizard: volver + StepDots + contador (Paso 1) */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <Link href={backHref} style={{ fontSize: 12, fontWeight: 700, color: T.blue }}>
+          <Link href={backHref} style={{ fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple }}>
             ← Volver
           </Link>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 800, color: T.text }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: ADMIN_COLORS.text }}>
               {editandoId ? "Editar cotización" : "Nueva cotización"}
             </p>
-            <p style={{ fontSize: 11, color: T.textMid }}>{phaseSubtitle}</p>
+            <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid }}>{phaseSubtitle}</p>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {basket.length > 0 && phase === "cats" && (
-            <div style={{ width: 26, height: 26, borderRadius: 13, background: T.blue, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: T.white, fontSize: 12, fontWeight: 900 }}>{basket.length}</span>
+            <div style={{ width: 26, height: 26, borderRadius: 13, background: ADMIN_COLORS.purple, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: ADMIN_COLORS.white, fontSize: 12, fontWeight: 900 }}>{basket.length}</span>
             </div>
           )}
           <StepDotsClaro current={phaseStep} total={4} />
@@ -632,23 +632,23 @@ export function NuevoCotizacionWizardEscritorio() {
             <button
               type="button"
               onClick={() => { setSelCat(null); setSelSubCat(null); setPhase("cats"); }}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue }}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple }}
             >
               ← Partidas
             </button>
           </div>
-          <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 16 }}>
+          <div style={{ background: ADMIN_COLORS.white, borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", marginBottom: 16 }}>
             {Object.entries(groupedItems).map(([catLabel, its], gi) => {
               const cap = sortedCatalogo.find((c) => c.nombre === catLabel);
               const chapTotal = its.reduce((a, it) => a + calcItem(it).subtotal, 0);
               return (
                 <div key={catLabel}>
-                  <div style={{ background: (cap?.color || T.blue) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${T.slateD}` : "none" }}>
+                  <div style={{ background: (cap?.color || ADMIN_COLORS.purple) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${ADMIN_COLORS.slateD}` : "none" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 15 }}>{cap?.emoji || "📋"}</span>
-                      <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || T.blue, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
+                      <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || ADMIN_COLORS.purple, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
                     </div>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || T.blue }}>{fmtPEN(chapTotal)}</p>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || ADMIN_COLORS.purple }}>{fmtPEN(chapTotal)}</p>
                   </div>
                   <div className="grid gap-0" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
                     {its.map((it) => {
@@ -656,16 +656,16 @@ export function NuevoCotizacionWizardEscritorio() {
                       const { subtotal } = calcItem(it);
                       const calcTypeKey = it.calcType === "m2" ? "m2" : it.calcType === "unit" ? "unit" : it.calcType === "hour" ? "hour" : "fixed";
                       return (
-                        <div key={it.svcId} style={{ padding: "11px 16px", borderBottom: `1px solid ${T.slate}`, borderRight: `1px solid ${T.slate}` }}>
+                        <div key={it.svcId} style={{ padding: "11px 16px", borderBottom: `1px solid ${ADMIN_COLORS.slate}`, borderRight: `1px solid ${ADMIN_COLORS.slate}` }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: it.calcType === "fixed" ? 0 : 8 }}>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1.3, flex: 1 }}>{it.svcLabel}</p>
-                            <p style={{ fontSize: 13, fontWeight: 800, color: T.text, flexShrink: 0 }}>{fmtPEN(subtotal)}</p>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: ADMIN_COLORS.text, lineHeight: 1.3, flex: 1 }}>{it.svcLabel}</p>
+                            <p style={{ fontSize: 13, fontWeight: 800, color: ADMIN_COLORS.text, flexShrink: 0 }}>{fmtPEN(subtotal)}</p>
                           </div>
                           {it.calcType === "fixed" ? (
-                            <p style={{ fontSize: 11, color: T.textMid }}>Precio fijo · S/ {it.basePrice}</p>
+                            <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid }}>Precio fijo · S/ {it.basePrice}</p>
                           ) : (
                             <div>
-                              <p style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 4 }}>{controlLabel(it.calcType)}</p>
+                              <p style={{ fontSize: 10, fontWeight: 700, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 4 }}>{controlLabel(it.calcType)}</p>
                               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                                 <input
                                   type="text"
@@ -673,14 +673,14 @@ export function NuevoCotizacionWizardEscritorio() {
                                   value={it.qty}
                                   onChange={(e) => updateQty(idx, e.target.value)}
                                   placeholder="0"
-                                  style={{ flex: 1, padding: "9px 10px", borderRadius: 10, fontSize: 16, fontWeight: 800, border: `1.5px solid ${parseFloat(it.qty) > 0 ? cap?.color || T.blue : T.slateD}`, outline: "none", color: T.text, background: T.slate, textAlign: "center", fontFamily: "inherit" }}
+                                  style={{ flex: 1, padding: "9px 10px", borderRadius: 10, fontSize: 16, fontWeight: 800, border: `1.5px solid ${parseFloat(it.qty) > 0 ? cap?.color || ADMIN_COLORS.purple : ADMIN_COLORS.slateD}`, outline: "none", color: ADMIN_COLORS.text, background: ADMIN_COLORS.slate, textAlign: "center", fontFamily: "inherit" }}
                                 />
-                                <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid, minWidth: 28 }}>{it.unit}</span>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.textMid, minWidth: 28 }}>{it.unit}</span>
                               </div>
                               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
                                 {(PRESETS[calcTypeKey] || []).map((n) => (
                                   <button key={n} type="button" onClick={() => updateQty(idx, String(n))}
-                                    style={{ padding: "5px 10px", borderRadius: 20, border: `1.5px solid ${String(it.qty) === String(n) ? cap?.color || T.blue : T.slateD}`, background: String(it.qty) === String(n) ? (cap?.color || T.blue) + "12" : T.white, cursor: "pointer", fontSize: 12, fontWeight: 800, color: String(it.qty) === String(n) ? cap?.color || T.blue : T.textMid }}>
+                                    style={{ padding: "5px 10px", borderRadius: 20, border: `1.5px solid ${String(it.qty) === String(n) ? cap?.color || ADMIN_COLORS.purple : ADMIN_COLORS.slateD}`, background: String(it.qty) === String(n) ? (cap?.color || ADMIN_COLORS.purple) + "12" : ADMIN_COLORS.white, cursor: "pointer", fontSize: 12, fontWeight: 800, color: String(it.qty) === String(n) ? cap?.color || ADMIN_COLORS.purple : ADMIN_COLORS.textMid }}>
                                     {n}
                                   </button>
                                 ))}
@@ -695,14 +695,14 @@ export function NuevoCotizacionWizardEscritorio() {
               );
             })}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: T.bluePale, borderRadius: 14, padding: "14px 18px" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Total parcial</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: T.blue }}>{fmtPEN(totalFinal)}</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: ADMIN_COLORS.purplePale, borderRadius: 14, padding: "14px 18px" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.text }}>Total parcial</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: ADMIN_COLORS.purple }}>{fmtPEN(totalFinal)}</span>
             <button
               type="button"
               onClick={goToResumen}
               disabled={!cantidadesCompleto}
-              style={{ padding: "10px 22px", borderRadius: 12, border: "none", cursor: cantidadesCompleto ? "pointer" : "not-allowed", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 13, fontWeight: 800, opacity: cantidadesCompleto ? 1 : 0.5 }}
+              style={{ padding: "10px 22px", borderRadius: 12, border: "none", cursor: cantidadesCompleto ? "pointer" : "not-allowed", background: `linear-gradient(135deg,${ADMIN_COLORS.purple},#9333EA)`, color: ADMIN_COLORS.white, fontSize: 13, fontWeight: 800, opacity: cantidadesCompleto ? 1 : 0.5 }}
             >
               Continuar → Resumen
             </button>
@@ -717,16 +717,16 @@ export function NuevoCotizacionWizardEscritorio() {
             <button
               type="button"
               onClick={() => setPhase("cantidades")}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue }}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple }}
             >
               ← Cantidades
             </button>
           </div>
 
-          <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 22, padding: "28px 26px 24px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
+          <div style={{ background: `linear-gradient(148deg,${ADMIN_COLORS.purple} 0%,#9333EA 100%)`, borderRadius: 22, padding: "28px 26px 24px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: 90, background: "rgba(255,255,255,0.06)" }} />
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, position: "relative" }}>Total cotización</p>
-            <p style={{ color: T.white, fontSize: 58, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
+            <p style={{ color: ADMIN_COLORS.white, fontSize: 58, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
             <div style={{ display: "flex", gap: 24, marginTop: 16, position: "relative" }}>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Ejecución material</p>
@@ -740,30 +740,30 @@ export function NuevoCotizacionWizardEscritorio() {
             </div>
           </div>
 
-          <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.slateD}`, overflow: "hidden", marginBottom: 16 }}>
+          <div style={{ background: ADMIN_COLORS.white, borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", marginBottom: 16 }}>
             {Object.entries(groupedItems).map(([catLabel, its], gi) => {
               const cap = sortedCatalogo.find((c) => c.nombre === catLabel);
               const chapTotal = its.reduce((a, it) => a + calcItem(it).subtotal, 0);
               return (
                 <div key={catLabel}>
-                  <div style={{ background: (cap?.color || T.blue) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${T.slateD}` : "none" }}>
+                  <div style={{ background: (cap?.color || ADMIN_COLORS.purple) + "10", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: gi > 0 ? `1px solid ${ADMIN_COLORS.slateD}` : "none" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 15 }}>{cap?.emoji || "📋"}</span>
-                      <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || T.blue, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
+                      <p style={{ fontSize: 12, fontWeight: 800, color: cap?.color || ADMIN_COLORS.purple, textTransform: "uppercase", letterSpacing: 0.4 }}>{catLabel}</p>
                     </div>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || T.blue }}>{fmtPEN(chapTotal)}</p>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: cap?.color || ADMIN_COLORS.purple }}>{fmtPEN(chapTotal)}</p>
                   </div>
                   {its.map((it) => {
                     const { subtotal } = calcItem(it);
                     return (
-                      <div key={it.svcId} style={{ padding: "11px 16px", borderBottom: `1px solid ${T.slate}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                      <div key={it.svcId} style={{ padding: "11px 16px", borderBottom: `1px solid ${ADMIN_COLORS.slate}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                         <div>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1.3 }}>{it.svcLabel}</p>
-                          <p style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: ADMIN_COLORS.text, lineHeight: 1.3 }}>{it.svcLabel}</p>
+                          <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid, marginTop: 2 }}>
                             {it.calcType === "fixed" ? `Precio fijo · S/ ${it.basePrice}` : `${it.qty} ${it.unit} · S/ ${it.basePrice}/${it.unit}`}
                           </p>
                         </div>
-                        <p style={{ fontSize: 13, fontWeight: 800, color: T.text, flexShrink: 0 }}>{fmtPEN(subtotal)}</p>
+                        <p style={{ fontSize: 13, fontWeight: 800, color: ADMIN_COLORS.text, flexShrink: 0 }}>{fmtPEN(subtotal)}</p>
                       </div>
                     );
                   })}
@@ -772,15 +772,15 @@ export function NuevoCotizacionWizardEscritorio() {
             })}
           </div>
 
-          <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ background: ADMIN_COLORS.white, borderRadius: 14, border: `1px solid ${ADMIN_COLORS.slateD}`, padding: "14px 16px", marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Ajustar mano de obra</span>
-              <span style={{ fontSize: 15, fontWeight: 900, color: T.blue }}>{margin}% · {fmtPEN(totalLabor)}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.text }}>Ajustar mano de obra</span>
+              <span style={{ fontSize: 15, fontWeight: 900, color: ADMIN_COLORS.purple }}>{margin}% · {fmtPEN(totalLabor)}</span>
             </div>
-            <input type="range" min={0} max={120} step={5} value={margin} onChange={(e) => setMargin(parseInt(e.target.value))} style={{ accentColor: T.blue, width: "100%", marginBottom: 8 }} />
+            <input type="range" min={0} max={120} step={5} value={margin} onChange={(e) => setMargin(parseInt(e.target.value))} style={{ accentColor: ADMIN_COLORS.purple, width: "100%", marginBottom: 8 }} />
             <div style={{ display: "flex", gap: 6 }}>
               {[0, 25, 40, 60, 80, 100].map((v) => (
-                <button key={v} type="button" onClick={() => setMargin(v)} style={{ flex: 1, padding: "7px 2px", borderRadius: 10, border: `1.5px solid ${margin === v ? T.blue : T.slateD}`, background: margin === v ? T.bluePale : "none", cursor: "pointer", fontSize: 11, fontWeight: 800, color: margin === v ? T.blue : T.textMid }}>
+                <button key={v} type="button" onClick={() => setMargin(v)} style={{ flex: 1, padding: "7px 2px", borderRadius: 10, border: `1.5px solid ${margin === v ? ADMIN_COLORS.purple : ADMIN_COLORS.slateD}`, background: margin === v ? ADMIN_COLORS.purplePale : "none", cursor: "pointer", fontSize: 11, fontWeight: 800, color: margin === v ? ADMIN_COLORS.purple : ADMIN_COLORS.textMid }}>
                   {v}%
                 </button>
               ))}
@@ -791,13 +791,13 @@ export function NuevoCotizacionWizardEscritorio() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="📝 Condiciones, plazos, exclusiones… (aparece en el PDF)"
-            style={{ width: "100%", padding: "13px 16px", borderRadius: 12, fontSize: 14, border: `1.5px solid ${T.slateD}`, outline: "none", color: T.text, background: T.white, resize: "none", minHeight: 72, marginBottom: 16, fontFamily: "inherit" }}
+            style={{ width: "100%", padding: "13px 16px", borderRadius: 12, fontSize: 14, border: `1.5px solid ${ADMIN_COLORS.slateD}`, outline: "none", color: ADMIN_COLORS.text, background: ADMIN_COLORS.white, resize: "none", minHeight: 72, marginBottom: 16, fontFamily: "inherit" }}
           />
 
           <button
             type="button"
             onClick={goToCliente}
-            style={{ width: "100%", padding: 16, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, boxShadow: `0 4px 16px ${T.blue}40` }}
+            style={{ width: "100%", padding: 16, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${ADMIN_COLORS.purple},#9333EA)`, color: ADMIN_COLORS.white, fontSize: 15, fontWeight: 800, boxShadow: `0 4px 16px ${ADMIN_COLORS.purple}40` }}
           >
             Continuar → Cliente
           </button>
@@ -810,32 +810,32 @@ export function NuevoCotizacionWizardEscritorio() {
           <button
             type="button"
             onClick={() => setPhase("resumen")}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue, marginBottom: 14 }}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple, marginBottom: 14 }}
           >
             ← Resumen
           </button>
 
-          <div style={{ background: T.white, borderRadius: 14, border: `1px solid ${T.slateD}`, padding: "16px 18px", marginBottom: 12 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Cliente</p>
+          <div style={{ background: ADMIN_COLORS.white, borderRadius: 14, border: `1px solid ${ADMIN_COLORS.slateD}`, padding: "16px 18px", marginBottom: 12 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Cliente</p>
             {[
               { k: "name", ph: "Nombre del cliente", val: clientName, set: setClientName },
               { k: "phone", ph: "Teléfono / WhatsApp", val: phone, set: setPhone },
               { k: "city", ph: "Ciudad / Dirección obra", val: city, set: setCity },
             ].map((f, i) => (
-              <div key={f.k} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: i < 2 ? `1px solid ${T.slateD}` : "none" }}>
+              <div key={f.k} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: i < 2 ? `1px solid ${ADMIN_COLORS.slateD}` : "none" }}>
                 <input
                   value={f.val}
                   onChange={(e) => f.set(e.target.value)}
                   placeholder={f.ph}
-                  style={{ flex: 1, border: "none", outline: "none", fontSize: 14, color: T.text, background: "transparent", fontFamily: "inherit" }}
+                  style={{ flex: 1, border: "none", outline: "none", fontSize: 14, color: ADMIN_COLORS.text, background: "transparent", fontFamily: "inherit" }}
                 />
               </div>
             ))}
           </div>
 
-          <div style={{ background: T.bluePale, borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>Total a confirmar</span>
-            <span style={{ fontSize: 22, fontWeight: 900, color: T.blue }}>{fmtPEN(totalFinal)}</span>
+          <div style={{ background: ADMIN_COLORS.purplePale, borderRadius: 14, padding: "14px 18px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: ADMIN_COLORS.text }}>Total a confirmar</span>
+            <span style={{ fontSize: 22, fontWeight: 900, color: ADMIN_COLORS.purple }}>{fmtPEN(totalFinal)}</span>
           </div>
 
           <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -843,12 +843,12 @@ export function NuevoCotizacionWizardEscritorio() {
               type="button"
               onClick={doSave}
               disabled={loading || clientName.trim().length < 2 || phone.trim().replace(/\D/g, "").length < 7}
-              style={{ flex: 1, padding: 15, borderRadius: 14, border: saved ? `1.5px solid ${T.green}30` : "none", cursor: "pointer", background: saved ? T.greenPale : `linear-gradient(135deg,${T.green},${T.greenD})`, color: saved ? T.green : T.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: saved ? "none" : `0 4px 16px ${T.green}35`, opacity: clientName.trim().length < 2 || phone.trim().replace(/\D/g, "").length < 7 ? 0.5 : 1 }}
+              style={{ flex: 1, padding: 15, borderRadius: 14, border: saved ? `1.5px solid ${ADMIN_COLORS.green}30` : "none", cursor: "pointer", background: saved ? ADMIN_COLORS.greenPale : `linear-gradient(135deg,${ADMIN_COLORS.green},${ADMIN_COLORS.greenD})`, color: saved ? ADMIN_COLORS.green : ADMIN_COLORS.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: saved ? "none" : `0 4px 16px ${ADMIN_COLORS.green}35`, opacity: clientName.trim().length < 2 || phone.trim().replace(/\D/g, "").length < 7 ? 0.5 : 1 }}
             >
               {loading ? "Guardando…" : saved ? (
-                <><Ic d={checkPath} color={T.green} size={16} /> {editandoId ? "Actualizada" : "Guardada"}</>
+                <><Ic d={checkPath} color={ADMIN_COLORS.green} size={16} /> {editandoId ? "Actualizada" : "Guardada"}</>
               ) : (
-                <><Ic d={savePath} color={T.white} size={15} /> {editandoId ? `Actualizar · ${fmtPEN(totalFinal)}` : `Guardar cotización · ${fmtPEN(totalFinal)}`}</>
+                <><Ic d={savePath} color={ADMIN_COLORS.white} size={15} /> {editandoId ? `Actualizar · ${fmtPEN(totalFinal)}` : `Guardar cotización · ${fmtPEN(totalFinal)}`}</>
               )}
             </button>
 
@@ -860,7 +860,7 @@ export function NuevoCotizacionWizardEscritorio() {
                   if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
                   else if (r.method === "error") window.open(pdfUrlGuardado, "_blank");
                 }}
-                style={{ flex: 1, padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.navy},${T.navyLight})`, color: T.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 4px 14px ${T.navy}30` }}
+                style={{ flex: 1, padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${ADMIN_COLORS.purpleDark},${ADMIN_COLORS.purple})`, color: ADMIN_COLORS.white, fontSize: 14, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 4px 14px ${ADMIN_COLORS.purpleDark}30` }}
               >
                 📤 Compartir PDF
               </button>
@@ -871,7 +871,7 @@ export function NuevoCotizacionWizardEscritorio() {
             <button
               type="button"
               onClick={() => { router.push(backHref); router.refresh(); }}
-              style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${T.blue},${T.blueL})`, color: T.white, fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10, boxShadow: `0 4px 16px ${T.blue}35` }}
+              style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", cursor: "pointer", background: `linear-gradient(135deg,${ADMIN_COLORS.purple},#9333EA)`, color: ADMIN_COLORS.white, fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 10, boxShadow: `0 4px 16px ${ADMIN_COLORS.purple}35` }}
             >
               Volver a Inicio →
             </button>
@@ -880,7 +880,7 @@ export function NuevoCotizacionWizardEscritorio() {
           <button
             type="button"
             onClick={reset}
-            style={{ width: "100%", padding: 13, borderRadius: 14, border: `1.5px dashed ${T.slateD}`, background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: T.textMid }}
+            style={{ width: "100%", padding: 13, borderRadius: 14, border: `1.5px dashed ${ADMIN_COLORS.slateD}`, background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: ADMIN_COLORS.textMid }}
           >
             + Nueva cotización
           </button>
@@ -889,15 +889,15 @@ export function NuevoCotizacionWizardEscritorio() {
 
       {/* Barra de acción del Paso 1 — docked, no flotante (MD §5.1 "FloatBar / acción") */}
       {phase === "cats" && basket.length > 0 && (
-        <div style={{ position: "sticky", bottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", background: T.navy, borderRadius: 16, padding: "14px 20px", boxShadow: "0 8px 24px rgba(10,22,40,0.25)" }}>
-          <span style={{ color: T.white, fontSize: 13, fontWeight: 700 }}>
+        <div style={{ position: "sticky", bottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", background: ADMIN_COLORS.purpleDark, borderRadius: 16, padding: "14px 20px", boxShadow: "0 8px 24px rgba(10,22,40,0.25)" }}>
+          <span style={{ color: ADMIN_COLORS.white, fontSize: 13, fontWeight: 700 }}>
             {basket.length} partida{basket.length !== 1 ? "s" : ""} seleccionada{basket.length !== 1 ? "s" : ""}
           </span>
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" onClick={() => setBasket([])} style={{ padding: "10px 16px", borderRadius: 12, border: "1.5px solid rgba(255,255,255,0.2)", background: "none", color: T.white, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            <button type="button" onClick={() => setBasket([])} style={{ padding: "10px 16px", borderRadius: 12, border: "1.5px solid rgba(255,255,255,0.2)", background: "none", color: ADMIN_COLORS.white, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
               Limpiar
             </button>
-            <button type="button" onClick={goToCantidades} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: T.blue, color: T.white, fontSize: 13, fontWeight: 800, cursor: "pointer" }}>
+            <button type="button" onClick={goToCantidades} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: ADMIN_COLORS.purple, color: ADMIN_COLORS.white, fontSize: 13, fontWeight: 800, cursor: "pointer" }}>
               Continuar → Cantidades
             </button>
           </div>
