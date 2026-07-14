@@ -348,7 +348,7 @@ export async function fetchAdminCatalogo() {
   const admin = adminClientOrNull();
   if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" as const };
 
-  const [{ data: productos }, { data: sectores }, { data: categorias }, { data: partidas }] = await Promise.all([
+  const [prodRes, sectRes, catRes, partRes] = await Promise.all([
     admin.from("productos_master").select("id, slug, nombre, descripcion").order("nombre"),
     admin.from("catalogo_sectores").select("id, slug, nombre, emoji, orden").order("orden"),
     admin
@@ -360,6 +360,13 @@ export async function fetchAdminCatalogo() {
       .select("id, categoria_maestro_id, svc_id, nombre, calc_type, precio_tarifa_pro, unidad, activo, created_at")
       .order("nombre"),
   ]);
+  // DIAG4 13/07/2026 -- temporal, retirar tras verificar si productos_master también falla con "Invalid API key"
+  if (prodRes.error) console.error("DIAG4 productos_master error:", JSON.stringify(prodRes.error));
+  if (sectRes.error) console.error("DIAG4 catalogo_sectores error:", JSON.stringify(sectRes.error));
+  const { data: productos } = prodRes;
+  const { data: sectores } = sectRes;
+  const { data: categorias } = catRes;
+  const { data: partidas } = partRes;
 
   const sectoresRows = (sectores ?? []) as AdminSectorRow[];
   const sectorNombreById = new Map(sectoresRows.map((s) => [s.id, s.nombre]));
