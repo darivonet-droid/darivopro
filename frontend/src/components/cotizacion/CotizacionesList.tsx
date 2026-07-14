@@ -33,9 +33,13 @@ interface CotizacionesListProps {
    * (el padre ya tiene su propio botón "+ Nueva cotización para este cliente").
    */
   soloHistorial?: boolean;
+  /** Base del wizard de cotización (Editar/Re-cotizar/EmptyState). Empresa la
+   * sustituye por "/empresa/cotizaciones/nuevo" (capa de presentación de escritorio,
+   * 05-MODULO-COTIZACIONES-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
+  nuevaCotizacionHref?: string;
 }
 
-export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false }: CotizacionesListProps) {
+export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false, nuevaCotizacionHref = "/cotizaciones/nuevo" }: CotizacionesListProps) {
   const router = useRouter();
   const [cotizaciones, setCotizaciones] = useState(() => {
     if (iniciales.length > 0) return iniciales;
@@ -69,7 +73,7 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
         titulo="Sin cotizaciones todavía"
         descripcion="Crea tu primera cotización en menos de 60 segundos."
       >
-        <Link href="/cotizaciones/nuevo">
+        <Link href={nuevaCotizacionHref}>
           <Button>Nueva cotización</Button>
         </Link>
       </EmptyState>
@@ -144,14 +148,14 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
                   {/* Fila 1: Editar · Re-cotizar · → Factura */}
                   <div className="flex w-full gap-2">
                     <Link
-                      href={`/cotizaciones/nuevo?editar=${p.id}`}
+                      href={`${nuevaCotizacionHref}?editar=${p.id}`}
                       className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
                       style={{ background: T.amberPale, color: T.amberD }}
                     >
                       ✏️ Editar
                     </Link>
                     <Link
-                      href={`/cotizaciones/nuevo?from=${p.id}`}
+                      href={`${nuevaCotizacionHref}?from=${p.id}`}
                       className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
                       style={{ background: T.bluePale, color: T.blue }}
                     >

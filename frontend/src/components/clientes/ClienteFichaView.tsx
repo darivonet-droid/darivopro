@@ -19,9 +19,13 @@ interface Props {
   cliente: Cliente;
   cotizaciones: Cotizacion[];
   facturas: Factura[];
+  /** Base del wizard de cotización. Empresa la sustituye por
+   * "/empresa/cotizaciones/nuevo" (capa de presentación de escritorio,
+   * 05-MODULO-COTIZACIONES-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
+  nuevaCotizacionHref?: string;
 }
 
-export function ClienteFichaView({ cliente, cotizaciones, facturas }: Props) {
+export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo" }: Props) {
   const router = useRouter();
   const { actualizar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -111,7 +115,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas }: Props) {
 
       {/* ── Nueva cotización para este cliente ─────────────── */}
       <Link
-        href={`/cotizaciones/nuevo?cliente=${cliente.id}`}
+        href={`${nuevaCotizacionHref}?cliente=${cliente.id}`}
         className="flex items-center justify-center rounded-2xl py-3.5 text-sm font-extrabold text-white"
         style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})`, boxShadow: `0 4px 16px ${T.blue}35` }}
       >
@@ -130,7 +134,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas }: Props) {
             </p>
           </div>
         ) : (
-          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial />
+          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial nuevaCotizacionHref={nuevaCotizacionHref} />
         )}
       </div>
 
