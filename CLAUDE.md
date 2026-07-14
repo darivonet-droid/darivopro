@@ -495,12 +495,12 @@ Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de reto
 1. ✅ Dashboard (00) — completo, ver arriba
 2. ✅ Configuración (11) — completo, ver arriba
 3. ✅ Empleados (07) — completo, ver arriba
-4. Partners (06) — código de UI completo (toolbar, panel lateral, paginación), pero **bloqueado en producción por un hallazgo de infraestructura, no de código** — ver sección propia abajo
-5. Empresas (02) — código de UI completo (toolbar, panel lateral, filtros, "Nueva empresa"), **bloqueado por el mismo hallazgo de infraestructura que Partners** — ver sección propia abajo
+4. ✅ Partners (06) — completo, ver corrección 14/07/2026 abajo
+5. ✅ Empresas (02) — completo, ver corrección 14/07/2026 abajo
 6. ✅ Suscripciones (04) — completo, ver arriba
-7. Catálogo Maestro (10) — código UI completo (CRUD sobre las 4 tablas), **bloqueado en producción por el mismo hallazgo de infraestructura que Partners/Empresas** — ver corrección 14/07/2026 y hallazgo ampliado abajo
+7. ✅ Catálogo Maestro (10) — completo, ver corrección 14/07/2026 abajo
 
-**Admin: 7/7 pantallas con código completo, 4/7 funcionando en producción.** Dashboard, Configuración, Empleados, Suscripciones ✅ verificadas visualmente en producción. Partners, Empresas, Catálogo Maestro: código completo pero bloqueadas por el mismo hallazgo de infraestructura — no son bugs de código, están a la espera de que el propietario corrija el `SUPABASE_SERVICE_ROLE_KEY` de Vercel Production (ver diagnóstico 14/07/2026 abajo: la causa más probable ya está identificada, no es "¿cuál de los 2 proyectos es el real?").
+**✅ Admin: 11/11 pantallas completas y verificadas visualmente en producción (14/07/2026).** El bloqueo de Partners/Empresas/Catálogo Maestro ("Invalid API key") se resolvió corrigiendo las 3 variables de Supabase en Vercel Production al proyecto real (`vyrtokggypcmpforglch`) + redeploy. Verificado con sesión Admin real (`yatriye@gmail.com`), caché/Service Worker limpiados antes de cada verificación: Partners y Empresas cargan sin error (0 registros, tablas vacías reales); Catálogo Maestro muestra datos reales — 6 categorías, 28 partidas. Sin errores en consola ni en logs de Vercel.
 
 **Corrección 14/07/2026 — el hallazgo de Catálogo Maestro de abajo estaba mal diagnosticado:** lo que se documentó primero como "problema de datos, no del mismo bug" resultó ser el mismo bug de "Invalid API key", enmascarado por `fetchAdminCatalogo()` (`admin-queries.ts`) que descartaba el `error` de la consulta sin loguearlo nunca. Diagnóstico temporal (DIAG4, ya retirado) confirmó que `productos_master` Y `catalogo_sectores` fallan con el mismo `{"message":"Invalid API key","hint":"Double check your Supabase \`anon\` or \`service_role\` API key."}` que Partners/Empresas — ver hallazgo ampliado justo abajo. Catálogo Maestro pasa de "✅ completo" a **bloqueado por el mismo hallazgo de infraestructura**, igual que Partners y Empresas.
 
