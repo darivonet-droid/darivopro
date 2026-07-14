@@ -20,6 +20,14 @@ import {
 } from "@/lib/roles-personalizados";
 import { createClient } from "@/lib/supabase/client";
 
+// Texto visible per 10-MODULO-EMPLEADOS-EMPRESA.md §"Estado" — distinto del
+// valor real en BD (CHECK: 'Activo'|'Inactivo'|'Pendiente', sin tocar).
+const ESTADO_LABEL: Record<EstadoEmpleadoEmpresa, string> = {
+  Activo: "Activo",
+  Pendiente: "Invitación pendiente",
+  Inactivo: "Desactivado",
+};
+
 function formatoUltimaActividad(iso: string | null): string {
   if (!iso) return "Nunca";
   return new Date(iso).toLocaleDateString("es-PE", {
@@ -229,8 +237,8 @@ export function EmpresaEmpleadosView() {
           </div>
           <p className="mt-2 text-xs" style={{ color: T.textLight }}>
             Se envía un correo real de invitación para que el técnico cree su contraseña y
-            acceda a Móvil. Queda con estado «Pendiente» hasta que acepte, y disponible como
-            Técnico asignable en Roles y Permisos.
+            acceda a Móvil. Queda con estado «Invitación pendiente» hasta que acepte, y disponible
+            como Técnico asignable en Roles y Permisos.
           </p>
         </div>
       )}
@@ -289,7 +297,7 @@ export function EmpresaEmpleadosView() {
                   </td>
                   <td className="px-4 py-3">
                     <AdminBadge
-                      label={e.estado}
+                      label={ESTADO_LABEL[e.estado]}
                       tone={
                         e.estado === "Activo"
                           ? "success"
