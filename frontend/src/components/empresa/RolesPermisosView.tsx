@@ -244,6 +244,37 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Badge + banner de la imagen oficial (11-ROLES-PLANES-PERMISOS-EMPRESA.md
+          §2/§5.1) — la matriz detallada sigue pendiente de aprobación (§5.2),
+          esto es solo el badge/banner visual, no cambia la interactividad. */}
+      <div>
+        <span
+          className="inline-block rounded-full px-3 py-1 text-xs font-bold"
+          style={{ background: T.slate, color: T.textMid }}
+        >
+          🔒 Solo lectura
+        </span>
+      </div>
+      <div
+        className="flex items-start gap-3 rounded-2xl p-4"
+        style={{ background: T.purplePale, border: `1px solid ${T.purple}33` }}
+      >
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black text-white"
+          style={{ background: T.purple }}
+        >
+          i
+        </span>
+        <div>
+          <p className="text-sm font-extrabold" style={{ color: T.text }}>
+            Este módulo es exclusivo para el rol de Gerente.
+          </p>
+          <p className="mt-0.5 text-xs" style={{ color: T.textMid }}>
+            Solo los gerentes pueden ver y administrar los permisos de los empleados.
+          </p>
+        </div>
+      </div>
+
       <div
         className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4"
         style={{ background: T.bluePale, border: `1px solid ${T.blue}33` }}
