@@ -8,7 +8,7 @@ import { useAppStore } from "@/store/useAppStore";
 
 type Tab = "gastos" | "expediente";
 
-const CATEGORIAS_GASTO = [
+export const CATEGORIAS_GASTO = [
   "Materiales",
   "Herramientas",
   "Transporte",

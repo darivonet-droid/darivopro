@@ -1,4 +1,4 @@
-import { CierreView } from "@/components/cierre/CierreView";
+import { CierreViewEscritorio } from "@/components/cierre/CierreViewEscritorio";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
@@ -35,7 +35,7 @@ export default async function EmpresaCierrePage() {
 
   return (
     <EmpresaShell titulo={mod.label}>
-      <CierreView
+      <CierreViewEscritorio
         resumenExpediente={{
           cotizaciones: cotizaciones ?? 0,
           facturas: facturas ?? 0,
