@@ -235,6 +235,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
                 cotizaciones={ficha.cotizaciones}
                 facturas={ficha.facturas}
                 nuevaCotizacionHref="/empresa/cotizaciones/nuevo"
+                nuevaFacturaHref="/empresa/facturas/nueva"
               />
             </>
           )}

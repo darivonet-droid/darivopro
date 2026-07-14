@@ -23,9 +23,12 @@ interface Props {
    * "/empresa/cotizaciones/nuevo" (capa de presentación de escritorio,
    * 05-MODULO-COTIZACIONES-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
   nuevaCotizacionHref?: string;
+  /** Base del editor de facturas. Empresa la sustituye por "/empresa/facturas/nueva"
+   * (06-MODULO-FACTURAS-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
+  nuevaFacturaHref?: string;
 }
 
-export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo" }: Props) {
+export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: Props) {
   const router = useRouter();
   const { actualizar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -134,7 +137,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
             </p>
           </div>
         ) : (
-          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial nuevaCotizacionHref={nuevaCotizacionHref} />
+          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial nuevaCotizacionHref={nuevaCotizacionHref} nuevaFacturaHref={nuevaFacturaHref} />
         )}
       </div>
 

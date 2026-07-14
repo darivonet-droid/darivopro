@@ -37,9 +37,13 @@ interface CotizacionesListProps {
    * sustituye por "/empresa/cotizaciones/nuevo" (capa de presentación de escritorio,
    * 05-MODULO-COTIZACIONES-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
   nuevaCotizacionHref?: string;
+  /** Base del editor de facturas (facturarMode="preguntar"). Empresa la sustituye
+   * por "/empresa/facturas/nueva" (06-MODULO-FACTURAS-EMPRESA.md) — Móvil sigue
+   * usando la ruta por defecto. */
+  nuevaFacturaHref?: string;
 }
 
-export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false, nuevaCotizacionHref = "/cotizaciones/nuevo" }: CotizacionesListProps) {
+export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: CotizacionesListProps) {
   const router = useRouter();
   const [cotizaciones, setCotizaciones] = useState(() => {
     if (iniciales.length > 0) return iniciales;
@@ -107,7 +111,7 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
   const hacerFactura = async (p: Cotizacion) => {
     // Modo "preguntar": el usuario elige Empresa (RUC) o Particular (DNI) en el formulario
     if (facturarMode === "preguntar") {
-      router.push(`/facturas/nueva?cotizacion=${p.id}`);
+      router.push(`${nuevaFacturaHref}?cotizacion=${p.id}`);
       return;
     }
     mostrarToast("Creando factura…");

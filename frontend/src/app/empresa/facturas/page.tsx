@@ -1,4 +1,4 @@
-import { FacturasView } from "@/components/facturacion/FacturasView";
+import { FacturasTableEmpresa } from "@/components/facturacion/FacturasTableEmpresa";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
@@ -77,10 +77,11 @@ export default async function EmpresaFacturasPage() {
 
   return (
     <EmpresaShell titulo={mod.label}>
-      <FacturasView
+      <FacturasTableEmpresa
         facturas={facturas}
         rucEmpresa={perfilRes.data?.ruc ?? ""}
         aprobados={aprobados}
+        nuevaFacturaHref="/empresa/facturas/nueva"
       />
     </EmpresaShell>
   );
