@@ -588,6 +588,17 @@ Migración de Empresa a `ADMIN_COLORS` y decisión sobre "Roles personalizados" 
 
 Las 3 pantallas: tsc/lint/build limpios en cada una. **Verificación visual interactiva pendiente en las 3**: no hay sesión de rol Gerente/Empresa en el navegador de esta sesión (solo Admin), y no corresponde iniciar sesión por credenciales — pendiente de que el propietario la confirme con su propia sesión.
 
+**✅ Cola de auditoría de Empresa completa (14/07/2026)** — las 6 pantallas restantes (Inicio, Clientes, Más, IA, Empleados, Roles) quedaron presentación-completas, sumadas a Cotizaciones/Facturas/Cierre de arriba. Las 9 pantallas auditadas el 13/07/2026 están cerradas en capa de presentación:
+
+- **Inicio (02)** — 2ª tarjeta de acceso rápido añadida (Cotizaciones, junto a la ya existente de Clientes), cerrando el hallazgo funcional del MD §5.4. Commit `386e1c0`.
+- **Clientes (03)** — ficha con subtítulo "N contactos", 3 botones de contacto rápido (WhatsApp/Llamar/Email) y 3 tarjetas de estadística (aprobadas/total) añadidos a `ClienteFichaView.tsx` (compartido con Móvil, vía props). Commit `648774b`.
+- **Más (07)** — layout de 2 columnas real: contenido + panel fijo "Más opciones" (~320px) a la derecha, en vez de apilado en una sola columna (`MasTabs.tsx` gana prop `ocultarOpciones`). Commit `061d044`.
+- **IA (08)** — 3ª tarjeta "Soporte con IA" añadida junto a Escribir/Hablar (grid 2 columnas + card ancha), enlazando al soporte real ya existente (Más → Soporte) — no se inventó ningún chat conversacional nuevo (Agente IA 2 sigue sin existir). `IACotizacionFlow.tsx` gana prop opcional `soporteHref`. Commit `8c1056c`.
+- **Empleados (10)** — etiquetas de estado alineadas al MD ("Invitación pendiente"/"Desactivado" en vez de "Pendiente"/"Inactivo"), sin tocar el enum real de BD ni la lógica de `cambiarEstado()`. Commit `96c3b26`.
+- **Roles y Permisos (11)** — badge "🔒 Solo lectura" + banner "exclusivo para Gerente" añadidos, copiados verbatim de la imagen oficial de referencia. §6.1 "Roles personalizados" (decisión de negocio pendiente de aprobación) no se tocó. Commit `028626b`.
+
+Las 6: tsc/lint/build limpios en cada commit. **Verificación visual interactiva pendiente** (mismo motivo que Cotizaciones/Facturas/Cierre arriba) — Migración de Empresa a `ADMIN_COLORS` (hallazgo raíz de color, ver arriba) y la decisión de negocio de "Roles personalizados" §6.1 siguen sin resolver, fuera de alcance de este cierre.
+
 ### Elementos de mockup descartados — no aplican al producto real
 
 Los 8 módulos reales del sidebar de Empresa son, en este orden, exactamente los de `frontend/src/lib/empresa-modules.ts` (`EMPRESA_NAV`): **Inicio, Clientes, Facturas, Cierre, Calculadora inteligente (IA), Más, Empleados, Roles y Permisos**. "Cotizaciones" no es ítem de sidebar por diseño (§1/§3 de `05-MODULO-COTIZACIONES-EMPRESA.md`: acceso solo vía CTA en Inicio o ficha de Cliente).
