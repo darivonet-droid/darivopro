@@ -100,6 +100,9 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
   return (
     <div className="flex items-start gap-4">
       <div className="min-w-0 flex-1">
+        <p className="mb-3 text-xs font-semibold" style={{ color: T.textMid }}>
+          {clientes.length} contacto{clientes.length !== 1 ? "s" : ""}
+        </p>
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <input
             type="search"

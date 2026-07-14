@@ -12,6 +12,7 @@ import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { FacturaCard } from "@/components/facturacion/FacturaCard";
 import { useClientes } from "@/hooks/useClientes";
 import { useAppStore } from "@/store/useAppStore";
+import { soloDigitos, fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { Cliente, Factura, Cotizacion } from "@/types";
 
@@ -55,6 +56,28 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
     });
   }, [cliente]);
 
+  // Estadísticas de la ficha (03-MODULO-CLIENTES-EMPRESA.md §6.3) — mismo
+  // cálculo que EmpresaClientesPanel/page.tsx usa para la tabla de lista.
+  const aprobadas = cotizaciones.filter((c) => c.status === "Aprobado").length;
+  const totalFinal = cotizaciones.reduce((s, c) => s + c.totalFinal, 0);
+
+  const abrirWhatsApp = () => {
+    const digitos = soloDigitos(cliente.telefono ?? "");
+    if (digitos.length < 6) { mostrarToast("Este cliente no tiene teléfono registrado", "error"); return; }
+    const numero = digitos.startsWith("51") ? digitos : `51${digitos}`;
+    window.open(`https://wa.me/${numero}`, "_blank", "noopener,noreferrer");
+  };
+
+  const llamar = () => {
+    const digitos = soloDigitos(cliente.telefono ?? "");
+    if (digitos.length < 6) { mostrarToast("Este cliente no tiene teléfono registrado", "error"); return; }
+    window.location.href = `tel:${digitos}`;
+  };
+
+  // Cliente no tiene campo email (types.ts) — MD §6.2 pide toast informativo
+  // en ese caso, que es siempre el caso hoy (no se inventa el campo).
+  const email = () => mostrarToast("Este cliente no tiene correo registrado", "error");
+
   const guardar = async () => {
     if (form.nombre.trim().length < 2) { mostrarToast("Ingresa el nombre", "error"); return; }
     const ok = await actualizar(cliente.id, {
@@ -76,6 +99,50 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
 
   return (
     <div className="flex flex-col gap-4">
+      {/* ── Acciones rápidas de contacto (§6.2) ─────────────── */}
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={abrirWhatsApp}
+          className="flex flex-col items-center gap-1 rounded-xl py-3 text-xs font-bold"
+          style={{ background: "#25D36618", color: "#128C7E" }}
+        >
+          💬 WhatsApp
+        </button>
+        <button
+          type="button"
+          onClick={llamar}
+          className="flex flex-col items-center gap-1 rounded-xl py-3 text-xs font-bold"
+          style={{ background: T.greenPale, color: T.greenD }}
+        >
+          📞 Llamar
+        </button>
+        <button
+          type="button"
+          onClick={email}
+          className="flex flex-col items-center gap-1 rounded-xl py-3 text-xs font-bold"
+          style={{ background: T.bluePale, color: T.blue }}
+        >
+          ✉️ Email
+        </button>
+      </div>
+
+      {/* ── Tarjetas de estadísticas (§6.3) ─────────────────── */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl py-3 text-center" style={{ background: T.bluePale }}>
+          <p className="text-lg font-black" style={{ color: T.blue }}>{cotizaciones.length}</p>
+          <p className="text-[10px] font-bold uppercase" style={{ color: T.blue }}>Cotizaciones</p>
+        </div>
+        <div className="rounded-xl py-3 text-center" style={{ background: T.greenPale }}>
+          <p className="text-lg font-black" style={{ color: T.greenD }}>{aprobadas}</p>
+          <p className="text-[10px] font-bold uppercase" style={{ color: T.greenD }}>Aprobadas</p>
+        </div>
+        <div className="rounded-xl py-3 text-center" style={{ background: T.amberPale }}>
+          <p className="text-sm font-black" style={{ color: T.amberD }}>{fmtPEN(totalFinal)}</p>
+          <p className="text-[10px] font-bold uppercase" style={{ color: T.amberD }}>Total S/</p>
+        </div>
+      </div>
+
       {/* ── Datos de contacto ─────────────────────────────── */}
       <Card>
         {editando ? (
