@@ -79,10 +79,13 @@ export function EmpresaInicioView({
         </div>
       </Link>
 
-      {/* Solo "Clientes" — Cotizaciones no tiene lista global propia
-          (05-MODULO-COTIZACIONES-EMPRESA.md §3), se consulta vía ficha de Cliente */}
-      <div className="grid gap-3">
+      {/* 2 tarjetas de acceso rápido (02-MODULO-INICIO-EMPRESA.md §5.4) — ambas
+          navegan a Clientes (Cotizaciones no tiene lista global propia,
+          05-MODULO-COTIZACIONES-EMPRESA.md §3): "Clientes" para gestión general,
+          "Cotizaciones" para consultar el historial por cliente. */}
+      <div className="grid gap-3 md:grid-cols-2">
         <QuickLink href="/empresa/clientes" label="Clientes" emoji="👥" />
+        <QuickLink href="/empresa/clientes" label="Cotizaciones" emoji="📋" />
       </div>
 
       <div>
