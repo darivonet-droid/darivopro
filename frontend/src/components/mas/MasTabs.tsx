@@ -17,9 +17,13 @@ interface MasTabsProps {
   email: string;
   inicial: EmpresaForm;
   esBusiness?: boolean;
+  /** Empresa desktop (07-MODULO-MAS-EMPRESA.md §4) renderiza "Más opciones"
+   * como panel fijo aparte, no apilado debajo del contenido — Móvil sigue
+   * con el comportamiento por defecto (incluido acá). */
+  ocultarOpciones?: boolean;
 }
 
-export function MasTabs({ email, inicial, esBusiness }: MasTabsProps) {
+export function MasTabs({ email, inicial, esBusiness, ocultarOpciones }: MasTabsProps) {
   const [tab, setTab] = useState<Tab>("categorias");
 
   const TABS: { id: Tab; label: string }[] = [
@@ -43,7 +47,7 @@ export function MasTabs({ email, inicial, esBusiness }: MasTabsProps) {
         {tab === "tarifas" && <TarifasEditTab />}
         {tab === "empresa" && <AjustesForm email={email} inicial={inicial} />}
 
-        <MasOpcionesList esBusiness={esBusiness} />
+        {!ocultarOpciones && <MasOpcionesList esBusiness={esBusiness} />}
       </div>
     </div>
   );

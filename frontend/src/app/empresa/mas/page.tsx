@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MasTabs } from "@/components/mas/MasTabs";
+import { MasOpcionesList } from "@/components/mas/MasOpcionesList";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
@@ -19,32 +19,28 @@ export default async function EmpresaMasPage() {
       <p className="mb-4 text-sm" style={{ color: T.textMid }}>
         Categorías · Mis Tarifas · Empresa — reutiliza flujo Móvil
       </p>
-      <MasTabs
-        email={user?.email ?? ""}
-        inicial={{
-          razonSocial: perfil?.razon_social ?? "",
-          ruc: perfil?.ruc ?? "",
-          direccion: perfil?.direccion ?? "",
-          telefono: perfil?.telefono ?? "",
-          moneda: perfil?.moneda ?? "PEN",
-          simbolo: perfil?.simbolo ?? "S/",
-          ctaDetracciones: perfil?.cta_detracciones ?? "",
-        }}
-      />
-      <Link
-        href="/empresa/mas/soporte"
-        className="mt-4 inline-block text-sm font-bold"
-        style={{ color: T.blue }}
-      >
-        Soporte — crear y consultar tickets →
-      </Link>
-      <Link
-        href="/mas"
-        className="mt-2 inline-block text-sm font-bold"
-        style={{ color: T.textLight }}
-      >
-        Abrir Más completo en Móvil →
-      </Link>
+      {/* Layout 2 columnas (07-MODULO-MAS-EMPRESA.md §4): contenido + panel
+          fijo "Más opciones" (~320px), en vez de apilado en una columna. */}
+      <div className="flex items-start gap-6">
+        <div className="min-w-0 flex-1">
+          <MasTabs
+            email={user?.email ?? ""}
+            inicial={{
+              razonSocial: perfil?.razon_social ?? "",
+              ruc: perfil?.ruc ?? "",
+              direccion: perfil?.direccion ?? "",
+              telefono: perfil?.telefono ?? "",
+              moneda: perfil?.moneda ?? "PEN",
+              simbolo: perfil?.simbolo ?? "S/",
+              ctaDetracciones: perfil?.cta_detracciones ?? "",
+            }}
+            ocultarOpciones
+          />
+        </div>
+        <div className="w-[320px] shrink-0" style={{ position: "sticky", top: 20 }}>
+          <MasOpcionesList />
+        </div>
+      </div>
     </EmpresaShell>
   );
 }
