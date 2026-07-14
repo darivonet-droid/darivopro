@@ -23,10 +23,13 @@ function mensajeError(error: AuthError): string {
   if (msg.includes("password")) {
     return "La contraseña no cumple los requisitos mínimos";
   }
-  if (msg.includes("email")) {
-    return "Ese correo no parece válido, revísalo";
-  }
 
+  // No mapear por "incluye la palabra email" — ese heurístico capturaba
+  // errores reales no relacionados con el formato (rate limit, fallo de
+  // envío SMTP, redirect URL no permitida) y los mostraba como "correo
+  // inválido", ocultando la causa real. El código exacto ya se maneja
+  // arriba vía ERRORES[error.code]; para todo lo demás, mostrar el
+  // mensaje real de Supabase es más honesto que adivinar.
   return error.message || "No se pudo crear la cuenta. Inténtalo de nuevo";
 }
 
