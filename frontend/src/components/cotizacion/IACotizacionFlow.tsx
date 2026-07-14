@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CotizacionIASkeleton } from "@/components/ui/Skeleton";
 import { useCotizacionDraft } from "@/hooks/useCotizacionDraft";
@@ -50,7 +51,20 @@ interface SpeechRecognitionEvent {
   results: { [index: number]: { [index: number]: { transcript: string } } };
 }
 
-export function IACotizacionFlow() {
+interface IACotizacionFlowProps {
+  /** Base del wizard de cotización tras generar con IA. Empresa la sustituye
+   * por "/empresa/cotizaciones/nuevo" (05-MODULO-COTIZACIONES-EMPRESA.md) —
+   * Móvil sigue usando la ruta por defecto. */
+  nuevaCotizacionHref?: string;
+  /** Empresa desktop (08-MODULO-IA-EMPRESA.md §4) agrega la 3ª card "Soporte
+   * con IA" (Agente IA 2) en fila 50/50 con las otras 2 — apunta al soporte
+   * real ya existente (Más → Soporte, mismo destino que documenta el propio
+   * MD §10 para el acceso de escritorio); no hay chat conversacional
+   * implementado, así que no se inventa uno nuevo. */
+  soporteHref?: string;
+}
+
+export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", soporteHref }: IACotizacionFlowProps = {}) {
   const router = useRouter();
   const { catalogo } = useCatalogo();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -84,9 +98,9 @@ export function IACotizacionFlow() {
         margin: saved.margin,
       }));
       limpiar();
-      router.push("/cotizaciones/nuevo?fromIA=1");
+      router.push(`${nuevaCotizacionHref}?fromIA=1`);
     }
-  }, [cargar, catalogo, limpiar, router]);
+  }, [cargar, catalogo, limpiar, router, nuevaCotizacionHref]);
 
   const redirigirAResumen = useCallback((data: IACotizacionResult, texto: string) => {
     const lineas = iaItemsALineas(data.items);
@@ -99,8 +113,8 @@ export function IACotizacionFlow() {
       margin: 40,
     }));
     limpiar();
-    router.push("/cotizaciones/nuevo?fromIA=1");
-  }, [catalogo, limpiar, router]);
+    router.push(`${nuevaCotizacionHref}?fromIA=1`);
+  }, [catalogo, limpiar, router, nuevaCotizacionHref]);
 
   const generarConIA = useCallback(async (texto: string) => {
     if (modoOffline) {
@@ -188,28 +202,46 @@ export function IACotizacionFlow() {
         <p className="text-sm" style={{ color: T.textMid }}>
           Describe el trabajo y la Calculadora inteligente genera la cotización en segundos.
         </p>
-        <button
-          type="button"
-          onClick={() => setModo("escribir")}
-          className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm transition-transform active:scale-95"
-        >
-          <span className="text-3xl">✏️</span>
-          <div className="text-left">
-            <p className="font-extrabold" style={{ color: T.text }}>Escribir descripción</p>
-            <p className="text-xs" style={{ color: T.textMid }}>Texto → OpenAI</p>
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={iniciarVoz}
-          className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm transition-transform active:scale-95"
-        >
-          <span className="text-3xl">🎤</span>
-          <div className="text-left">
-            <p className="font-extrabold" style={{ color: T.text }}>Hablar</p>
-            <p className="text-xs" style={{ color: T.textMid }}>Web Speech → OpenAI</p>
-          </div>
-        </button>
+        <div className={soporteHref ? "grid grid-cols-2 gap-4" : "flex flex-col gap-4"}>
+          <button
+            type="button"
+            onClick={() => setModo("escribir")}
+            className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm transition-transform active:scale-95"
+          >
+            <span className="text-3xl">✏️</span>
+            <div className="text-left">
+              <p className="font-extrabold" style={{ color: T.text }}>Escribir descripción</p>
+              <p className="text-xs" style={{ color: T.textMid }}>Texto → OpenAI</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={iniciarVoz}
+            className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm transition-transform active:scale-95"
+          >
+            <span className="text-3xl">🎤</span>
+            <div className="text-left">
+              <p className="font-extrabold" style={{ color: T.text }}>Hablar</p>
+              <p className="text-xs" style={{ color: T.textMid }}>Web Speech → OpenAI</p>
+            </div>
+          </button>
+        </div>
+        {/* Card 3 — Soporte con IA (Agente IA 2), solo Empresa desktop
+            (08-MODULO-IA-EMPRESA.md §4/§10). Apunta al soporte real
+            existente — no hay chat conversacional implementado todavía. */}
+        {soporteHref && (
+          <Link
+            href={soporteHref}
+            className="flex items-center gap-4 rounded-2xl p-5 shadow-sm transition-transform active:scale-95"
+            style={{ background: T.tealPale }}
+          >
+            <span className="text-3xl">📞</span>
+            <div className="text-left">
+              <p className="font-extrabold" style={{ color: T.teal }}>Soporte con IA</p>
+              <p className="text-xs" style={{ color: T.textMid }}>Agente IA 2 · crear y consultar tickets</p>
+            </div>
+          </Link>
+        )}
       </div>
     );
   }

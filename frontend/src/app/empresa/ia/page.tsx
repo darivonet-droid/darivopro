@@ -11,8 +11,11 @@ export default function EmpresaIAPage() {
       <p className="mb-4 text-sm" style={{ color: T.textMid }}>
         Cotización con Calculadora inteligente — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
       </p>
-      <div className="max-w-lg">
-        <IACotizacionFlow />
+      <div className="max-w-2xl">
+        <IACotizacionFlow
+          nuevaCotizacionHref="/empresa/cotizaciones/nuevo"
+          soporteHref="/empresa/mas/soporte"
+        />
       </div>
     </EmpresaShell>
   );
