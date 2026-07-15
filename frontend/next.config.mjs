@@ -37,6 +37,15 @@ const withPWA = withPWAInit({
         handler: "StaleWhileRevalidate",
         options: { cacheName: "darivo-pages" },
       },
+      // Partner es su propia PWA instalable (manifest propio, ver
+      // partner-manifest.json) — caché independiente, sin compartir
+      // "darivo-pages" con Móvil (regla absoluta 15/07/2026: no mezclar PWA
+      // de Partner con la de Móvil).
+      {
+        urlPattern: /\/partner(\/)?$/i,
+        handler: "StaleWhileRevalidate",
+        options: { cacheName: "darivo-partner-pages" },
+      },
     ],
   },
 });
