@@ -28,7 +28,7 @@ interface FichaData {
   facturas: Factura[];
 }
 
-const FORM_VACIO = { nombre: "", telefono: "", ciudad: "" };
+const FORM_VACIO = { nombre: "", telefono: "", ciudad: "", email: "" };
 
 export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteRow[] }) {
   const [clientes, setClientes] = useState(iniciales);
@@ -71,6 +71,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
       nombre: form.nombre.trim(),
       telefono: form.telefono.trim(),
       ciudad: form.ciudad.trim() || undefined,
+      email: form.email.trim() || undefined,
     });
     if (creado) {
       setClientes((prev) =>
@@ -146,6 +147,14 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
               placeholder="Ciudad (opcional)"
               value={form.ciudad}
               onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
+              className="rounded-xl border px-3 py-2 text-sm"
+              style={{ borderColor: ADMIN_COLORS.slateD }}
+            />
+            <input
+              type="email"
+              placeholder="Correo electrónico (opcional)"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="rounded-xl border px-3 py-2 text-sm"
               style={{ borderColor: ADMIN_COLORS.slateD }}
             />

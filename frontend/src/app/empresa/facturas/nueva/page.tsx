@@ -76,6 +76,7 @@ export default async function EmpresaNuevaFacturaPage({
     ruc: row.ruc ?? undefined,
     direccion: row.direccion ?? undefined,
     ciudad: row.ciudad ?? undefined,
+    email: row.email ?? undefined,
     notas: row.notas ?? undefined,
     createdAt: row.created_at,
   }));

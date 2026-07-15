@@ -12,6 +12,7 @@ interface ClienteRow {
   ruc: string | null;
   direccion: string | null;
   ciudad: string | null;
+  email: string | null;
   notas: string | null;
   created_at: string;
 }
@@ -23,6 +24,7 @@ const mapRow = (row: ClienteRow): Cliente => ({
   ruc: row.ruc ?? undefined,
   direccion: row.direccion ?? undefined,
   ciudad: row.ciudad ?? undefined,
+  email: row.email ?? undefined,
   notas: row.notas ?? undefined,
   createdAt: row.created_at,
 });
@@ -59,6 +61,7 @@ export function useClientes() {
         ruc: cliente.ruc ?? null,
         direccion: cliente.direccion ?? null,
         ciudad: cliente.ciudad ?? null,
+        email: cliente.email ?? null,
         notas: cliente.notas ?? null,
       })
       .select()
@@ -80,6 +83,7 @@ export function useClientes() {
     if (cliente.ruc       !== undefined) patch.ruc       = cliente.ruc       || null;
     if (cliente.direccion !== undefined) patch.direccion = cliente.direccion || null;
     if (cliente.ciudad    !== undefined) patch.ciudad    = cliente.ciudad    || null;
+    if (cliente.email     !== undefined) patch.email     = cliente.email     || null;
     if (cliente.notas     !== undefined) patch.notas     = cliente.notas     || null;
 
     const { data, error } = await supabase

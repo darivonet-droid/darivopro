@@ -41,6 +41,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
     ruc:       cliente.ruc ?? "",
     direccion: cliente.direccion ?? "",
     ciudad:    cliente.ciudad ?? "",
+    email:     cliente.email ?? "",
     notas:     cliente.notas ?? "",
   });
 
@@ -52,6 +53,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
       ruc:       cliente.ruc ?? "",
       direccion: cliente.direccion ?? "",
       ciudad:    cliente.ciudad ?? "",
+      email:     cliente.email ?? "",
       notas:     cliente.notas ?? "",
     });
   }, [cliente]);
@@ -74,9 +76,10 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
     window.location.href = `tel:${digitos}`;
   };
 
-  // Cliente no tiene campo email (types.ts) — MD §6.2 pide toast informativo
-  // en ese caso, que es siempre el caso hoy (no se inventa el campo).
-  const email = () => mostrarToast("Este cliente no tiene correo registrado", "error");
+  const email = () => {
+    if (!cliente.email) { mostrarToast("Este cliente no tiene correo registrado", "error"); return; }
+    window.location.href = `mailto:${cliente.email}`;
+  };
 
   const guardar = async () => {
     if (form.nombre.trim().length < 2) { mostrarToast("Ingresa el nombre", "error"); return; }
@@ -86,6 +89,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
       ruc:       form.ruc.trim() || undefined,
       direccion: form.direccion.trim() || undefined,
       ciudad:    form.ciudad.trim() || undefined,
+      email:     form.email.trim() || undefined,
       notas:     form.notas.trim() || undefined,
     });
     if (ok) {
@@ -152,6 +156,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
             <Input label="RUC / DNI" inputMode="numeric" value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
             <Input label="Dirección" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
             <Input label="Ciudad" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />
+            <Input label="Correo electrónico" type="email" placeholder="cliente@correo.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <Input label="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setEditando(false)}>Cancelar</Button>
@@ -169,6 +174,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
                   {[cliente.direccion, cliente.ciudad].filter(Boolean).join(" · ")}
                 </p>
               )}
+              {cliente.email && <p className="text-xs" style={{ color: T.textMid }}>✉️ {cliente.email}</p>}
               {cliente.notas && <p className="text-xs" style={{ color: T.textMid }}>📝 {cliente.notas}</p>}
             </div>
             <button

@@ -113,6 +113,7 @@ export interface Cliente {
   ruc?: string;
   direccion?: string;
   ciudad?: string;
+  email?: string;
   notas?: string;
   createdAt: string;
 }

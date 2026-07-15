@@ -92,6 +92,7 @@ export function NuevaFacturaForm({
   const [clientDni,    setClientDni]    = useState("");
   const [clientDir,    setClientDir]    = useState("");
   const [clientPhone,  setClientPhone]  = useState("");
+  const [clientEmail,  setClientEmail]  = useState("");
   const [items,        setItems]        = useState<LineaFactura[]>([{ ...LINEA_VACIA }]);
   const [desdeQuote,   setDesdeQuote]   = useState(cotizacionId ?? "");
   const [formaPago,    setFormaPago]    = useState<FormaPago>("Efectivo");
@@ -144,6 +145,7 @@ export function NuevaFacturaForm({
     setClientRuc(c.ruc ?? "");
     setClientDir(c.direccion ?? "");
     setClientPhone(c.telefono ?? "");
+    setClientEmail(c.email ?? "");
   };
 
   const cambiarLinea = (i: number, campo: keyof LineaFactura, valor: string) => {
@@ -388,6 +390,9 @@ export function NuevaFacturaForm({
 
       <Input label="Dirección" value={clientDir} onChange={(e) => setClientDir(e.target.value)} />
       <Input label="Teléfono WhatsApp" inputMode="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
+      {clientEmail && (
+        <p className="px-1 text-xs" style={{ color: T.textMid }}>✉️ {clientEmail}</p>
+      )}
 
       {/* Forma de pago */}
       <div>

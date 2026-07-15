@@ -27,6 +27,7 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
     ruc: cliRow.ruc ?? undefined,
     direccion: cliRow.direccion ?? undefined,
     ciudad: cliRow.ciudad ?? undefined,
+    email: cliRow.email ?? undefined,
     notas: cliRow.notas ?? undefined,
     createdAt: cliRow.created_at,
   };

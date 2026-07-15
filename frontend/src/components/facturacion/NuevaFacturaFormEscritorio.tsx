@@ -55,6 +55,7 @@ export function NuevaFacturaFormEscritorio({
   const [clientDni, setClientDni] = useState("");
   const [clientDir, setClientDir] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [items, setItems] = useState<LineaFactura[]>([{ ...LINEA_VACIA }]);
   const [desdeQuote, setDesdeQuote] = useState(cotizacionId ?? "");
   const [formaPago, setFormaPago] = useState<FormaPago>("Efectivo");
@@ -106,6 +107,7 @@ export function NuevaFacturaFormEscritorio({
     setClientRuc(c.ruc ?? "");
     setClientDir(c.direccion ?? "");
     setClientPhone(c.telefono ?? "");
+    setClientEmail(c.email ?? "");
   };
 
   const cambiarLinea = (i: number, campo: keyof LineaFactura, valor: string) => {
@@ -298,6 +300,9 @@ export function NuevaFacturaFormEscritorio({
               <input inputMode="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} style={{ width: "100%", borderRadius: 12, padding: "10px 14px", fontSize: 13, background: ADMIN_COLORS.white, border: `1.5px solid ${ADMIN_COLORS.slateD}`, outline: "none" }} />
             </div>
           </div>
+          {clientEmail && (
+            <p style={{ fontSize: 12, color: ADMIN_COLORS.textMid }}>✉️ {clientEmail}</p>
+          )}
 
           {/* Tabla de líneas (§6.3) */}
           <div>

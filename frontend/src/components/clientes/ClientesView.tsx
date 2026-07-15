@@ -16,7 +16,7 @@ import type { Cliente } from "@/types";
 
 export type ClienteConConteo = Cliente & { cotizaciones: number };
 
-const FORM_VACIO = { nombre: "", telefono: "", ruc: "", ciudad: "" };
+const FORM_VACIO = { nombre: "", telefono: "", ruc: "", ciudad: "", email: "" };
 
 export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
   const router = useRouter();
@@ -42,6 +42,7 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
       telefono: form.telefono.trim(),
       ruc: form.ruc.trim() || undefined,
       ciudad: form.ciudad.trim() || undefined,
+      email: form.email.trim() || undefined,
     });
     if (creado) {
       setClientes((prev) =>
@@ -74,6 +75,7 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
             <Input label="Teléfono (WhatsApp) *" placeholder="51 999 999 999" inputMode="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
             <Input label="RUC / DNI (opcional)" placeholder="11 u 8 dígitos" inputMode="numeric" value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
             <Input label="Ciudad (opcional)" placeholder="Ej: Lima" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />
+            <Input label="Correo electrónico (opcional)" type="email" placeholder="cliente@correo.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <p className="text-[11px]" style={{ color: T.textMid }}>
               Solo necesitas nombre y teléfono. El resto lo puedes completar después en la ficha del cliente.
             </p>
