@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { CATEGORIAS } from "@/lib/catalog";
+import { CATEGORIAS, type CategoriaMeta } from "@/lib/catalog";
 import { T } from "@/lib/theme";
 import { ProgressBar, OnbButton, ErrorBanner } from "../_shared";
 
@@ -31,10 +31,26 @@ export default function OnboardingStep2() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
 
+    // `perfiles` no tiene columna `categorias` (confirmado en supabase/migrations/) —
+    // se persiste en la tabla `categorias` (overlay por usuario, ya usada por
+    // Mis Tarifas/useCatalogo), una fila por categoría elegida, marcada es_base=true
+    // porque son categorías del catálogo base, no nuevas.
+    const filas = seleccionadas
+      .map((id) => CATEGORIAS.find((c) => c.id === id))
+      .filter((c): c is CategoriaMeta => Boolean(c))
+      .map((c) => ({
+        user_id: user.id,
+        cat_id: c.id,
+        nombre: c.nombre,
+        emoji: c.emoji,
+        color: c.color,
+        es_base: true,
+        activa: true,
+      }));
+
     const { error: dbErr } = await supabase
-      .from("perfiles")
-      .update({ categorias: seleccionadas })
-      .eq("id", user.id);
+      .from("categorias")
+      .upsert(filas, { onConflict: "user_id,cat_id" });
 
     setLoading(false);
     if (dbErr) {
