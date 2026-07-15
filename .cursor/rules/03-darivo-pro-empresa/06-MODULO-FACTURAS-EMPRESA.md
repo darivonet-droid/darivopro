@@ -1,8 +1,10 @@
 # 06 – MÓDULO FACTURAS – DARIVO PRO EMPRESA
 
-**Versión:** 1.2
+**Versión:** 1.3
 
-**Estado:** ⚠️ Requiere nueva imagen oficial (ver §2 y §5.2, pendiente desde v1.1 + ahora también Cobrada). Lógica y texto sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md` v1.6.
+**Estado:** ⚠️ Requiere nueva imagen oficial (ver §2 y §5.2, pendiente desde v1.1 + ahora también Cobrada + ahora también §5.4/§6.1). Lógica y texto sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md` v1.6.
+
+**Changelog v1.3 (15/07/2026):** la barra de herramientas (§5.4) pasa de un único botón «+ Nueva factura» a dos accesos directos «Factura» / «Boleta», que abren el editor ya configurado con el tipo elegido. Se elimina el «Paso 0 — ¿Tu cliente tiene RUC?» (§6.1) como pantalla propia dentro del editor — el tipo de comprobante ya no se pregunta ahí, se elige antes, en la lista. Cambio pedido por el propietario; no afecta Móvil (sigue preguntando en su propio flujo, sin tocar).
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §6, §9, §18 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.4 · `22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md`
 
@@ -84,7 +86,7 @@ Cuando exista, prevalecerá siempre este MD ante cualquier diferencia con la ima
 │  Facturas ● ├──────────────────────────────────────────────────┤
 │             │  BANNER ámbar (si hay cotiz. aprobadas sin fact.) │
 │             ├──────────────────────────────────────────────────┤
-│             │  TOOLBAR — [+ Nueva factura]                       │
+│             │  TOOLBAR — [🏢 Factura] [👤 Boleta]                  │
 │             ├──────────────────────────────────────────────────┤
 │             │  TABLA PRINCIPAL (§5)                            │
 └─────────────┴──────────────────────────────────────────────────┘
@@ -159,11 +161,14 @@ Visible solo si existen cotizaciones **Aprobadas** sin facturar (Móvil §2):
 
 ## 5.4 Barra de herramientas
 
-| Botón | Acción | Origen |
-|-------|--------|--------|
-| **+ Nueva factura** | Abre editor «desde cero» (Móvil §2 · §5) | Móvil §2 |
+⚠️ **Corrección v1.3** — sustituye el botón único «+ Nueva factura», que llevaba a una pantalla intermedia («Paso 0», §6.1) antes de poder editar. Ahora la elección de tipo se hace aquí mismo, con 2 accesos directos al editor:
 
-Subtítulo opcional en botón: «Crear desde cero en 60 seg» (Móvil §2).
+| Botón | Acción |
+|-------|--------|
+| **🏢 Factura** | Abre el editor directo, ya configurado como Factura (RUC). Subtítulo: «Serie F001 · IGV desglosado · Detracción si aplica». |
+| **👤 Boleta** | Abre el editor directo, ya configurado como Boleta (DNI). Subtítulo: «Serie B001 · IGV incluido · DNI si total > S/700». |
+
+El editor ya no vuelve a preguntar el tipo al entrar — solo permite cambiarlo con el enlace «Cambiar» del encabezado (§4.2), que alterna Factura ↔ Boleta sin pantalla intermedia.
 
 ## 5.5 Tabla principal
 
@@ -189,21 +194,21 @@ Sustituye las cards móviles (Móvil §2):
 
 Flujo funcional idéntico a Móvil §3–§5. Solo cambia la presentación escritorio.
 
-## 6.1 Paso 0 — Tipo de comprobante
+## 6.1 Tipo de comprobante — elegido antes de entrar (§5.4)
 
-Antes de cualquier otro dato (Móvil §3):
+⚠️ **Corrección v1.3** — en escritorio, el tipo de comprobante ya **no** se pregunta como paso 0 dentro del editor (a diferencia de Móvil, que conserva su propia pantalla de pregunta, `06-MODULO-FACTURAS.md` §3, sin cambios). El Gerente lo elige directamente en la lista de Facturas (§5.4, botones «Factura»/«Boleta»), y el editor abre ya configurado:
 
-| Respuesta | Comprobante | Datos obligatorios |
+| Botón en lista | Comprobante | Datos obligatorios |
 |-----------|-------------|-------------------|
-| Cliente **sin RUC** | BOLETA B001-… | Nombre + DNI (8 dígitos) |
-| Cliente **con RUC** | FACTURA F001-… | Razón social + RUC (11 dígitos, empieza 10 o 20) |
+| **Boleta** | BOLETA B001-… | Nombre + DNI (8 dígitos) |
+| **Factura** | FACTURA F001-… | Razón social + RUC (11 dígitos, empieza 10 o 20) |
 
 * BOLETA: IGV incluido, no desglosado.
 * FACTURA: desglose Subtotal + IGV 18% + Total.
 
-**Regla:** RUC/DNI **solo aquí**, nunca al crear Cliente ni Cotización (Móvil §3).
+**Regla:** RUC/DNI **solo al facturar**, nunca al crear Cliente ni Cotización (Móvil §3) — sin cambios.
 
-Presentación escritorio: card selector o modal inicial equivalente al paso móvil.
+Dentro del editor, el enlace «Cambiar» (§4.2 encabezado) permite alternar Factura ↔ Boleta sin volver a la lista ni mostrar ninguna pantalla intermedia.
 
 ## 6.2 Detracción SUNAT
 

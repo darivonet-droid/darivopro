@@ -36,18 +36,20 @@ interface Props {
   aprobados: Cotizacion[];
   clientes: Cliente[];
   cotizacionId?: string;
+  /** Elegido en la lista de Facturas (botón «Factura» o «Boleta») — ya no se pregunta dentro del formulario. */
+  tipoInicial: TipoComprobante;
   volverHref: string;
 }
 
 export function NuevaFacturaFormEscritorio({
-  empresa, numerosExistentes, aprobados, clientes, cotizacionId, volverHref,
+  empresa, numerosExistentes, aprobados, clientes, cotizacionId, tipoInicial, volverHref,
 }: Props) {
   const router = useRouter();
   const { crear, generarPDF, loading } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
-  const [tipo, setTipo] = useState<TipoComprobante | null>(null);
+  const [tipo, setTipo] = useState<TipoComprobante>(tipoInicial);
   const [clientName, setClientName] = useState("");
   const [clientRuc, setClientRuc] = useState("");
   const [clientDni, setClientDni] = useState("");
@@ -220,39 +222,6 @@ export function NuevaFacturaFormEscritorio({
     );
   }
 
-  /* ── Paso 0: elegir tipo (card selector, MD §6.1) ──────── */
-  if (!tipo) {
-    return (
-      <div style={{ maxWidth: 640, margin: "20px auto" }} className="flex flex-col gap-5">
-        <Link href={volverHref} style={{ fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple }}>← Volver</Link>
-        <div style={{ textAlign: "center" }}>
-          <p style={{ fontSize: 20, fontWeight: 900, color: ADMIN_COLORS.purpleDark }}>¿Tu cliente tiene RUC?</p>
-          <p style={{ marginTop: 4, fontSize: 13, color: ADMIN_COLORS.textMid }}>Esto determina el tipo de comprobante SUNAT</p>
-        </div>
-        <div style={{ display: "flex", gap: 14 }}>
-          <button
-            type="button"
-            onClick={() => { setTipo("factura"); setDetTipo(null); }}
-            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, borderRadius: 16, padding: 24, background: ADMIN_COLORS.white, border: `2px solid ${ADMIN_COLORS.purple}`, cursor: "pointer" }}
-          >
-            <span style={{ fontSize: 32 }}>🏢</span>
-            <p style={{ fontWeight: 800, color: ADMIN_COLORS.purple, fontSize: 14 }}>Sí, tiene RUC → Factura</p>
-            <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid, textAlign: "center" }}>Serie F001 · IGV desglosado · Detracción si aplica</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => { setTipo("boleta"); setDetTipo(null); }}
-            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, borderRadius: 16, padding: 24, background: ADMIN_COLORS.white, border: `2px solid ${ADMIN_COLORS.green}`, cursor: "pointer" }}
-          >
-            <span style={{ fontSize: 32 }}>👤</span>
-            <p style={{ fontWeight: 800, color: ADMIN_COLORS.greenD, fontSize: 14 }}>No tiene RUC → Boleta</p>
-            <p style={{ fontSize: 11, color: ADMIN_COLORS.textMid, textAlign: "center" }}>Serie B001 · IGV incluido · DNI si total &gt; S/700</p>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   /* ── Editor — layout ~60/40 (MD §4.2) ──────────────────── */
   return (
     <div className="flex flex-col gap-4">
@@ -265,7 +234,11 @@ export function NuevaFacturaFormEscritorio({
             </p>
             <p style={{ fontSize: 13, fontWeight: 900, color: tipo === "factura" ? ADMIN_COLORS.purpleDark : ADMIN_COLORS.greenD }}>{invNum}</p>
           </div>
-          <button type="button" onClick={() => setTipo(null)} style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, background: "none", border: "none", cursor: "pointer" }}>
+          <button
+            type="button"
+            onClick={() => { setTipo((t) => (t === "factura" ? "boleta" : "factura")); setDetTipo(null); }}
+            style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, background: "none", border: "none", cursor: "pointer" }}
+          >
             Cambiar
           </button>
         </div>

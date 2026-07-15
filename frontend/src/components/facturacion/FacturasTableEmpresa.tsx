@@ -175,14 +175,21 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
         </div>
       )}
 
-      {/* Toolbar (§5.4) */}
-      <div>
+      {/* Toolbar (§5.4) — 2 accesos directos al formulario, sin pantalla intermedia de "¿tiene RUC?" */}
+      <div style={{ display: "flex", gap: 12 }}>
         <Link
-          href={nuevaFacturaHref}
-          style={{ display: "inline-flex", alignItems: "center", gap: 10, borderRadius: 14, padding: "12px 20px", background: ADMIN_COLORS.purple, color: ADMIN_COLORS.white, fontWeight: 800, fontSize: 13 }}
+          href={`${nuevaFacturaHref}?tipo=factura`}
+          style={{ display: "inline-flex", flexDirection: "column", gap: 2, borderRadius: 14, padding: "12px 20px", background: ADMIN_COLORS.purple, color: ADMIN_COLORS.white }}
         >
-          + Nueva factura
-          <span style={{ fontWeight: 500, fontSize: 11, opacity: 0.8 }}>Crear desde cero en 60 seg</span>
+          <span style={{ fontWeight: 800, fontSize: 13 }}>🏢 Factura</span>
+          <span style={{ fontWeight: 500, fontSize: 11, opacity: 0.85 }}>Serie F001 · IGV desglosado · Detracción si aplica</span>
+        </Link>
+        <Link
+          href={`${nuevaFacturaHref}?tipo=boleta`}
+          style={{ display: "inline-flex", flexDirection: "column", gap: 2, borderRadius: 14, padding: "12px 20px", background: ADMIN_COLORS.green, color: ADMIN_COLORS.white }}
+        >
+          <span style={{ fontWeight: 800, fontSize: 13 }}>👤 Boleta</span>
+          <span style={{ fontWeight: 500, fontSize: 11, opacity: 0.85 }}>Serie B001 · IGV incluido · DNI si total &gt; S/700</span>
         </Link>
       </div>
 

@@ -5,13 +5,14 @@ import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { NuevaFacturaFormEscritorio } from "@/components/facturacion/NuevaFacturaFormEscritorio";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Cliente, EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
+import type { TipoComprobante } from "@/lib/factura-utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmpresaNuevaFacturaPage({
   searchParams,
 }: {
-  searchParams: { cotizacion?: string };
+  searchParams: { cotizacion?: string; tipo?: string };
 }) {
   const supabase = createServerClient();
 
@@ -40,6 +41,7 @@ export default async function EmpresaNuevaFacturaPage({
     : null;
 
   const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
+  const tipoInicial: TipoComprobante = searchParams.tipo === "boleta" ? "boleta" : "factura";
 
   const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
     id: row.id,
@@ -86,6 +88,7 @@ export default async function EmpresaNuevaFacturaPage({
         aprobados={aprobados}
         clientes={clientes}
         cotizacionId={searchParams.cotizacion}
+        tipoInicial={tipoInicial}
         volverHref="/empresa/facturas"
       />
     </EmpresaShell>
