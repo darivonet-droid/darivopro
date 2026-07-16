@@ -1,8 +1,8 @@
 ﻿# 09 – PANEL ADMIN – SOPORTE
 
-**Versión:** 1.2
+**Versión:** 1.3
 
-**Estado:** Diseño oficial aprobado. Endpoint desactivado a propósito (INC-A01) — este documento solo corrige los estados a los reales de BD, no reactiva el pipeline.
+**Estado:** Diseño oficial aprobado. Backend real construido (16/07/2026, pedido explícito del propietario dentro de "Fase 3 — Darivo") — INC-A01/DOC-01 quedan resueltos, ver §10–§11.
 
 ---
 
@@ -208,19 +208,13 @@ Las relaciones técnicas con Base de Datos y Arquitectura Maestra quedan reserva
 
 # 10. Base de datos
 
-Pendiente de documentación oficial.
-
-No crear tablas.
-
-No crear relaciones.
+Tablas ya existentes desde el baseline (`supabase/migrations/20260705120000_baseline_v2.sql`), sin cambios de schema para este desbloqueo: `soporte_tickets` (`id`, `user_id`, `user_email`, `user_nombre`, `plan_snapshot`, `asunto`, `descripcion`, `estado`, `created_at`, `ultima_respuesta_at`) y `soporte_mensajes` (`id`, `ticket_id`, `autor_tipo` [`usuario`/`admin`], `autor_user_id`, `mensaje`, `created_at`). RLS ya activo desde el baseline: `soporte_tickets_user`/`soporte_mensajes_user` (`FOR ALL`, solo filas propias del usuario) y `soporte_tickets_admin`/`soporte_mensajes_admin` (`FOR ALL`, gateado por `is_darivo_admin()`). No se crearon tablas ni relaciones nuevas.
 
 ---
 
 # 11. API
 
-Pendiente de documentación oficial.
-
-No crear endpoints.
+Construida (16/07/2026): `frontend/src/app/api/soporte/tickets/route.ts` (GET lista los tickets del usuario logueado, POST crea uno nuevo) y `frontend/src/app/api/soporte/tickets/[id]/mensajes/route.ts` (GET/POST mensajes de un ticket). Ambas rutas usan la sesión del propio usuario (no un cliente admin) — la seguridad la sigue garantizando RLS, no la ruta. El Panel Admin (este módulo) consulta directamente contra Supabase con el cliente admin existente del resto de Admin (mismo patrón que Usuarios/Partners), sin una API pública nueva para el lado Admin.
 
 ---
 
@@ -247,9 +241,11 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 
 # 14. Estado del documento
 
-**Versión:** 1.2
+**Versión:** 1.3
 
-🟡 Documento de diseño oficial.
+🟢 Diseño oficial + backend real construido.
+
+**Cambio principal (v1.3 — 16/07/2026):** desbloqueado INC-A01/DOC-01 a pedido explícito del propietario (Fase 3 — asistente "Darivo"). §10 y §11 documentan la API real construida sobre las tablas ya existentes, sin cambios de schema. Ver `01-darivo-pro-movil/08-MODULO-IA.md` v1.10 §3-A para la identidad de "Darivo" (nombre oficial del Agente IA 2, primer nivel de este mismo modelo de soporte).
 
 **Cambio principal (v1.1):** modelo oficial Soporte Humano (segundo nivel), escalado desde IA de Soporte, regla de no inventar soluciones y relación actualizada con Móvil v1.6.
 

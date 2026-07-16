@@ -67,7 +67,7 @@ const PASOS = [
 ];
 
 // Fotos de stock (Pexels, licencia libre) — fuentes y autores en
-// public/landing/CREDITOS-IMAGENES.md
+// frontend/docs-internos/landing/CREDITOS-IMAGENES.md (fuera de /public, no público)
 const CATEGORIAS = [
   { icon: IconHelmet, nombre: "Construcción", texto: "Albañilería, estructuras, acabados y mucho más.", foto: "/landing/categoria-construccion.jpg" },
   { icon: IconWrench, nombre: "Fontanería", texto: "Instalaciones de agua, desagüe, gas y sanitarios.", foto: "/landing/categoria-fontaneria.jpg" },
@@ -412,8 +412,10 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-2 text-sm font-semibold sm:items-end">
+            <Link href="/soporte">Soporte</Link>
             <Link href="/terminos">Términos y condiciones</Link>
             <Link href="/privacidad">Política de privacidad</Link>
+            <Link href="/cookies">Política de cookies</Link>
           </div>
         </div>
 

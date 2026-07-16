@@ -13,7 +13,7 @@ interface CookieASetear {
   options?: CookieOptions;
 }
 
-const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena", "/precios", "/contacto", "/terminos", "/privacidad", "/auth/callback", "/ref"];
+const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena", "/precios", "/contacto", "/soporte", "/terminos", "/privacidad", "/cookies", "/auth/callback", "/ref"];
 // /nueva-contrasena: el usuario llega con sesión de recuperación — no redirigir al dashboard
 const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar"];
 

@@ -364,7 +364,14 @@ export function NuevoCotizacionWizard() {
 
   // Paso 1 → Paso 2 (cantidad ya escrita en la propia fila de la partida)
   const goToResumen = () => {
-    if (!basket.length || !cantidadesCompleto) return;
+    if (!basket.length) return;
+    if (!cantidadesCompleto) {
+      const faltantes = basket
+        .filter((it) => it.calcType !== "fixed" && !(parseFloat(it.qty) > 0))
+        .map((it) => it.svcLabel);
+      mostrarToast(`Falta indicar cantidad en: ${faltantes.join(", ")}`, "error");
+      return;
+    }
     setPhase("resumen");
   };
 
@@ -506,20 +513,21 @@ export function NuevoCotizacionWizard() {
       {cap.partidas.map((p, si) => {
         const sel = isSelected(p.id);
         const it = basket.find((b) => b.svcId === p.id);
+        const faltaCantidad = sel && p.calcType !== "fixed" && !(parseFloat(it?.qty ?? "") > 0);
         return (
           <div
             key={p.id}
             style={{
               width: "100%", padding: "12px 16px 12px 20px",
               borderBottom: si < cap.partidas.length - 1 ? `1px solid ${T.slate}` : "none",
-              background: sel ? cap.color + "0A" : T.white,
+              background: faltaCantidad ? T.redPale : sel ? cap.color + "0A" : T.white,
               display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10,
             }}
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 14, fontWeight: sel ? 800 : 600, color: sel ? cap.color : T.text, lineHeight: 1.3 }}>{p.nombre}</p>
-              <p style={{ fontSize: 12, color: T.textMid, marginTop: 1 }}>
-                {p.calcType === "fixed" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
+              <p style={{ fontSize: 12, color: faltaCantidad ? T.red : T.textMid, marginTop: 1, fontWeight: faltaCantidad ? 700 : 400 }}>
+                {faltaCantidad ? "Falta indicar cantidad" : p.calcType === "fixed" ? `S/ ${p.precio} precio fijo` : `S/ ${p.precio} / ${p.unidad}`}
               </p>
             </div>
             {p.calcType !== "fixed" && (
@@ -529,7 +537,7 @@ export function NuevoCotizacionWizard() {
                 value={it?.qty ?? ""}
                 onChange={(e) => setCantidad(cap, p, e.target.value)}
                 placeholder="0"
-                style={{ width: 52, padding: "8px 6px", borderRadius: 10, fontSize: 15, fontWeight: 800, border: `1.5px solid ${sel ? cap.color : T.slateD}`, outline: "none", color: T.text, background: T.slate, textAlign: "center", fontFamily: "inherit", flexShrink: 0 }}
+                style={{ width: 52, padding: "8px 6px", borderRadius: 10, fontSize: 15, fontWeight: 800, border: `1.5px solid ${faltaCantidad ? T.red : sel ? cap.color : T.slateD}`, outline: "none", color: T.text, background: T.slate, textAlign: "center", fontFamily: "inherit", flexShrink: 0 }}
               />
             )}
             <button
@@ -565,46 +573,95 @@ export function NuevoCotizacionWizard() {
 
       <div style={{ padding: "18px 16px 100px" }}>
 
-        {/* ══ PASO 1: SELECCIÓN (Regla 3 — sin cálculo) ══ */}
+        {/* ══ PASO 1: SELECCIÓN (Regla 3 — sin cálculo). Drill-down Fable 5: una
+             pantalla por paso — la lista de categorías se reemplaza por completo
+             al abrir una, igual que ya hacía Construcción → subcategorías
+             (05-MODULO-COTIZACIONES.md líneas 59, 67-99, 123-125). ══ */}
         {phase === "cats" && (
           <div className="su">
 
-            <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-              Toca una categoría para ver sus partidas
-            </p>
+            {/* ── Lista de categorías (solo visible sin categoría abierta) ── */}
+            {selCat === null && (
+              <>
+                <p style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+                  Toca una categoría para ver sus partidas
+                </p>
 
-            {/* Construcción → subcategorías → partidas (Regla 2) */}
-            {showConstruccion && (() => {
+                {showConstruccion && (() => {
+                  const cap = CONSTRUCCION_META;
+                  const selCount = basket.filter((b) => construccionSubs.some((s) => s.partidas.some((p) => p.id === b.svcId))).length;
+                  return (
+                    <button
+                      key={CONSTRUCCION_ID}
+                      type="button"
+                      onClick={() => setSelCat(CONSTRUCCION_ID)}
+                      style={{ width: "100%", marginBottom: 8, borderRadius: 16, border: `2px solid ${selCount > 0 ? cap.color : T.slateD}`, padding: "14px 16px", background: selCount > 0 ? cap.color + "07" : T.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                    >
+                      <span style={{ fontSize: 26, lineHeight: 1 }}>{cap.emoji}</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 15, fontWeight: 800, color: selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
+                        <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>
+                          {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""} añadida${selCount !== 1 ? "s" : ""}` : `${construccionSubs.length} subcategorías`}
+                        </p>
+                      </div>
+                      {selCount > 0 && (
+                        <div style={{ width: 22, height: 22, borderRadius: 11, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Ic d={checkPath} color={T.white} size={12} />
+                        </div>
+                      )}
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Ic d={chevronPath} color={T.textMid} size={16} sw={2.5} />
+                      </div>
+                    </button>
+                  );
+                })()}
+
+                {otrasCategorias.map((cap) => {
+                  const selCount = basket.filter((b) => cap.partidas.some((p) => p.id === b.svcId)).length;
+                  return (
+                    <button
+                      key={cap.id}
+                      type="button"
+                      onClick={() => setSelCat(cap.id)}
+                      style={{ width: "100%", marginBottom: 8, borderRadius: 16, border: `2px solid ${selCount > 0 ? cap.color : T.slateD}`, padding: "14px 16px", background: selCount > 0 ? cap.color + "07" : T.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                    >
+                      <span style={{ fontSize: 26, lineHeight: 1 }}>{cap.emoji}</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 15, fontWeight: 800, color: selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
+                        <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>
+                          {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""} añadida${selCount !== 1 ? "s" : ""}` : `${cap.partidas.length} partidas disponibles`}
+                        </p>
+                      </div>
+                      {selCount > 0 && (
+                        <div style={{ width: 22, height: 22, borderRadius: 11, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Ic d={checkPath} color={T.white} size={12} />
+                        </div>
+                      )}
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Ic d={chevronPath} color={T.textMid} size={16} sw={2.5} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </>
+            )}
+
+            {/* ── Detalle Construcción → subcategorías → partidas (Regla 2) ── */}
+            {selCat === CONSTRUCCION_ID && (() => {
               const cap = CONSTRUCCION_META;
-              const isOpen = selCat === CONSTRUCCION_ID;
-              const selCount = basket.filter((b) => construccionSubs.some((s) => s.partidas.some((p) => p.id === b.svcId))).length;
               const activeSub = selSubCat ? construccionSubs.find((s) => s.id === selSubCat) : null;
               return (
-                <div key={CONSTRUCCION_ID} style={{ marginBottom: 8, borderRadius: 16, overflow: "hidden", border: `2px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : T.slateD}`, transition: "border-color 0.2s" }}>
+                <div>
                   <button
                     type="button"
-                    onClick={() => { setSelCat(isOpen ? null : CONSTRUCCION_ID); setSelSubCat(null); }}
-                    style={{ width: "100%", padding: "14px 16px", background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : T.white, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                    onClick={() => { setSelCat(null); setSelSubCat(null); }}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue, marginBottom: 12 }}
                   >
-                    <span style={{ fontSize: 26, lineHeight: 1 }}>{cap.emoji}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 15, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
-                      <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>
-                        {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""} añadida${selCount !== 1 ? "s" : ""}` : `${construccionSubs.length} subcategorías`}
-                      </p>
-                    </div>
-                    {selCount > 0 && (
-                      <div style={{ width: 22, height: 22, borderRadius: 11, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Ic d={checkPath} color={T.white} size={12} />
-                      </div>
-                    )}
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: isOpen ? cap.color + "15" : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Ic d={chevronPath} color={isOpen ? cap.color : T.textMid} size={16} sw={2.5} />
-                    </div>
+                    ← Categorías
                   </button>
 
-                  {isOpen && !selSubCat && (
-                    <div className="su" style={{ background: T.white, borderTop: `1px solid ${cap.color}20`, padding: "8px 12px 12px" }}>
+                  {!activeSub && (
+                    <div className="su">
                       {SUBCATEGORIAS_CONSTRUCCION.filter((sub) => construccionSubs.some((c) => c.id === sub.id)).map((sub) => {
                         const subCap = construccionSubs.find((c) => c.id === sub.id)!;
                         const subSel = basket.filter((b) => subCap.partidas.some((p) => p.id === b.svcId)).length;
@@ -628,12 +685,12 @@ export function NuevoCotizacionWizard() {
                     </div>
                   )}
 
-                  {isOpen && activeSub && (
-                    <div>
+                  {activeSub && (
+                    <div style={{ borderRadius: 16, overflow: "hidden", border: `2px solid ${cap.color}60` }}>
                       <button
                         type="button"
                         onClick={() => setSelSubCat(null)}
-                        style={{ width: "100%", padding: "10px 16px", background: T.slate, border: "none", borderTop: `1px solid ${cap.color}20`, cursor: "pointer", textAlign: "left", fontSize: 12, fontWeight: 700, color: T.blue }}
+                        style={{ width: "100%", padding: "10px 16px", background: T.slate, border: "none", cursor: "pointer", textAlign: "left", fontSize: 12, fontWeight: 700, color: T.blue }}
                       >
                         ← Subcategorías
                       </button>
@@ -644,41 +701,26 @@ export function NuevoCotizacionWizard() {
               );
             })()}
 
-            {/* Resto de categorías — acceso directo a partidas */}
-            {otrasCategorias.map((cap) => {
-              const isOpen = selCat === cap.id;
-              const selCount = basket.filter((b) => cap.partidas.some((p) => p.id === b.svcId)).length;
+            {/* ── Detalle resto de categorías — solo partidas (Regla: "Pantalla de
+                 Partidas muestra únicamente las partidas") ── */}
+            {selCat !== null && selCat !== CONSTRUCCION_ID && (() => {
+              const cap = otrasCategorias.find((c) => c.id === selCat);
+              if (!cap) return null;
               return (
-                <div key={cap.id} style={{ marginBottom: 8, borderRadius: 16, overflow: "hidden", border: `2px solid ${selCount > 0 ? cap.color : isOpen ? cap.color + "60" : T.slateD}`, transition: "border-color 0.2s" }}>
+                <div>
                   <button
                     type="button"
-                    onClick={() => { setSelCat(isOpen ? null : cap.id); setSelSubCat(null); }}
-                    style={{ width: "100%", padding: "14px 16px", background: isOpen ? cap.color + "0E" : selCount > 0 ? cap.color + "07" : T.white, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                    onClick={() => setSelCat(null)}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.blue, marginBottom: 12 }}
                   >
-                    <span style={{ fontSize: 26, lineHeight: 1 }}>{cap.emoji}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 15, fontWeight: 800, color: isOpen || selCount > 0 ? cap.color : T.text }}>{cap.nombre}</p>
-                      <p style={{ fontSize: 11, color: T.textMid, marginTop: 1 }}>
-                        {selCount > 0 ? `${selCount} partida${selCount !== 1 ? "s" : ""} añadida${selCount !== 1 ? "s" : ""}` : `${cap.partidas.length} partidas disponibles`}
-                      </p>
-                    </div>
-                    {selCount > 0 && (
-                      <div style={{ width: 22, height: 22, borderRadius: 11, background: T.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Ic d={checkPath} color={T.white} size={12} />
-                      </div>
-                    )}
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: isOpen ? cap.color + "15" : T.slate, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
-                      <Ic d={chevronPath} color={isOpen ? cap.color : T.textMid} size={16} sw={2.5}
-                        // @ts-expect-error style prop on custom component
-                        style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s" }}
-                      />
-                    </div>
+                    ← Categorías
                   </button>
-
-                  {isOpen && renderPartidas(cap)}
+                  <div style={{ borderRadius: 16, overflow: "hidden", border: `2px solid ${cap.color}60` }}>
+                    {renderPartidas(cap)}
+                  </div>
                 </div>
               );
-            })}
+            })()}
           </div>
         )}
 

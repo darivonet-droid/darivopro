@@ -53,8 +53,7 @@ export function FloatBar({
         </div>
         <button
           onClick={onPrimary}
-          disabled={primaryDisabled}
-          style={{ width: "100%", background: primaryDisabled ? T.slateD : `linear-gradient(135deg,${T.blue},${T.blueL})`, border: "none", cursor: primaryDisabled ? "default" : "pointer", borderRadius: 13, padding: "12px 18px", color: T.white, fontSize: 14, fontWeight: 800, boxShadow: primaryDisabled ? "none" : `0 4px 16px ${T.blue}50` }}
+          style={{ width: "100%", background: primaryDisabled ? T.slateD : `linear-gradient(135deg,${T.blue},${T.blueL})`, border: "none", cursor: "pointer", borderRadius: 13, padding: "12px 18px", color: T.white, fontSize: 14, fontWeight: 800, boxShadow: primaryDisabled ? "none" : `0 4px 16px ${T.blue}50` }}
         >
           {primaryLabel}
         </button>

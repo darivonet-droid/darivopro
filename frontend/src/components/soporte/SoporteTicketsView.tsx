@@ -3,20 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { CodeNotice } from "@/components/common/CodeNotice";
 import { T } from "@/lib/theme";
-import type { EstadoTicket } from "@/lib/soporte-types";
-
-/** Almacenamiento local Móvil — sync Admin pendiente decisión propietario (INC-A01 · DOC-01) */
-const STORAGE_KEY = "darivo_tickets_soporte";
-
-interface TicketLocal {
-  id: string;
-  asunto: string;
-  descripcion: string;
-  estado: EstadoTicket;
-  fecha: string;
-}
+import type { EstadoTicket, SoporteTicket } from "@/lib/soporte-types";
 
 interface SoporteTicketsViewProps {
   volverHref: string;
@@ -29,40 +17,61 @@ export function SoporteTicketsView({
   volverLabel = "← Volver",
   embedded = false,
 }: SoporteTicketsViewProps) {
-  const [tickets, setTickets] = useState<TicketLocal[]>([]);
+  const [tickets, setTickets] = useState<SoporteTicket[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [asunto, setAsunto] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const cargarTickets = async () => {
+    setCargando(true);
+    try {
+      const res = await fetch("/api/soporte/tickets");
+      const json = await res.json();
+      if (res.ok) setTickets(json.data as SoporteTicket[]);
+    } catch {
+      /* deja la lista como estaba */
+    } finally {
+      setCargando(false);
+    }
+  };
 
   useEffect(() => {
-    try {
-      setTickets(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as TicketLocal[]);
-    } catch {
-      setTickets([]);
-    }
+    void cargarTickets();
   }, []);
 
-  const crearTicket = () => {
-    if (!asunto.trim() || !descripcion.trim()) return;
-    const nuevo: TicketLocal = {
-      id: crypto.randomUUID(),
-      asunto: asunto.trim(),
-      descripcion: descripcion.trim(),
-      estado: "Nuevo",
-      fecha: new Date().toLocaleDateString("es-PE"),
-    };
-    const next = [nuevo, ...tickets];
-    setTickets(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setAsunto("");
-    setDescripcion("");
-    setMostrarForm(false);
+  const crearTicket = async () => {
+    if (!asunto.trim() || !descripcion.trim() || enviando) return;
+    setEnviando(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch("/api/soporte/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asunto: asunto.trim(), descripcion: descripcion.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setErrorMsg(json.error ?? "No se pudo enviar el caso");
+        return;
+      }
+      setTickets((prev) => [json.data as SoporteTicket, ...prev]);
+      setAsunto("");
+      setDescripcion("");
+      setMostrarForm(false);
+    } catch {
+      setErrorMsg("No se pudo enviar el caso — revisa tu conexión");
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
     <div>
       {!embedded && (
-        <PageHeader titulo="Soporte" subtitulo="Crear y consultar tickets" />
+        <PageHeader titulo="Mis casos" subtitulo="Crear y consultar tus casos con el equipo" />
       )}
       <main className={embedded ? "" : "px-4 py-4"}>
         <button
@@ -71,7 +80,7 @@ export function SoporteTicketsView({
           className="mb-4 w-full rounded-2xl py-3.5 text-sm font-extrabold text-white"
           style={{ background: T.teal }}
         >
-          + Nueva incidencia
+          + Nuevo caso
         </button>
 
         {mostrarForm && (
@@ -94,6 +103,11 @@ export function SoporteTicketsView({
               className="mb-3 w-full rounded-xl border px-3 py-2.5 text-sm"
               style={{ borderColor: T.slateD }}
             />
+            {errorMsg && (
+              <p className="mb-2 text-xs font-semibold" style={{ color: T.red }}>
+                {errorMsg}
+              </p>
+            )}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -106,19 +120,23 @@ export function SoporteTicketsView({
               <button
                 type="button"
                 onClick={crearTicket}
+                disabled={enviando}
                 className="flex-[2] rounded-xl py-2.5 text-sm font-bold text-white"
-                style={{ background: T.teal }}
+                style={{ background: T.teal, opacity: enviando ? 0.6 : 1 }}
               >
-                Enviar
+                {enviando ? "Enviando…" : "Enviar"}
               </button>
             </div>
-            <CodeNotice code="INC-A01" className="mt-2" />
           </div>
         )}
 
-        {tickets.length === 0 ? (
+        {cargando ? (
           <p className="py-8 text-center text-sm" style={{ color: T.textMid }}>
-            No tienes tickets aún
+            Cargando…
+          </p>
+        ) : tickets.length === 0 ? (
+          <p className="py-8 text-center text-sm" style={{ color: T.textMid }}>
+            No tienes casos aún
           </p>
         ) : (
           <div className="flex flex-col gap-2">
@@ -138,7 +156,7 @@ export function SoporteTicketsView({
                   {t.descripcion}
                 </p>
                 <p className="mt-1 text-[10px]" style={{ color: T.textLight }}>
-                  {t.fecha}
+                  {new Date(t.createdAt).toLocaleDateString("es-PE")}
                 </p>
               </div>
             ))}
@@ -155,9 +173,10 @@ export function SoporteTicketsView({
 
 function EstadoBadge({ estado }: { estado: EstadoTicket }) {
   const colors: Record<EstadoTicket, { bg: string; color: string }> = {
-    Nuevo: { bg: T.bluePale, color: T.blue },
-    "En proceso": { bg: T.amberPale, color: T.amberD },
+    Abierto: { bg: T.bluePale, color: T.blue },
+    "En progreso": { bg: T.amberPale, color: T.amberD },
     Resuelto: { bg: T.greenPale, color: T.greenD },
+    Cerrado: { bg: T.slate, color: T.textMid },
   };
   const s = colors[estado];
   return (

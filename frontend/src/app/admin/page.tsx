@@ -5,7 +5,6 @@ import { AdminDashboardToolbar } from "@/components/admin/AdminDashboardToolbar"
 import { AdminActividadChart } from "@/components/admin/AdminActividadChart";
 import { AdminPlanesDonut } from "@/components/admin/AdminPlanesDonut";
 import { IconUsers, IconCreditCard, IconCash, IconUserPlus, IconTicket } from "@/components/admin/AdminIcons";
-import { CodeNotice } from "@/components/common/CodeNotice";
 import { fetchAdminDashboard } from "@/lib/admin-queries";
 import { fmtPEN } from "@/lib/utils";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
@@ -68,7 +67,6 @@ export default async function AdminDashboardPage({
         <AdminKpiCard
           label="Tickets abiertos"
           value={d.ticketsAbiertos}
-          hint={d.ticketsAbiertosHint}
           icon={<IconTicket size={16} />}
         />
       </AdminKpiGrid>
@@ -80,16 +78,26 @@ export default async function AdminDashboardPage({
 
         <AdminCard title="Estado de soporte">
           <ul className="space-y-3 text-sm">
-            {["Abiertos", "En proceso", "Resueltos (30 días)"].map((label) => (
+            {[
+              { label: "Abiertos", value: d.ticketsAbiertos },
+              { label: "En progreso", value: d.ticketsEnProgreso },
+              { label: "Resueltos (30 días)", value: d.ticketsResueltos30d },
+            ].map(({ label, value }) => (
               <li key={label} className="flex items-center justify-between">
                 <span style={{ color: ADMIN_COLORS.textMid }}>{label}</span>
                 <span className="font-bold" style={{ color: ADMIN_COLORS.text }}>
-                  —
+                  {value}
                 </span>
               </li>
             ))}
           </ul>
-          <CodeNotice code="INC-A01" className="mt-3" />
+          <Link
+            href="/admin/soporte"
+            className="mt-3 inline-block text-xs font-bold"
+            style={{ color: ADMIN_COLORS.purple }}
+          >
+            Ver todos los casos →
+          </Link>
         </AdminCard>
       </div>
 

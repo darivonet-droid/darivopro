@@ -4,7 +4,7 @@
  */
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
-import { codeLine } from "@/lib/error-catalog";
+import { enviarTicketResuelto } from "@/lib/email/send";
 
 export type AdminPerfilRow = {
   id: string;
@@ -62,6 +62,11 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
   inicioActividad.setHours(0, 0, 0, 0);
   const isoActividad = inicioActividad.toISOString();
 
+  const inicio30 = new Date();
+  inicio30.setDate(inicio30.getDate() - 29);
+  inicio30.setHours(0, 0, 0, 0);
+  const iso30 = inicio30.toISOString();
+
   const [
     { count: totalUsuarios },
     { data: perfiles },
@@ -69,6 +74,7 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
     { data: recientes },
     { data: cotizacionesActividad },
     { data: facturasActividad },
+    { data: tickets },
   ] = await Promise.all([
     admin.from("perfiles").select("*", { count: "exact", head: true }),
     admin.from("perfiles").select("id, plan_tipo, onboarding_done, created_at"),
@@ -80,6 +86,7 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
       .limit(5),
     admin.from("cotizaciones").select("created_at").gte("created_at", isoActividad),
     admin.from("facturas").select("created_at").gte("created_at", isoActividad),
+    admin.from("soporte_tickets").select("estado, ultima_respuesta_at"),
   ]);
 
   const rows = perfiles ?? [];
@@ -92,8 +99,12 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
     .filter((f) => f.inv_status === "Cobrada")
     .reduce((s, f) => s + Number(f.total_final ?? 0), 0);
 
-  /** INC-A01: pipeline soporte detenido — KPI no disponible hasta DOC-01 */
-  const ticketsAbiertos: string | number = "—";
+  const ticketsRows = tickets ?? [];
+  const ticketsAbiertos = ticketsRows.filter((t) => t.estado === "Abierto").length;
+  const ticketsEnProgreso = ticketsRows.filter((t) => t.estado === "En progreso").length;
+  const ticketsResueltos30d = ticketsRows.filter(
+    (t) => t.estado === "Resuelto" && t.ultima_respuesta_at && t.ultima_respuesta_at >= iso30
+  ).length;
 
   const actividad = construirSerieActividad(
     diasActividad,
@@ -110,7 +121,8 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
       ingresosMes,
       nuevosRegistros,
       ticketsAbiertos,
-      ticketsAbiertosHint: codeLine("INC-A01"),
+      ticketsEnProgreso,
+      ticketsResueltos30d,
       recientes: recientes ?? [],
       actividad,
       distribucion: {
@@ -433,4 +445,75 @@ export async function fetchAdminProductos(): Promise<
   }));
 
   return { data: productos };
+}
+
+export type AdminSoporteTicketRow = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userNombre: string;
+  plan: string;
+  asunto: string;
+  descripcion: string;
+  estado: "Abierto" | "En progreso" | "Resuelto" | "Cerrado";
+  createdAt: string;
+  ultimaRespuesta: string | null;
+};
+
+/** Tickets de soporte — desbloqueo INC-A01/DOC-01 (16/07/2026), ver 09-PANEL-ADMIN-SOPORTE.md §10-11 */
+export async function fetchAdminSoporte(): Promise<
+  { data: AdminSoporteTicketRow[] } | { error: string }
+> {
+  const admin = adminClientOrNull();
+  if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+
+  const { data, error } = await admin
+    .from("soporte_tickets")
+    .select("id, user_id, user_email, user_nombre, plan_snapshot, asunto, descripcion, estado, created_at, ultima_respuesta_at")
+    .order("created_at", { ascending: false });
+
+  if (error) return { error: error.message };
+
+  const tickets: AdminSoporteTicketRow[] = (data ?? []).map((t) => ({
+    id: t.id,
+    userId: t.user_id,
+    userEmail: t.user_email ?? "",
+    userNombre: t.user_nombre ?? "",
+    plan: t.plan_snapshot ?? "",
+    asunto: t.asunto,
+    descripcion: t.descripcion,
+    estado: t.estado,
+    createdAt: t.created_at,
+    ultimaRespuesta: t.ultima_respuesta_at,
+  }));
+
+  return { data: tickets };
+}
+
+/** Cambia el estado de un ticket desde Admin (Server Action, ver admin/soporte/actions.ts) */
+export async function actualizarEstadoTicket(
+  ticketId: string,
+  estado: "Abierto" | "En progreso" | "Resuelto" | "Cerrado"
+): Promise<{ ok: true } | { error: string }> {
+  const admin = adminClientOrNull();
+  if (!admin) return { error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+
+  const { data, error } = await admin
+    .from("soporte_tickets")
+    .update({ estado, ultima_respuesta_at: new Date().toISOString() })
+    .eq("id", ticketId)
+    .select("user_email, user_nombre, asunto")
+    .single();
+
+  if (error) return { error: error.message };
+
+  if (estado === "Resuelto" && data?.user_email) {
+    void enviarTicketResuelto(data.user_email, {
+      nombre: data.user_nombre || "cliente Darivo Pro",
+      numeroTicket: `TCK-${ticketId.slice(0, 8).toUpperCase()}`,
+      resumenSolucion: data.asunto,
+    });
+  }
+
+  return { ok: true };
 }

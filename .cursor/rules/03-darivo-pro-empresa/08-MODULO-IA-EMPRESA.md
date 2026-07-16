@@ -1,8 +1,10 @@
 # 08 – MÓDULO IA – DARIVO PRO EMPRESA
 
-**Versión:** 1.2
+**Versión:** 1.3
 
-**Estado:** ✅ Documentación sincronizada con Móvil v1.6 — imagen oficial previa (fase global §7 — 02/07/2026); **card Soporte con IA** pendiente de nueva imagen.
+**Estado:** ✅ Documentación sincronizada con Móvil v1.10 — imagen oficial previa (fase global §7 — 02/07/2026); **card Soporte con IA** pendiente de nueva imagen.
+
+**Cambio v1.3 (16/07/2026):** el Agente IA 2 tiene nombre oficial de cara al usuario, "Darivo" (ver Móvil `08-MODULO-IA.md` v1.10 §3-A) — mismo agente, misma identidad, en Empresa y Móvil. Estados de ticket corregidos en §10 para coincidir con el schema real.
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §13 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.6 · `01-darivo-pro-movil/08-MODULO-IA.md` v1.6 · `01-darivo-pro-movil/16-SISTEMA-DE-DISEÑO-FABLE5.md` §6.8.2
 
@@ -209,7 +211,7 @@ El soporte humano revisa, comunica, solicita información, resuelve incidencias 
 
 ### Presentación
 
-Vista conversacional (panel central o modal ancho) con historial de mensajes, campo de texto y estado del ticket cuando corresponda. Estados oficiales: **Nuevo** / **En proceso** / **Resuelto** (`09-PANEL-ADMIN-SOPORTE.md`).
+Vista conversacional (panel central o modal ancho) con historial de mensajes, campo de texto y estado del ticket cuando corresponda. Estados oficiales: **Abierto** / **En progreso** / **Resuelto** / **Cerrado** (schema real `soporte_tickets.estado`, ver Móvil `08-MODULO-IA.md` v1.10 §11 y `09-PANEL-ADMIN-SOPORTE.md`).
 
 ---
 
@@ -283,7 +285,7 @@ Detalle: `11-ROLES-PLANES-PERMISOS-EMPRESA.md` — **matriz detallada pendiente 
 
 # 17. Estado
 
-✅ **Documentación v1.2 sincronizada** (04/07/2026) — modelo soporte IA + humano.
+✅ **Documentación v1.3 sincronizada** (16/07/2026) — Agente IA 2 con nombre oficial "Darivo", estados de ticket corregidos.
 
 ⏳ Imagen oficial §2 — actualización visual card Agente IA 2.
 

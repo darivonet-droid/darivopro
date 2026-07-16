@@ -1,10 +1,12 @@
 # 05 – FRONTEND – DARIVO PRO
 
-**Versión:** 2.2
+**Versión:** 2.3
 
-**Fecha:** 03/07/2026
+**Fecha:** 16/07/2026
 
 **Estado:** Documento técnico oficial — **Post-V1 ecosistema completo cerrada** (Móvil · Empresa · Admin · Partner)
+
+**Cambio v2.3 (16/07/2026):** **DOC-01 resuelto** — pedido explícito del propietario dentro de "Fase 3 — Darivo" (asistente de soporte). Backend real de tickets construido sobre `soporte_tickets`/`soporte_mensajes` (ya existentes en BD, sin cambio de schema). INC-M01/INC-B01 quedan resueltos como consecuencia; DT-05-04 completada. Ver `01-darivo-pro-movil/08-MODULO-IA.md` v1.10 §3-A y `02-darivo-pro-admin/09-PANEL-ADMIN-SOPORTE.md` v1.3.
 
 **Referencias:**
 
@@ -37,7 +39,7 @@ No modifica lógica de negocio ni arquitectura aprobada.
 | **Darivo Pro Empresa** | `/empresa/*` | `EmpresaShell` sidebar | ✅ Post-V1: Inicio + 7 módulos Móvil · Empleados UI |
 | **Panel Partner** | `/partner` | Página única | ✅ Post-V1: Perfil + enlace sync Admin + registros + comisiones |
 
-\* Admin Soporte: UI informativa — pipeline tickets bloqueado **DOC-01** (ver §7).
+\* Admin Soporte: pipeline de tickets real desde 16/07/2026 — **DOC-01 resuelto** (ver §7).
 
 ---
 
@@ -73,7 +75,7 @@ Implementación: `frontend/src/components/ui/BottomNav.tsx`
 | `/mas/informes` | Informes (Semana/Mes/Anual) |
 | `/mas/documentos` | Historial cotizaciones/facturas |
 | `/mas/plan` | Mi Plan + checkout dLocal (T08) |
-| `/mas/soporte` | Tickets — `SoporteTicketsView` (localStorage · DOC-01) |
+| `/mas/soporte` | Darivo (chat) + `SoporteTicketsView` (tickets reales, API `/api/soporte/tickets`) |
 | `/mas/ia-preferencias` | Enlace al módulo IA (T07 activo) |
 | `/mas/preferencias` | Preferencias generales |
 
@@ -95,7 +97,7 @@ Rutas bajo `/admin` con menú lateral oficial (`00-PANEL-ADMIN-DASHBOARD.md` §4
 
 | Ruta | MD referencia | Estado UI |
 |------|---------------|-----------|
-| `/admin` | Dashboard | ✅ KPIs Supabase (service role) · tickets KPI `—` (DOC-01) |
+| `/admin` | Dashboard | ✅ KPIs Supabase (service role) · tickets KPI real desde 16/07/2026 |
 | `/admin/catalogo` | Catálogo Maestro | ✅ Lectura tablas 015 |
 | `/admin/usuarios` | Usuarios | ✅ Listado perfiles + emails |
 | `/admin/suscripciones` | Suscripciones | ✅ Catálogo oficial + distribución |
@@ -104,7 +106,7 @@ Rutas bajo `/admin` con menú lateral oficial (`00-PANEL-ADMIN-DASHBOARD.md` §4
 | `/admin/empleados` | Empleados | ✅ `AdminEmpleadosInternosView` — allowlist env |
 | `/admin/apis` | Configuración APIs | ✅ `ApisRegistroView` — §5.1–5.3 |
 | `/admin/partners` | Partners | ✅ `AdminPartnersView` — JSON servidor + Server Actions |
-| `/admin/soporte` | Soporte | 🟡 `AdminSoporteView` — pendiente DOC-01 (§11: no endpoints) |
+| `/admin/soporte` | Soporte | ✅ `AdminSoporteView` — tickets reales, filtros y cambio de estado (16/07/2026) |
 | `/admin/configuracion` | Configuración | ✅ Perfil admin |
 
 Shell: `frontend/src/components/admin/AdminShell.tsx`
@@ -163,9 +165,9 @@ Guard: `requireProducto("partner")` (T11).
 | DT-05-01 | Tabla BD `gastos` + Storage documentos Cierre | 02 / propietario |
 | DT-05-02 | ~~IA análisis gastos~~ | ✅ T07 |
 | DT-05-03 | Export expediente mensual | 09 / propietario |
-| **DOC-01** | **Soporte Móvil ↔ Admin** — contradicción `09-PANEL-ADMIN-SOPORTE.md` §11 vs sync | **Bloqueada — decisión propietario** |
-| DT-05-04 | Soporte Móvil ↔ Admin (pipeline autorizado) | Admin iteración · depende DOC-01 |
-| DT-05-05 | UI completa Admin por módulo | 🟡 Parcial post-V1 — Soporte pendiente DOC-01 |
+| **DOC-01** | ~~Soporte Móvil ↔ Admin~~ — contradicción `09-PANEL-ADMIN-SOPORTE.md` §11 vs sync | ✅ **Resuelta 16/07/2026** — decisión propietario (Fase 3, Darivo) |
+| DT-05-04 | ~~Soporte Móvil ↔ Admin (pipeline autorizado)~~ | ✅ Construido 16/07/2026 |
+| DT-05-05 | UI completa Admin por módulo | ✅ Soporte completado 16/07/2026 (DOC-01) |
 | DT-05-06 | UI Empresa Empleados | 🟡 Parcial — UI implementada · BD pendiente |
 | DT-05-07 | ~~Auth rol Administrador / Partner~~ | ✅ T11 |
 | DT-05-08 | Informe Anual dedicado (vs trimestral) | Propietario |
@@ -176,8 +178,8 @@ Guard: `requireProducto("partner")` (T11).
 
 | ID | Descripción | Motivo |
 |----|-------------|--------|
-| INC-M01 | Admin Soporte: Ver / Responder ticket (§8) | Bloqueada por DOC-01 |
-| INC-B01 | Filtro por plan en Admin Soporte | Bloqueada por DOC-01 |
+| ~~INC-M01~~ | ~~Admin Soporte: Ver / Responder ticket (§8)~~ | ✅ Resuelta 16/07/2026 (junto con DOC-01) |
+| ~~INC-B01~~ | ~~Filtro por plan en Admin Soporte~~ | ✅ Resuelta 16/07/2026 (junto con DOC-01) |
 
 ---
 

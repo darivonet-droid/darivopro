@@ -29,22 +29,6 @@ export const ERROR_CATALOG: Record<string, CodeCatalogEntry> = {
     detalle:
       "Por ahora puedes ver el detalle, pero no modificarlo — el guardado (useGastos.ts) solo admite registrar gastos nuevos.",
   },
-  "INC-A01": {
-    severidad: "pending",
-    mensaje: "El envío de tickets de soporte no se sincroniza con Admin todavía.",
-    detalle:
-      "El endpoint /api/soporte/tickets fue retirado por contradicción con la documentación oficial (09-PANEL-ADMIN-SOPORTE.md §11) — pendiente de decisión del propietario (DOC-01).",
-  },
-  "INC-M01": {
-    severidad: "pending",
-    mensaje: "Ver y responder tickets desde Admin todavía no está disponible.",
-    detalle: "Bloqueado hasta la misma decisión del propietario que INC-A01 (DOC-01).",
-  },
-  "INC-B01": {
-    severidad: "pending",
-    mensaje: "Filtrar tickets por plan todavía no está disponible.",
-    detalle: "Bloqueado hasta la misma decisión del propietario que INC-A01 (DOC-01).",
-  },
 };
 
 /** Línea de una sola oración "CODIGO · mensaje", para usos de texto plano (ej. hint de una KpiCard). */

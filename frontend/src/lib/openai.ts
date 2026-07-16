@@ -39,7 +39,23 @@ export async function openaiChatJSON(options: {
     { role: "system", content: options.system },
     { role: "user", content: options.user },
   ];
-  return openaiRequest(messages, options.maxTokens ?? 1024, false);
+  return openaiRequest(messages, options.maxTokens ?? 1024, false, true);
+}
+
+/**
+ * Chat de texto libre, multi-turno (sin forzar JSON) — usado por Darivo.
+ * `history` no debe incluir el mensaje `system`, ese va aparte en `system`.
+ */
+export async function openaiChatText(options: {
+  system: string;
+  history: Array<{ role: "user" | "assistant"; content: string }>;
+  maxTokens?: number;
+}): Promise<string> {
+  const messages: ChatMessage[] = [
+    { role: "system", content: options.system },
+    ...options.history,
+  ];
+  return openaiRequest(messages, options.maxTokens ?? 500, false, false);
 }
 
 export async function openaiVisionJSON(options: {
@@ -63,13 +79,14 @@ export async function openaiVisionJSON(options: {
       ],
     },
   ];
-  return openaiRequest(messages, options.maxTokens ?? 1024, true);
+  return openaiRequest(messages, options.maxTokens ?? 1024, true, true);
 }
 
 async function openaiRequest(
   messages: ChatMessage[],
   maxTokens: number,
-  vision: boolean
+  vision: boolean,
+  jsonMode: boolean
 ): Promise<string> {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -80,7 +97,7 @@ async function openaiRequest(
     body: JSON.stringify({
       model: model(vision),
       max_tokens: maxTokens,
-      response_format: { type: "json_object" },
+      ...(jsonMode ? { response_format: { type: "json_object" as const } } : {}),
       messages,
     }),
   });

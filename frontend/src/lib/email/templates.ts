@@ -221,9 +221,7 @@ export function plantillaComisionGanada(datos: {
 
 // ─────────────────────────────────────────────────────────────────────────
 // 8. Ticket recibido — soporte@ — al crearse ticket
-// ⚠️ NO conectado todavía — el backend de tickets (/api/soporte/tickets) está
-// deshabilitado (INC-A01, ver AdminSoporteView.tsx). Sin evento de creación
-// real que observar, esta plantilla queda lista pero sin punto de disparo.
+// Conectado 16/07/2026 — ver POST /api/soporte/tickets/route.ts.
 // ─────────────────────────────────────────────────────────────────────────
 export function plantillaTicketRecibido(datos: {
   nombre: string;
@@ -244,7 +242,7 @@ export function plantillaTicketRecibido(datos: {
 
 // ─────────────────────────────────────────────────────────────────────────
 // 9. Ticket resuelto — soporte@ — al marcarse resuelto
-// ⚠️ Mismo bloqueo que plantillaTicketRecibido — ver nota arriba.
+// Conectado 16/07/2026 — ver actualizarEstadoTicket() en lib/admin-queries.ts.
 // ─────────────────────────────────────────────────────────────────────────
 export function plantillaTicketResuelto(datos: {
   nombre: string;

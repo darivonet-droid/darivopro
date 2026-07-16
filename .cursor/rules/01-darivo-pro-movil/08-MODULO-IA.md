@@ -1,8 +1,10 @@
 # DARIVO PRO — MÓDULO IA
 ## Diseño + Funcionalidad
-### Versión: 1.9 — 09/07/2026
+### Versión: 1.10 — 16/07/2026
 ### Fuente: diseño Fable 5 (`IAMenuScreen`, botón central nav) + regla `05-MODULO-COTIZACIONES.md` + `06-MODULO-FACTURAS.md` + funcionalidad real construida
-### Relacionado: ver `01-VISION-DEL-PRODUCTO.md` §13 · ver `04-PANEL-ADMIN-SUSCRIPCIONES.md` · ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` · ver `05-MODULO-COTIZACIONES.md` · ver `06-MODULO-FACTURAS.md` · ver `07-MODULO-MAS.md` §6–§8
+### Relacionado: ver `01-VISION-DEL-PRODUCTO.md` §13 · ver `04-PANEL-ADMIN-SUSCRIPCIONES.md` · ver `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` · ver `05-MODULO-COTIZACIONES.md` · ver `06-MODULO-FACTURAS.md` · ver `07-MODULO-MAS.md` §6–§8 · ver `DARIVO-CONOCIMIENTO-SOPORTE.md` (raíz del repo)
+
+**Cambio principal (v1.10, pedido explícito del propietario):** el Agente IA 2 (Soporte y Tickets) recibe nombre oficial de cara al usuario: **Darivo**. Nunca se muestra al usuario como "IA", "asistente de IA", "bot" ni "Agente IA 2" — ese nombre interno sigue existiendo solo en la documentación técnica. Añadida §3-A (identidad y fuente de conocimiento de Darivo), corregidos los estados de ticket citados en §3/§11 para que coincidan con el CHECK real de `soporte_tickets` en `supabase/migrations/20260705120000_baseline_v2.sql:483` (`Abierto`/`En progreso`/`Resuelto`/`Cerrado` — no `Nuevo`/`En proceso`/`Resuelto`, que nunca existieron en el schema real), y documentada la sub-capacidad de ayuda a cotización de Darivo (§3-B) con hand-off obligatorio al Agente IA 1, sin que Darivo cree la cotización él mismo. Backend real de tickets construido (antes bloqueado por INC-A01/DOC-01) — ver `09-PANEL-ADMIN-SOPORTE.md` para el detalle de esa parte.
 
 **Cambio principal (v1.9):** §9 corregida por segunda vez en el mismo día — la corrección v1.8 ("Paso 2 (Resumen)" → "Paso 3 (Resumen)") fue incompleta: renumeró el paso pero conservó el nombre de pantalla equivocado. `05-MODULO-COTIZACIONES.md:34` (no modificado, ya correcto) especifica que el handoff de IA converge en **Cantidades — Paso 2**, no en Resumen: los items que entrega la IA llegan con mediciones (`qty`) pre-rellenadas pero editables, y solo la pantalla Cantidades admite edición de mediciones (Resumen es de solo presentación, sin controles — `05` §Paso 3). Corregido a "Paso 2 (Cantidades)"; "Paso 3 (Cliente)" de v1.8 pasa a "Paso 4 (Cliente)" para mantener la secuencia de 4 pasos.
 
@@ -24,10 +26,10 @@
 
 Darivo Pro Móvil dispone de **dos agentes oficiales de Inteligencia Artificial** con responsabilidades exclusivas y separadas.
 
-| Agente | Nombre oficial | Ámbito |
-|--------|----------------|--------|
-| **Agente IA 1** | Cotizaciones y Facturas | Cotizaciones, facturas y conversión entre ambos |
-| **Agente IA 2** | Soporte y Tickets | Uso de la app, incidencias y tickets de soporte |
+| Agente | Nombre oficial (interno) | Nombre de cara al usuario | Ámbito |
+|--------|----------------|----------------|--------|
+| **Agente IA 1** | Cotizaciones y Facturas | (sin nombre propio — parte del flujo normal de Cotizaciones/Facturas) | Cotizaciones, facturas y conversión entre ambos |
+| **Agente IA 2** | Soporte y Tickets | **Darivo** | Uso de la app, incidencias y tickets de soporte |
 
 Ningún otro agente conversacional forma parte del producto.
 
@@ -51,7 +53,18 @@ No puede responder consultas fuera de cotizaciones y facturas.
 
 ---
 
-## 3. AGENTE IA 2 — SOPORTE Y TICKETS
+## 3. AGENTE IA 2 — SOPORTE Y TICKETS ("DARIVO")
+
+### 3-A. Identidad y fuente de conocimiento (regla estricta, sin excepción)
+
+* **Nombre único y oficial de cara al usuario: "Darivo".** Nunca se presenta como "asistente de IA", "bot", "chatbot" ni menciona la palabra "IA" en ningún texto visible al usuario. Suena como una persona real de soporte — tono conversacional, sin jerga técnica.
+* **Fuente de conocimiento: únicamente `DARIVO-CONOCIMIENTO-SOPORTE.md`** (raíz del repo, sincronizado en `frontend/src/content/darivo/conocimiento.md`). Darivo **no consulta la base de datos, el código fuente, ni ningún otro documento** para construir sus respuestas — solo ese archivo. La creación de un ticket real (§11) es una acción estructurada de la interfaz (guardar `user_id`/asunto/descripción), no una consulta de datos que Darivo "lea" para responder — esta distinción importa: Darivo no sabe leer tu cuenta, tus cotizaciones ni tus facturas, solo puede abrirte un caso para que una persona lo revise.
+* Ese documento define además, en su propia sección "NO PÚBLICO", qué información no debe compartirse nunca (nombres de documentos internos, arquitectura técnica, mecanismos de seguridad) — Darivo nunca da a entender que existe un documento o fuente interna detrás de sus respuestas.
+* Fuera del ámbito de este documento (temas ajenos a Darivo Pro), Darivo lo indica con naturalidad y redirige la conversación — nunca responde con conocimiento general ajeno a `DARIVO-CONOCIMIENTO-SOPORTE.md`.
+
+### 3-B. Sub-capacidad: ayuda para armar una cotización
+
+Darivo puede ayudar a un usuario a **pensar y organizar** una cotización de forma conversacional (categoría, partidas, cantidades, precios de referencia del catálogo base) — pero **nunca crea la cotización él mismo**: esa responsabilidad sigue siendo exclusiva del Agente IA 1 (§2). Darivo siempre termina remitiendo al usuario al flujo normal de Cotizaciones (`05-MODULO-COTIZACIONES.md`) para elegir sus partidas reales y guardar el documento. Si tiene alguna duda sobre un producto/servicio/precio durante esa conversación, **debe preguntarle al usuario** en vez de asumir o inventar — los únicos precios que puede citar son los de referencia del catálogo base documentados en `DARIVO-CONOCIMIENTO-SOPORTE.md`, siempre aclarando que son orientativos y pueden no coincidir con las tarifas propias del usuario.
 
 ### Modelo de soporte oficial
 
@@ -101,7 +114,7 @@ La IA **no** cierra tickets escalados al soporte humano; el cierre corresponde a
 
 No puede responder consultas fuera del funcionamiento de Darivo Pro Móvil.
 
-Los estados oficiales del ticket (**Nuevo**, **En proceso**, **Resuelto**) y la administración desde Darivo Pro Admin se documentan en `09-PANEL-ADMIN-SOPORTE.md` y `07-MODULO-MAS.md` §8.
+Los estados oficiales del ticket (**Abierto**, **En progreso**, **Resuelto**, **Cerrado** — schema real `soporte_tickets.estado`, `supabase/migrations/20260705120000_baseline_v2.sql:483`) y la administración desde Darivo Pro Admin se documentan en `09-PANEL-ADMIN-SOPORTE.md` y `07-MODULO-MAS.md` §8.
 
 ---
 
@@ -170,10 +183,11 @@ Según `01-VISION-DEL-PRODUCTO.md` §5, **IA** es uno de los seis módulos de la
 
 Desde la posición **IA** de la barra de navegación inferior → `IAMenuScreen`.
 
-### Agente IA 2 — accesos oficiales
+### Agente IA 2 ("Darivo") — accesos oficiales
 
-* Desde **Más → Soporte** (`07-MODULO-MAS.md` §6).
-* Desde una entrada en `IAMenuScreen` dedicada al soporte — diseño Fable 5 §6.8.2 (card **Soporte con IA**).
+* Desde **Más → Soporte** (`07-MODULO-MAS.md` §6), para usuarios con sesión iniciada — puede abrir un ticket real vinculado a su cuenta.
+* Desde una entrada en `IAMenuScreen` dedicada al soporte — diseño Fable 5 §6.8.2 (card **Soporte con IA**, copy visible sigue siendo "Soporte con IA"; el agente que responde ahí se identifica a sí mismo como "Darivo" en la conversación).
+* **También público, sin sesión iniciada**, en darivopro.com — pedido explícito del propietario (16/07/2026) para atender dudas de soporte/ventas antes del registro. Un visitante sin cuenta no puede abrir un ticket real (`soporte_tickets.user_id` es obligatorio, referencia `auth.users`) — Darivo lo deriva al formulario de contacto público (`/contacto`) o a info@darivopro.com cuando haga falta escalar a una persona.
 
 ### Diseño (Fable 5 — `IAMenuScreen` + `BottomNav` §6.8)
 
@@ -327,7 +341,7 @@ SOPORTE HUMANO (Admin — segundo nivel):
 INTEGRACIÓN:
 - Tickets sincronizados con Darivo Pro Admin 
   (09-PANEL-ADMIN-SOPORTE.md)
-- Estados oficiales: Nuevo / En proceso / Resuelto
+- Estados oficiales: Abierto / En progreso / Resuelto / Cerrado (schema real `soporte_tickets.estado`)
 - Acceso usuario: Más → Soporte · IAMenuScreen card Soporte con IA 
   (07-MODULO-MAS.md §6)
 ```
@@ -400,9 +414,11 @@ DISEÑO:
 
 ## 14. Estado del documento
 
-**Versión:** 1.6
+**Versión:** 1.10
 
-**Estado:** Diseño y funcionalidad oficial aprobados.
+**Estado:** Diseño y funcionalidad oficial aprobados. Agente IA 2 con nombre de cara al usuario ("Darivo") y backend de tickets real construidos (16/07/2026).
+
+**Cambio principal (v1.10):** ver changelog al inicio del documento.
 
 **Cambio principal (v1.6):** modelo oficial de soporte IA + humano (dos niveles), regla obligatoria de no inventar soluciones y escalado automático al soporte humano.
 

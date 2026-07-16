@@ -13,12 +13,10 @@
 // mismo HTML en el Dashboard del proyecto hosted (Authentication → Email
 // Templates → Reset Password), config.toml no sincroniza eso automáticamente.
 //
-// Ticket recibido/resuelto (eventos 8 y 9, soporte@) NO están conectados:
-// el backend de tickets (/api/soporte/tickets) fue deshabilitado (INC-A01,
-// 09-PANEL-ADMIN-SOPORTE.md §11 "No crear endpoints") — no existe hoy ningún
-// evento real de creación/resolución de ticket en el servidor al que
-// enganchar el envío. Las plantillas ya existen en templates.ts, listas para
-// conectar el día que se decida reconstruir ese backend.
+// Ticket recibido/resuelto (eventos 8 y 9, soporte@): conectados 16/07/2026
+// al backend real de tickets (INC-A01/DOC-01 desbloqueados a pedido del
+// propietario) — ver POST /api/soporte/tickets/route.ts y
+// actualizarEstadoTicket() en lib/admin-queries.ts.
 //
 // Todas las funciones de este archivo son best-effort: nunca lanzan — un
 // fallo de envío se loguea y no debe romper el flujo que lo llama (mismo
@@ -33,6 +31,8 @@ import {
   plantillaCambioPlan,
   plantillaBienvenidaPartner,
   plantillaComisionGanada,
+  plantillaTicketRecibido,
+  plantillaTicketResuelto,
 } from "@/lib/email/templates";
 
 async function enviarSeguro(opts: {
@@ -120,4 +120,22 @@ export async function enviarComisionGanada(
 ): Promise<void> {
   const { subject, html } = plantillaComisionGanada(datos);
   await enviarSeguro({ cuenta: "partners", to, subject, html, evento: "comision_ganada" });
+}
+
+// 8. Ticket recibido — soporte@
+export async function enviarTicketRecibido(
+  to: string,
+  datos: { nombre: string; numeroTicket: string; resumen: string }
+): Promise<void> {
+  const { subject, html } = plantillaTicketRecibido(datos);
+  await enviarSeguro({ cuenta: "soporte", to, subject, html, evento: "ticket_recibido" });
+}
+
+// 9. Ticket resuelto — soporte@
+export async function enviarTicketResuelto(
+  to: string,
+  datos: { nombre: string; numeroTicket: string; resumenSolucion: string }
+): Promise<void> {
+  const { subject, html } = plantillaTicketResuelto(datos);
+  await enviarSeguro({ cuenta: "soporte", to, subject, html, evento: "ticket_resuelto" });
 }

@@ -1,8 +1,7 @@
 # TÉRMINOS Y CONDICIONES DE USO — DARIVO PRO
 
 **Última actualización:** [fecha de publicación]
-
-
+**Última revisión de este borrador:** 16/07/2026 (ver changelog al final del documento).
 
 ---
 
@@ -10,7 +9,7 @@
 
 Darivo Pro es un servicio prestado por **[Nombre completo / razón social]**, con domicilio en España, [NIF/DNI], en adelante "Darivo Pro", "nosotros" o "la Empresa".
 
-Contacto: [email de contacto] · [WhatsApp/teléfono]
+Contacto: [email de contacto — mientras tanto, info@darivopro.com] · [WhatsApp/teléfono]
 
 *(Rellenar con tus datos reales de autónomo antes de publicar — confirmar con tu gestoría el formato exacto exigido para mostrar en una web de servicios.)*
 
@@ -28,7 +27,7 @@ Al registrarte y utilizar Darivo Pro, aceptas estos Términos y Condiciones en s
 
 * Los planes disponibles, sus precios y características se muestran actualizados en [darivopro.com/precios] en todo momento. Esta es la única fuente oficial de precios — cualquier otra referencia queda subordinada a lo publicado ahí.
 * Los precios pueden modificarse. Los cambios de precio no afectan a un periodo ya pagado, solo a renovaciones futuras.
-* El pago se procesa a través de nuestro proveedor de pagos [dLocal / el que corresponda]. Darivo Pro no almacena datos completos de tarjetas de pago.
+* El pago se procesa a través de nuestro proveedor de pagos, dLocal Go, mediante un checkout redirigido a su propio dominio. Darivo Pro no almacena datos completos de tarjetas de pago.
 * Puedes cancelar tu suscripción en cualquier momento desde el propio panel de Darivo Pro. La cancelación surte efecto al final del periodo ya pagado.
 
 ## 5. Uso permitido
@@ -90,5 +89,8 @@ Con carácter general, estos Términos se rigen por la legislación española. P
 * Condiciones específicas: [ ]
 
 ---
+
+**Changelog:**
+* 16/07/2026 — Fase 2 (Legal): confirmado el nombre real del proveedor de pagos (dLocal Go) en §4; añadido email de contacto provisional (info@darivopro.com) en §1 mientras se confirma un email dedicado. Sigue siendo un borrador, pendiente de revisión legal antes de publicar.
 
 **Fin del documento — recuerda: revisión legal obligatoria antes de publicar.**
