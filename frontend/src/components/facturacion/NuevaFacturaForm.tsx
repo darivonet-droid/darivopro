@@ -35,58 +35,25 @@ interface Props {
   aprobados:         Cotizacion[];
   clientes:          Cliente[];
   cotizacionId?:    string;
-}
-
-/* ─── Paso 0: elegir tipo de comprobante ──────────────────── */
-function PasoCero({ onElegir }: { onElegir: (tipo: TipoComprobante) => void }) {
-  return (
-    <div className="flex flex-col gap-5 px-4 py-6">
-      <div className="text-center">
-        <p className="text-xl font-black" style={{ color: T.navy }}>¿Tu cliente tiene RUC?</p>
-        <p className="mt-1 text-sm" style={{ color: T.textMid }}>Esto determina el tipo de comprobante SUNAT</p>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => onElegir("factura")}
-        className="flex items-center gap-4 rounded-2xl p-5 transition-transform active:scale-95"
-        style={{ background: T.white, border: `2px solid ${T.blue}`, boxShadow: "0 4px 20px rgba(37,99,235,0.12)" }}
-      >
-        <span className="text-3xl">🏢</span>
-        <div className="text-left">
-          <p className="font-extrabold" style={{ color: T.blue }}>Sí, tiene RUC → Factura</p>
-          <p className="text-xs mt-0.5" style={{ color: T.textMid }}>Serie F001 · IGV desglosado · Detracción si aplica</p>
-        </div>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onElegir("boleta")}
-        className="flex items-center gap-4 rounded-2xl p-5 transition-transform active:scale-95"
-        style={{ background: T.white, border: `2px solid ${T.green}`, boxShadow: "0 4px 20px rgba(16,185,129,0.12)" }}
-      >
-        <span className="text-3xl">👤</span>
-        <div className="text-left">
-          <p className="font-extrabold" style={{ color: T.greenD }}>No tiene RUC → Boleta</p>
-          <p className="text-xs mt-0.5" style={{ color: T.textMid }}>Serie B001 · IGV incluido · DNI si total &gt; S/700</p>
-        </div>
-      </button>
-    </div>
-  );
+  /** Tipo de comprobante elegido antes de entrar aquí (Clientes/Facturas) —
+   * ya no se pregunta "¿Tu cliente tiene RUC?" dentro del formulario. */
+  tipoInicial:      TipoComprobante;
+  /** Cliente preseleccionado (viene de la ficha de cliente). */
+  clienteIdInicial?: string;
 }
 
 /* ─── Formulario principal ────────────────────────────────── */
 export function NuevaFacturaForm({
-  empresa, numerosExistentes, aprobados, clientes, cotizacionId,
+  empresa, numerosExistentes, aprobados, clientes, cotizacionId, tipoInicial, clienteIdInicial,
 }: Props) {
   const router       = useRouter();
   const { crear, generarPDF, loading } = useFactura();
   const mostrarToast   = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
-  // Paso 0: elegir tipo de comprobante
-  const [tipo, setTipo]             = useState<TipoComprobante | null>(null);
+  const [tipo, setTipo]             = useState<TipoComprobante>(tipoInicial);
 
+  const [selectedClienteId, setSelectedClienteId] = useState<string | undefined>(undefined);
   const [clientName,   setClientName]   = useState("");
   const [clientRuc,    setClientRuc]    = useState("");
   const [clientDni,    setClientDni]    = useState("");
@@ -123,6 +90,7 @@ export function NuevaFacturaForm({
     const p = aprobados.find((x) => x.id === id);
     if (!p) return;
     setClientName(p.clientName);
+    setSelectedClienteId(p.clienteId);
     if (p.phone) setClientPhone(p.phone);
     const lineas: LineaFactura[] = p.items.map((it) => ({
       desc: it.svcLabel, cantidad: it.qty, pu: it.unitPrice, subtotal: it.subtotal,
@@ -141,12 +109,18 @@ export function NuevaFacturaForm({
   const seleccionarCliente = (id: string) => {
     const c = clientes.find((x) => x.id === id);
     if (!c) return;
+    setSelectedClienteId(c.id);
     setClientName(c.nombre);
     setClientRuc(c.ruc ?? "");
     setClientDir(c.direccion ?? "");
     setClientPhone(c.telefono ?? "");
     setClientEmail(c.email ?? "");
   };
+
+  useEffect(() => {
+    if (clienteIdInicial) seleccionarCliente(clienteIdInicial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clienteIdInicial]);
 
   const cambiarLinea = (i: number, campo: keyof LineaFactura, valor: string) => {
     setItems((prev) =>
@@ -197,6 +171,8 @@ export function NuevaFacturaForm({
       invDate: hoy(),
       invStatus: pagado ? "Cobrada" : "Emitida",
       tipoDoc: tipo,
+      clienteId: selectedClienteId,
+      clientPhone: clientPhone.trim() || undefined,
       clientName: clientName.trim(),
       clientRuc:  tipo === "factura" ? clientRuc.trim() || undefined : undefined,
       clientDni:  tipo === "boleta"  ? clientDni.trim() || undefined : undefined,
@@ -227,7 +203,7 @@ export function NuevaFacturaForm({
     const doCompartir = async () => {
       if (!pdfUrl) { if (clientPhone) window.open(waUrl, "_blank", "noopener,noreferrer"); return; }
       const titulo = `${guardada.invNum} — ${guardada.clientName}`;
-      const r = await import("@/lib/share").then((m) => m.compartirPDF(pdfUrl, titulo));
+      const r = await import("@/lib/share").then((m) => m.compartirPDF(pdfUrl, titulo, `${guardada.invNum}.pdf`));
       if (r.method === "clipboard") {
         mostrarToast("Enlace copiado al portapapeles ✓");
       } else if (r.method === "error") {
@@ -283,18 +259,6 @@ export function NuevaFacturaForm({
     );
   }
 
-  /* ── Paso 0: elegir tipo ───────────────────────────────── */
-  if (!tipo) {
-    return (
-      <>
-        <Link href="/facturas" className="mx-4 mt-4 inline-block text-sm font-semibold" style={{ color: T.textMid }}>
-          ← Volver
-        </Link>
-        <PasoCero onElegir={(t) => { setTipo(t); setDetTipo(null); }} />
-      </>
-    );
-  }
-
   /* ── Formulario ────────────────────────────────────────── */
   return (
     <div className="flex flex-col gap-4 px-4 py-4" style={{ background: T.slate }}>
@@ -316,11 +280,11 @@ export function NuevaFacturaForm({
         </div>
         <button
           type="button"
-          onClick={() => setTipo(null)}
+          onClick={() => { setTipo(tipo === "factura" ? "boleta" : "factura"); setDetTipo(null); }}
           className="text-xs font-semibold"
           style={{ color: T.textMid }}
         >
-          Cambiar
+          Cambiar a {tipo === "factura" ? "Boleta" : "Factura"}
         </button>
       </div>
 

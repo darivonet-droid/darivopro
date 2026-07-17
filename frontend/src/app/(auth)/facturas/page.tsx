@@ -1,13 +1,21 @@
 // DARIVO PRO — Facturación (Server Component)
-import { FacturasView } from "@/components/facturacion/FacturasView";
+// Lista CLIENTES con al menos una factura (no documentos sueltos) — misma
+// fuente de datos que Clientes, filtrada por facturas.cliente_id (FK real).
+// Ver detalle/estado/PDF de cada factura en la ficha del cliente (§6).
+import { FacturasView, type ClienteConFacturas } from "@/components/facturacion/FacturasView";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Factura, InvStatus, LineaCotizacion, Cotizacion } from "@/types";
+import type { LineaCotizacion, Cotizacion } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function FacturasPage() {
   const supabase = createServerClient();
 
-  const [facturasRes, perfilRes, aprobadosRes] = await Promise.all([
-    supabase.from("facturas").select("*").order("created_at", { ascending: false }),
+  const [clientesRes, perfilRes, aprobadosRes] = await Promise.all([
+    supabase
+      .from("clientes")
+      .select("*, facturas!inner(inv_id, inv_num, inv_status, total_final, sym)")
+      .order("nombre"),
     supabase.from("perfiles").select("ruc").single(),
     supabase
       .from("cotizaciones")
@@ -16,32 +24,23 @@ export default async function FacturasPage() {
       .order("created_at", { ascending: false }),
   ]);
 
-  const facturas: Factura[] = (facturasRes.data ?? []).map((row) => ({
-    invId: row.inv_id,
-    tenant_id: row.user_id,
-    invNum: row.inv_num,
-    invDate: row.inv_date,
-    invStatus: row.inv_status as InvStatus,
-    tipoDoc: row.tipo_doc ?? "factura",
-    clientName: row.client_name,
-    clientRuc: row.client_ruc ?? undefined,
-    clientDni: row.client_dni ?? undefined,
-    clientDir: row.client_dir ?? undefined,
-    moneda: row.moneda ?? "PEN",
-    sym: row.sym ?? "S/",
-    items: row.items ?? [],
-    subtotalBase: Number(row.subtotal_base ?? 0),
-    igvAmount: Number(row.igv_amount ?? 0),
-    totalFinal: Number(row.total_final ?? 0),
-    detraccion: row.detraccion_tipo ? {
-      tipo: row.detraccion_tipo,
-      pct: Number(row.detraccion_pct ?? 0),
-      monto: Number(row.detraccion_monto ?? 0),
-      neto: Number(row.neto_cobrar ?? 0),
-      ctaDetracciones: row.cta_detracciones ?? undefined,
-    } : undefined,
-    fromQuoteId: row.from_quote_id ?? undefined,
-    bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
+  const clientes: ClienteConFacturas[] = (clientesRes.data ?? []).map((row) => ({
+    id: row.id,
+    nombre: row.nombre,
+    telefono: row.telefono ?? undefined,
+    ruc: row.ruc ?? undefined,
+    direccion: row.direccion ?? undefined,
+    ciudad: row.ciudad ?? undefined,
+    email: row.email ?? undefined,
+    notas: row.notas ?? undefined,
+    createdAt: row.created_at,
+    facturas: (row.facturas ?? []).map((f: Record<string, unknown>) => ({
+      invId: String(f.inv_id),
+      invNum: String(f.inv_num),
+      invStatus: String(f.inv_status),
+      totalFinal: Number(f.total_final ?? 0),
+      sym: String(f.sym ?? "S/"),
+    })),
   }));
 
   const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
@@ -62,7 +61,7 @@ export default async function FacturasPage() {
 
   return (
     <FacturasView
-      facturas={facturas}
+      clientes={clientes}
       rucEmpresa={perfilRes.data?.ruc ?? ""}
       aprobados={aprobados}
     />

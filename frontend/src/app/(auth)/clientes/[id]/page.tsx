@@ -67,18 +67,16 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
     pdfUrl: row.pdf_url ?? undefined,
   }));
 
-  // Facturas asociadas — vinculadas vía la cotización origen (from_quote_id).
+  // Facturas asociadas — vinculadas vía facturas.cliente_id (FK real, migración
+  // 20260717120000), no solo las que vienen de una cotización de este cliente.
   // Estado leído en vivo de facturas.inv_status (sin copia local).
-  const quoteIds = cotizaciones.map((p) => p.id);
-  let facturas: Factura[] = [];
-  if (quoteIds.length > 0) {
-    const { data: facRows } = await supabase
-      .from("facturas")
-      .select("*")
-      .in("from_quote_id", quoteIds)
-      .order("created_at", { ascending: false });
+  const { data: facRows } = await supabase
+    .from("facturas")
+    .select("*")
+    .eq("cliente_id", params.id)
+    .order("created_at", { ascending: false });
 
-    facturas = (facRows ?? []).map((row) => ({
+  const facturas: Factura[] = (facRows ?? []).map((row) => ({
       invId: row.inv_id,
       tenant_id: row.user_id,
       invNum: row.inv_num,
@@ -105,7 +103,6 @@ export default async function ClienteFichaPage({ params }: { params: { id: strin
       fromQuoteId: row.from_quote_id ?? undefined,
       bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
     }));
-  }
 
   return (
     <div style={{ background: "#F8FAFF", minHeight: "100vh" }}>

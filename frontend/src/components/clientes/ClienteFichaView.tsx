@@ -31,10 +31,12 @@ interface Props {
 
 export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: Props) {
   const router = useRouter();
-  const { actualizar, loading } = useClientes();
+  const { actualizar, eliminar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
 
   const [editando, setEditando] = useState(false);
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
   const [form, setForm] = useState({
     nombre:    cliente.nombre,
     telefono:  cliente.telefono ?? "",
@@ -98,6 +100,19 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
       router.refresh();
     } else {
       mostrarToast("No se pudo actualizar", "error");
+    }
+  };
+
+  const confirmarEliminar = async () => {
+    setEliminando(true);
+    const ok = await eliminar(cliente.id);
+    setEliminando(false);
+    if (ok) {
+      mostrarToast("Cliente eliminado");
+      router.push("/clientes");
+      router.refresh();
+    } else {
+      mostrarToast("No se pudo eliminar", "error");
     }
   };
 
@@ -198,6 +213,24 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
         + Nueva cotización para este cliente
       </Link>
 
+      {/* ── Nueva factura para este cliente — elegir Boleta/Factura ─── */}
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href={`${nuevaFacturaHref}?tipo=boleta&cliente=${cliente.id}`}
+          className="flex items-center justify-center gap-1.5 rounded-2xl py-3 text-xs font-extrabold text-white"
+          style={{ background: T.green }}
+        >
+          👤 Boleta
+        </Link>
+        <Link
+          href={`${nuevaFacturaHref}?tipo=factura&cliente=${cliente.id}`}
+          className="flex items-center justify-center gap-1.5 rounded-2xl py-3 text-xs font-extrabold text-white"
+          style={{ background: T.navy }}
+        >
+          🏢 Factura
+        </Link>
+      </div>
+
       {/* ── Historial de cotizaciones ──────────────────────── */}
       <div>
         <p className="mb-2 px-1 text-[11px] font-extrabold uppercase tracking-wide" style={{ color: T.textMid }}>
@@ -225,6 +258,35 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
           </div>
         </div>
       )}
+
+      {/* ── Eliminar cliente — siempre con confirmación explícita ─── */}
+      <Card>
+        {confirmandoEliminar ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-bold" style={{ color: T.red }}>
+              ¿Seguro que quieres eliminar a {cliente.nombre}?
+            </p>
+            <p className="text-xs" style={{ color: T.textMid }}>
+              Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setConfirmandoEliminar(false)} disabled={eliminando}>Cancelar</Button>
+              <Button full variant="danger" disabled={eliminando} onClick={confirmarEliminar}>
+                {eliminando ? "Eliminando…" : "Sí, eliminar"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmandoEliminar(true)}
+            className="w-full text-center text-xs font-bold"
+            style={{ color: T.red }}
+          >
+            Eliminar cliente
+          </button>
+        )}
+      </Card>
     </div>
   );
 }

@@ -158,43 +158,41 @@ export function useClientes() {
       pdfUrl: row.pdf_url ?? undefined,
     }));
 
-    const quoteIds = cotizaciones.map((p) => p.id);
-    let facturas: Factura[] = [];
-    if (quoteIds.length > 0) {
-      const { data: facRows } = await supabase
-        .from("facturas")
-        .select("*")
-        .in("from_quote_id", quoteIds)
-        .order("created_at", { ascending: false });
+    // Vinculadas vía facturas.cliente_id (FK real, migración 20260717120000),
+    // no solo las que vienen de una cotización de este cliente.
+    const { data: facRows } = await supabase
+      .from("facturas")
+      .select("*")
+      .eq("cliente_id", id)
+      .order("created_at", { ascending: false });
 
-      facturas = (facRows ?? []).map((row) => ({
-        invId: row.inv_id,
-        tenant_id: row.user_id,
-        invNum: row.inv_num,
-        invDate: row.inv_date,
-        invStatus: row.inv_status as InvStatus,
-        tipoDoc: row.tipo_doc ?? "factura",
-        clientName: row.client_name,
-        clientRuc: row.client_ruc ?? undefined,
-        clientDni: row.client_dni ?? undefined,
-        clientDir: row.client_dir ?? undefined,
-        moneda: row.moneda ?? "PEN",
-        sym: row.sym ?? "S/",
-        items: row.items ?? [],
-        subtotalBase: Number(row.subtotal_base ?? 0),
-        igvAmount: Number(row.igv_amount ?? 0),
-        totalFinal: Number(row.total_final ?? 0),
-        detraccion: row.detraccion_tipo ? {
-          tipo: row.detraccion_tipo,
-          pct: Number(row.detraccion_pct ?? 0),
-          monto: Number(row.detraccion_monto ?? 0),
-          neto: Number(row.neto_cobrar ?? 0),
-          ctaDetracciones: row.cta_detracciones ?? undefined,
-        } : undefined,
-        fromQuoteId: row.from_quote_id ?? undefined,
-        bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
-      }));
-    }
+    const facturas: Factura[] = (facRows ?? []).map((row) => ({
+      invId: row.inv_id,
+      tenant_id: row.user_id,
+      invNum: row.inv_num,
+      invDate: row.inv_date,
+      invStatus: row.inv_status as InvStatus,
+      tipoDoc: row.tipo_doc ?? "factura",
+      clientName: row.client_name,
+      clientRuc: row.client_ruc ?? undefined,
+      clientDni: row.client_dni ?? undefined,
+      clientDir: row.client_dir ?? undefined,
+      moneda: row.moneda ?? "PEN",
+      sym: row.sym ?? "S/",
+      items: row.items ?? [],
+      subtotalBase: Number(row.subtotal_base ?? 0),
+      igvAmount: Number(row.igv_amount ?? 0),
+      totalFinal: Number(row.total_final ?? 0),
+      detraccion: row.detraccion_tipo ? {
+        tipo: row.detraccion_tipo,
+        pct: Number(row.detraccion_pct ?? 0),
+        monto: Number(row.detraccion_monto ?? 0),
+        neto: Number(row.neto_cobrar ?? 0),
+        ctaDetracciones: row.cta_detracciones ?? undefined,
+      } : undefined,
+      fromQuoteId: row.from_quote_id ?? undefined,
+      bizData: row.biz_data ?? { razonSocial: "", ruc: "", direccion: "", moneda: "PEN", simbolo: "S/" },
+    }));
 
     return { cliente, cotizaciones, facturas };
   }, [supabase]);

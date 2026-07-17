@@ -3,11 +3,12 @@ import { NuevaFacturaForm } from "@/components/facturacion/NuevaFacturaForm";
 import { createServerClient } from "@/lib/supabase/server";
 import { T } from "@/lib/theme";
 import type { Cliente, EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
+import type { TipoComprobante } from "@/lib/factura-utils";
 
 export default async function NuevaFacturaPage({
   searchParams,
 }: {
-  searchParams: { cotizacion?: string };
+  searchParams: { cotizacion?: string; tipo?: string; cliente?: string };
 }) {
   const supabase = createServerClient();
 
@@ -36,6 +37,7 @@ export default async function NuevaFacturaPage({
     : null;
 
   const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
+  const tipoInicial: TipoComprobante = searchParams.tipo === "boleta" ? "boleta" : "factura";
 
   const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
     id: row.id,
@@ -87,6 +89,8 @@ export default async function NuevaFacturaPage({
         aprobados={aprobados}
         clientes={clientes}
         cotizacionId={searchParams.cotizacion}
+        tipoInicial={tipoInicial}
+        clienteIdInicial={searchParams.cliente}
       />
     </div>
   );

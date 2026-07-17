@@ -38,11 +38,13 @@ interface Props {
   cotizacionId?: string;
   /** Elegido en la lista de Facturas (botón «Factura» o «Boleta») — ya no se pregunta dentro del formulario. */
   tipoInicial: TipoComprobante;
+  /** Cliente preseleccionado (viene de la ficha de cliente). */
+  clienteIdInicial?: string;
   volverHref: string;
 }
 
 export function NuevaFacturaFormEscritorio({
-  empresa, numerosExistentes, aprobados, clientes, cotizacionId, tipoInicial, volverHref,
+  empresa, numerosExistentes, aprobados, clientes, cotizacionId, tipoInicial, clienteIdInicial, volverHref,
 }: Props) {
   const router = useRouter();
   const { crear, generarPDF, loading } = useFactura();
@@ -50,6 +52,7 @@ export function NuevaFacturaFormEscritorio({
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
   const [tipo, setTipo] = useState<TipoComprobante>(tipoInicial);
+  const [selectedClienteId, setSelectedClienteId] = useState<string | undefined>(undefined);
   const [clientName, setClientName] = useState("");
   const [clientRuc, setClientRuc] = useState("");
   const [clientDni, setClientDni] = useState("");
@@ -85,6 +88,7 @@ export function NuevaFacturaFormEscritorio({
     const p = aprobados.find((x) => x.id === id);
     if (!p) return;
     setClientName(p.clientName);
+    setSelectedClienteId(p.clienteId);
     if (p.phone) setClientPhone(p.phone);
     const lineas: LineaFactura[] = p.items.map((it) => ({
       desc: it.svcLabel, cantidad: it.qty, pu: it.unitPrice, subtotal: it.subtotal,
@@ -103,12 +107,18 @@ export function NuevaFacturaFormEscritorio({
   const seleccionarCliente = (id: string) => {
     const c = clientes.find((x) => x.id === id);
     if (!c) return;
+    setSelectedClienteId(c.id);
     setClientName(c.nombre);
     setClientRuc(c.ruc ?? "");
     setClientDir(c.direccion ?? "");
     setClientPhone(c.telefono ?? "");
     setClientEmail(c.email ?? "");
   };
+
+  useEffect(() => {
+    if (clienteIdInicial) seleccionarCliente(clienteIdInicial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clienteIdInicial]);
 
   const cambiarLinea = (i: number, campo: keyof LineaFactura, valor: string) => {
     setItems((prev) =>
@@ -156,6 +166,8 @@ export function NuevaFacturaFormEscritorio({
       invDate: hoy(),
       invStatus: pagado ? "Cobrada" : "Emitida",
       tipoDoc: tipo,
+      clienteId: selectedClienteId,
+      clientPhone: clientPhone.trim() || undefined,
       clientName: clientName.trim(),
       clientRuc: tipo === "factura" ? clientRuc.trim() || undefined : undefined,
       clientDni: tipo === "boleta" ? clientDni.trim() || undefined : undefined,

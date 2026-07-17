@@ -22,6 +22,7 @@ interface CotizacionRow {
   id: string;
   user_id: string;
   cot_num: string | null;
+  cliente_id: string | null;
   client_name: string;
   phone: string | null;
   city: string | null;
@@ -52,6 +53,7 @@ const mapRow = (row: CotizacionRow): Cotizacion => ({
   id: row.id,
   tenant_id: row.user_id,
   cotNum: row.cot_num ?? undefined,
+  clienteId: row.cliente_id ?? undefined,
   clientName: row.client_name,
   phone: row.phone ?? undefined,
   city: row.city ?? undefined,
@@ -117,7 +119,7 @@ export function useCotizacion() {
     setLoading(true);
     const { data, error } = await supabase
       .from("cotizaciones")
-      .select("id, user_id, cot_num, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
+      .select("id, user_id, cot_num, cliente_id, client_name, phone, city, margin, total_base, total_labor, total_final, status, notes, created_at, pdf_url, items:cotizacion_items(svc_id, cat_label, svc_label, calc_type, base_price, unit, qty, unit_price, subtotal)")
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) { setError(error.message); return []; }

@@ -16,6 +16,8 @@ export interface Cotizacion {
   id: string;
   tenant_id: string;
   cotNum?: string;
+  /** FK real a clientes.id — vinculación automática por teléfono (invisible al usuario). */
+  clienteId?: string;
   clientName: string;
   phone?: string;
   city?: string;
@@ -62,6 +64,8 @@ export interface Factura {
   invDate: string;
   invStatus: InvStatus;
   tipoDoc: "boleta" | "factura";
+  /** FK real a clientes.id — misma fuente de verdad que Cotizacion.clienteId. */
+  clienteId?: string;
   clientName: string;
   clientRuc?: string;
   clientDni?: string;

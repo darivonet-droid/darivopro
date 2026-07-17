@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { verificarLimiteFactura, UPGRADE_MENSAJES } from "@/lib/plan-limits";
-import { buildWAMessage } from "@/lib/utils";
+import { buildWAMessage, soloDigitos } from "@/lib/utils";
 import { nextNumeroComprobante } from "@/lib/factura-utils";
 import type { EmpresaData, Factura, InvStatus, LineaFactura, Cotizacion } from "@/types";
 
@@ -14,6 +14,7 @@ interface FacturaRow {
   inv_date: string;
   inv_status: InvStatus;
   tipo_doc: Factura["tipoDoc"] | null;
+  cliente_id: string | null;
   client_name: string;
   client_ruc: string | null;
   client_dni: string | null;
@@ -40,6 +41,7 @@ const mapRow = (row: FacturaRow): Factura => ({
   invDate: row.inv_date,
   invStatus: row.inv_status,
   tipoDoc: row.tipo_doc ?? "factura",
+  clienteId: row.cliente_id ?? undefined,
   clientName: row.client_name,
   clientRuc: row.client_ruc ?? undefined,
   clientDni: row.client_dni ?? undefined,
@@ -72,6 +74,47 @@ export function useFactura() {
   const [error, setError]     = useState<string | null>(null);
   const supabase = createClient();
 
+  /**
+   * Busca un cliente por teléfono normalizado y, si no existe, lo crea —
+   * mismo patrón invisible que useCotizacion.findOrCreateCliente, para que
+   * facturas.cliente_id use la misma fuente de verdad que cotizaciones.cliente_id.
+   */
+  const findOrCreateCliente = useCallback(async (
+    userId:     string,
+    clientName: string,
+    phone?:     string,
+  ): Promise<string | null> => {
+    const tel = soloDigitos(phone);
+    if (tel.length < 6) return null;
+
+    const { data: existente } = await supabase
+      .from("clientes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("telefono", tel)
+      .limit(1)
+      .maybeSingle();
+    if (existente?.id) return existente.id as string;
+
+    const { data: creado, error: insErr } = await supabase
+      .from("clientes")
+      .insert({ user_id: userId, nombre: clientName.trim() || "Cliente", telefono: tel })
+      .select("id")
+      .single();
+
+    if (insErr) {
+      const { data: reintento } = await supabase
+        .from("clientes")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("telefono", tel)
+        .limit(1)
+        .maybeSingle();
+      return (reintento?.id as string) ?? null;
+    }
+    return (creado?.id as string) ?? null;
+  }, [supabase]);
+
   const listar = useCallback(async (): Promise<Factura[]> => {
     setLoading(true);
     const { data, error } = await supabase
@@ -84,7 +127,7 @@ export function useFactura() {
   }, [supabase]);
 
   const crear = useCallback(async (
-    factura: Omit<Factura, "invId" | "tenant_id">,
+    factura: Omit<Factura, "invId" | "tenant_id"> & { clientPhone?: string },
     onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
   ): Promise<Factura | null> => {
     setLoading(true);
@@ -100,10 +143,15 @@ export function useFactura() {
       return null;
     }
 
+    // Vinculación factura → cliente: usa el cliente ya elegido explícitamente
+    // (ficha de cliente, selector) o lo deduplica/crea por teléfono (invisible).
+    const clienteId = factura.clienteId ?? await findOrCreateCliente(user.id, factura.clientName, factura.clientPhone);
+
     const { data, error } = await supabase
       .from("facturas")
       .insert({
         user_id: user.id,
+        cliente_id: clienteId,
         inv_num: factura.invNum,
         inv_date: factura.invDate,
         inv_status: factura.invStatus,
@@ -224,10 +272,15 @@ export function useFactura() {
 
     const hoy = new Date().toISOString().slice(0, 10);
 
+    // Misma vinculación que en crear(): usa el cliente_id ya presente en la
+    // cotización de origen (findOrCreateCliente ya lo resolvió al crearla).
+    const clienteId = p.clienteId ?? await findOrCreateCliente(user.id, p.clientName, p.phone);
+
     const { data, error: dbErr } = await supabase
       .from("facturas")
       .insert({
         user_id:        user.id,
+        cliente_id:     clienteId,
         inv_num:        invNum,
         inv_date:       hoy,
         inv_status:     "Emitida",

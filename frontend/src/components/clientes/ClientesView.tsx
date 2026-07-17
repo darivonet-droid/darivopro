@@ -24,7 +24,7 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
   const [mostrandoForm, setMostrandoForm] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
   const [error, setError] = useState<string | null>(null);
-  const { crear, eliminar, loading } = useClientes();
+  const { crear, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(clientes);
 
@@ -53,16 +53,6 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
       mostrarToast("Cliente guardado ✓");
     } else {
       mostrarToast("No se pudo guardar el cliente", "error");
-    }
-  };
-
-  const borrar = async (id: string) => {
-    const ok = await eliminar(id);
-    if (ok) {
-      setClientes((prev) => prev.filter((c) => c.id !== id));
-      mostrarToast("Cliente eliminado");
-    } else {
-      mostrarToast("No se pudo eliminar", "error");
     }
   };
 
@@ -121,17 +111,7 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg" style={{ color: T.textLight }}>›</span>
-              <button
-                onClick={(e) => { e.stopPropagation(); borrar(c.id); }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base font-black"
-                style={{ background: T.redPale, color: T.red }}
-                aria-label={`Eliminar ${c.nombre}`}
-              >
-                ×
-              </button>
-            </div>
+            <span className="text-lg" style={{ color: T.textLight }}>›</span>
           </div>
         </div>
       ))}

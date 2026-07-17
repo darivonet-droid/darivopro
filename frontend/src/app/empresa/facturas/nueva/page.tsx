@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function EmpresaNuevaFacturaPage({
   searchParams,
 }: {
-  searchParams: { cotizacion?: string; tipo?: string };
+  searchParams: { cotizacion?: string; tipo?: string; cliente?: string };
 }) {
   const supabase = createServerClient();
 
@@ -90,6 +90,7 @@ export default async function EmpresaNuevaFacturaPage({
         clientes={clientes}
         cotizacionId={searchParams.cotizacion}
         tipoInicial={tipoInicial}
+        clienteIdInicial={searchParams.cliente}
         volverHref="/empresa/facturas"
       />
     </EmpresaShell>

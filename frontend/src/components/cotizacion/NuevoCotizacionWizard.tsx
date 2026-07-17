@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cotizacionSchema } from "@/lib/validations";
 import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
-import { compartirPDF } from "@/lib/share";
+import { compartirPDF, abrirVentanaDiferida, navegarVentanaDiferida } from "@/lib/share";
 import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
 import { T } from "@/lib/design-system/tokens";
 import { DarkHeader } from "@/components/design-system/DarkHeader";
@@ -383,6 +383,13 @@ export function NuevoCotizacionWizard() {
 
   // Save (crea nueva o actualiza existente según editandoId)
   const doSave = async () => {
+    // Abre la pestaña de WhatsApp YA (dentro del gesto de clic, antes de cualquier
+    // await) — si se abre después de guardar/generar el PDF, el navegador móvil
+    // normal (a diferencia de la PWA instalada) la bloquea como popup tardío.
+    const waWinPreabierta = !editandoId && phone.trim().replace(/\D/g, "").length >= 7
+      ? abrirVentanaDiferida()
+      : null;
+
     const calcInputs = buildCalcInputs(basket);
     const engineResult = calcBasket(calcInputs, margin);
     const items: LineaCotizacion[] = basket.map((it, idx) => {
@@ -401,7 +408,7 @@ export function NuevoCotizacionWizard() {
     });
     const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
     const valido = cotizacionSchema.safeParse(payload);
-    if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
+    if (!valido.success) { waWinPreabierta?.close(); mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
 
     // ── MODO EDICIÓN: actualizar registro existente ────────────────────────
     if (editandoId) {
@@ -426,7 +433,7 @@ export function NuevoCotizacionWizard() {
 
     // ── MODO CREACIÓN: crear nueva cotización ──────────────────────────────
     const creado = await crear(payload, mostrarUpgrade);
-    if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
+    if (!creado) { waWinPreabierta?.close(); mostrarToast("No se pudo guardar la cotización", "error"); return; }
 
     saveCalcSnapshot(engineResult);
     void registrarCalculo(creado.id, {
@@ -479,7 +486,9 @@ export function NuevoCotizacionWizard() {
         pdfUrl:       pdfUrl ?? undefined,
       });
       const numero = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
-      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
+      navegarVentanaDiferida(waWinPreabierta, `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`);
+    } else {
+      waWinPreabierta?.close();
     }
     await registrarEnvioWA(creado.id, pdfUrl ?? undefined);
   };
@@ -738,19 +747,19 @@ export function NuevoCotizacionWizard() {
               </button>
             </div>
 
-            <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 22, padding: "26px 22px 22px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+            <div style={{ background: `linear-gradient(148deg,${T.blue} 0%,${T.blueL} 100%)`, borderRadius: 18, padding: "18px 18px 16px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: 90, background: "rgba(255,255,255,0.06)" }} />
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6, position: "relative" }}>Total cotización</p>
-              <p style={{ color: T.white, fontSize: 54, fontWeight: 900, letterSpacing: -3, lineHeight: 1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
-              <div style={{ display: "flex", gap: 20, marginTop: 14, position: "relative" }}>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 4, position: "relative" }}>Total cotización</p>
+              <p style={{ color: T.white, fontSize: 32, fontWeight: 900, letterSpacing: -1, lineHeight: 1.1, position: "relative" }}>{fmtPEN(totalFinal)}</p>
+              <div style={{ display: "flex", gap: 16, marginTop: 12, position: "relative" }}>
                 <div>
                   <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Ejecución material</p>
-                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalBase)}</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalBase)}</p>
                 </div>
                 <div style={{ width: 1, background: "rgba(255,255,255,0.15)" }} />
                 <div>
                   <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>Mano de obra ({margin % 1 === 0 ? margin : margin.toFixed(1)}%)</p>
-                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalLabor)}</p>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, fontWeight: 700, marginTop: 2 }}>{fmtPEN(totalLabor)}</p>
                 </div>
               </div>
             </div>
@@ -882,7 +891,7 @@ export function NuevoCotizacionWizard() {
               <button
                 type="button"
                 onClick={async () => {
-                  const r = await compartirPDF(pdfUrlGuardado, `Cotización — ${clientName.trim() || "Sin cliente"}`);
+                  const r = await compartirPDF(pdfUrlGuardado, `Cotización — ${clientName.trim() || "Sin cliente"}`, "cotizacion.pdf");
                   if (r.method === "clipboard") mostrarToast("Enlace copiado al portapapeles ✓");
                   else if (r.method === "error") window.open(pdfUrlGuardado, "_blank");
                 }}
