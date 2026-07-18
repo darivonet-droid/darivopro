@@ -65,18 +65,13 @@ Cola de trabajo entregada por Mohamed el 17/07/2026, para procesar en orden, una
 
 **Verificado**: `tsc`/`lint`/`next build` limpios (78 rutas). **No verificado en vivo con una sesión de Técnico real** — crear una cuenta de prueba de Técnico requeriría escribir una contraseña en el formulario de login/invitación, fuera de lo permitido (regla permanente de este documento). Recomendado que el propietario, tras correr la migración SQL: invite un Técnico de prueba con Factura OFF/Informe OFF, confirme que no ve esas pestañas ni "Mis planes", que sí puede cotizar sin el límite de 5 de la prueba gratuita, y que activar Factura/Informe desde Empresa se refleja en su Móvil sin que el Técnico haga nada.
 
-### 3. [ ] Documento "Condiciones y Uso de Partners" — privado, solo Partners logueados
+### 3. [x] Documento "Condiciones y Uso de Partners" — hecho 17/07/2026
 
-**Nunca público, nunca accesible por URL directa en `darivopro.com`, nunca linkeado desde ningún lugar sin login.** Debe vivir dentro del Panel Partner ya existente (`/partner`, mismo middleware de auth que protege el resto del panel) — como sección o modal dentro de esa página, no como ruta nueva.
+Agregado dentro de la Card "Tiempos de pago" de `PartnerPanel.tsx` (id `tiempos-pago`), como bloque expandible (botón "Condiciones y Uso de Partners" ▾) — no se tocó el copy oficial protegido que ya existía ahí (comentario "no modificar sin aprobación", intacto). Contenido: comisión por cliente referido válido, pago vía dLocal el día 5 de cada mes, mínimo 3 clientes válidos para el primer pago, validación de clientes (plan de pago + cobro procesado, excluye duplicados/cancelados/fraudulentos), y el beneficio de incorporación de S/89 de formación gratuita.
 
-Contenido:
-- Comisión por cliente referido válido.
-- Pago vía dLocal el día 5 de cada mes.
-- Mínimo 3 clientes válidos para el primer pago.
-- Validación de clientes: plan de pago + cobro procesado; excluye duplicados, cancelados y fraudulentos.
-- Beneficio de incorporación: S/89 de formación gratuita.
+**Privacidad confirmada con evidencia, no solo afirmación:** el texto vive únicamente en `PartnerPanel.tsx` (grep exhaustivo del string exacto en todo `frontend/src` → 1 solo archivo). Ese componente solo lo renderiza `frontend/src/app/partner/page.tsx`, cuya ruta (`/partner`) está protegida por `middleware.ts` (`esPartnerAutorizado()` — allowlist de email + `partners.estado !== 'Suspendido'`, ya auditado sin brechas el 12/07/2026). No se creó ninguna ruta nueva ni ningún enlace desde `darivopro.com` ni desde ninguna página pública.
 
-Ubicación sugerida por el propietario: dentro de la sección "Tiempos de pago" del Panel Partner (ver `PartnerPanel.tsx`).
+**Verificado**: `tsc`/`lint` limpios. No verificado visualmente con una sesión Partner real (mismo bloqueo de credenciales de siempre) — recomendado que el propietario confirme que el desplegable se ve y funciona bien en su cuenta Partner.
 
 ### 4. [ ] Documento interno único de TODO lo pendiente en Darivo Pro
 

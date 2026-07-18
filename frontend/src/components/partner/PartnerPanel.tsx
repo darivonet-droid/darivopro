@@ -132,6 +132,7 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
   const progresoHitos = calcularProgresoHitos(registros.length, hitosConfig);
   const [copiado, setCopiado] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [mostrarCondiciones, setMostrarCondiciones] = useState(false);
   const [activeId, setActiveId] = useState<string>(NAV_ITEMS[0].id);
   const [periodo, setPeriodo] = useState<"mes" | "historico">("mes");
 
@@ -590,6 +591,43 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
                 retiro — habitualmente entre 15 y 30 días desde que se generó. Una vez el pago esté
                 listo, se transferirá a tu cuenta bancaria registrada en dLocal.
               </p>
+
+              {/* Condiciones y Uso de Partners — privado, solo visible aquí dentro
+                  del Panel Partner logueado (Tarea 3, CLAUDE.md 17/07/2026). Nunca
+                  una ruta pública, nunca linkeado desde darivopro.com. */}
+              <button
+                type="button"
+                onClick={() => setMostrarCondiciones((v) => !v)}
+                className="mt-4 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold"
+                style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.purple }}
+                aria-expanded={mostrarCondiciones}
+              >
+                Condiciones y Uso de Partners
+                <span style={{ transform: mostrarCondiciones ? "rotate(180deg)" : "none" }}>▾</span>
+              </button>
+
+              {mostrarCondiciones && (
+                <div
+                  className="mt-3 rounded-xl p-4 text-sm leading-relaxed"
+                  style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
+                >
+                  <ul className="flex flex-col gap-2.5" style={{ paddingLeft: 18, listStyle: "disc" }}>
+                    <li>Ganas una comisión por cada cliente referido válido que se suscribe a Darivo Pro.</li>
+                    <li>El pago se procesa vía dLocal el <strong>día 5 de cada mes</strong>.</li>
+                    <li>Se requiere un <strong>mínimo de 3 clientes válidos</strong> para recibir tu primer pago.</li>
+                    <li>
+                      Un cliente se considera válido cuando está en un plan de pago y su cobro fue
+                      procesado correctamente — se excluyen registros duplicados, cuentas canceladas y
+                      casos identificados como fraudulentos.
+                    </li>
+                    <li>Beneficio de incorporación: <strong>S/89 de formación gratuita</strong> al activarte como Partner.</li>
+                  </ul>
+                  <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+                    Documento interno, visible solo dentro de tu Panel Partner logueado — no se comparte
+                    públicamente. Cualquier duda, escríbenos a partners@darivopro.com.
+                  </p>
+                </div>
+              )}
             </Card>
 
             {/* Banner de sincronización — PANEL-PARTNER.md §5 */}
