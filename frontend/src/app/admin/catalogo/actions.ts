@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
 
 type Resultado = { ok: true } | { ok: false; error: string };
 
@@ -27,6 +28,8 @@ export async function crearCategoriaAction(input: {
   emoji?: string;
   color?: string;
 }): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -55,6 +58,8 @@ export async function editarCategoriaAction(
   id: string,
   input: { nombre?: string; emoji?: string; color?: string; activo?: boolean }
 ): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -76,6 +81,8 @@ export async function editarCategoriaAction(
 }
 
 export async function eliminarCategoriaAction(id: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -98,6 +105,8 @@ export async function crearPartidaAction(input: {
   precioTarifaPro: number;
   unidad?: string;
 }): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -136,6 +145,8 @@ export async function editarPartidaAction(
     activo?: boolean;
   }
 ): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -161,6 +172,8 @@ export async function editarPartidaAction(
 }
 
 export async function eliminarPartidaAction(id: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();

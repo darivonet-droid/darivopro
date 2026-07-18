@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@supabase/supabase-js";
+import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
 import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 
 /**
@@ -15,6 +16,8 @@ import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 type Resultado = { ok: true } | { ok: false; error: string };
 
 export async function bloquearUsuarioAction(userId: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -29,6 +32,8 @@ export async function bloquearUsuarioAction(userId: string): Promise<Resultado> 
 }
 
 export async function desbloquearUsuarioAction(userId: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -45,6 +50,8 @@ export async function cambiarPlanUsuarioAction(
   userId: string,
   plan: PlanTipoPersistido
 ): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -63,6 +70,8 @@ export async function cambiarPlanUsuarioAction(
  * caso lo correcto es "Restablecer acceso", no reinvitar.
  */
 export async function reenviarInvitacionAction(email: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   let admin;
   try {
     admin = createAdminClient();
@@ -81,6 +90,8 @@ export async function reenviarInvitacionAction(email: string): Promise<Resultado
  * método no requiere sesión del destinatario, es el flujo público estándar.
  */
 export async function restablecerAccesoAction(email: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return { ok: false, error: "Supabase no configurado" };

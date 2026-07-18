@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
 
 /**
  * Edita un producto existente de `productos_master` (Módulo Admin 05).
@@ -14,6 +15,8 @@ export async function updateProductoAction(
   id: string,
   campos: { nombre: string; descripcion: string | null; activo: boolean }
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
   if (!campos.nombre.trim()) {
     return { ok: false, error: "El nombre es obligatorio" };
   }

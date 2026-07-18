@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
 import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 
 /**
@@ -16,6 +17,9 @@ export async function cambiarPlanEmpresaAction(
   gerenteUserId: string,
   plan: PlanTipoPersistido
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
+
   let admin;
   try {
     admin = createAdminClient();
@@ -49,6 +53,9 @@ export async function crearEmpresaAction(input: {
   direccion?: string;
   telefono?: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
+
   let admin;
   try {
     admin = createAdminClient();
@@ -107,6 +114,9 @@ export async function setEmpresaActivaAction(
   empresaId: string,
   activa: boolean
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
+
   let admin;
   try {
     admin = createAdminClient();

@@ -5,6 +5,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { createServerClient } from "@/lib/supabase/server";
 
 function emailsAllowlist(envKey: string): Set<string> {
   const raw = process.env[envKey] ?? "";
@@ -81,6 +82,25 @@ export async function puedeAccederEmpresa(
   // Si no hay fila de empresa (o el usuario no es su gerente_user_id), es un
   // Técnico invitado — sin acceso al panel de escritorio.
   return empresa?.gerente_user_id === user.id;
+}
+
+/**
+ * Guardia de defensa-en-profundidad para Server Actions del Panel Admin
+ * (mejora de seguridad pendiente documentada en CLAUDE.md, 15/07/2026):
+ * hasta ahora estas Server Actions confiaban por completo en que
+ * middleware.ts protegiera /admin/* sin re-verificar el rol internamente —
+ * si el matcher del middleware cambiara alguna vez sin darse cuenta de esa
+ * dependencia implícita, quedarían expuestas sin ningún otro chequeo.
+ * Devuelve un mensaje de error listo para el shape { ok: false, error } que
+ * ya usan todas ellas, o null si el usuario autenticado es Administrador Darivo.
+ */
+export async function errorSiNoEsAdmin(): Promise<string | null> {
+  const supabase = createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!esAdministradorDarivo(user?.email)) return "No autorizado";
+  return null;
 }
 
 export type ProductoProtegido = "admin" | "empresa" | "partner";
