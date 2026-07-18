@@ -33,6 +33,71 @@ Para todo lo demás (código de frontend/backend, commits a develop, buscar e im
 
 Toda migración que referencie columnas de una tabla ya existente debe incluir, como parte de la respuesta, el extracto literal del `CREATE TABLE` de esa tabla (con número de archivo y líneas), no solo la afirmación de que se verificó el schema. Si la tabla pudo haber sido modificada por `ALTER TABLE` en otra migración posterior, debe confirmarse explícitamente que no hay ningún `ALTER TABLE` que la afecte, listando el resultado de esa búsqueda. Sin este extracto, la migración no se considera verificada y no debe entregarse como final.
 
+## COLA DE TAREAS PENDIENTES (creada 17/07/2026 — procesar en este orden)
+
+Cola de trabajo entregada por Mohamed el 17/07/2026, para procesar en orden, una tarea a la vez (nunca varias en paralelo), con commit individual por tarea. Cada tarea se marca `[ ]`→`[x]` (o `[~]` si quedó parcial) justo aquí, con un resumen breve de qué se hizo o qué quedó pendiente de confirmación, apenas se completa — no se crean informes nuevos en otro lugar para esto.
+
+### 1. [ ] Actualizar precios oficiales
+
+Básico **S/49/mes**, Pro **S/89/mes**, Business **S/130/mes** — reemplaza cualquier precio anterior en: código (`roles-planes-oficial.ts`/`PRECIOS_OFICIALES` y cualquier otro lugar hardcodeado), `/precios`, panel Admin → Suscripciones, `04-PANEL-ADMIN-SUSCRIPCIONES.md` (documento protegido — cambio autorizado explícitamente aquí por el propietario), y cualquier otro sitio donde aparezca un precio de estos 3 planes.
+
+**Precio anual = precio mensual × 10, sin descuento adicional**, para los 3 planes (Básico S/490/año, Pro S/890/año, Business S/1300/año).
+
+Actualizar también cualquier cálculo de comisión de Partner que dependa de estos montos (`partner_comisiones_config`, lógica de hitos/porcentajes si referencia el precio del plan directamente en vez de solo el porcentaje).
+
+### 2. [ ] Roles Gerente/Técnico (Empresa + Móvil)
+
+- **Gerente**: acceso total dentro de los límites de su plan (sin cambios respecto a hoy).
+- **Técnico** (rol por defecto de cualquier empleado nuevo):
+  - Solo ve **Cotización**.
+  - **Factura: OFF por defecto** — el Gerente la activa manualmente, por técnico individual (no es un toggle global).
+  - **Informe de su propio trabajo**: opcional, el Gerente decide si ese técnico lo ve o no.
+  - **Nunca ve "Mis planes"** (ni para consultar ni para cambiar el plan de la cuenta).
+- **Flujo de alta**: Gerente crea empleado (ya existe la acción de invitar) → el correo de invitación debe indicar el rol asignado → el Técnico se registra usando ese mismo correo → su perfil se activa automáticamente con los permisos ya configurados por el Gerente al crearlo, **sin que el Técnico tenga que configurar nada él mismo**.
+
+**Antes de escribir código:** revisar qué ya existe en `RolesPermisosView.tsx`, la tabla de empleados (`empresa_empleados`, `roles_personalizados`) y el flujo de invitación real, para no duplicar trabajo ya construido — recordar que `MATRIZ_PERMISOS_APROBADA=false` (RBAC inerte) es el estado documentado hasta ahora, ver "🔴 Sin auditar" más abajo.
+
+Si esto requiere cambios de schema (columnas de permiso por empleado, tabla de toggles por feature), entregar el SQL completo en el chat para que Mohamed lo corra manualmente — nunca ejecutarlo directamente (regla permanente de este documento).
+
+### 3. [ ] Documento "Condiciones y Uso de Partners" — privado, solo Partners logueados
+
+**Nunca público, nunca accesible por URL directa en `darivopro.com`, nunca linkeado desde ningún lugar sin login.** Debe vivir dentro del Panel Partner ya existente (`/partner`, mismo middleware de auth que protege el resto del panel) — como sección o modal dentro de esa página, no como ruta nueva.
+
+Contenido:
+- Comisión por cliente referido válido.
+- Pago vía dLocal el día 5 de cada mes.
+- Mínimo 3 clientes válidos para el primer pago.
+- Validación de clientes: plan de pago + cobro procesado; excluye duplicados, cancelados y fraudulentos.
+- Beneficio de incorporación: S/89 de formación gratuita.
+
+Ubicación sugerida por el propietario: dentro de la sección "Tiempos de pago" del Panel Partner (ver `PartnerPanel.tsx`).
+
+### 4. [ ] Documento interno único de TODO lo pendiente en Darivo Pro
+
+No solo legal/cookies — cualquier cosa a medias, placeholder, o pendiente de revisión en cualquier parte del proyecto: legal, funcionalidades, textos, configuraciones. Debe ser claro y exhaustivo, para que el propietario o cualquier sesión futura sepan de un vistazo qué falta, sin tener que releer todo este `CLAUDE.md`.
+
+**Requisito de seguridad NO NEGOCIABLE**: debe vivir en `frontend/docs-internos/` (o equivalente ya establecido) y **no debe ser accesible por ninguna URL pública de `darivopro.com` bajo ningún caso** — verificar que no quede en `frontend/public`, que ninguna ruta lo sirva, y que no esté linkeado desde ninguna página pública. Motivo explícito: la semana que viene entran proveedores externos y clientes reales a `darivopro.com` — un documento de "lo que falta" visible públicamente sería un problema serio de imagen y seguridad.
+
+**Antes de dar la tarea por terminada**: confirmar explícitamente, con evidencia (no solo afirmación) — grep de rutas públicas, confirmación de que el archivo no está en `public/`, etc. — que el archivo no es alcanzable desde ninguna URL pública.
+
+### 5. [ ] Limpieza y mejoras del Panel Empresa
+
+**Regla general (aplica a TODO el panel Empresa, no solo a los ítems de abajo):** adaptar siempre al mismo diseño visual de Admin (`ADMIN_COLORS`) y a los MISMOS DATOS que ya existen en Darivo Pro Móvil — nunca inventar funcionalidad nueva, nunca reutilizar el flujo de Móvil tal cual (la UX se adapta a escritorio, los datos/lógica se mantienen idénticos a Móvil). Ejemplos ya bien hechos, no tocar su patrón: **Categorías** y **Mis Tarifas** en Empresa.
+
+**NO TOCAR** (ya están bien, verificado por el propietario): Clientes, Facturas, Cierre — no modificar su funcionalidad existente en esta tarea, salvo lo indicado explícitamente en el punto (c).
+
+**Honestidad en el reporte**: no marcar nada como "hecho" aquí a menos que replique correctamente el diseño de Admin y los datos reales de Móvil. Si solo quedó parecido pero no equivalente, reportarlo como parcial (`[~]`) y decir qué falta.
+
+**Estructura de navegación**: Empresa NO tiene una sección "Más" como Móvil — solo tiene "Categorías" (que ya cumple ese rol adaptado correctamente). Donde en Móvil algo viva dentro de "Más" (ej. la Calculadora/IA), en Empresa debe organizarse dentro de "Categorías" — no crear una sección "Más" nueva que no existe en el diseño de Empresa.
+
+- **5a. [ ]** "Calculadora inteligente" → renombrar la etiqueta a simplemente **"Darivo"** y quitar cualquier mención a IA/OpenAI de cara al usuario en todo el texto visible. Ubicarla dentro de "Categorías" en Empresa.
+- **5b. [ ]** FIX "Mi plan" en Empresa — hoy no está adaptado correctamente (revisar si redirige/reutiliza la vista de Móvil tal cual en vez de un layout propio de escritorio). Adaptar al diseño de Admin, manteniendo los mismos datos/lógica que ya tiene Móvil — no inventar campos nuevos, solo corregir layout/presentación.
+- **5c. [ ]** "Informe" (hoy vive dentro de "Más" en Móvil) — **no** agregar como sección nueva independiente en el menú de Empresa. Integrarlo **dentro de "Cierre"** (está relacionado directamente con el cierre del mes). Revisar primero cómo se ve/qué datos muestra "Informe" en Móvil, y agregarlo como parte del flujo/vista de Cierre en Empresa (diseño de Admin, datos de Móvil), sin romper ni cambiar lo que Cierre ya hace bien hoy.
+- **5d. [ ]** Investigar qué hace hoy la sección "Documento" (PDFs de informes/cotizaciones/facturas) y si es redundante — **reportar antes de eliminar nada, no borrar sin confirmación explícita** del propietario.
+- **5e. [ ]** Perfil de usuario — agregar "Referencias generales", diseño de Admin, mismos datos que Móvil. Revisar primero cómo se ve esa sección en Móvil antes de construirla en Empresa, para no inventar su forma.
+
+---
+
 ## ESTADO REAL DEL PROYECTO (única fuente de verdad — actualizar al final de cada bloque de trabajo)
 
 *Última actualización: 12/07/2026 — chequeo completo end-to-end: `main` limpiado desde cero (`tsc`/`lint`/`build`) + 6 auditorías de código en paralelo (Móvil/Empresa/Admin/Partner/Supabase-Vercel/Email) + investigación del bug de reset-password. Sustituye todo el estado anterior.*
