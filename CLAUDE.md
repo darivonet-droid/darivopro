@@ -54,7 +54,6 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 - **Causa raíz (confianza alta):** `frontend/src/components/cotizacion/NuevoCotizacionWizard.tsx`. Al tocar el botón `+/✓` de una partida no-fija (`m2`/`unit`/`hour` — la mayoría del catálogo), `toggleSvc` (línea 315) la agrega al `basket` con `qty: ""` (vacío). `cantidadesCompleto` (líneas 359-363) exige `qty` numérico > 0 para toda partida no-fija, así que queda `false`. `goToResumen()` (líneas 366-369) hace `return` silencioso si `!cantidadesCompleto` — sin toast, sin alert, sin mensaje. El botón "Continuar → Resumen" del `FloatBar` (línea 882, `primaryDisabled={!cantidadesCompleto}`) simplemente se pone gris (`FloatBar.tsx` líneas 54-60), pero conserva el mismo label y contador, sin explicar por qué no avanza. Además, la fila de la partida seleccionada-pero-incompleta se ve visualmente **idéntica** a una completa (mismo check verde, `renderPartidas` líneas 504-546) — no hay ningún indicador de "falta cantidad". Resultado: el usuario toca el check, ve la partida "seleccionada", y el botón de avance queda inerte sin ninguna pista visual de qué falta — coincide con el síntoma reportado.
 - **Mismo patrón en Empresa** (`NuevoCotizacionWizardEscritorio.tsx`, `toggleSvc` línea 281-294, `cantidadesCompleto` línea 337, `goToResumen` línea 343-344) — no reportado por el propietario, pero comparte la causa raíz.
 - **Hallazgo secundario (confianza media, contribuyente posible, no confirmado como la causa reportada):** el auto-guardado de borrador (`useCotizacionDraft`, Regla 10 de `05-MODULO-COTIZACIONES.md`) hardcodea `items: []` (línea 93 del wizard) — el `basket` real nunca se persiste — y la función `cargar()` del hook nunca se invoca (no hay restauración al montar). Si el usuario sale de la app/PWA se recarga a medio wizard, el carrito se pierde sin aviso. Puede explicar el síntoma solo si el reporte involucra recarga/cambio de contexto; si no, es un bug real pero distinto.
-- **Nota de consistencia:** esto contradice la línea "Móvil — wizard... los 4 pasos del wizard completos sin TODOs" de la auditoría "🟢 Sólido y verificado" de arriba — esa entrada quedó desactualizada tras el rediseño quirúrgico del 15/07/2026 (wizard pasó de 4 pasos a 3: `cats`/`resumen`/`cliente`, ver entrada de esa fecha arriba) y no reflejaba este bug. Pendiente de corregir esa línea junto con el fix.
 - **Spec oficial (`.cursor/rules/01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` v1.6) no está actualizada** frente al diseño híbrido actual (cantidad + `+/✓` en la misma fila del Paso 1) — describe un Paso 2 "Cantidades" separado que ya no existe en el código, por decisión explícita del propietario del 15/07/2026. El MD está protegido, no se tocó.
 - **No documentado, no asumido:** ningún MD oficial especifica qué debe pasar visualmente cuando una partida queda "seleccionada pero sin cantidad" en el diseño híbrido actual — es una laguna de diseño real, no solo de implementación. Antes de corregir, hace falta decidir: ¿deshabilitar el botón `+/✓` hasta que haya cantidad, o mantenerlo pero mostrar un indicador de error (borde rojo / mensaje) en la partida y/o en el botón "Continuar"?
 - **Sin verificar en vivo todavía** (diagnóstico 100% por trazado estático) — recomendado confirmar en el navegador de preview antes de corregir.
@@ -128,6 +127,21 @@ Excepción confirmada por Mohamed (16/07/2026): la corrección del botón Contin
 8. **No tocado (fuera de lo pedido en esta corrección)**: Clientes/Facturas de **Empresa** (`EmpresaClientesPanel.tsx`, `FacturasTableEmpresa.tsx`) siguen con su comportamiento anterior (sin el filtro sin-factura/con-factura) — mismo criterio que sesiones previas de no tocar Empresa sin pedido explícito; Empresa **sí** ya tenía resuelto el punto 5 desde antes (`FacturasTableEmpresa.tsx` ya usaba 2 botones Boleta/Factura sin paso intermedio).
 9. **Verificado**: `tsc --noEmit`, `next lint` (mismos 2 warnings preexistentes de `useCotizacion.ts`, más 2 nuevos análogos en `useFactura.ts` por el mismo patrón `findOrCreateCliente`, no son errores) y `next build` limpios (76 rutas). **No verificado en vivo con sesión autenticada** — mismo bloqueo de credenciales de siempre (`/cotizaciones/nuevo`, `/clientes`, `/facturas` redirigen a `/login`). Recomendado que el propietario, tras correr la migración SQL: (a) confirme visualmente el punto 2 (botón Continuar) después de limpiar caché; (b) pruebe compartir un PDF por WhatsApp desde Chrome Android normal y desde la app instalada; (c) confirme que un cliente sin factura aparece en Clientes y no en Facturas, y viceversa tras generar una factura de prueba; (d) cambie el estado de una factura desde su ficha y confirme que se ve reflejado en la ficha del cliente.
 
+**Migración `20260717120000_facturas_cliente_id.sql` corrida por Mohamed (17/07/2026)** — confirmado por el propio Mohamed en el chat ("ya"). Sin verificación de datos post-migración desde código (no hay acceso a consultar Supabase directamente en esta sesión); si algo no cuadra en Clientes/Facturas, revisar primero cuántas filas de `facturas` quedaron con `cliente_id IS NULL` tras el backfill.
+
+### ✅ Resuelto — Barra flotante del wizard (Móvil) tapada por la barra de gestos de Android (17/07/2026)
+
+Bug reportado: en el paso Selección/Partidas del wizard de cotización, la `FloatBar` ("N partida(s) seleccionada(s)" + botón Continuar) quedaba parcialmente tapada por la barra de navegación por gestos de Android (no respetaba el safe area inferior).
+
+**Causa raíz real — no era solo `FloatBar.tsx`:** el `viewport` global del proyecto (`frontend/src/app/layout.tsx`) nunca declaraba `viewportFit: "cover"`. Sin eso, `env(safe-area-inset-*)` resuelve siempre a `0px` en **toda la app** — incluido `BottomNav.tsx`, que ya usaba `pb-[env(safe-area-inset-bottom)]` sin ningún efecto real hasta ahora.
+
+**Corrección:**
+- `layout.tsx`: `viewport.viewportFit = "cover"` añadido.
+- `FloatBar.tsx`: `bottom` pasa de `20` fijo a `calc(20px + env(safe-area-inset-bottom, 0px))` — en pantallas sin barra de gestos, `env()` resuelve a `0px` y el resultado es idéntico a antes (sin regresión).
+- No se tocó ninguna otra parte del wizard.
+
+**Verificado:** `tsc --noEmit`, `next lint` (mismos warnings preexistentes) y `next build` limpios. Confirmado en el navegador que el `<meta name="viewport">` renderizado ya incluye `viewport-fit=cover`. **No verificado visualmente en un Android real con barra de gestos** — ni las herramientas de este entorno simulan el inset real, ni hay sesión autenticada disponible para llegar a esa pantalla. Recomendado que el propietario confirme en su teléfono que el botón "Continuar" queda completamente libre de la barra de gestos.
+
 ### ✅ Resuelto — `main` ya no está detrás de `develop` (era cierto el 12/07/2026, ya no)
 
 La alarma de abajo (escrita 12/07/2026) quedó obsoleta: verificado hoy (15/07/2026) con `git log main..develop` → **0 commits** — `develop` no tiene nada que `main` no tenga ya. Los 3 puntos que preocupaban en su momento ya están en `main`: el fix de caché offline (`extendDefaultRuntimeCaching: true` presente en `frontend/next.config.mjs:14`), la separación de PWA Admin/Empresa vs Móvil, y el fix de precio Pro en `UpgradeModal` — todo llegó a `main` como parte del trabajo de Admin/Empresa de las sesiones 13–14/07/2026 (commits `1b8e7d8` y posteriores). No hay ninguna acción pendiente aquí.
@@ -148,7 +162,7 @@ La alarma de abajo (escrita 12/07/2026) quedó obsoleta: verificado hoy (15/07/2
 ### 🟢 Sólido y verificado — confirmado leyendo el código real en `main`
 
 - **Build/lint/typecheck limpios en `main` desde cero**: `tsc --noEmit` sin errores, `next lint` sin errores (solo 2 warnings preexistentes en `useCotizacion.ts`, sin relación con nada reciente), `next build` compila las 69 rutas sin errores.
-- **Móvil — wizard, cotizaciones, facturas, PDF**: los 4 pasos del wizard completos sin TODOs; CRUD de cotizaciones completo con buen manejo de errores; los 6 estados oficiales de factura confirmados textualmente en código; numeración correcta; cálculo de detracción es local (sin integración SUNAT real, correcto — no hay proveedor OSE contratado); generación de PDF funciona end-to-end vía `@react-pdf/renderer` + Supabase Storage; plan `gratis` bloquea facturas correctamente.
+- **Móvil — wizard, cotizaciones, facturas, PDF**: wizard de 3 pasos (Selección/Partidas → Resumen → Cliente, desde el rediseño quirúrgico del 15/07/2026 — ya no son 4) completo, con indicador visual + toast cuando falta cantidad en una partida (fix 16/07/2026); CRUD de cotizaciones completo con buen manejo de errores; los 6 estados oficiales de factura confirmados textualmente en código; numeración correcta; cálculo de detracción es local (sin integración SUNAT real, correcto — no hay proveedor OSE contratado); generación de PDF funciona end-to-end vía `@react-pdf/renderer` + Supabase Storage (17/07/2026: comparte el archivo real por WhatsApp cuando el navegador lo soporta, no solo el link, ver entrada propia arriba); plan `gratis` bloquea facturas correctamente.
 - **Admin — Usuarios/Partners/Productos**: las 5 acciones de Usuarios (Bloquear/Desbloquear/Cambiar plan/Reenviar invitación/Restablecer acceso) verifican el `error` de Supabase y no tienen silent failures; filtros funcionales. "Configurar tabla de comisiones" de Partners edita `partner_comisiones_config` real, leída también por el trigger de comisiones y por el Panel Partner (sin valores duplicados). Edición de Productos (nombre/descripción/activo) funciona, sin crear/eliminar (correcto, fuera de alcance documentado). Allowlist de acceso (`DARIVO_ADMIN_EMAILS`) falla cerrado si la lista está vacía.
 - **Empresa — Invitar empleado y Cotizaciones**: `invitarEmpleadoAction` da acceso real a Móvil (`inviteUserByEmail` + `empresa_empleados.user_id`), no es decorativo. Acceso a cotizaciones correctamente restringido a Inicio + ficha de Cliente (sin sidebar/lista global). Middleware de `/empresa` gatea por `plan_tipo` consultado en vivo en cada request (no allowlist estático).
 - **Partner — comisiones y referidos**: `mapPartner()` trae comisiones pendientes/pagadas reales desde `partner_comisiones_historial`. El flujo de link de referido (`/ref/[codigo]` → cookie → `registrar-referido`) funciona end-to-end con protección contra duplicados.
@@ -200,7 +214,7 @@ No pude verificar la fecha de creación ni el plan desde código — requiere en
 
 ✅ **Resuelto** — ya en `main` (commit `1b8e7d8`, confirmado en la revisión del 15/07/2026, ver sección "✅ Resuelto — main ya no está detrás de develop" arriba). Verificado en código (no solo en el commit): `manifest: "/manifest.json"` solo está presente en `(auth)/layout.tsx:13` y `onboarding/layout.tsx:10` (rutas de Móvil); `app/layout.tsx:28` documenta explícitamente por qué se quitó de la raíz; Admin/Empresa no lo declaran en ningún layout propio, así que no lo heredan. Sin acción pendiente.
 
-## Landing page y PWA — mejoras técnicas 12/07/2026 (autonomía total, sin tocar copy/diseño ya cerrado) — ⚠️ sin comitear, ver "CRÍTICO" arriba
+## Landing page y PWA — mejoras técnicas 12/07/2026 (autonomía total, sin tocar copy/diseño ya cerrado) — ✅ ya en `main`, ver "✅ Resuelto — main ya no está detrás de develop" arriba
 
 Sesión enfocada solo en `darivopro.com` (landing) y configuración PWA — sin tocar ningún panel autenticado. No se cambió ni una palabra de copy ni la estructura visual de `LANDING-PAGE-DARIVO-PRO.md` v1.3; todo lo de abajo es infraestructura/SEO/accesibilidad/rendimiento. Verificado con `tsc --noEmit`, `next lint` y `next build` limpios, más revisión visual real en el navegador (Móvil dev server).
 
@@ -327,30 +341,9 @@ Cada vez que se genere una migración (SQL nuevo, cambios de schema, RLS, trigge
 
 Las credenciales (tokens, contraseñas de BD, claves de API) **nunca se pegan en el chat con la IA** — ni en Cursor ni en Claude Code. Van directamente en GitHub Secrets o en el archivo `.env.local` local, nunca en un mensaje. Si Claude Code necesita saber si una variable existe, que pregunte o revise `.env.example`, nunca que pida el valor real.
 
-## Tarea 0 (primera, antes del Día 1) — Limpieza de documentación de proceso Cursor
+## ✅ Tarea 0 — Limpieza de documentación de proceso Cursor (completada, verificada 17/07/2026)
 
-Ya verificado con nombres exactos (06/07/2026) — no hace falta redescubrir nada, ejecuta directo:
-
-```powershell
-Remove-Item ".cursor/rules/22 – METODOLOGÍA OFICIAL DE IA – DARIVO PRO.md"
-Remove-Item ".cursor/rules/23 – METODOLOGÍA OFICIAL – TRABAJO EN PARALELO CON DOS AGENTES IA – DARIVO PRO.md"
-Remove-Item ".cursor/rules/23-A – PROMPT OFICIAL – AGENTE 1 – PRODUCCIÓN – DARIVO PRO.md"
-Remove-Item ".cursor/rules/23-B – PROMPT OFICIAL – AGENTE 2 – AUDITORÍA DEL ECOSISTEMA – DARIVO PRO.md"
-Remove-Item ".cursor/rules/23-C – PROMPT OFICIAL – AGENTE 3 – IMPLEMENTACIÓN DEL PRODUCTO – DARIVO PRO.md"
-Remove-Item ".cursor/rules/24 – PROMPT OFICIAL – PRODUCCIÓN E IMPLEMENTACIÓN – DARIVO PRO.md"
-Remove-Item ".cursor/rules/25 – CATÁLOGO OFICIAL DE TAREAS – IMPLEMENTACIÓN DARIVO PRO.md"
-Remove-Item ".cursor/rules/informes" -Recurse
-Remove-Item ".cursor/rules/03-darivo-pro-empresa/INFORME-FASE-FINAL-DARIVO-PRO-EMPRESA.md"
-Remove-Item ".cursor/audit-db-output.json"
-Remove-Item ".cursor/rules/DARIVO-PRO-FINAL.mdc"
-# NOTA (nombres reales verificados 08/07/2026): los archivos 22–25 usan raya "–" (U+2013),
-# NO guion "-", y llevan tildes (METODOLOGÍA, PRODUCCIÓN, etc.). Cópialos literalmente o el
-# Remove-Item no encontrará el archivo. El .mdc confirmado es DARIVO-PRO-FINAL.mdc.
-```
-
-Después de borrar, verifica: `(Get-ChildItem -Path ".cursor/rules" -Filter "*.md" -Recurse -File | Measure-Object).Count` debe dar **48** (no 30 — ese número era un error de conteo, ya corregido). Si no da 48, para y compara contra la lista de "MD esenciales" más abajo antes de hacer commit.
-
-Un solo commit: "chore: eliminar documentación de proceso Cursor (metodología, prompts de agentes, informes) — no necesaria para Claude Code"
+Los archivos de metodología/prompts de agentes/informes de Cursor (`22`–`25`, `23-A/B/C`, `informes/`, `INFORME-FASE-FINAL-DARIVO-PRO-EMPRESA.md`, `audit-db-output.json`, `DARIVO-PRO-FINAL.mdc`) ya no existen en el repo — confirmado directamente en el filesystem (17/07/2026), no solo por el registro de esta tarea. Conteo real de `.cursor/rules/*.md`: **48**, como se esperaba. Nada pendiente aquí.
 
 ## Handoff: de Cursor (Composer 2.5) a Claude Code
 
@@ -361,7 +354,7 @@ Hasta el 06/07/2026, el trabajo de código se hizo con Cursor (Composer 2.5). A 
 * Roles personalizados (RBAC) — migración `roles_personalizados` + UI en `RolesPermisosView.tsx`.
 * Pantalla de Inicio (Móvil) corregida — sin enlace a Empresa, sin accesos rápidos a Clientes/Cotizaciones.
 
-**Pendiente de verificar por Claude Code al empezar** (Cursor lo hizo pero no se auditó a fondo): la migración de terminología presupuesto→cotización en rutas de página/API (commits `6f19ea5`, `3538514`, `a897249`) — confirmar que quedó bien antes de continuar con el Día 1.
+✅ La migración de terminología presupuesto→cotización (commits `6f19ea5`, `3538514`, `a897249`) quedó **confirmada COMPLETA** por la auditoría del 09/07/2026 (migraciones, rutas, tipos, caché PWA) — ver "Tareas de código pendientes conocidas" más abajo. No repetir este trabajo.
 
 ## Estado de remediación — Auditoría 09/07/2026 (leer antes de continuar)
 
@@ -400,57 +393,11 @@ Se ejecutó una auditoría de solo lectura (4 agentes en paralelo + verificació
 
 Migraciones de terminología cotización (completo) · `roles-planes-oficial.ts` ↔ `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 · Middleware de subdominios (correctamente apagado) · Landing v1.3 ↔ MD v1.3 · los 3 botones del header · RLS activo en todas las tablas de usuario.
 
-## Plan de trabajo — MAÑANA (todo excepto SUNAT)
+## ✅ Plan de trabajo de los primeros días (06-07/07/2026) — completado
 
-SUNAT queda para **pasado mañana**, cuando el dominio y `info@darivopro.com` estén operativos y se pueda enviar el correo a Bizlinks. No lo toques mañana.
+Este documento tenía un plan día-a-día (migración de terminología, Landing Page, `/precios` a 3 planes, Módulo Admin 05, middleware de subdominios) escrito antes de que existiera casi todo el resto de este `CLAUDE.md`. Los 5 puntos están confirmados completos, cada uno con su propia entrada más abajo (ver "Tareas de código pendientes conocidas", "Estado de remediación — Auditoría 09/07/2026" Prioridad 1, y "🔴 Sin auditar" para el middleware, que sigue **apagado a propósito**, no pendiente de terminar). No queda ninguna acción de este plan original por hacer.
 
-Orden de prioridad para mañana (de mayor a menor riesgo — hazlo en este orden, un commit por bloque, muéstrame cada diff antes de aplicar):
-
-### 1. Migración de terminología (presupuesto → cotización) — el más arriesgado, primero con la mente fresca
-
-1. Inventario completo (tablas, columnas, tipos TS, archivos/carpetas) agrupado por riesgo — sin tocar nada todavía.
-2. Revisar el inventario con Mohamed antes de continuar.
-3. Ejecutar primero lo de bajo riesgo (tipos TS, nombres de archivo/carpeta de componentes).
-4. Tablas de BD con datos reales al final, con migración que preserve los datos (no DROP/CREATE).
-5. Verificación final: grep global de "presupuesto" en todo el proyecto.
-
-### 2. Landing Page (`darivopro.com`)
-
-**No la construyas — Mohamed la hace él mismo mañana por la mañana en Cursor, ANTES de que tú toques el Bloque 5 (middleware).** MD oficial ya listo: `LANDING-PAGE-DARIVO-PRO.md` (v1.0) + mockup de referencia `mockup-landing-darivopro.html`. Si te pide ayuda puntual con esto, sigue exactamente ese MD, no inventes estructura nueva.
-
-**Orden acordado:** Landing (Mohamed, Cursor) → luego Bloque 5 (tú, middleware). No los hagas en paralelo — ambos tocan `frontend/src/app/page.tsx`.
-
-### 3. Precios (`/precios`) — actualizar a 3 planes
-
-Cambiar metadata y contenido de "Planes Básico y Pro" a los 3 planes oficiales (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 — precios marcados como provisionales). Ver detalle exacto de archivo:línea en "Estado de remediación — Auditoría 09/07/2026" → Prioridad 1. Al terminar, marcar ese checkbox también, no solo tachar esto de la lista de mañana.
-
-### 4. Módulo Admin 05 (Edición de Productos)
-
-MD ya oficial: `.cursor/rules/02-darivo-pro-admin/05-PANEL-ADMIN-EDICION-DE-PRODUCTOS.md` (v1.1 — usa `slug`, no `codigo`).
-
-1. Migración: añadir `orden` y `updated_at` a `productos_master` solo si Mohamed lo confirma — hoy no existen.
-2. Pantalla en `frontend/src/app/admin/productos/` — solo edición de las 3 filas existentes, sin crear/eliminar.
-3. Entrada en el sidebar de Admin, siguiendo `16-SISTEMA-DE-DISEÑO-ADMIN.md`.
-
-### 5. Middleware de subdominios (preparar, no activar)
-
-⚠️ **NO empieces este bloque hasta confirmar con Mohamed que ya construyó la Landing Page en Cursor esta mañana.** Si no la ha terminado todavía, salta este bloque y avísale — no lo hagas en paralelo, los dos tocáis la misma ruta raíz (`frontend/src/app/page.tsx`) y os podéis pisar.
-
-Una vez confirmado que la Landing ya existe:
-
-Estructura: `darivopro.com` (landing, ya construida por Mohamed) · `app.` (Móvil) · `empresa.` (Empresa) · `admin.` (Admin) · `partner.` (Partner).
-
-1. Revisar `frontend/src/middleware.ts` actual, mostrarlo antes de tocar.
-2. Confirmar dónde quedó la Landing Page real (puede que Mohamed haya movido el contenido de `page.tsx` o creado una ruta nueva) — pregúntale si no está claro, no asumas.
-3. Rewrite (no redirect) por hostname, sin romper localhost/desarrollo.
-4. No tocar `next.config.mjs` ni crear `vercel.json` todavía — eso se hace cuando el dominio esté conectado a Vercel.
-
-## Pasado mañana — SUNAT (no antes)
-
-Una vez `info@darivopro.com` esté operativo:
-
-1. Enviar el correo ya redactado a Bizlinks (pedir a Mohamed que confirme si ya lo envió y qué respondieron).
-2. No escribir ningún código de integración real hasta tener condiciones confirmadas del proveedor OSE.
+**SUNAT sigue sin integrarse** (esto sí sigue vigente, no es parte de lo ya completado): no hay proveedor OSE contratado todavía. No escribir código de integración real hasta que Mohamed confirme que el correo a Bizlinks se envió y las condiciones del proveedor están cerradas — ver también "Lo que NO existe en este producto" más abajo.
 
 ## Antes de publicar la Política de Privacidad y Términos de Uso
 
@@ -544,9 +491,9 @@ Auditoría de solo lectura + correcciones puntuales. Corregido en el momento (ve
 - ~~**Empresa — Ficha de Cliente**~~ ✅ **Resuelto 12/07/2026**: panel lateral dentro de `EmpresaShell`, ver arriba.
 - **Nota relacionada, sin resolver:** el wizard de cotización sigue sin adaptarse al layout de 3 paneles de escritorio que pide `05-MODULO-COTIZACIONES-EMPRESA.md` §4 — tanto el CTA de Inicio como el botón "+ Nueva cotización" de la ficha enlazan al wizard Móvil (`/cotizaciones/nuevo`) tal cual. No es una regresión nueva (ya pasaba antes), pero sigue pendiente si se quiere una experiencia de escritorio completa.
 - ~~**Empresa — Invitar empleado**~~ ✅ **Resuelto 13/07/2026** — ver arriba. Decisión de diseño tomada: reutiliza el propio invite de Supabase Auth (no una tabla de tokens propia ni uno de los 9 emails transaccionales).
-- **Empresa — Empleados:** faltan las acciones "Editar" y "Permisos" por fila que pide el MD §5 (solo hay Activar/Desactivar); la columna "Última actividad" nunca se escribe (no hay evento de login Móvil que la alimente) y la tabla muestra "Alta" (`created_at`) en su lugar.
+- ~~**Empresa — Empleados:** faltan las acciones "Editar" y "Permisos" por fila; "Última actividad" nunca se escribe~~ ✅ **Resuelto el mismo 12/07/2026** — ver "Cambios mergeados a main" más abajo (acciones Editar/Permisos añadidas, columna "Última actividad" real conectada a login).
 - ~~**Partner — visibilidad de comisiones**~~ ✅ **Resuelto 12/07/2026** (sesión continua siguiente): `mapPartner()` consulta `partner_comisiones_historial`, `PartnerPanel.tsx` muestra totales + listado.
-- **Partner — acceso tras suspensión:** `/partner` se gatea solo por allowlist de email (`DARIVO_PARTNER_EMAILS`), independiente de `partners.estado` — un Partner Suspendido con el email todavía en la allowlist conserva acceso de lectura completo al panel. Mismo gap de arquitectura ya documentado (jerarquía Suscripción→Producto→Rol→Permisos solo a medias, DT-04-02), no es una sorpresa nueva, pero vale la pena resolverlo si se activa esa jerarquía de verdad.
+- ~~**Partner — acceso tras suspensión:** `/partner` se gatea solo por allowlist de email, independiente de `partners.estado`~~ ✅ **Resuelto el mismo 12/07/2026** — ver "Cambios mergeados a main" más abajo (`esPartnerAutorizado()` ahora consulta `partners.estado` real, deniega si `Suspendido`).
 
 ## Auditoría MD↔código Admin (funcional + visual) — 13/07/2026
 
