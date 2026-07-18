@@ -73,13 +73,18 @@ Agregado dentro de la Card "Tiempos de pago" de `PartnerPanel.tsx` (id `tiempos-
 
 **Verificado**: `tsc`/`lint` limpios. No verificado visualmente con una sesión Partner real (mismo bloqueo de credenciales de siempre) — recomendado que el propietario confirme que el desplegable se ve y funciona bien en su cuenta Partner.
 
-### 4. [ ] Documento interno único de TODO lo pendiente en Darivo Pro
+### 4. [x] Documento interno único de TODO lo pendiente — hecho 17/07/2026
 
-No solo legal/cookies — cualquier cosa a medias, placeholder, o pendiente de revisión en cualquier parte del proyecto: legal, funcionalidades, textos, configuraciones. Debe ser claro y exhaustivo, para que el propietario o cualquier sesión futura sepan de un vistazo qué falta, sin tener que releer todo este `CLAUDE.md`.
+Creado `frontend/docs-internos/TODO-PENDIENTES-DARIVO-PRO.md` — 6 categorías (acciones externas del propietario, legal, decisiones de negocio, funcionalidad a medias, cola de trabajo activa, deuda técnica ya resuelta), cada punto con su ubicación exacta y remitiendo al detalle completo en este mismo `CLAUDE.md` en vez de duplicarlo. No es un informe nuevo aislado — es el índice de todo lo que ya estaba disperso en las secciones de arriba.
 
-**Requisito de seguridad NO NEGOCIABLE**: debe vivir en `frontend/docs-internos/` (o equivalente ya establecido) y **no debe ser accesible por ninguna URL pública de `darivopro.com` bajo ningún caso** — verificar que no quede en `frontend/public`, que ninguna ruta lo sirva, y que no esté linkeado desde ninguna página pública. Motivo explícito: la semana que viene entran proveedores externos y clientes reales a `darivopro.com` — un documento de "lo que falta" visible públicamente sería un problema serio de imagen y seguridad.
+**Verificación de seguridad con evidencia real** (no solo afirmación, tal como se pidió):
+1. `find frontend/public -iname "*TODO-PENDIENTES*"` → vacío, confirmado que no está en la carpeta que Next.js sirve como estática.
+2. `grep -rn "docs-internos" frontend/src/app frontend/src/components frontend/next.config.mjs` → un solo resultado, un comentario informativo en `page.tsx` (no una ruta que sirva la carpeta).
+3. `grep -rln "TODO-PENDIENTES" frontend/src` → vacío, ningún componente lo referencia.
+4. `grep -rn "readFileSync|readFile("` en `app/`/`components/` → confirmado que los únicos usos reales son `src/content/legal/*.md` (las 3 páginas legales públicas, a propósito) y `src/content/darivo/conocimiento.md` (vía la API del chat de soporte, nunca sirve el archivo crudo) — ninguno apunta a `docs-internos/`.
+5. `next build` completo tras crearlo: `✓ Compiled successfully`, y ninguna ruta generada lo menciona.
 
-**Antes de dar la tarea por terminada**: confirmar explícitamente, con evidencia (no solo afirmación) — grep de rutas públicas, confirmación de que el archivo no está en `public/`, etc. — que el archivo no es alcanzable desde ninguna URL pública.
+**Verificado**: build limpio. El documento queda como referencia viva — si algo cambia de estado, actualizarlo ahí también, no solo aquí.
 
 ### 5. [ ] Limpieza y mejoras del Panel Empresa
 
