@@ -37,13 +37,13 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 
 Cola de trabajo entregada por Mohamed el 17/07/2026, para procesar en orden, una tarea a la vez (nunca varias en paralelo), con commit individual por tarea. Cada tarea se marca `[ ]`→`[x]` (o `[~]` si quedó parcial) justo aquí, con un resumen breve de qué se hizo o qué quedó pendiente de confirmación, apenas se completa — no se crean informes nuevos en otro lugar para esto.
 
-### 1. [ ] Actualizar precios oficiales
+### 1. [x] Actualizar precios oficiales — hecho 17/07/2026
 
-Básico **S/49/mes**, Pro **S/89/mes**, Business **S/130/mes** — reemplaza cualquier precio anterior en: código (`roles-planes-oficial.ts`/`PRECIOS_OFICIALES` y cualquier otro lugar hardcodeado), `/precios`, panel Admin → Suscripciones, `04-PANEL-ADMIN-SUSCRIPCIONES.md` (documento protegido — cambio autorizado explícitamente aquí por el propietario), y cualquier otro sitio donde aparezca un precio de estos 3 planes.
+Único origen real: `PRECIOS_OFICIALES` (`frontend/src/lib/roles-planes-oficial.ts`) — actualizado a Básico S/49/mes (sin cambio, ya estaba correcto), Pro S/89/mes (antes S/79), Business S/130/mes (antes S/120); anual = mensual × 10 para los 3 (S/490/S/890/S/1300), sin descuento adicional. Como todo el resto del código (`/precios`, Admin Suscripciones, checkout, emails) ya leía de esta constante — confirmado con grep, sin ningún otro precio hardcodeado en componentes/rutas — el cambio se propaga solo. Corregidas 5 instancias de una etiqueta "Pendiente"/"Precio anual: Pendiente" en `AdminSuscripcionesView.tsx`/`AdminRolesView.tsx` que asumían que solo Business tenía precio definitivo (ya no aplica, los 3 son definitivos). Actualizados también: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (v1.9, documento protegido, cambio autorizado aquí mismo por el propietario) y las 2 copias de la tabla de precios en el conocimiento de Darivo (`DARIVO-CONOCIMIENTO-SOPORTE.md` + su copia sincronizada `frontend/src/content/darivo/conocimiento.md`), que tenían los precios viejos hardcodeados como texto de referencia para el asistente de soporte.
 
-**Precio anual = precio mensual × 10, sin descuento adicional**, para los 3 planes (Básico S/490/año, Pro S/890/año, Business S/1300/año).
+**Comisión de Partner — no requirió cambio de código**: confirmado que `partner_comisiones_config.porcentaje` se aplica sobre el monto real cobrado en `pagos_eventos` (vía trigger de BD), no sobre una copia hardcodeada del precio del plan — se actualiza solo en cuanto el checkout cobre los nuevos precios, sin tocar nada.
 
-Actualizar también cualquier cálculo de comisión de Partner que dependa de estos montos (`partner_comisiones_config`, lógica de hitos/porcentajes si referencia el precio del plan directamente en vez de solo el porcentaje).
+**Verificado**: `tsc`/`lint` limpios. Probado en el navegador `/precios` con sesión de preview (sin login, ruta pública): Mensual muestra S/49/S/89/S/130, Anual muestra S/490/S/890/S/1,300 — exacto ×10 en los 3 planes.
 
 ### 2. [ ] Roles Gerente/Técnico (Empresa + Móvil)
 

@@ -1,8 +1,10 @@
 ﻿# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.8
+**Versión:** 1.9
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.9 — 17/07/2026, autorizado explícitamente por el propietario):** los 3 precios quedan **definitivos** — Básico S/49/mes, **Pro S/89/mes (antes S/79, provisional)**, **Business S/130/mes (antes S/120)**. Precio anual = precio mensual × 10 para los 3 planes, sin descuento adicional (Básico S/490, Pro S/890, Business S/1300). Ya no queda ningún plan "provisional" ni "pendiente" en este documento.
 
 **Cambio principal (v1.8 — 11/07/2026, autorizado explícitamente por el propietario):** precio de **Business fijado como definitivo — S/120/mes, S/1200/año** (ya no es "rango de ejemplo"). Básico (S/49) y Pro (S/79) siguen provisionales — no confirmados como definitivos por el propietario todavía, no se inventa ese dato.
 
@@ -119,15 +121,15 @@ Todos los demás módulos (Dashboard, Usuarios, Empresas, Soporte, Mi Plan) debe
 
 No duplicar la definición de planes en otros documentos MD.
 
-## Catálogo oficial v3
+## Catálogo oficial v4 (definitivo, 17/07/2026)
 
 | Plan | Tipo | Precio mensual | Precio anual |
 |------|------|----------------|--------------|
-| **Básico** | Pago | S/49 *(provisional — precio final no decidido)* | *Pendiente* |
-| **Pro** | Pago | S/79 *(provisional — precio final no decidido)* | *Pendiente* |
-| **Business** | Pago | **S/120 (definitivo)** | **S/1200 (definitivo)** |
+| **Básico** | Pago | **S/49 (definitivo)** | **S/490 (definitivo)** |
+| **Pro** | Pago | **S/89 (definitivo)** | **S/890 (definitivo)** |
+| **Business** | Pago | **S/130 (definitivo)** | **S/1300 (definitivo)** |
 
-> Básico y Pro siguen **provisionales** — el propietario aún no ha fijado su precio definitivo. **Business ya tiene precio definitivo** (confirmado 11/07/2026): S/120/mes, S/1200/año.
+> Los 3 planes tienen precio **definitivo**, confirmado por el propietario 17/07/2026. Precio anual = precio mensual × 10, sin descuento adicional, para los 3 planes.
 
 > El **Plan Pro** es el plan destacado y recomendado visualmente en Darivo Pro.
 
@@ -171,7 +173,7 @@ Todo cambio de precio debe registrarse en la pestaña **Historial de cambios** (
 
 Cada plan de suscripción determina, como mínimo:
 
-* **Precio** (mensual y anual — editable, ver arriba; provisional hasta decisión final).
+* **Precio** (mensual y anual — editable desde Admin en cualquier momento, ver arriba; ya definitivo para los 3 planes, ver Catálogo oficial).
 * **Servicios/módulos disponibles** (ver matriz de funcionalidades arriba).
 * **Roles y límites de uso**: número de Técnicos (solo Business, ampliable), límites de uso de IA, y demás restricciones cuantitativas (`12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`).
 * **Producto(s) accesibles**: únicamente **Business** da acceso a Darivo Pro Empresa como producto (ver nota de nomenclatura arriba).

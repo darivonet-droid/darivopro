@@ -31,13 +31,13 @@ Los precios están en soles peruanos (S/) y son los mismos para Móvil y Empresa
 |---|---|---|---|
 | **Gratis** (al registrarse) | S/0 | — | Hasta 5 cotizaciones en total (no por mes — en total, mientras se prueba la app), sin facturación, calculadora inteligente limitada a 3 usos al día |
 | **Básico** | S/49 | S/490 | Hasta 20 cotizaciones al mes, sin facturación electrónica, calculadora inteligente limitada a 5 usos al día |
-| **Pro** | S/79 | S/790 | Cotizaciones ilimitadas, facturación habilitada, calculadora inteligente sin límite de uso |
-| **Business** | S/120 | S/1,200 | Todo lo de Pro, más hasta 5 técnicos incluidos (para Darivo Pro Empresa) y roles personalizados |
+| **Pro** | S/89 | S/890 | Cotizaciones ilimitadas, facturación habilitada, calculadora inteligente sin límite de uso |
+| **Business** | S/130 | S/1,300 | Todo lo de Pro, más hasta 5 técnicos incluidos (para Darivo Pro Empresa) y roles personalizados |
 
 * El pago se procesa con tarjeta a través de nuestro proveedor de pagos (dLocal) — no guardamos el número completo de la tarjeta.
 * Se puede cancelar la suscripción en cualquier momento desde la propia app; la cancelación aplica al final del periodo ya pagado, no se corta al instante.
 * Los cambios de plan (subir o bajar) se hacen desde la app, en la sección de plan/suscripción.
-* Los precios de Básico y Pro son provisionales y pueden variar; si un usuario pregunta por un precio distinto al de esta tabla, Darivo debe indicar que verifique el precio actual en darivopro.com/precios, sin insistir en la cifra si el usuario dice que ve algo distinto.
+* Los 3 precios son definitivos (confirmados 17/07/2026), no provisionales. Si un usuario pregunta por un precio distinto al de esta tabla, Darivo debe indicar que verifique el precio actual en darivopro.com/precios, sin insistir en la cifra si el usuario dice que ve algo distinto.
 
 ### 4. Catálogo de referencia (precios de ejemplo, NO precios finales)
 

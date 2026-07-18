@@ -110,7 +110,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
                       ...planes.map((id) => [
                         planesOficiales[id].nombre,
                         String(planesOficiales[id].mensual),
-                        id === "business" ? String(planesOficiales[id].anual) : "Pendiente",
+                        String(planesOficiales[id].anual),
                         String(usuariosDe(id)),
                       ]),
                     ]
@@ -171,7 +171,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
                         </span>
                       </p>
                       <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                        {id === "business" ? `${fmtPEN(plan.anual)}/año` : "Precio anual: Pendiente"}
+                        {fmtPEN(plan.anual)}/año
                       </p>
                       <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                         {usuariosDe(id)} usuarios activos
@@ -189,7 +189,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
                 rows={planes.map((id, i) => [
                   planesOficiales[id].nombre,
                   fmtPEN(planesOficiales[id].mensual),
-                  id === "business" ? fmtPEN(planesOficiales[id].anual) : <em key="a">Pendiente</em>,
+                  fmtPEN(planesOficiales[id].anual),
                   <AdminBadge key="e" label="Activo" tone="success" />,
                   String(i + 1),
                   <span key="v" className="text-xs font-bold" style={{ color: ADMIN_COLORS.purple }}>
@@ -237,7 +237,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
               </span>
             </p>
             <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              {seleccionado.id === "business" ? `${fmtPEN(seleccionado.anual)}/año` : "Precio anual: Pendiente"}
+              {fmtPEN(seleccionado.anual)}/año
             </p>
             <p className="mt-2 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               {usuariosDe(seleccionado.id)} usuarios activos en este plan
@@ -259,9 +259,9 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
           <>
             <AdminCard title="Información">
               <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-                Fuente única del catálogo oficial de planes (Doc 04 §6). Básico y Pro tienen precio
-                mensual provisional — el propietario aún no fijó el definitivo. Business ya tiene
-                precio definitivo (S/120/mes, S/1200/año, confirmado 11/07/2026).
+                Fuente única del catálogo oficial de planes (Doc 04 §6). Los 3 planes tienen precio
+                definitivo confirmado por el propietario 17/07/2026 (Básico S/49/mes, Pro S/89/mes,
+                Business S/130/mes — precio anual = mensual × 10, sin descuento adicional).
               </p>
             </AdminCard>
 

@@ -113,7 +113,7 @@ export function AdminRolesView() {
                       </span>
                     </p>
                     <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                      Anual: {plan === "business" ? `S/ ${p.anual}` : "Pendiente"}
+                      Anual: S/ {p.anual}
                     </p>
                     <ul className="mt-4 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
                       {"cotizacionesMes" in limites && (

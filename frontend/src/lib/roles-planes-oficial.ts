@@ -63,13 +63,16 @@ export const LIMITES_PLAN = {
   },
 } as const;
 
+// Precios oficiales confirmados por el propietario 17/07/2026 — ya no
+// provisionales. Anual = mensual × 10, sin descuento adicional, para los 3
+// planes (regla explícita del propietario, misma sesión).
 export const PRECIOS_OFICIALES: Record<
   PlanSuscripcionOficial,
   { mensual: number; anual: number; nombre: string }
 > = {
-  basico: { mensual: 49, anual: 490, nombre: "BÁSICO" }, // provisional
-  pro: { mensual: 79, anual: 790, nombre: "PRO" }, // provisional
-  business: { mensual: 120, anual: 1200, nombre: "BUSINESS" }, // precio definitivo confirmado 11/07/2026
+  basico: { mensual: 49, anual: 490, nombre: "BÁSICO" },
+  pro: { mensual: 89, anual: 890, nombre: "PRO" },
+  business: { mensual: 130, anual: 1300, nombre: "BUSINESS" },
 };
 
 /** Usuario solo Móvil = Gerente + Técnico simultáneamente (Visión §5 excepción) */
