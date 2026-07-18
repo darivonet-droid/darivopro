@@ -43,6 +43,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   themeColor: "#2563EB",
+  // Sin esto, env(safe-area-inset-*) resuelve siempre a 0px en toda la app
+  // (Android/iOS ignoran el inset si el viewport no declara "cover") — lo
+  // necesita cualquier elemento fixed pegado a un borde (BottomNav, FloatBar).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -26,7 +26,19 @@ export function FloatBar({
   return (
     <div
       className="pi"
-      style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 28px)", maxWidth: 362, zIndex: 200 }}
+      style={{
+        position: "fixed",
+        // 20px de margen de siempre + el inset real de la barra de sistema
+        // (gestos/navegación de Android, home indicator de iOS). Sin
+        // safe-area (pantallas sin barra de gestos) env(...) resuelve a 0px,
+        // así que queda igual que antes (20px).
+        bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "calc(100% - 28px)",
+        maxWidth: 362,
+        zIndex: 200,
+      }}
     >
       <div style={{ background: T.navyLight, borderRadius: 18, padding: "12px 14px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 10px 36px rgba(0,0,0,0.55)", display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
