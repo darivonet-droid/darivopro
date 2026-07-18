@@ -658,7 +658,7 @@ Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de reto
 4. ✅ Partners (06) — completo, ver corrección 14/07/2026 abajo
 5. ✅ Empresas (02) — completo, ver corrección 14/07/2026 abajo
 6. ✅ Suscripciones (04) — completo, ver arriba
-7. ✅ Catálogo Maestro (10) — completo visualmente, ver corrección 14/07/2026 abajo. **⚠️ Contradicción sin resolver, detectada 18/07/2026: el propio MD-10 §9/§10 dice "No crear tablas/endpoints", pero este mismo trabajo (commit `616cee8`) sí construyó CRUD real (`admin/catalogo/actions.ts`). No se tocó nada más al detectarlo — ver el aviso destacado al inicio de `frontend/docs-internos/TODO-PENDIENTES-DARIVO-PRO.md`, pendiente de que el propietario confirme si el CRUD queda autorizado o hay que revisarlo.**
+7. ✅ Catálogo Maestro (10) — completo, ver corrección 14/07/2026 abajo. **Contradicción detectada 18/07/2026 (MD-10 §9/§10 decía "No crear endpoints" pese a que el CRUD real ya existía desde el 13/07/2026, commit `616cee8`) — reportada sin tocar código, y confirmada por el propietario el mismo día ("ya") como autorizada. MD-10 actualizado a v1.3 reflejándolo.**
 
 **✅ Admin: 11/11 pantallas completas y verificadas visualmente en producción (14/07/2026).** El bloqueo de Partners/Empresas/Catálogo Maestro ("Invalid API key") se resolvió corrigiendo las 3 variables de Supabase en Vercel Production al proyecto real (`vyrtokggypcmpforglch`) + redeploy. Verificado con sesión Admin real (`yatriye@gmail.com`), caché/Service Worker limpiados antes de cada verificación: Partners y Empresas cargan sin error (0 registros, tablas vacías reales); Catálogo Maestro muestra datos reales — 6 categorías, 28 partidas. Sin errores en consola ni en logs de Vercel.
 

@@ -1,10 +1,12 @@
 ﻿# MD-10 – PANEL ADMIN – CATÁLOGO MAESTRO
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Diseño oficial aprobado
 
-**Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
+**Cambio principal (v1.3 — 18/07/2026):** corrección documental. §9/§10 quedaban desactualizados — decían "Pendiente de documentación oficial, no crear tablas/endpoints" pese a que el CRUD real (categorías y partidas, sobre las 4 tablas ya existentes del Doc 21, sin tablas nuevas) se construyó el 13/07/2026 dentro de la tanda autorizada de Admin. Detectada la contradicción el 18/07/2026, reportada al propietario sin tocar código, y confirmada por él como autorizada ("ya") — este cambio documenta esa confirmación, no autoriza nada nuevo por iniciativa propia.
+
+**Cambio anterior (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
 ---
 
@@ -226,19 +228,13 @@ Las relaciones con Base de Datos, Roles y Permisos se documentarán cuando los d
 
 # 9. Base de datos
 
-Pendiente de documentación oficial.
-
-No crear tablas.
-
-No crear relaciones.
+CRUD real construido (13/07/2026, confirmado autorizado por el propietario 18/07/2026) sobre las 4 tablas ya existentes del Doc 21 — sin tablas nuevas: `catalogo_sectores` (solo lectura, referencia fija), `catalogo_categorias_maestro`, `catalogo_partidas_maestro` (CRUD completo). No se crearon relaciones nuevas.
 
 ---
 
 # 10. API
 
-Pendiente de documentación oficial.
-
-No crear endpoints.
+CRUD real construido vía Server Actions de Next.js (`frontend/src/app/admin/catalogo/actions.ts`, 13/07/2026, confirmado autorizado por el propietario 18/07/2026): `crearCategoriaAction`, `editarCategoriaAction`, `eliminarCategoriaAction`, `crearPartidaAction`, `editarPartidaAction`, `eliminarPartidaAction`. No hay endpoints REST propios (`app/api/...`) — el patrón de este proyecto usa Server Actions para las mutaciones de Admin, no una API separada.
 
 ---
 
@@ -268,7 +264,7 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 
 🟢 Documento de diseño oficial con arquitectura funcional sincronizada con el Documento 21.
 
-La documentación de Base de Datos, APIs y Permisos se completará cuando los documentos oficiales correspondientes estén finalizados y aprobados.
+§9 (Base de Datos) y §10 (API) documentan el CRUD real ya construido y autorizado (18/07/2026). La documentación formal de Permisos se completará cuando el documento oficial correspondiente esté finalizado y aprobado.
 
 ---
 

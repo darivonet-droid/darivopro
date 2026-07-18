@@ -6,15 +6,11 @@ Creado 17/07/2026 (Tarea 4 de la cola pendiente de `CLAUDE.md`). Objetivo: que e
 
 ---
 
-## ⚠️ Pendiente de tu decisión — contradicción encontrada 18/07/2026 (Catálogo Maestro)
+## ✅ Resuelto 18/07/2026 — contradicción de Catálogo Maestro, confirmada autorizada
 
-`10-PANEL-ADMIN-CATALOGO-MAESTRO.md` (documento oficial protegido) dice en su §9 "Base de datos" y §10 "API": *"Pendiente de documentación oficial. No crear tablas. No crear relaciones. No crear endpoints."* Y en su cláusula de protección: *"Si una IA detecta un posible error, contradicción o información incompleta, deberá: detener el trabajo, informar al propietario, esperar instrucciones."*
+`10-PANEL-ADMIN-CATALOGO-MAESTRO.md` (documento oficial protegido) decía en su §9/§10 "Pendiente de documentación oficial. No crear tablas/endpoints", pese a que `frontend/src/app/admin/catalogo/actions.ts` ya tenía CRUD real (6 Server Actions) construido el 13/07/2026 (commit `616cee8`, dentro de la tanda ya autorizada de completar las 7 pantallas de Admin — probable descuido de esa restricción específica, no una decisión deliberada de saltársela).
 
-Pero `frontend/src/app/admin/catalogo/actions.ts` ya tiene 6 Server Actions reales (`crearCategoriaAction`, `editarCategoriaAction`, `eliminarCategoriaAction`, `crearPartidaAction`, `editarPartidaAction`, `eliminarPartidaAction`) que crean/editan/eliminan filas en `catalogo_categorias_maestro` y `catalogo_partidas_maestro`, conectadas y en uso real desde `AdminCatalogoView.tsx` — exactamente lo que el MD dice que no se debe crear.
-
-**Contexto de cómo llegó a construirse (commit `616cee8`, 13/07/2026)**: no fue una acción aislada sin autorización — se hizo dentro de la cola explícitamente autorizada ese mismo día ("terminar las 7 pantallas restantes de Admin", con autonomía total reconfirmada por el propietario para push/deploy sin pedir permiso por pantalla, ver `CLAUDE.md` → "Siguiente paso — orden confirmado por el propietario 13/07/2026"). El commit sí fue cuidadoso con Doc 21 (reutiliza las 4 tablas ya existentes del catálogo, no crea tablas nuevas) — pero pasó por alto la restricción específica y más estricta del propio MD-10 §9/§10 ("No crear endpoints"), que es más restrictiva que Doc 21. Parece un descuido dentro de una tarea más amplia ya autorizada, no una decisión deliberada de saltarse la regla.
-
-**No se tocó nada** (ni se agregó más CRUD, ni se retiró el existente) — solo se detuvo el trabajo y se documenta aquí, como pide la propia regla del documento. Necesito que confirmes: ¿el CRUD de Catálogo Maestro ya está autorizado en la práctica (y solo falta actualizar el MD 10 para que lo refleje), o hay que revisar/retirar algo?
+Reportado sin tocar código el mismo 18/07/2026, y **confirmado por el propietario ese mismo día ("ya") como autorizado**. `10-PANEL-ADMIN-CATALOGO-MAESTRO.md` actualizado a v1.3 — §9/§10 ya documentan el CRUD real en vez de decir "pendiente"/"no crear". Nada más cambió en código, solo el MD queda sincronizado con lo que ya estaba en producción.
 
 ---
 
@@ -43,7 +39,7 @@ Pero `frontend/src/app/admin/catalogo/actions.ts` ya tiene 6 Server Actions real
 
 ## 4. Funcionalidad a medias o placeholder
 
-- ⚠️ **Catálogo Maestro (Admin, pantalla 10) — CONTRADICCIÓN sin resolver, ver nota destacada abajo.** El propio MD oficial (`10-PANEL-ADMIN-CATALOGO-MAESTRO.md` §9/§10) dice explícitamente "No crear tablas... No crear endpoints" — pero `frontend/src/app/admin/catalogo/actions.ts` ya tiene CRUD completo (crear/editar/eliminar categoría y partida) escribiendo en `catalogo_categorias_maestro`/`catalogo_partidas_maestro`, conectado y en uso real desde `AdminCatalogoView.tsx`. Detectado 18/07/2026 — no se tocó nada (ni se agregó más CRUD, ni se retiró el existente), siguiendo la propia regla del MD ("si detecta contradicción, detener el trabajo e informar al propietario, no asumir"). Ver la nota destacada al principio de este archivo.
+- ~~**Catálogo Maestro (Admin, pantalla 10) — CONTRADICCIÓN con su propio MD**~~ ✅ **Resuelto 18/07/2026** — ver nota destacada al principio de este archivo. El CRUD real (`admin/catalogo/actions.ts`, construido 13/07/2026) quedó confirmado como autorizado por el propietario; `10-PANEL-ADMIN-CATALOGO-MAESTRO.md` actualizado a v1.3 para reflejarlo.
 - ~~**Admin → Empleados internos: acciones "Editar"/"Cambiar departamento" pendientes**~~ — dato desactualizado, corregido 18/07/2026: ya están construidas desde el 13/07/2026 (`EditarEmpleadoForm`, `editarEmpleadoAction` en `admin/empleados/actions.ts`) — confirmado leyendo el código, no solo la nota anterior de este documento.
 - **Sección "Documento" (Móvil, PDFs de informes/cotizaciones/facturas)**: investigación **completada y reportada** en `CLAUDE.md` → Tarea 5d (17/07/2026) — confirmado redundante (subconjunto de Cotizaciones/Facturas/Informes, sin filtros ni acciones). No se eliminó nada, sigue pendiente de que el propietario confirme si quiere retirarla.
 - ~~**Wizard de cotización en Empresa sin layout de 3 paneles**~~ — dato desactualizado, corregido 18/07/2026: ya se construyó `NuevoCotizacionWizardEscritorio.tsx` el 14/07/2026, con los 3 puntos de entrada reales (Inicio, ficha de Cliente, handoff desde IA) ya enlazando ahí — confirmado en código.
