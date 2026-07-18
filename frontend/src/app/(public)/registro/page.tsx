@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { T } from "@/lib/theme";
 import type { AuthError } from "@supabase/supabase-js";
 
@@ -167,18 +168,16 @@ export default function RegistroPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <AuthInput
+          <PasswordInput
             label="Contraseña"
-            type="password"
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <AuthInput
+          <PasswordInput
             label="Confirmar contraseña"
-            type="password"
             placeholder="Repite tu contraseña"
             autoComplete="new-password"
             value={confirmar}

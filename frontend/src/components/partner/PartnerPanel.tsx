@@ -28,14 +28,16 @@ const ESTADO_COLOR: Record<string, string> = {
 
 /** Navegación del Panel Partner — es una sola página (PANEL-PARTNER.md §4:
  *  "No existen menús internos ni módulos adicionales"), así que esto son
- *  anclas dentro de esa única página, no rutas nuevas. Orden confirmado por
- *  el propietario 15/07/2026; "Tiempos de pago" se mantiene como 6ª sección
- *  aunque no estaba en esa lista porque el propio MD la exige como copy
+ *  anclas dentro de esa única página, no rutas nuevas. Orden reconfirmado por
+ *  el propietario 17/07/2026: "Registro de referidos" pasa a ser la primera
+ *  sección (antes iba 3ª); el resto conserva su orden relativo. "Tiempos de
+ *  pago" se mantiene como última sección aunque no estaba en la lista
+ *  original del 15/07/2026 porque el propio MD la exige como copy
  *  obligatorio de cara al usuario. */
 const NAV_ITEMS = [
+  { id: "registros", label: "Registro de referidos", icon: "📋" },
   { id: "mi-perfil", label: "Mi perfil", icon: "👤" },
   { id: "mi-enlace", label: "Mi enlace", icon: "🔗" },
-  { id: "registros", label: "Registro de referidos", icon: "📋" },
   { id: "tabla-comisiones", label: "Tabla de comisiones", icon: "💰" },
   { id: "mis-comisiones", label: "Mis comisiones", icon: "💵" },
   { id: "tiempos-pago", label: "Tiempos de pago", icon: "⏱️" },
@@ -100,6 +102,20 @@ function Card({
       </div>
       <div className="mt-4">{children}</div>
     </section>
+  );
+}
+
+/** Rótulo de grupo — separa visualmente bloques de secciones relacionadas
+ *  (ej. "Tu cuenta", "Comisiones") para que el panel se escanee por partes
+ *  en vez de verse como una sola lista continua de tarjetas. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className="mb-2.5 px-1 text-[11px] font-extrabold uppercase tracking-wide"
+      style={{ color: ADMIN_COLORS.textLight }}
+    >
+      {children}
+    </p>
   );
 }
 
@@ -289,8 +305,48 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
               </div>
             )}
 
-            {/* 1. Mi perfil / 2. Mi enlace */}
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Registro de referidos — primera sección del panel (pedido explícito
+                del propietario 17/07/2026), ancho completo para que destaque. */}
+            <Card
+              id="registros"
+              icon="📋"
+              title="Registro de referidos"
+              subtitle="Lista de correos registrados mediante tu enlace."
+              className="mb-8"
+            >
+              <div className="rounded-xl px-3 py-2.5" style={{ background: ADMIN_COLORS.purplePale }}>
+                <p className="text-[11px] font-bold uppercase" style={{ color: ADMIN_COLORS.purple }}>
+                  Total de registros
+                </p>
+                <p className="text-2xl font-black" style={{ color: ADMIN_COLORS.purple }}>
+                  {registros.length}
+                </p>
+              </div>
+              {registros.length > 0 ? (
+                <ul className="mt-3 flex max-h-64 flex-col gap-1.5 overflow-y-auto">
+                  {registros.map((r, i) => (
+                    <li
+                      key={`${r.email}-${i}`}
+                      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm"
+                      style={{ background: ADMIN_COLORS.slate }}
+                    >
+                      <span style={{ color: ADMIN_COLORS.text }}>{r.email}</span>
+                      <span className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+                        {r.fecha}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+                  Aún no hay registros asociados a tu enlace.
+                </p>
+              )}
+            </Card>
+
+            {/* Tu cuenta: Mi perfil / Mi enlace */}
+            <SectionLabel>Tu cuenta</SectionLabel>
+            <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               <Card id="mi-perfil" icon="👤" title="Mi perfil">
                 <p className="text-base font-black" style={{ color: ADMIN_COLORS.text }}>
                   {nombre}
@@ -362,44 +418,11 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
               </Card>
             </div>
 
-            {/* 3. Registro de referidos / 4. Tabla de comisiones */}
-            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Card
-                id="registros"
-                icon="📋"
-                title="Registro de referidos"
-                subtitle="Lista de correos registrados mediante tu enlace."
-              >
-                <div className="rounded-xl px-3 py-2.5" style={{ background: ADMIN_COLORS.purplePale }}>
-                  <p className="text-[11px] font-bold uppercase" style={{ color: ADMIN_COLORS.purple }}>
-                    Total de registros
-                  </p>
-                  <p className="text-2xl font-black" style={{ color: ADMIN_COLORS.purple }}>
-                    {registros.length}
-                  </p>
-                </div>
-                {registros.length > 0 ? (
-                  <ul className="mt-3 flex max-h-64 flex-col gap-1.5 overflow-y-auto">
-                    {registros.map((r, i) => (
-                      <li
-                        key={`${r.email}-${i}`}
-                        className="flex items-center justify-between rounded-xl px-3 py-2 text-sm"
-                        style={{ background: ADMIN_COLORS.slate }}
-                      >
-                        <span style={{ color: ADMIN_COLORS.text }}>{r.email}</span>
-                        <span className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                          {r.fecha}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                    Aún no hay registros asociados a tu enlace.
-                  </p>
-                )}
-              </Card>
-
+            {/* Comisiones: Tabla de comisiones / Mis comisiones — agrupadas por
+                tema (antes Tabla de comisiones iba junto a Registro de referidos,
+                sin relación temática real). */}
+            <SectionLabel>Comisiones</SectionLabel>
+            <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               <Card
                 id="tabla-comisiones"
                 icon="💰"
@@ -471,16 +494,14 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
                   </tbody>
                 </table>
               </Card>
-            </div>
 
-            {/* 5. Mis comisiones — con filtro de periodo (este mes / histórico) */}
-            <Card
-              id="mis-comisiones"
-              icon="💵"
-              title="Mis comisiones"
-              subtitle="Detalle de lo ganado por periodo."
-              className="mb-4"
-              headerExtra={
+              {/* Mis comisiones — con filtro de periodo (este mes / histórico) */}
+              <Card
+                id="mis-comisiones"
+                icon="💵"
+                title="Mis comisiones"
+                subtitle="Detalle de lo ganado por periodo."
+                headerExtra={
                 <div className="flex gap-1 rounded-lg p-1" style={{ background: ADMIN_COLORS.slate }}>
                   {(["mes", "historico"] as const).map((p) => (
                     <button
@@ -498,8 +519,8 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
                     </button>
                   ))}
                 </div>
-              }
-            >
+                }
+              >
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl px-3 py-2.5" style={{ background: ADMIN_COLORS.amberPale }}>
                   <p className="text-[11px] font-bold uppercase" style={{ color: ADMIN_COLORS.amberD }}>
@@ -557,10 +578,11 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
                   {periodo === "mes" ? "Aún no tienes comisiones este mes." : "Aún no tienes comisiones generadas."}
                 </p>
               )}
-            </Card>
+              </Card>
+            </div>
 
-            {/* 6. Tiempos de pago (copy oficial, PANEL-PARTNER.md v1.2 § Tiempos de pago) */}
-            <Card id="tiempos-pago" icon="⏱️" title="Tiempos de pago" className="mb-4">
+            {/* Tiempos de pago (copy oficial, PANEL-PARTNER.md v1.2 § Tiempos de pago) */}
+            <Card id="tiempos-pago" icon="⏱️" title="Tiempos de pago" className="mb-8">
               {/* Copy oficial — no modificar sin aprobación */}
               <p className="text-sm leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
                 Las comisiones se calculan sobre facturas ya cobradas a tus clientes referidos. Cada

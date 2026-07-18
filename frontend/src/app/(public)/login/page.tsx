@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { T } from "@/lib/theme";
 
 const ERRORES: Record<string, string> = {
@@ -88,9 +89,8 @@ export default function LoginPage() {
             required
           />
           <div>
-            <AuthInput
+            <PasswordInput
               label="Contraseña"
-              type="password"
               placeholder="••••••••"
               autoComplete="current-password"
               value={password}

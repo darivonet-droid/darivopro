@@ -261,3 +261,28 @@ export function plantillaTicketResuelto(datos: {
     `),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// 10. Contacto desde el widget de chat de la landing — soporte@ (interno)
+// Nuevo 17/07/2026. NO es uno de los 9 eventos oficiales al usuario (esos
+// van dirigidos a un cliente ya registrado) — este es una notificación
+// interna: el visitante de darivopro.com todavía no tiene cuenta, así que
+// no hay "Hola {nombre}" ni pie de firma de marca, es correo de equipo a
+// equipo. Completamente separado del sistema de tickets (soporte_tickets).
+// ─────────────────────────────────────────────────────────────────────────
+export function plantillaContactoLanding(datos: {
+  nombre: string;
+  contacto: string;
+  mensaje: string;
+}): EmailContenido {
+  return {
+    subject: `Nuevo mensaje del chat de la landing — ${datos.nombre}`,
+    html: layout(`
+      <p><strong>Nuevo mensaje desde el widget de chat de darivopro.com</strong> (visitante, todavía sin cuenta).</p>
+      <p>Nombre: ${datos.nombre}<br/>Contacto: ${datos.contacto || "(no dejó forma de contacto)"}</p>
+      <p style="white-space:pre-wrap;">${datos.mensaje}</p>
+      <hr style="border:none;border-top:1px solid #E5E7EB;margin:24px 0 12px;" />
+      <p style="font-size:11px;color:#9CA3AF;">Este mensaje no crea ningún ticket ni registro en la app — responder directamente al contacto de arriba.</p>
+    `),
+  };
+}

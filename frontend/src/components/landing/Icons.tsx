@@ -157,3 +157,82 @@ export function IconArrow() {
     </svg>
   );
 }
+
+export function IconChevronDown() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+export function IconMenu() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+export function IconClose() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+      <line x1="5" y1="5" x2="19" y2="19" />
+      <line x1="19" y1="5" x2="5" y2="19" />
+    </svg>
+  );
+}
+
+export function IconChatBubble() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+    </svg>
+  );
+}
+
+export function IconBuilding() {
+  return (
+    <Svg>
+      <rect x="4" y="3" width="10" height="18" rx="1" />
+      <rect x="16" y="9" width="5" height="12" rx="1" />
+      <line x1="7" y1="7" x2="7" y2="7.01" />
+      <line x1="11" y1="7" x2="11" y2="7.01" />
+      <line x1="7" y1="11" x2="7" y2="11.01" />
+      <line x1="11" y1="11" x2="11" y2="11.01" />
+      <line x1="7" y1="15" x2="7" y2="15.01" />
+      <line x1="11" y1="15" x2="11" y2="15.01" />
+    </Svg>
+  );
+}
+
+export function IconSmartphone() {
+  return (
+    <Svg>
+      <rect x="6" y="2" width="12" height="20" rx="2.5" />
+      <line x1="11" y1="18" x2="13" y2="18" />
+    </Svg>
+  );
+}
+
+export function IconHandshake() {
+  return (
+    <Svg>
+      <path d="M3 11l4.5-4.5a2 2 0 012.8 0l1.2 1.2" />
+      <path d="M21 11l-4.5-4.5a2 2 0 00-2.8 0L12.5 7.7" />
+      <path d="M7 13l3 3a1.8 1.8 0 002.5 0 1.8 1.8 0 000-2.5l-2.7-2.8" />
+      <path d="M9.8 15.8l1 1a1.8 1.8 0 002.5 0 1.8 1.8 0 000-2.5" />
+      <path d="M3 11l3 3M21 11l-3 3" />
+    </Svg>
+  );
+}
+
+export function IconCheck() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}

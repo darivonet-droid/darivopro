@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { LandingChatWidget } from "@/components/landing/LandingChatWidget";
 import {
   IconList,
   IconSparkle,
@@ -16,14 +18,24 @@ import {
   IconRoller,
   IconBolt,
   IconArrow,
+  IconBuilding,
+  IconSmartphone,
+  IconHandshake,
+  IconCheck,
 } from "@/components/landing/Icons";
 
-// LANDING-PAGE-DARIVO-PRO.md v1.3 — página pública de marketing en darivopro.com.
+// LANDING-PAGE-DARIVO-PRO.md v1.5 — página pública de marketing en darivopro.com.
 // No requiere sesión, no comparte diseño con Admin/Empresa ni con Fable 5 (Móvil).
 // Regla de producto: nunca se comunica como "IA" de cara al usuario — "Calculadora
 // inteligente" en todo texto visible (ver §2 del MD).
 // Testimonios y vídeo del hero: omitidos a propósito en esta versión — pendientes
-// de contenido real (clientes verificados / grabación sobre la app real).
+// de contenido real (clientes verificados / grabación sobre la app real). La
+// sección "Confianza" de más abajo usa solo hechos verificables del producto,
+// nunca citas ni nombres de clientes (§4.1).
+// Rediseño 17/07/2026: header con acceso a los 3 productos (LandingHeader.tsx),
+// sección "Un Darivo Pro para cada parte de tu negocio", franja de confianza,
+// y widget de chat flotante para visitantes sin cuenta (LandingChatWidget.tsx,
+// independiente del sistema de tickets interno).
 
 const LANDING_TITLE = "Darivo Pro — Una factura en un minuto";
 const LANDING_DESCRIPTION =
@@ -83,6 +95,44 @@ const FEATURES = [
   { icon: IconShieldCloud, titulo: "Seguro y en la nube", texto: "Tus datos y documentos siempre protegidos." },
 ];
 
+// Un Darivo Pro por tipo de usuario — dobla como acceso directo a los 3
+// productos (ver LandingHeader) y como "casos de uso" de la landing.
+// Subdominios reales (frontend/src/middleware.ts SUBDOMINIOS) — aún sin
+// conectar en DNS, ver nota en LandingHeader.tsx.
+const PRODUCTOS_USO = [
+  {
+    icon: IconSmartphone,
+    nombre: "Darivo Pro Móvil",
+    para: "Para el maestro de obra independiente",
+    texto: "Cotiza y factura tú mismo desde el celular, obra por obra, sin depender de nadie más.",
+    href: "https://app.darivopro.com",
+  },
+  {
+    icon: IconBuilding,
+    nombre: "Darivo Pro Empresa",
+    para: "Para constructoras con equipo",
+    texto: "Gestiona clientes, cotizaciones y facturas de todo tu equipo desde un solo panel de escritorio.",
+    href: "https://empresa.darivopro.com",
+  },
+  {
+    icon: IconHandshake,
+    nombre: "Darivo Pro Partner",
+    para: "Para quien quiere ganar refiriendo",
+    texto: "Comparte tu enlace, gana comisión por cada cliente que se registre e invierta en Darivo Pro.",
+    href: "https://partner.darivopro.com",
+  },
+];
+
+// Confianza — solo hechos reales del producto (nunca testimonios/nombres
+// inventados: LANDING-PAGE-DARIVO-PRO.md §4.1 los prohíbe hasta tener 3
+// clientes reales verificables).
+const CONFIANZA = [
+  "Hecho a la medida del maestro de obra y la constructora peruana",
+  "Tus cotizaciones y facturas, guardadas de forma segura en la nube",
+  "Sin contratos forzosos — cancela cuando quieras",
+  "Soporte real por correo, no un bot que da vueltas",
+];
+
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -104,40 +154,7 @@ export default function LandingPage() {
       />
 
       {/* ── Header ─────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <span className="text-lg font-black tracking-tight" style={{ color: NAVY }}>
-            DARIVO <span style={{ color: BLUE }}>PRO</span>
-          </span>
-
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-600 sm:flex">
-            <Link href="/precios">Precios</Link>
-            <a href="#como-funciona">¿Cómo funciona?</a>
-          </nav>
-
-          <div className="flex items-center gap-1 whitespace-nowrap sm:gap-2">
-            <Link
-              href="/login"
-              className="rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 sm:px-4 sm:py-2 sm:text-sm"
-            >
-              Iniciar sesión
-            </Link>
-            <Link
-              href="/registro"
-              className="rounded-xl border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-700 sm:px-4 sm:py-2 sm:text-sm"
-            >
-              Registrarse
-            </Link>
-            <Link
-              href="/registro"
-              className="rounded-xl px-2 py-1.5 text-xs font-bold text-white sm:px-4 sm:py-2 sm:text-sm"
-              style={{ background: BLUE }}
-            >
-              Empieza gratis
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="px-6 py-14" style={{ background: NAVY }}>
@@ -303,6 +320,44 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Un Darivo Pro para cada parte de tu negocio ─────────── */}
+      <section className="px-6 py-16" style={{ background: "#F8FAFF" }}>
+        <div className="mx-auto max-w-5xl text-center">
+          <h2 className="text-2xl font-black sm:text-3xl" style={{ color: NAVY }}>
+            Un Darivo Pro para <span style={{ color: BLUE }}>cada parte de tu negocio</span>
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">Elige el que se ajusta a cómo trabajas</p>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            {PRODUCTOS_USO.map((p) => (
+              <a
+                key={p.nombre}
+                href={p.href}
+                className="flex flex-col rounded-3xl bg-white p-6 text-left transition-transform hover:-translate-y-1"
+                style={{ boxShadow: "0 4px 24px rgba(10,22,40,0.06)" }}
+              >
+                <span
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl"
+                  style={{ background: "#EFF4FF", color: BLUE }}
+                >
+                  <p.icon />
+                </span>
+                <h3 className="mt-4 text-base font-black" style={{ color: NAVY }}>
+                  {p.nombre}
+                </h3>
+                <p className="mt-1 text-xs font-bold" style={{ color: BLUE }}>
+                  {p.para}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-500">{p.texto}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: BLUE }}>
+                  Conocer más →
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Hecho para tu chamba ───────────────────────────────── */}
       <section className="px-6 py-16" style={{ background: "#F8FAFF" }}>
         <div className="mx-auto max-w-5xl text-center">
@@ -310,7 +365,7 @@ export default function LandingPage() {
             Hecho para <span style={{ color: BLUE }}>tu chamba</span>
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Miles de maestros y técnicos ya cotizan y facturan más rápido
+            Sin importar tu especialidad, cotiza y factura más rápido
           </p>
 
           <div className="mt-10 grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -362,6 +417,30 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Confianza — solo hechos reales, sin testimonios inventados
+          (LANDING-PAGE-DARIVO-PRO.md §4.1: prohibidos hasta 3 clientes
+          reales verificables) ───────────────────────────────────── */}
+      <section className="px-6 pb-16">
+        <div
+          className="mx-auto grid max-w-5xl grid-cols-1 gap-4 rounded-3xl border border-slate-100 p-8 sm:grid-cols-2"
+          style={{ background: "#FAFBFF" }}
+        >
+          {CONFIANZA.map((texto) => (
+            <div key={texto} className="flex items-start gap-3">
+              <span
+                className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white"
+                style={{ background: BLUE }}
+              >
+                <IconCheck />
+              </span>
+              <p className="text-sm font-semibold leading-relaxed" style={{ color: NAVY }}>
+                {texto}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -423,6 +502,8 @@ export default function LandingPage() {
           © {new Date().getFullYear()} Darivo Pro. Todos los derechos reservados.
         </p>
       </footer>
+
+      <LandingChatWidget />
     </div>
   );
 }

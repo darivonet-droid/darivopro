@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { T } from "@/lib/theme";
 
 function NuevaContrasenaForm() {
@@ -12,7 +13,6 @@ function NuevaContrasenaForm() {
 
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [verPassword, setVerPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -182,14 +182,11 @@ function NuevaContrasenaForm() {
             placeholder="Mínimo 8 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            visible={verPassword}
-            onToggle={() => setVerPassword((v) => !v)}
             autoComplete="new-password"
             required
           />
-          <AuthInput
+          <PasswordInput
             label="Confirmar contraseña"
-            type="password"
             placeholder="Repite tu contraseña"
             autoComplete="new-password"
             value={confirmar}
@@ -232,69 +229,6 @@ export default function NuevaContrasenaPage() {
     >
       <NuevaContrasenaForm />
     </Suspense>
-  );
-}
-
-interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-}
-
-function AuthInput({ label, ...props }: AuthInputProps) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
-        {label}
-      </span>
-      <input
-        {...props}
-        className="w-full rounded-xl px-4 py-3.5 text-sm font-medium outline-none transition-all focus:ring-2"
-        style={{
-          background: "#fff",
-          color: T.text,
-          border: `1.5px solid ${T.slateD}`,
-          // @ts-expect-error custom property
-          "--tw-ring-color": T.blue,
-        }}
-      />
-    </label>
-  );
-}
-
-interface PasswordInputProps extends Omit<AuthInputProps, "type"> {
-  visible: boolean;
-  onToggle: () => void;
-}
-
-function PasswordInput({ label, visible, onToggle, ...props }: PasswordInputProps) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
-        {label}
-      </span>
-      <div className="relative">
-        <input
-          {...props}
-          type={visible ? "text" : "password"}
-          className="w-full rounded-xl px-4 py-3.5 pr-12 text-sm font-medium outline-none transition-all focus:ring-2"
-          style={{
-            background: "#fff",
-            color: T.text,
-            border: `1.5px solid ${T.slateD}`,
-            // @ts-expect-error custom property
-            "--tw-ring-color": T.blue,
-          }}
-        />
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-xs font-bold"
-          style={{ color: T.textMid }}
-          aria-label={visible ? "Ocultar contraseña" : "Ver contraseña"}
-        >
-          {visible ? "🙈" : "👁"}
-        </button>
-      </div>
-    </label>
   );
 }
 

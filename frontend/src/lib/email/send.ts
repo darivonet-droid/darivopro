@@ -33,6 +33,7 @@ import {
   plantillaComisionGanada,
   plantillaTicketRecibido,
   plantillaTicketResuelto,
+  plantillaContactoLanding,
 } from "@/lib/email/templates";
 
 async function enviarSeguro(opts: {
@@ -138,4 +139,20 @@ export async function enviarTicketResuelto(
 ): Promise<void> {
   const { subject, html } = plantillaTicketResuelto(datos);
   await enviarSeguro({ cuenta: "soporte", to, subject, html, evento: "ticket_resuelto" });
+}
+
+// 10. Contacto desde el widget de chat de la landing — soporte@ (interno,
+// no es uno de los 9 eventos oficiales al usuario). from=to=soporte@: el
+// equipo se lo envía a sí mismo con el mensaje del visitante adentro.
+export async function enviarContactoLanding(
+  datos: { nombre: string; contacto: string; mensaje: string }
+): Promise<void> {
+  const { subject, html } = plantillaContactoLanding(datos);
+  await enviarSeguro({
+    cuenta: "soporte",
+    to: CUENTAS_EMAIL.soporte,
+    subject,
+    html,
+    evento: "contacto_landing",
+  });
 }

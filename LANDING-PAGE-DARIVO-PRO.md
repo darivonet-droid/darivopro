@@ -2,9 +2,11 @@
 
 # DARIVO PRO — LANDING PAGE PÚBLICA (darivopro.com)
 
-**Versión:** 1.4
+**Versión:** 1.5
 
-**Estado:** ✅ Documento oficial — actualizado por el propietario (09/07/2026)
+**Estado:** ✅ Documento oficial — actualizado por Claude Code a pedido explícito del propietario (17/07/2026)
+
+**Cambio principal (v1.5, 17/07/2026):** rediseño de la landing pedido explícitamente por el propietario ("se ve genérica"), con libertad de diseño/estructura. Cambios: (1) el header gana un menú "Productos" (desktop: dropdown; móvil: dentro del menú ☰ nuevo) con acceso directo a los 3 productos del ecosistema — Darivo Pro Empresa, Móvil y Partner, cada uno a su subdominio real (`empresa.`/`app.`/`partner.darivopro.com` — **aún sin conectar en DNS**, ver `frontend/src/middleware.ts` `SUBDOMAIN_ROUTING_ENABLED`, así que estos enlaces no resuelven todavía en producción); (2) nueva sección "Un Darivo Pro para cada parte de tu negocio" (casos de uso por tipo de usuario, dobla como acceso a los 3 productos también en el cuerpo de la página, no solo en el header); (3) nueva franja de confianza con 4 hechos verificables del producto — **nunca testimonios ni cifras de usuarios inventadas**, la prohibición de §4.1 sigue intacta; (4) nuevo widget de chat flotante (burbuja fija, esquina inferior derecha) para visitantes sin cuenta con dudas de planes/precios/funcionamiento — formulario simple (nombre/contacto/mensaje) que envía un correo best-effort a `soporte@darivopro.com` (mismo patrón que los 9 eventos transaccionales de `lib/email/send.ts`) y siempre confirma recepción en pantalla; **completamente independiente del sistema de tickets interno** (`soporte_tickets`/`/api/soporte/*`), sin compartir componente ni backend; sin número de WhatsApp (no existe todavía, se agrega en un prompt aparte cuando lo haya); (5) corregido un subtítulo preexistente ("Miles de maestros y técnicos ya cotizan...") que era una cifra de usuarios no verificable — mismo criterio que la prohibición de testimonios de §4.1, aunque no fuera técnicamente un testimonio. El resto de la estructura v1.3/v1.4 (Hero, Así de fácil, Hecho para tu chamba, Todo lo que necesitas, CTA final, Footer) se mantiene sin cambios de contenido, solo estilo/orden.
 
 **Cambio principal (v1.4, 12/07/2026):** corregido typo en §7 (Footer) — el email de contacto real es `info@darivopro.com`, no `hola@darivo.pro` (dominio distinto de `darivopro.com`, que la empresa no posee — era un error de tipeo, no una decisión de negocio). Alineado con el código (`frontend/src/app/(public)/contacto/page.tsx`), que usaba el mismo typo.
 
@@ -88,19 +90,24 @@ No se fija todavía ruta/nombre de archivo exacto para estas 5 — pendiente de 
 
 ---
 
-# 4. Estructura de la página (vigente — v1.3, 09/07/2026)
+# 4. Estructura de la página (vigente — v1.5, 17/07/2026)
 
-⚠️ Sustituye por completo la estructura simple de 2 bloques de v1.1/v1.2 (Hero + Planes + Footer). El propietario aportó un diseño de referencia completo con 7 secciones — es la especificación vigente:
+⚠️ Sustituye por completo la estructura simple de 2 bloques de v1.1/v1.2 (Hero + Planes + Footer). Base: diseño de referencia de v1.3 (7 secciones) + rediseño v1.5 (header con Productos, 2 secciones nuevas, widget de chat) — es la especificación vigente:
 
 ```
-1. HEADER
+1. HEADER (frontend/src/components/landing/LandingHeader.tsx)
    - Logo "DARIVO PRO"
    - Nav: "Precios" (→ /precios) · "¿Cómo funciona?" (ancla a la
-     sección "Así de fácil" en la misma página)
+     sección "Así de fácil") · "Productos" (dropdown desktop / dentro
+     del menú ☰ en móvil — nuevo en v1.5): Darivo Pro Empresa/Móvil/
+     Partner, cada uno a su subdominio real (sin conectar en DNS
+     todavía, ver nota de v1.5 arriba)
    - 3 botones a la derecha: "Iniciar sesión" (→ /login, estilo
      discreto) · "Registrarse" (→ /registro, estilo discreto) ·
      "Empieza gratis" (→ /registro, estilo destacado — mismo peso
      visual que el CTA original)
+   - Menú ☰ en móvil (nuevo en v1.5): repite todo el nav de arriba,
+     no cabía en el header compacto de celular
 
 2. HERO (fondo navy)
    - Mensaje principal: "Una factura en un minuto"
@@ -124,18 +131,30 @@ No se fija todavía ruta/nombre de archivo exacto para estas 5 — pendiente de 
    2. "La calculadora arma tu cotización" — nunca "La IA arma..."
    3. "PDF al WhatsApp"
 
-4. "HECHO PARA TU CHAMBA" — 4 tarjetas de categoría
+4. "UN DARIVO PRO PARA CADA PARTE DE TU NEGOCIO" (nuevo en v1.5)
+   3 tarjetas — Darivo Pro Móvil (maestro de obra independiente) ·
+   Darivo Pro Empresa (constructora con equipo) · Darivo Pro Partner
+   (gana comisión por referir) — cada una enlaza a su subdominio real.
+   Casos de uso por tipo de usuario + acceso a producto en el cuerpo
+   de la página (no solo en el header).
+
+5. "HECHO PARA TU CHAMBA" — 4 tarjetas de categoría
    Construcción · Fontanería · Pintura · Electricidad, cada una con
    foto (pendiente — ver §3.1) + icono superpuesto + descripción corta.
 
-5. "TODO LO QUE NECESITAS EN TU CELULAR" — 5 features solo-icono
+6. "TODO LO QUE NECESITAS EN TU CELULAR" — 5 features solo-icono
    Ahorra tiempo · Precios actualizados · PDF profesional ·
    Envío directo · Seguro y en la nube.
 
-6. BANNER CTA FINAL (fondo navy)
+7. FRANJA DE CONFIANZA (nuevo en v1.5)
+   4 hechos verificables del producto (no testimonios, no cifras de
+   usuarios) — ver §4.1, la prohibición de testimonios/cifras
+   inventadas sigue vigente sin excepción.
+
+8. BANNER CTA FINAL (fondo navy)
    "Empieza gratis hoy mismo" + botón "Empieza gratis →"
 
-7. FOOTER (fondo navy)
+9. FOOTER (fondo navy)
    - Logo + tagline
    - Contacto: hasta que exista un número de WhatsApp real confirmado,
      enlaza a /contacto (canal real: info@darivopro.com) — nunca inventar
@@ -143,6 +162,17 @@ No se fija todavía ruta/nombre de archivo exacto para estas 5 — pendiente de 
    - Horario de atención
    - Términos y condiciones · Política de privacidad
    - Copyright
+
+10. WIDGET DE CHAT FLOTANTE (nuevo en v1.5, visible en toda la página,
+    no es una sección del scroll)
+    Burbuja fija esquina inferior derecha. Al abrir: mensaje de
+    bienvenida + formulario (nombre/contacto/mensaje). Envía correo
+    best-effort a soporte@darivopro.com, siempre confirma recepción en
+    pantalla. Sin backend de IA ni respuestas automáticas. Sin número
+    de WhatsApp (no existe todavía). Completamente independiente del
+    sistema de tickets interno (soporte_tickets/mensajes) — no
+    comparte componente, tabla ni backend con SoporteTicketsView/
+    DarivoChat.
 ```
 
 **Planes (Básico/Pro/Business) ya NO viven en la landing.** Se accede vía el enlace "Precios" del header, que lleva a la página `/precios` ya existente (que sigue leyendo de `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6, fuente única — sin cambios en esa regla).
@@ -186,7 +216,7 @@ Cualquier imagen o mockup que el propietario comparta durante el desarrollo (inc
 
 # 7. Estado del documento
 
-✅ Documento oficial completo, versión 1.3. Reemplaza v1.2. Imágenes pendientes: logo real (§3, el actual está corrupto), foto de hero y 4 fotos de categoría (§3.1).
+✅ Documento oficial completo, versión 1.5. Reemplaza v1.4. Imágenes pendientes: logo real (§3, el actual está corrupto), foto de hero y 4 fotos de categoría (§3.1). Pendiente adicional de v1.5: los enlaces a los 3 productos del header/sección 4 no resuelven hasta que se conecte el subdominio en DNS (`SUBDOMAIN_ROUTING_ENABLED`).
 
 ## Protección del documento oficial
 
