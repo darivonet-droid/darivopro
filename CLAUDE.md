@@ -548,9 +548,11 @@ Para probar cualquier feature (facturación, IA, roles personalizados, Empresa) 
 
 ## Email transaccional (Gmail API) — construido 12/07/2026, texto real conectado 12/07/2026
 
+**⚠️ Corrección 18/07/2026 — esta sección estaba desactualizada, ver "Estado real 18/07/2026" al final.** Se dejó el resto tal cual como historial de esa fecha.
+
 Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, `templates.ts`, `send.ts`) — domain-wide delegation (1 credencial de Google Cloud sirve para las 5 cuentas info@/facturacion@/noreply@/partners@/soporte@, no 5 OAuth consent flows separados). **`templates.ts` ya tiene el texto real aprobado por Mohamed (ya no es placeholder)** — 9 plantillas completas.
 
-**Conectado a eventos reales (7 de 9):**
+**Conectado a eventos reales (7 de 9, en 12/07/2026 — ver corrección: hoy son 9 de 9):**
 1. Bienvenida (info@) — `registro/page.tsx`, solo en el flujo de sesión inmediata (ver nota en `auth/callback/route.ts` sobre por qué el flujo de confirmación por correo no está cubierto — comparte ruta con el login de Google, sin señal fiable para distinguir registro nuevo de login recurrente). Plan mostrado: "Prueba gratuita" sin monto si `plan_tipo='gratis'`, o el plan pagado real si no.
 2. Pago confirmado (facturacion@) — `api/pagos/webhook/route.ts`. "Próximo cobro" solo se muestra si el `order_id` trae el ciclo (mensual/anual) — si no, se omite esa línea en vez de inventar una fecha.
 3. Pago fallido (facturacion@) — mismo webhook. La plantilla real pedía "fecha límite" de pago — se omitió esa línea porque no hay ningún dato real de "cuándo se corta el acceso" en el sistema (no inventado).
@@ -565,7 +567,16 @@ Infraestructura en `frontend/src/lib/email/` (`gmail-client.ts`, `accounts.ts`, 
 - Configure el Database Webhook de Supabase para el evento 7 (Dashboard → Database → Webhooks → tabla `partner_comisiones_historial`, INSERT) — pasos en `partner-comision/route.ts`.
 - Pegue `supabase/templates/recovery.html` en el Dashboard del proyecto hosted (evento 4, ver arriba).
 
-**Bloqueado, no construido:** Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado (INC-A01, `09-PANEL-ADMIN-SOPORTE.md` §11 "No crear endpoints"), no existe ningún evento real de creación/resolución al que enganchar el envío. Las plantillas ya tienen el texto real en `templates.ts`, listas para conectar el día que se decida reconstruir ese backend.
+**Bloqueado, no construido (12/07/2026 — ya no aplica, ver corrección):** ~~Ticket recibido/resuelto (soporte@, eventos 8-9) — el backend de tickets (`/api/soporte/tickets`) está deshabilitado...~~ — el backend de tickets se construyó el 16/07/2026 (Fase 3 — Darivo, ver esa sección más abajo) y estos 2 eventos ya están conectados desde esa fecha.
+
+### Estado real 18/07/2026 (corrección — la sección de arriba quedó vieja)
+
+Pedido explícito de Mohamed de verificar el estado real de conexión y probar envíos reales. Hallazgos:
+
+- **Código: 9 de 9 eventos oficiales ya están conectados**, no 7 de 9 — el número de arriba es de 12/07/2026, antes de que Fase 3 (16/07/2026, ver sección propia) conectara los eventos 8 (`ticket_recibido`) y 9 (`ticket_resuelto`) al backend real de tickets. Confirmado leyendo `frontend/src/lib/email/send.ts` completo: las 9 funciones (`enviarBienvenida`, `enviarPagoConfirmado`, `enviarPagoFallido`, `enviarCambioPlan`, `enviarBienvenidaPartner`, `enviarComisionGanada`, `enviarTicketRecibido`, `enviarTicketResuelto`, más el reset de contraseña vía Supabase Auth nativo) existen y están invocadas desde sus disparadores reales. `templates.ts` tiene las 9 plantillas con texto HTML real (no placeholder), fechado 12/07/2026 en su propio encabezado — más 2 plantillas adicionales no-oficiales (`plantillaContactoLanding`, `plantillaInvitacionEmpleado`, agregadas 17/07/2026 para otros flujos).
+- **El bloqueo real no es de código, es de infraestructura, y afecta a los 9 eventos por igual, no a 2**: `GMAIL_SERVICE_ACCOUNT_JSON` sigue vacía — confirmado vacía en `frontend/.env.example` y ausente/vacía en `frontend/.env.local` de este entorno. Sin esa variable, **cualquiera** de los 9 envíos falla de inmediato con el error claro `"GMAIL_SERVICE_ACCOUNT_JSON no configurada"` (`gmail-client.ts`) — no es que falten 2 eventos por conectar en código, es que ninguno de los 9 puede entregar un correo real todavía. **No se pudo confirmar si Vercel Production ya la tiene configurada** (no hay acceso a leer variables de entorno de Vercel desde esta sesión, y por regla permanente de este documento tampoco se pediría ver el valor aunque se pudiera) — Mohamed debe confirmarlo él mismo en Vercel → Settings → Environment Variables.
+- **Intento de prueba de envío real — no se pudo ejecutar**: sin `GMAIL_SERVICE_ACCOUNT_JSON` en el entorno local de esta sesión, cualquier llamada a `enviarGmail()` lanza el error de arriba antes de intentar nada contra la API de Gmail — no hay forma de probar un envío real "bienvenida"/"pago_confirmado" desde aquí hasta que esa variable esté puesta (localmente, o confirmando que ya lo está en Producción para probar ahí).
+- **`darivo_email_sender.py`** (archivo Python con un diccionario `PLANTILLAS`, mencionado por Mohamed como la fuente de las 9 plantillas aprobadas el 16/07/2026 en tono "profesional-cercano") — **no existe en el repo**, confirmado por búsqueda exhaustiva (ningún archivo `.py` del proyecto, solo paquetes de terceros en `backend/.venv/`). Este archivo nunca llegó a integrarse — el texto real que sí está en producción hoy (`templates.ts`) es un conjunto distinto, en TypeScript/HTML, aprobado y conectado el 12/07/2026. **No se sobreescribió nada** a la espera de que Mohamed reenvíe el contenido completo del archivo, para no inventar ni mezclar redacciones de dos aprobaciones distintas sin confirmar cuál es la vigente.
 
 ## Auditoría 12/07/2026 — Admin/Empresa/Partner (sesión continua, 3 agentes en paralelo)
 
