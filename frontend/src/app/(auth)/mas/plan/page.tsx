@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { MiPlanCard } from "@/components/mas/MiPlanCard";
 import { PagoEstadoBanner } from "@/components/pagos/PagoEstadoBanner";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 import { T } from "@/lib/theme";
 
@@ -11,6 +13,11 @@ interface Props {
 }
 
 export default async function MiPlanPage({ searchParams }: Props) {
+  // Rol Técnico (Tarea 2, CLAUDE.md 17/07/2026): nunca ve "Mis planes" — la
+  // suscripción la administra únicamente el Gerente.
+  const contexto = await obtenerContextoAcceso();
+  if (contexto.rol === "tecnico") redirect("/mas");
+
   const supabase = createServerClient();
   const { data: perfil } = await supabase
     .from("perfiles")

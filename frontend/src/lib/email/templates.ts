@@ -286,3 +286,36 @@ export function plantillaContactoLanding(datos: {
     `),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// 11. Invitación de empleado (Técnico) — soporte@ → el técnico invitado
+// Nuevo 17/07/2026 (Tarea 2 de la cola pendiente). Complementa, no
+// reemplaza, el correo nativo de invitación de Supabase Auth (ese trae el
+// enlace mágico para fijar contraseña; Supabase no permite variables de
+// plantilla propias ahí, así que el rol/permisos van en este correo aparte).
+// ─────────────────────────────────────────────────────────────────────────
+export function plantillaInvitacionEmpleado(datos: {
+  nombre: string;
+  empresaNombre: string;
+  facturaHabilitada: boolean;
+  informeHabilitado: boolean;
+}): EmailContenido {
+  const permisos = [
+    "Cotizaciones — siempre habilitado",
+    `Facturas — ${datos.facturaHabilitada ? "habilitado" : "no habilitado (pídeselo a tu Gerente si lo necesitas)"}`,
+    `Informes de tu propio trabajo — ${datos.informeHabilitado ? "habilitado" : "no habilitado"}`,
+  ]
+    .map((p) => `<li>${p}</li>`)
+    .join("");
+  return {
+    subject: `Te invitaron a Darivo Pro como Técnico de ${datos.empresaNombre}`,
+    html: layout(`
+      <p>Hola ${datos.nombre},</p>
+      <p><strong>${datos.empresaNombre}</strong> te invitó a Darivo Pro como <strong>Técnico</strong>. Revisa tu bandeja de entrada — te llegó otro correo de Supabase con el enlace para crear tu contraseña; con ese entras directo, sin configurar nada más.</p>
+      <p>Tus permisos ya quedaron configurados por tu Gerente:</p>
+      <ul style="padding-left:20px;">${permisos}</ul>
+      <p>Cualquier duda, escríbenos a soporte@darivopro.com.</p>
+      ${pie("soporte@darivopro.com")}
+    `),
+  };
+}

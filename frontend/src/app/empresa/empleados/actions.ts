@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerClient } from "@/lib/supabase/server";
+import { enviarInvitacionEmpleado } from "@/lib/email/send";
 
 type Resultado = { ok: true } | { ok: false; error: string };
 
@@ -13,22 +14,27 @@ type Resultado = { ok: true } | { ok: false; error: string };
  * otorgaba acceso real. Ahora:
  * 1. Crea la cuenta real en auth.users y envía el correo de invitación de
  *    Supabase Auth (`inviteUserByEmail` — magic link para fijar contraseña).
- * 2. Vincula el `perfiles` resultante a esta empresa (`empresa_id`) y salta
- *    su onboarding propio — se une a una empresa existente, no crea la suya.
- * 3. Guarda el `user_id` real en `empresa_empleados`
- *    (columna añadida por `20260713100000_empresa_empleados_user_id.sql`,
- *    pendiente de ejecución por el propietario).
+ * 2. Vincula el `perfiles` resultante a esta empresa (`empresa_id`), copia
+ *    el `plan_tipo` del Gerente (el Técnico no paga por su cuenta — sin
+ *    esto quedaría en el plan `gratis` por defecto del trigger
+ *    `handle_new_user()`, con el límite de 5 cotizaciones de por vida) y
+ *    salta su onboarding propio — se une a una empresa existente.
+ * 3. Guarda el `user_id`, y los permisos por técnico (Tarea 2, CLAUDE.md
+ *    17/07/2026: Factura OFF por defecto, Informe opcional, ambos los
+ *    activa el Gerente aquí mismo al invitar) en `empresa_empleados`.
+ * 4. Envía un segundo correo (best-effort, `lib/email/send.ts`) indicando el
+ *    rol y los permisos asignados — el invite nativo de Supabase Auth no
+ *    soporta variables de plantilla personalizadas, así que el rol no puede
+ *    ir en ESE correo; se informa en uno propio aparte.
  *
- * Nota de alcance: esto otorga acceso real de sesión — no implementa
- * diferenciación de permisos Gerente vs Técnico en la UI de Móvil (esa
- * jerarquía sigue solo a medias, ver CLAUDE.md DT-04-02, decisión pendiente
- * del propietario). Un Técnico invitado hoy inicia sesión y ve la misma
- * Móvil que un Gerente solo — el alcance de este fix es "el acceso es real",
- * no "los permisos ya están diferenciados".
+ * Gating real de "Técnico solo ve Cotización / Factura si está habilitada /
+ * Informe si está habilitado / nunca Mis planes" vive en
+ * `lib/rol-empleado.ts` (`obtenerContextoAcceso`), consumido desde
+ * `(auth)/layout.tsx` y las páginas de Facturas/Informes/Mi Plan.
  */
 export async function invitarEmpleadoAction(
   empresaId: string,
-  input: { nombre: string; email: string; telefono?: string }
+  input: { nombre: string; email: string; telefono?: string; facturaHabilitada: boolean; informeHabilitado: boolean }
 ): Promise<Resultado> {
   const supabase = createServerClient();
   const {
@@ -53,6 +59,12 @@ export async function invitarEmpleadoAction(
     return { ok: false, error: "No autorizado sobre esta empresa" };
   }
 
+  const { data: gerentePerfil } = await admin
+    .from("perfiles")
+    .select("plan_tipo")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
     input.email,
@@ -64,12 +76,14 @@ export async function invitarEmpleadoAction(
 
   const nuevoUserId = invited.user.id;
 
-  // Une al nuevo usuario a esta empresa y salta su onboarding propio —
+  // Une al nuevo usuario a esta empresa, hereda el plan del Gerente (no es
+  // una suscripción propia, ver nota arriba) y salta su onboarding propio —
   // se está uniendo a una empresa existente, no creando la suya.
   const { error: perfilError } = await admin.from("perfiles").upsert({
     id: nuevoUserId,
     empresa_id: empresaId,
     razon_social: empresa.razon_social,
+    plan_tipo: gerentePerfil?.plan_tipo ?? "gratis",
     onboarding_done: true,
   });
   if (perfilError) return { ok: false, error: perfilError.message };
@@ -82,8 +96,17 @@ export async function invitarEmpleadoAction(
     telefono: input.telefono || null,
     rol: "Técnico",
     estado: "Pendiente",
+    factura_habilitada: input.facturaHabilitada,
+    informe_habilitado: input.informeHabilitado,
   });
   if (empError) return { ok: false, error: empError.message };
+
+  await enviarInvitacionEmpleado(input.email, {
+    nombre: input.nombre,
+    empresaNombre: empresa.razon_social,
+    facturaHabilitada: input.facturaHabilitada,
+    informeHabilitado: input.informeHabilitado,
+  });
 
   revalidatePath("/empresa/empleados");
   return { ok: true };

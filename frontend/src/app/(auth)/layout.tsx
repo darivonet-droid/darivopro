@@ -6,6 +6,7 @@ import { Toast } from "@/components/ui/Toast";
 import { UpgradeModal } from "@/components/plan/UpgradeModal";
 import { PwaShell } from "@/components/pwa/PwaShell";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 
 // manifest/appleWebApp: solo aquí y en onboarding/layout.tsx (Móvil) — el
 // resto de la app (Admin, Empresa, landing) no debe ser instalable como PWA.
@@ -30,6 +31,11 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
   if (!perfil?.onboarding_done) redirect("/onboarding/1");
 
+  // Rol Gerente/Técnico (Tarea 2, CLAUDE.md 17/07/2026) — un Técnico sin
+  // Factura habilitada no ve esa pestaña en la barra inferior.
+  const contexto = await obtenerContextoAcceso();
+  const ocultarFacturas = contexto.rol === "tecnico" && !contexto.facturaHabilitada;
+
   return (
     <MobileShell>
       <div className="min-h-screen pb-20">
@@ -37,7 +43,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         <Toast />
         <UpgradeModal />
         {children}
-        <BottomNav />
+        <BottomNav ocultarFacturas={ocultarFacturas} />
       </div>
     </MobileShell>
   );

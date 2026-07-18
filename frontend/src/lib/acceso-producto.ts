@@ -49,18 +49,38 @@ export async function esPartnerAutorizado(
   return data?.estado !== "Suspendido";
 }
 
-/** Acceso a Darivo Pro Empresa — solo plan Business (04 §6 · Visión §8) */
+/**
+ * Acceso a Darivo Pro Empresa — solo plan Business (04 §6 · Visión §8) Y
+ * solo el Gerente (dueño de la empresa), nunca un Técnico invitado.
+ *
+ * Tarea 2 (CLAUDE.md 17/07/2026): invitarEmpleadoAction copia el plan_tipo
+ * del Gerente al perfil del Técnico invitado (para que no quede varado en
+ * el límite del plan gratis) — sin este chequeo extra de rol, ese mismo
+ * plan_tipo='business' heredado le habría abierto la puerta al panel de
+ * escritorio de Empresa completo, que es exclusivo del Gerente (Cotización
+ * es lo único que ve un Técnico, siempre por Móvil).
+ */
 export async function puedeAccederEmpresa(
   supabase: SupabaseClient,
   user: User | null
 ): Promise<boolean> {
   if (!user) return false;
-  const { data } = await supabase
+  const { data: perfil } = await supabase
     .from("perfiles")
-    .select("plan_tipo")
+    .select("plan_tipo, empresa_id")
     .eq("id", user.id)
     .single();
-  return data?.plan_tipo === "business";
+  if (perfil?.plan_tipo !== "business") return false;
+  if (!perfil.empresa_id) return true; // usuario solo, sin empresa asociada aún
+
+  const { data: empresa } = await supabase
+    .from("empresas")
+    .select("gerente_user_id")
+    .eq("id", perfil.empresa_id)
+    .maybeSingle();
+  // Si no hay fila de empresa (o el usuario no es su gerente_user_id), es un
+  // Técnico invitado — sin acceso al panel de escritorio.
+  return empresa?.gerente_user_id === user.id;
 }
 
 export type ProductoProtegido = "admin" | "empresa" | "partner";

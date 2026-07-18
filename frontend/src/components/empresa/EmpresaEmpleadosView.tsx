@@ -7,6 +7,7 @@ import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import {
   actualizarDatosEmpleado,
   actualizarEstadoEmpleado,
+  actualizarPermisosEmpleado,
   asignarRolPersonalizadoEmpleado,
   listarEmpleadosEmpresa,
   type EmpleadoEmpresa,
@@ -48,6 +49,8 @@ export function EmpresaEmpleadosView() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [facturaHabilitada, setFacturaHabilitada] = useState(false);
+  const [informeHabilitado, setInformeHabilitado] = useState(false);
   const [buscar, setBuscar] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
@@ -119,17 +122,32 @@ export function EmpresaEmpleadosView() {
       nombre: nombre.trim(),
       email: email.trim(),
       telefono: telefono.trim() || undefined,
+      facturaHabilitada,
+      informeHabilitado,
     });
     if (result.ok) {
       setNombre("");
       setEmail("");
       setTelefono("");
+      setFacturaHabilitada(false);
+      setInformeHabilitado(false);
       setMostrarForm(false);
       void cargar(empresaId);
     } else {
       setErrorForm(result.error);
     }
     setGuardando(false);
+  };
+
+  const cambiarPermiso = async (
+    empleadoId: string,
+    permiso: "facturaHabilitada" | "informeHabilitado",
+    valor: boolean
+  ) => {
+    if (!empresaId) return;
+    const supabase = createClient();
+    await actualizarPermisosEmpleado(supabase, empleadoId, { [permiso]: valor });
+    void cargar(empresaId);
   };
 
   const cambiarEstado = async (id: string, estado: EstadoEmpleadoEmpresa) => {
@@ -211,6 +229,31 @@ export function EmpresaEmpleadosView() {
             className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
             style={{ borderColor: ADMIN_COLORS.slateD }}
           />
+
+          <div className="mb-3 rounded-xl p-3" style={{ background: ADMIN_COLORS.slate }}>
+            <p className="mb-2 text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+              Permisos de este Técnico
+            </p>
+            <p className="mb-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+              Cotización siempre está habilitada. El resto lo decides tú:
+            </p>
+            <label className="mb-1.5 flex items-center gap-2 text-sm" style={{ color: ADMIN_COLORS.text }}>
+              <input
+                type="checkbox"
+                checked={facturaHabilitada}
+                onChange={(e) => setFacturaHabilitada(e.target.checked)}
+              />
+              Puede crear Facturas
+            </label>
+            <label className="flex items-center gap-2 text-sm" style={{ color: ADMIN_COLORS.text }}>
+              <input
+                type="checkbox"
+                checked={informeHabilitado}
+                onChange={(e) => setInformeHabilitado(e.target.checked)}
+              />
+              Puede ver Informe de su propio trabajo
+            </label>
+          </div>
           {errorForm && (
             <p className="mb-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.red }}>
               {errorForm}
@@ -236,9 +279,9 @@ export function EmpresaEmpleadosView() {
             </button>
           </div>
           <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-            Se envía un correo real de invitación para que el técnico cree su contraseña y
-            acceda a Móvil. Queda con estado «Invitación pendiente» hasta que acepte, y disponible
-            como Técnico asignable en Roles y Permisos.
+            Se envía un correo real de invitación (contraseña) más otro con el rol y los permisos
+            asignados. Queda con estado «Invitación pendiente» hasta que acepte, entra directo con
+            esos permisos ya activos, sin configurar nada él mismo. Nunca ve «Mis planes».
           </p>
         </div>
       )}
@@ -259,10 +302,10 @@ export function EmpresaEmpleadosView() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl" style={{ border: `1px solid ${ADMIN_COLORS.slateD}` }}>
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[920px] text-left text-sm">
             <thead style={{ background: ADMIN_COLORS.tableHeaderBg }}>
               <tr>
-                {["Empleado", "Contacto", "Rol", "Permisos", "Estado", "Última actividad", "Acciones"].map((h) => (
+                {["Empleado", "Contacto", "Rol", "Factura", "Informe", "Rol personalizado", "Estado", "Última actividad", "Acciones"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-xs font-bold uppercase"
@@ -284,6 +327,26 @@ export function EmpresaEmpleadosView() {
                     {e.telefono && <span className="block">{e.telefono}</span>}
                   </td>
                   <td className="px-4 py-3">{e.rol}</td>
+                  <td className="px-4 py-3">
+                    <label className="flex items-center gap-1.5 text-xs" style={{ color: ADMIN_COLORS.text }}>
+                      <input
+                        type="checkbox"
+                        checked={e.facturaHabilitada}
+                        onChange={(ev) => void cambiarPermiso(e.id, "facturaHabilitada", ev.target.checked)}
+                      />
+                      Habilitada
+                    </label>
+                  </td>
+                  <td className="px-4 py-3">
+                    <label className="flex items-center gap-1.5 text-xs" style={{ color: ADMIN_COLORS.text }}>
+                      <input
+                        type="checkbox"
+                        checked={e.informeHabilitado}
+                        onChange={(ev) => void cambiarPermiso(e.id, "informeHabilitado", ev.target.checked)}
+                      />
+                      Habilitado
+                    </label>
+                  </td>
                   <td className="px-4 py-3">
                     <select
                       value={e.rol_personalizado_id ?? ""}

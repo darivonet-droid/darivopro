@@ -83,10 +83,16 @@ const OPCION_EMPRESA: MasOpcion = {
 interface MasOpcionesListProps {
   /** Plan Business da acceso al producto Darivo Pro Empresa (04 §6, nota de nomenclatura) */
   esBusiness?: boolean;
+  /** Rol Técnico (Tarea 2, CLAUDE.md 17/07/2026): nunca ve "Mis planes"; ve
+   * "Informes" solo si su Gerente se lo habilitó. */
+  ocultarMisPlanes?: boolean;
+  ocultarInformes?: boolean;
 }
 
-export function MasOpcionesList({ esBusiness }: MasOpcionesListProps) {
-  const opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
+export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes }: MasOpcionesListProps) {
+  let opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
+  if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan");
+  if (ocultarInformes) opciones = opciones.filter((o) => o.href !== "/mas/informes");
   return (
     <div className="mt-6">
       <p

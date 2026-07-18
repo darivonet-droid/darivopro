@@ -1,14 +1,17 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { MasTabs } from "@/components/mas/MasTabs";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 
 export default async function MasPage() {
   const supabase = createServerClient();
 
-  const [{ data: { user } }, { data: perfil }] = await Promise.all([
+  const [{ data: { user } }, { data: perfil }, contexto] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("*").single(),
+    obtenerContextoAcceso(),
   ]);
+  const esTecnico = contexto.rol === "tecnico";
 
   return (
     <div>
@@ -20,6 +23,8 @@ export default async function MasPage() {
         <MasTabs
           email={user?.email ?? ""}
           esBusiness={perfil?.plan_tipo === "business"}
+          ocultarMisPlanes={esTecnico}
+          ocultarInformes={esTecnico && !contexto.informeHabilitado}
           inicial={{
             razonSocial: perfil?.razon_social ?? "",
             ruc: perfil?.ruc ?? "",

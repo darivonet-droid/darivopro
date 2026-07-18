@@ -21,9 +21,13 @@ interface MasTabsProps {
    * como panel fijo aparte, no apilado debajo del contenido — Móvil sigue
    * con el comportamiento por defecto (incluido acá). */
   ocultarOpciones?: boolean;
+  /** Rol Técnico (Tarea 2, CLAUDE.md 17/07/2026): nunca ve "Mis planes"; ve
+   * "Informes" solo si su Gerente se lo habilitó. */
+  ocultarMisPlanes?: boolean;
+  ocultarInformes?: boolean;
 }
 
-export function MasTabs({ email, inicial, esBusiness, ocultarOpciones }: MasTabsProps) {
+export function MasTabs({ email, inicial, esBusiness, ocultarOpciones, ocultarMisPlanes, ocultarInformes }: MasTabsProps) {
   const [tab, setTab] = useState<Tab>("categorias");
 
   const TABS: { id: Tab; label: string }[] = [
@@ -47,7 +51,13 @@ export function MasTabs({ email, inicial, esBusiness, ocultarOpciones }: MasTabs
         {tab === "tarifas" && <TarifasEditTab />}
         {tab === "empresa" && <AjustesForm email={email} inicial={inicial} />}
 
-        {!ocultarOpciones && <MasOpcionesList esBusiness={esBusiness} />}
+        {!ocultarOpciones && (
+          <MasOpcionesList
+            esBusiness={esBusiness}
+            ocultarMisPlanes={ocultarMisPlanes}
+            ocultarInformes={ocultarInformes}
+          />
+        )}
       </div>
     </div>
   );

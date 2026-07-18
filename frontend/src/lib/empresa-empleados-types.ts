@@ -17,6 +17,9 @@ export interface EmpleadoEmpresa {
   estado: EstadoEmpleadoEmpresa;
   ultima_actividad: string | null;
   rol_personalizado_id: string | null;
+  /** Permisos por técnico individual — Tarea 2 (CLAUDE.md 17/07/2026). Cotización siempre está habilitada, no tiene toggle. */
+  facturaHabilitada: boolean;
+  informeHabilitado: boolean;
   createdAt: string;
 }
 
@@ -30,6 +33,8 @@ interface EmpleadoRow {
   estado: EstadoEmpleadoEmpresa;
   ultima_actividad: string | null;
   rol_personalizado_id: string | null;
+  factura_habilitada: boolean;
+  informe_habilitado: boolean;
   created_at: string;
 }
 
@@ -44,6 +49,8 @@ function mapRow(row: EmpleadoRow): EmpleadoEmpresa {
     estado: row.estado,
     ultima_actividad: row.ultima_actividad,
     rol_personalizado_id: row.rol_personalizado_id,
+    facturaHabilitada: row.factura_habilitada,
+    informeHabilitado: row.informe_habilitado,
     createdAt: row.created_at,
   };
 }
@@ -55,13 +62,26 @@ export async function listarEmpleadosEmpresa(
   const { data, error } = await supabase
     .from("empresa_empleados")
     .select(
-      "id, empresa_id, nombre, email, telefono, rol, estado, ultima_actividad, rol_personalizado_id, created_at"
+      "id, empresa_id, nombre, email, telefono, rol, estado, ultima_actividad, rol_personalizado_id, factura_habilitada, informe_habilitado, created_at"
     )
     .eq("empresa_id", empresaId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
   return ((data ?? []) as EmpleadoRow[]).map(mapRow);
+}
+
+/** Activa/desactiva Factura o Informe para un técnico individual — solo el Gerente decide (RLS). */
+export async function actualizarPermisosEmpleado(
+  supabase: SupabaseClient,
+  empleadoId: string,
+  permisos: { facturaHabilitada?: boolean; informeHabilitado?: boolean }
+): Promise<void> {
+  const patch: Record<string, boolean> = {};
+  if (permisos.facturaHabilitada !== undefined) patch.factura_habilitada = permisos.facturaHabilitada;
+  if (permisos.informeHabilitado !== undefined) patch.informe_habilitado = permisos.informeHabilitado;
+  const { error } = await supabase.from("empresa_empleados").update(patch).eq("id", empleadoId);
+  if (error) throw error;
 }
 
 export async function actualizarEstadoEmpleado(

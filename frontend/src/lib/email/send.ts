@@ -34,6 +34,7 @@ import {
   plantillaTicketRecibido,
   plantillaTicketResuelto,
   plantillaContactoLanding,
+  plantillaInvitacionEmpleado,
 } from "@/lib/email/templates";
 
 async function enviarSeguro(opts: {
@@ -155,4 +156,13 @@ export async function enviarContactoLanding(
     html,
     evento: "contacto_landing",
   });
+}
+
+// 11. Invitación de empleado (Técnico) — soporte@ → el técnico invitado
+export async function enviarInvitacionEmpleado(
+  to: string,
+  datos: { nombre: string; empresaNombre: string; facturaHabilitada: boolean; informeHabilitado: boolean }
+): Promise<void> {
+  const { subject, html } = plantillaInvitacionEmpleado(datos);
+  await enviarSeguro({ cuenta: "soporte", to, subject, html, evento: "invitacion_empleado" });
 }

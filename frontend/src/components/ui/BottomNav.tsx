@@ -20,9 +20,11 @@ const TABS_DER: { href: string; label: string; icon: IconName; match?: string[] 
 // del bug de overlap en /cotizaciones/nuevo (10/07/2026).
 const RUTAS_SIN_NAV = ["/cotizaciones/nuevo"];
 
-export function BottomNav() {
+export function BottomNav({ ocultarFacturas }: { ocultarFacturas?: boolean } = {}) {
   const pathname = usePathname();
   if (RUTAS_SIN_NAV.some((r) => pathname.startsWith(r))) return null;
+
+  const tabsDer = ocultarFacturas ? TABS_DER.filter((t) => t.href !== "/facturas") : TABS_DER;
 
   return (
     <nav
@@ -58,7 +60,7 @@ export function BottomNav() {
       </Link>
 
       <div className="flex flex-1 justify-around">
-        {TABS_DER.map((t) => (
+        {tabsDer.map((t) => (
           <TabItem
             key={t.href}
             pathname={pathname}

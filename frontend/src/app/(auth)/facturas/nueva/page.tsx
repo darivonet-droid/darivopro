@@ -1,6 +1,8 @@
 // DARIVO PRO — Nueva factura
+import { redirect } from "next/navigation";
 import { NuevaFacturaForm } from "@/components/facturacion/NuevaFacturaForm";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 import { T } from "@/lib/theme";
 import type { Cliente, EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
 import type { TipoComprobante } from "@/lib/factura-utils";
@@ -10,6 +12,10 @@ export default async function NuevaFacturaPage({
 }: {
   searchParams: { cotizacion?: string; tipo?: string; cliente?: string };
 }) {
+  // Rol Técnico (Tarea 2, CLAUDE.md 17/07/2026): Factura OFF por defecto.
+  const contexto = await obtenerContextoAcceso();
+  if (contexto.rol === "tecnico" && !contexto.facturaHabilitada) redirect("/cotizaciones");
+
   const supabase = createServerClient();
 
   const [perfilRes, facturasRes, aprobadosRes, clientesRes] = await Promise.all([

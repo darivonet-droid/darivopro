@@ -2,13 +2,20 @@
 // Lista CLIENTES con al menos una factura (no documentos sueltos) — misma
 // fuente de datos que Clientes, filtrada por facturas.cliente_id (FK real).
 // Ver detalle/estado/PDF de cada factura en la ficha del cliente (§6).
+import { redirect } from "next/navigation";
 import { FacturasView, type ClienteConFacturas } from "@/components/facturacion/FacturasView";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 import type { LineaCotizacion, Cotizacion } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function FacturasPage() {
+  // Rol Técnico (Tarea 2, CLAUDE.md 17/07/2026): Factura OFF por defecto,
+  // el Gerente la activa por técnico individual.
+  const contexto = await obtenerContextoAcceso();
+  if (contexto.rol === "tecnico" && !contexto.facturaHabilitada) redirect("/cotizaciones");
+
   const supabase = createServerClient();
 
   const [clientesRes, perfilRes, aprobadosRes] = await Promise.all([

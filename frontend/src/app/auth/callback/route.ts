@@ -57,6 +57,10 @@ export async function GET(request: Request) {
 
   // Última actividad de Empleados Empresa (Técnico) — best-effort, nunca
   // bloquea el login. Cubre Google OAuth y aceptar invitación por correo.
+  // Tarea 2 (CLAUDE.md 17/07/2026): además, si es su primer login real
+  // (estado todavía "Pendiente" desde la invitación), pasa a "Activo" solo
+  // — los permisos (factura_habilitada/informe_habilitado) ya quedaron
+  // fijados por el Gerente al invitar, aquí no se tocan.
   if (data.user) {
     try {
       const admin = createAdminClient();
@@ -64,6 +68,11 @@ export async function GET(request: Request) {
         .from("empresa_empleados")
         .update({ ultima_actividad: new Date().toISOString() })
         .eq("user_id", data.user.id);
+      await admin
+        .from("empresa_empleados")
+        .update({ estado: "Activo" })
+        .eq("user_id", data.user.id)
+        .eq("estado", "Pendiente");
     } catch {
       /* no crítico */
     }
