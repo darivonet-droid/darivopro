@@ -9,12 +9,13 @@ export default function EmpresaIAPage() {
   return (
     <EmpresaShell titulo={mod.label}>
       <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-        Cotización con Calculadora inteligente — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
+        Cotización con Darivo — misma lógica Móvil (`08-MODULO-IA-EMPRESA.md`)
       </p>
       <div className="max-w-2xl">
         <IACotizacionFlow
           nuevaCotizacionHref="/empresa/cotizaciones/nuevo"
           soporteHref="/empresa/mas/soporte"
+          nombreAsistente="Darivo"
         />
       </div>
     </EmpresaShell>

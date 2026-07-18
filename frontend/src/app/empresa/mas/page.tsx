@@ -38,7 +38,7 @@ export default async function EmpresaMasPage() {
           />
         </div>
         <div className="w-[320px] shrink-0" style={{ position: "sticky", top: 20 }}>
-          <MasOpcionesList />
+          <MasOpcionesList esEmpresa />
         </div>
       </div>
     </EmpresaShell>

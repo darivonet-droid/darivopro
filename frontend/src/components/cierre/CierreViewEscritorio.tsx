@@ -22,8 +22,20 @@ import { useGastos, type Gasto } from "@/hooks/useGastos";
 import { CATEGORIAS_GASTO } from "@/components/cierre/CierreView";
 import type { GastoIAExtraccion } from "@/lib/gasto-ia";
 import { useAppStore } from "@/store/useAppStore";
+import { InformesTab } from "@/components/informes/InformesTab";
 
-type Tab = "gastos" | "expediente";
+// Tarea 5c (CLAUDE.md 17/07/2026): "Informes" no es una sección nueva
+// independiente del menú de Empresa (que no tiene "Más" fuera de
+// Categorías) — se integra como 3ª pestaña aquí, dentro de Cierre, mismos
+// datos que Móvil (useInformes(), vía InformesTab.tsx sin tocar). No se
+// modificó nada de la lógica/JSX de Gastos ni Expediente Mensual que ya
+// funcionaba bien — es una pestaña hermana, no un reemplazo.
+// Nota honesta (parcial, ver CLAUDE.md): InformesTab.tsx y sus 3
+// sub-componentes (Semanal/Mensual/Trimestral) siguen usando los tokens
+// Fable 5 (`T`) internamente, no ADMIN_COLORS — los datos y la integración
+// son reales, la reskin visual completa a la paleta de Admin queda
+// pendiente.
+type Tab = "gastos" | "expediente" | "informes";
 
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -97,18 +109,25 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
     <div className="flex flex-col gap-5">
       {/* Pestañas (§3/§4) */}
       <div style={{ display: "inline-flex", borderRadius: 14, padding: 4, background: ADMIN_COLORS.slate, width: "fit-content" }}>
-        {(["gastos", "expediente"] as const).map((t) => (
+        {(["gastos", "expediente", "informes"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             style={{ padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 800, border: "none", cursor: "pointer", background: tab === t ? ADMIN_COLORS.white : "transparent", color: tab === t ? CIERRE_ACCENT : ADMIN_COLORS.textMid, boxShadow: tab === t ? "0 1px 6px rgba(0,0,0,0.08)" : "none" }}
           >
-            {t === "gastos" ? "Gastos" : "Expediente Mensual"}
+            {t === "gastos" ? "Gastos" : t === "expediente" ? "Expediente Mensual" : "Informes"}
           </button>
         ))}
       </div>
 
+      {tab === "informes" && (
+        <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white, padding: 20 }}>
+          <InformesTab />
+        </div>
+      )}
+
+      {tab !== "informes" && (
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
         {/* Columna principal ~58% */}
         <div style={{ flex: "1 1 58%", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -122,7 +141,7 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
               {/* Tarjeta Registrar gasto (§5.2) */}
               <div style={{ borderRadius: 18, padding: 20, background: `linear-gradient(135deg, ${ADMIN_COLORS.purpleDark}, ${ADMIN_COLORS.purple})`, boxShadow: `0 6px 24px ${ADMIN_COLORS.purple}44` }}>
                 <p style={{ fontSize: 16, fontWeight: 900, color: ADMIN_COLORS.white }}>Registrar gasto</p>
-                <p style={{ marginTop: 4, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>📷 La IA analizará tu documento automáticamente</p>
+                <p style={{ marginTop: 4, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>📷 La Calculadora inteligente analizará tu documento automáticamente</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 14 }}>
                   <button type="button" onClick={abrirCamara} disabled={analizando} style={{ padding: "10px 6px", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", background: "rgba(255,255,255,0.15)", color: ADMIN_COLORS.white, opacity: analizando ? 0.6 : 1 }}>
                     {analizando ? "Analizando…" : "📷 Tomar foto"}
@@ -277,6 +296,7 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -368,7 +388,7 @@ function PanelRegistrarGasto({
 
       <p style={{ fontSize: 15, fontWeight: 900, color: ADMIN_COLORS.text }}>{prefill ? "Revisar gasto" : "Registro manual"}</p>
       {prefill && (
-        <p style={{ marginTop: 2, fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.greenD }}>✓ Documento analizado — La IA extrajo la información</p>
+        <p style={{ marginTop: 2, fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.greenD }}>✓ Documento analizado — La Calculadora inteligente extrajo la información</p>
       )}
 
       <div className="flex flex-col gap-3" style={{ marginTop: 14 }}>

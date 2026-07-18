@@ -87,11 +87,24 @@ interface MasOpcionesListProps {
    * "Informes" solo si su Gerente se lo habilitó. */
   ocultarMisPlanes?: boolean;
   ocultarInformes?: boolean;
+  /** Tareas 5b/5e (CLAUDE.md 17/07/2026): en Empresa, "Mi Plan" y "Perfil del
+   * usuario" enlazan a su propia capa de presentación de escritorio
+   * (ADMIN_COLORS dentro de EmpresaShell) en vez de la ruta Móvil tal cual. */
+  esEmpresa?: boolean;
 }
 
-export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes }: MasOpcionesListProps) {
+export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes, esEmpresa }: MasOpcionesListProps) {
   let opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
-  if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan");
+  if (esEmpresa) {
+    opciones = opciones.map((o) =>
+      o.href === "/mas/plan"
+        ? { ...o, href: "/empresa/mas/plan" }
+        : o.href === "/mas/perfil"
+          ? { ...o, href: "/empresa/mas/perfil" }
+          : o
+    );
+  }
+  if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan" && o.href !== "/empresa/mas/plan");
   if (ocultarInformes) opciones = opciones.filter((o) => o.href !== "/mas/informes");
   return (
     <div className="mt-6">

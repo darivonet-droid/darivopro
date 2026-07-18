@@ -10,14 +10,17 @@
  * el MD directamente.
  */
 export const EMPRESA_NAV = [
-  { href: "/empresa", label: "Inicio", md: "03-darivo-pro-empresa/02-MODULO-INICIO-EMPRESA.md" },
-  { href: "/empresa/clientes", label: "Clientes", md: "03-darivo-pro-empresa/03-MODULO-CLIENTES-EMPRESA.md" },
-  { href: "/empresa/facturas", label: "Facturas", md: "03-darivo-pro-empresa/06-MODULO-FACTURAS-EMPRESA.md" },
-  { href: "/empresa/cierre", label: "Cierre", md: "03-darivo-pro-empresa/09-MODULO-CIERRE-EMPRESA.md" },
-  { href: "/empresa/ia", label: "Calculadora inteligente", md: "03-darivo-pro-empresa/08-MODULO-IA-EMPRESA.md" },
-  { href: "/empresa/mas", label: "Más", md: "03-darivo-pro-empresa/07-MODULO-MAS-EMPRESA.md" },
-  { href: "/empresa/empleados", label: "Empleados", md: "03-darivo-pro-empresa/10-MODULO-EMPLEADOS-EMPRESA.md" },
-  { href: "/empresa/roles", label: "Roles y Permisos", md: "03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md" },
+  { href: "/empresa", label: "Inicio", md: "03-darivo-pro-empresa/02-MODULO-INICIO-EMPRESA.md", ocultoEnSidebar: false },
+  { href: "/empresa/clientes", label: "Clientes", md: "03-darivo-pro-empresa/03-MODULO-CLIENTES-EMPRESA.md", ocultoEnSidebar: false },
+  { href: "/empresa/facturas", label: "Facturas", md: "03-darivo-pro-empresa/06-MODULO-FACTURAS-EMPRESA.md", ocultoEnSidebar: false },
+  { href: "/empresa/cierre", label: "Cierre", md: "03-darivo-pro-empresa/09-MODULO-CIERRE-EMPRESA.md", ocultoEnSidebar: false },
+  // Tarea 5a (CLAUDE.md 17/07/2026): ya no es ítem propio del sidebar — se
+  // accede desde dentro de "Categorías" (módulo "mas"). La ruta /empresa/ia
+  // sigue existiendo (MasTabs.tsx enlaza ahí), solo se quitó del sidebar.
+  { href: "/empresa/ia", label: "Darivo", md: "03-darivo-pro-empresa/08-MODULO-IA-EMPRESA.md", ocultoEnSidebar: true },
+  { href: "/empresa/mas", label: "Más", md: "03-darivo-pro-empresa/07-MODULO-MAS-EMPRESA.md", ocultoEnSidebar: false },
+  { href: "/empresa/empleados", label: "Empleados", md: "03-darivo-pro-empresa/10-MODULO-EMPLEADOS-EMPRESA.md", ocultoEnSidebar: false },
+  { href: "/empresa/roles", label: "Roles y Permisos", md: "03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md", ocultoEnSidebar: false },
 ] as const;
 
 export type EmpresaModuloSlug =

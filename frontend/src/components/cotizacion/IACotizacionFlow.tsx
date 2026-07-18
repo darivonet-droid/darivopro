@@ -62,9 +62,20 @@ interface IACotizacionFlowProps {
    * MD §10 para el acceso de escritorio); no hay chat conversacional
    * implementado, así que no se inventa uno nuevo. */
   soporteHref?: string;
+  /** Nombre visible del asistente en este texto — Móvil sigue diciendo
+   * "Calculadora inteligente" (nombre ya establecido); Empresa pasa "Darivo"
+   * (Tarea 5a, CLAUDE.md 17/07/2026: renombrar la etiqueta en Empresa, sin
+   * tocar el nombre ya usado en Móvil). Nunca "OpenAI" — regla de producto
+   * ya vigente en el resto de la app (nunca se comunica como IA/proveedor
+   * de cara al usuario). */
+  nombreAsistente?: string;
 }
 
-export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", soporteHref }: IACotizacionFlowProps = {}) {
+export function IACotizacionFlow({
+  nuevaCotizacionHref = "/cotizaciones/nuevo",
+  soporteHref,
+  nombreAsistente = "Calculadora inteligente",
+}: IACotizacionFlowProps = {}) {
   const router = useRouter();
   const { catalogo } = useCatalogo();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -118,7 +129,7 @@ export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", 
 
   const generarConIA = useCallback(async (texto: string) => {
     if (modoOffline) {
-      mostrarToast("Sin conexión — la Calculadora inteligente requiere internet", "error");
+      mostrarToast(`Sin conexión — ${nombreAsistente} requiere internet`, "error");
       return;
     }
     setProcesando(true);
@@ -134,16 +145,16 @@ export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", 
         return;
       }
       if (!res.ok) {
-        mostrarToast(json.error ?? "Error con la Calculadora inteligente", "error");
+        mostrarToast(json.error ?? `Error con ${nombreAsistente}`, "error");
         return;
       }
       redirigirAResumen(json.data, texto);
     } catch {
-      mostrarToast("No se pudo conectar con la Calculadora inteligente", "error");
+      mostrarToast(`No se pudo conectar con ${nombreAsistente}`, "error");
     } finally {
       setProcesando(false);
     }
-  }, [mostrarToast, mostrarUpgrade, modoOffline, redirigirAResumen]);
+  }, [mostrarToast, mostrarUpgrade, modoOffline, redirigirAResumen, nombreAsistente]);
 
   const iniciarVoz = () => {
     setModo("hablar");
@@ -200,7 +211,7 @@ export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", 
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm" style={{ color: T.textMid }}>
-          Describe el trabajo y la Calculadora inteligente genera la cotización en segundos.
+          Describe el trabajo y {nombreAsistente} genera la cotización en segundos.
         </p>
         <div className={soporteHref ? "grid grid-cols-2 gap-4" : "flex flex-col gap-4"}>
           <button
@@ -211,7 +222,7 @@ export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", 
             <span className="text-3xl">✏️</span>
             <div className="text-left">
               <p className="font-extrabold" style={{ color: T.text }}>Escribir descripción</p>
-              <p className="text-xs" style={{ color: T.textMid }}>Texto → OpenAI</p>
+              <p className="text-xs" style={{ color: T.textMid }}>Texto → {nombreAsistente}</p>
             </div>
           </button>
           <button
@@ -222,7 +233,7 @@ export function IACotizacionFlow({ nuevaCotizacionHref = "/cotizaciones/nuevo", 
             <span className="text-3xl">🎤</span>
             <div className="text-left">
               <p className="font-extrabold" style={{ color: T.text }}>Hablar</p>
-              <p className="text-xs" style={{ color: T.textMid }}>Web Speech → OpenAI</p>
+              <p className="text-xs" style={{ color: T.textMid }}>Voz → {nombreAsistente}</p>
             </div>
           </button>
         </div>

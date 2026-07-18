@@ -33,7 +33,7 @@ export function EmpresaShell({
           DARIVO PRO EMPRESA
         </p>
         <nav className="flex flex-col gap-0.5">
-          {EMPRESA_NAV.map((item) => {
+          {EMPRESA_NAV.filter((item) => !item.ocultoEnSidebar).map((item) => {
             const activo =
               item.href === "/empresa"
                 ? pathname === "/empresa"

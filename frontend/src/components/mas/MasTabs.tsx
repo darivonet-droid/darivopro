@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { T } from "@/lib/theme";
 import { TabPillSelector } from "@/components/design-system/TabPillSelector";
 import { AjustesForm } from "@/components/ajustes/AjustesForm";
@@ -42,6 +43,25 @@ export function MasTabs({ email, inicial, esBusiness, ocultarOpciones, ocultarMi
       <div className="mt-[18px]">
         {tab === "categorias" && (
           <div>
+            {/* Acceso a Darivo (cotización con calculadora inteligente) — solo
+                Empresa (Tarea 5a, CLAUDE.md 17/07/2026): ya no es ítem propio
+                del sidebar, vive dentro de Categorías. Móvil sigue accediendo
+                por el botón central de BottomNav, sin cambios. */}
+            {ocultarOpciones && (
+              <Link
+                href="/empresa/ia"
+                className="mb-4 flex items-center gap-3 rounded-2xl p-4 transition-transform active:scale-[0.98]"
+                style={{ background: "linear-gradient(135deg,#7C3AED,#A78BFA)" }}
+              >
+                <span className="text-2xl">✨</span>
+                <div className="flex-1">
+                  <p className="text-sm font-extrabold text-white">Darivo</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.8)" }}>
+                    Cotiza describiendo o hablando el trabajo
+                  </p>
+                </div>
+              </Link>
+            )}
             <p className="mb-3.5 text-[13px]" style={{ color: T.textMid }}>
               Activa capítulos y añade tus propias partidas
             </p>
