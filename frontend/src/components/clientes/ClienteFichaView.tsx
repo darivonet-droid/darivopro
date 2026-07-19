@@ -243,7 +243,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
             </p>
           </div>
         ) : (
-          <CotizacionesList iniciales={cotizaciones} facturarMode="preguntar" soloHistorial nuevaCotizacionHref={nuevaCotizacionHref} nuevaFacturaHref={nuevaFacturaHref} />
+          <CotizacionesList iniciales={cotizaciones} soloHistorial nuevaCotizacionHref={nuevaCotizacionHref} nuevaFacturaHref={nuevaFacturaHref} />
         )}
       </div>
 

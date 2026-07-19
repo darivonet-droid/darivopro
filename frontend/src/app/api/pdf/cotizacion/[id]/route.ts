@@ -12,7 +12,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
     const { data: cotizacion, error } = await supabase
       .from("cotizaciones")
-      .select("*, items:cotizacion_items(cat_label, svc_label, qty, unit, unit_price, subtotal)")
+      .select("*, items:cotizacion_items(svc_id, cat_label, svc_label, qty, unit, unit_price, subtotal)")
       .eq("id", params.id)
       .eq("user_id", user.id)
       .single();

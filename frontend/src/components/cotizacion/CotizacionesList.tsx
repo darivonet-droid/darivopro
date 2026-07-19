@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/Button";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
 import { CotizacionCard } from "@/components/cotizacion/CotizacionCard";
 import { useCotizacion } from "@/hooks/useCotizacion";
-import { useFactura } from "@/hooks/useFactura";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
@@ -24,11 +23,6 @@ const SIGUIENTE_ESTADO: Record<Cotizacion["status"], Cotizacion["status"] | null
 interface CotizacionesListProps {
   iniciales: Cotizacion[];
   /**
-   * "directo"   → convierte la cotización en boleta al instante (comportamiento por defecto).
-   * "preguntar" → abre el formulario de factura para elegir Empresa (RUC) o Particular (DNI).
-   */
-  facturarMode?: "directo" | "preguntar";
-  /**
    * true → modo ficha de cliente: oculta Eliminar y el EmptyState con botón "Nueva cotización"
    * (el padre ya tiene su propio botón "+ Nueva cotización para este cliente").
    */
@@ -37,13 +31,13 @@ interface CotizacionesListProps {
    * sustituye por "/empresa/cotizaciones/nuevo" (capa de presentación de escritorio,
    * 05-MODULO-COTIZACIONES-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
   nuevaCotizacionHref?: string;
-  /** Base del editor de facturas (facturarMode="preguntar"). Empresa la sustituye
-   * por "/empresa/facturas/nueva" (06-MODULO-FACTURAS-EMPRESA.md) — Móvil sigue
-   * usando la ruta por defecto. */
+  /** Base del editor de facturas ("Convertir a Factura", cotizaciones Aprobado).
+   * Empresa la sustituye por "/empresa/facturas/nueva" (06-MODULO-FACTURAS-EMPRESA.md)
+   * — Móvil sigue usando la ruta por defecto. */
   nuevaFacturaHref?: string;
 }
 
-export function CotizacionesList({ iniciales, facturarMode = "directo", soloHistorial = false, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: CotizacionesListProps) {
+export function CotizacionesList({ iniciales, soloHistorial = false, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: CotizacionesListProps) {
   const router = useRouter();
   const [cotizaciones, setCotizaciones] = useState(() => {
     if (iniciales.length > 0) return iniciales;
@@ -52,9 +46,7 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
   const [abierto, setAbierto] = useState<string | null>(null);
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(cotizaciones);
   const { actualizarEstado, eliminar, generarPDF } = useCotizacion();
-  const { convertirDesdeCotizacion } = useFactura();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
-  const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
 
   useEffect(() => {
     if (iniciales.length > 0) {
@@ -108,19 +100,14 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
     }
   };
 
-  const hacerFactura = async (p: Cotizacion) => {
-    // Modo "preguntar": el usuario elige Empresa (RUC) o Particular (DNI) en el formulario
-    if (facturarMode === "preguntar") {
-      router.push(`${nuevaFacturaHref}?cotizacion=${p.id}`);
-      return;
-    }
-    mostrarToast("Creando factura…");
-    const factura = await convertirDesdeCotizacion(p, mostrarUpgrade);
-    if (factura) {
-      mostrarToast(`${factura.invNum} creada ✓`);
-    } else {
-      mostrarToast("No se pudo crear la factura", "error");
-    }
+  // Convertir a Factura (05-MODULO-COTIZACIONES.md — flujo con revisión
+  // obligatoria, 19/07/2026): nunca emite directo — siempre abre el
+  // formulario de Nueva factura pre-llenado con los datos de esta cotización
+  // (cliente, ítems, cantidades, precios), donde el usuario revisa/edita todo
+  // libremente y solo al guardar ahí se emite la factura real. La cotización
+  // original nunca se modifica (el formulario solo lee de ella, no escribe).
+  const convertirAFactura = (p: Cotizacion) => {
+    router.push(`${nuevaFacturaHref}?cotizacion=${p.id}`);
   };
 
   const compartir = async (p: Cotizacion) => {
@@ -165,13 +152,15 @@ export function CotizacionesList({ iniciales, facturarMode = "directo", soloHist
                     >
                       Re-cotizar
                     </Link>
-                    <button
-                      className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
-                      style={{ background: "#F0FDF4", color: "#15803D" }}
-                      onClick={() => hacerFactura(p)}
-                    >
-                      → Factura
-                    </button>
+                    {p.status === "Aprobado" && (
+                      <button
+                        className="flex flex-1 items-center justify-center rounded-xl px-2 py-2.5 text-xs font-bold"
+                        style={{ background: "#F0FDF4", color: "#15803D" }}
+                        onClick={() => convertirAFactura(p)}
+                      >
+                        Convertir a Factura
+                      </button>
+                    )}
                   </div>
                   {/* Fila 2: → Estado · Compartir · Eliminar */}
                   <div className="flex w-full gap-2">

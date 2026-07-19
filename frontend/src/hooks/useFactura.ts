@@ -4,8 +4,7 @@ import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { verificarLimiteFactura, UPGRADE_MENSAJES } from "@/lib/plan-limits";
 import { buildWAMessage, soloDigitos } from "@/lib/utils";
-import { nextNumeroComprobante } from "@/lib/factura-utils";
-import type { EmpresaData, Factura, InvStatus, LineaFactura, Cotizacion } from "@/types";
+import type { EmpresaData, Factura, InvStatus, LineaFactura } from "@/types";
 
 interface FacturaRow {
   inv_id: string;
@@ -210,102 +209,5 @@ export function useFactura() {
     return json.data?.data?.url ?? json.data?.url ?? null;
   }, []);
 
-  /**
-   * Convierte una cotización (cotizacion) en una factura/boleta.
-   * Copia cliente, partidas, cantidades, precios, observaciones.
-   * Mantiene trazabilidad vía from_quote_id.
-   * IGV 18% se aplica sobre el total de la cotización.
-   */
-  const convertirDesdeCotizacion = useCallback(async (
-    p: Cotizacion,
-    onUpgrade?: (razon: import("@/lib/plan-limits").UpgradeRazon) => void
-  ): Promise<Factura | null> => {
-    setLoading(true);
-    setError(null);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); setError("Sesión expirada"); return null; }
-
-    // Plan limit check
-    const limite = await verificarLimiteFactura(supabase);
-    if (!limite.ok) {
-      setLoading(false);
-      setError(UPGRADE_MENSAJES[limite.razon].subtitulo);
-      onUpgrade?.(limite.razon);
-      return null;
-    }
-
-    // Fetch existing invoice numbers and company profile in parallel
-    const [facturasRes, perfilRes] = await Promise.all([
-      supabase.from("facturas").select("inv_num"),
-      supabase.from("perfiles").select("*").single(),
-    ]);
-
-    const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
-    const perfil = perfilRes.data;
-
-    // Auto-generate next boleta number
-    const invNum = nextNumeroComprobante("boleta", numerosExistentes);
-
-    // Map cotizacion items → lineas de factura (one-to-one, full traceability)
-    const items: LineaFactura[] = p.items.map((it) => ({
-      desc: it.catLabel ? `${it.catLabel} — ${it.svcLabel}` : it.svcLabel,
-      cantidad: it.calcType === "fixed" ? 1 : it.qty,
-      pu:       it.calcType === "fixed" ? it.subtotal : it.unitPrice,
-      subtotal: it.subtotal,
-    }));
-
-    // Totals: cotizacion.totalFinal is the pre-IGV base; invoice adds 18% IGV
-    const subtotalBase = Math.round(p.totalFinal * 100) / 100;
-    const igvAmount    = Math.round(subtotalBase * 0.18 * 100) / 100;
-    const totalFinal   = Math.round((subtotalBase + igvAmount) * 100) / 100;
-
-    const bizData: EmpresaData = {
-      razonSocial:       perfil?.razon_social ?? "",
-      ruc:               perfil?.ruc ?? "",
-      direccion:         perfil?.direccion ?? "",
-      telefono:          perfil?.telefono ?? undefined,
-      moneda:            (perfil?.moneda as "PEN" | "USD") ?? "PEN",
-      simbolo:           perfil?.simbolo ?? "S/",
-      cta_detracciones:  perfil?.cta_detracciones ?? undefined,
-    };
-
-    const hoy = new Date().toISOString().slice(0, 10);
-
-    // Misma vinculación que en crear(): usa el cliente_id ya presente en la
-    // cotización de origen (findOrCreateCliente ya lo resolvió al crearla).
-    const clienteId = p.clienteId ?? await findOrCreateCliente(user.id, p.clientName, p.phone);
-
-    const { data, error: dbErr } = await supabase
-      .from("facturas")
-      .insert({
-        user_id:        user.id,
-        cliente_id:     clienteId,
-        inv_num:        invNum,
-        inv_date:       hoy,
-        inv_status:     "Emitida",
-        tipo_doc:       "boleta",
-        client_name:    p.clientName,
-        client_dir:     p.city ?? null,
-        moneda:         bizData.moneda,
-        sym:            bizData.simbolo,
-        items,
-        subtotal_base:  subtotalBase,
-        igv_amount:     igvAmount,
-        total_final:    totalFinal,
-        from_quote_id:  p.id,
-        biz_data:       {
-          ...bizData,
-          ...(p.notes ? { observaciones: p.notes } : {}),
-        },
-      })
-      .select()
-      .single();
-
-    setLoading(false);
-    if (dbErr || !data) { setError(dbErr?.message ?? "Error al crear factura"); return null; }
-    return mapRow(data as FacturaRow);
-  }, [supabase]);
-
-  return { loading, error, listar, crear, actualizarEstado, enviarWhatsApp, generarPDF, convertirDesdeCotizacion };
+  return { loading, error, listar, crear, actualizarEstado, enviarWhatsApp, generarPDF };
 }

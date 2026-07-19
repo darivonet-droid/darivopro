@@ -1,9 +1,11 @@
 import React from "react";
 import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
-import { baseStyles, C, fmtMoney, fmtQty } from "./styles";
+import { baseStyles, C, fmtMoney } from "./styles";
+import { montoALetras } from "@/lib/numero-a-letras";
 import type { EmpresaData } from "@/types";
 
 export interface CotizacionItemRow {
+  svc_id?: string | null;
   cat_label?: string | null;
   svc_label?: string | null;
   qty?: number | null;
@@ -67,17 +69,27 @@ const s = StyleSheet.create({
     color: C.blue,
     textTransform: "uppercase",
   },
-  th: { fontSize: 8, color: C.textMid, fontFamily: "Helvetica-Bold" },
-  colDesc: { width: "46%" },
-  colQty: { width: "18%", textAlign: "right" },
-  colPu: { width: "18%", textAlign: "right" },
-  colSub: { width: "18%", textAlign: "right" },
-  totales: { marginTop: 18, marginLeft: "auto", width: "55%" },
+  // Tabla de ítems estilo Bizlinks (modelo de referencia de Factura real,
+  // 19/07/2026): Ítem | Código | Descripción | Und. | Cantidad | V. Unitario
+  // | P. Unitario | Descuento | Valor Venta.
+  th: { fontSize: 7, color: C.textMid, fontFamily: "Helvetica-Bold" },
+  thSub: { fontSize: 5.5, color: C.textLight, fontFamily: "Helvetica" },
+  td: { fontSize: 8 },
+  colItem: { width: "5%" },
+  colCodigo: { width: "11%" },
+  colDescripcion: { width: "25%" },
+  colUnd: { width: "6%" },
+  colCantidad: { width: "9%", textAlign: "right" },
+  colVUnit: { width: "11%", textAlign: "right" },
+  colPUnit: { width: "11%", textAlign: "right" },
+  colDescuento: { width: "10%", textAlign: "right" },
+  colValorVenta: { width: "12%", textAlign: "right" },
+  totales: { marginTop: 18, marginLeft: "auto", width: "60%" },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 3,
-    fontSize: 11,
+    fontSize: 10,
   },
   totalFinal: {
     flexDirection: "row",
@@ -86,9 +98,18 @@ const s = StyleSheet.create({
     borderTopColor: C.navy,
     marginTop: 6,
     paddingTop: 8,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Helvetica-Bold",
     color: C.navy,
+  },
+  sonLetras: {
+    marginTop: 10,
+    marginLeft: "auto",
+    width: "60%",
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: C.textMid,
+    textTransform: "uppercase",
   },
   notas: {
     marginTop: 16,
@@ -151,44 +172,91 @@ export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
 
         <View style={{ marginTop: 14 }}>
           <View style={baseStyles.tableHeader}>
-            <Text style={[s.th, s.colDesc]}>Partida</Text>
-            <Text style={[s.th, s.colQty]}>Cant.</Text>
-            <Text style={[s.th, s.colPu]}>P. Unit.</Text>
-            <Text style={[s.th, s.colSub]}>Subtotal</Text>
+            <Text style={[s.th, s.colItem]}>Ítem</Text>
+            <Text style={[s.th, s.colCodigo]}>Código</Text>
+            <Text style={[s.th, s.colDescripcion]}>Descripción</Text>
+            <Text style={[s.th, s.colUnd]}>Und.</Text>
+            <Text style={[s.th, s.colCantidad]}>Cantidad</Text>
+            <Text style={[s.th, s.colVUnit]}>V. Unitario</Text>
+            <Text style={[s.th, s.colPUnit]}>P. Unitario</Text>
+            <Text style={[s.th, s.colDescuento]}>Descuento</Text>
+            <View style={s.colValorVenta}>
+              <Text style={s.th}>Valor Venta</Text>
+              <Text style={s.thSub}>(afecto al IGV)</Text>
+            </View>
           </View>
 
-          {(data.items ?? []).map((item, i) => {
-            const cap = item.cat_label ?? "";
-            const showCap = cap && cap !== lastCap;
-            if (showCap) lastCap = cap;
-            return (
-              <React.Fragment key={i}>
-                {showCap ? <Text style={s.cap}>{cap}</Text> : null}
-                <View style={baseStyles.tableRow}>
-                  <Text style={s.colDesc}>{item.svc_label ?? ""}</Text>
-                  <Text style={s.colQty}>{fmtQty(Number(item.qty), item.unit ?? undefined)}</Text>
-                  <Text style={s.colPu}>{fmtMoney(Number(item.unit_price))}</Text>
-                  <Text style={s.colSub}>{fmtMoney(Number(item.subtotal))}</Text>
+          {(() => {
+            let itemNum = 0;
+            return (data.items ?? []).map((item, i) => {
+              const cap = item.cat_label ?? "";
+              const showCap = cap && cap !== lastCap;
+              if (showCap) lastCap = cap;
+              itemNum += 1;
+              const vUnitario = Number(item.unit_price ?? 0);
+              const pUnitario = Math.round(vUnitario * 1.18 * 100) / 100;
+              return (
+                <React.Fragment key={i}>
+                  {showCap ? <Text style={s.cap}>{cap}</Text> : null}
+                  <View style={baseStyles.tableRow}>
+                    <Text style={[s.td, s.colItem]}>{itemNum}</Text>
+                    <Text style={[s.td, s.colCodigo]}>{item.svc_id ?? ""}</Text>
+                    <Text style={[s.td, s.colDescripcion]}>{item.svc_label ?? ""}</Text>
+                    <Text style={[s.td, s.colUnd]}>{item.unit ?? ""}</Text>
+                    <Text style={[s.td, s.colCantidad]}>{Number(item.qty ?? 0).toFixed(2)}</Text>
+                    <Text style={[s.td, s.colVUnit]}>{vUnitario.toFixed(2)}</Text>
+                    <Text style={[s.td, s.colPUnit]}>{pUnitario.toFixed(2)}</Text>
+                    <Text style={[s.td, s.colDescuento]}>0.00</Text>
+                    <Text style={[s.td, s.colValorVenta]}>{Number(item.subtotal ?? 0).toFixed(2)}</Text>
+                  </View>
+                </React.Fragment>
+              );
+            });
+          })()}
+        </View>
+
+        {(() => {
+          // Op. Gravada = base imponible (materiales + partidas + mano de obra,
+          // sin IGV) — mismo total_final que ya usa hoy la conversión real
+          // Cotización → Factura (hooks/useFactura.ts, "cotizacion.totalFinal
+          // is the pre-IGV base"), para que el desglose acá sea consistente
+          // con la factura que eventualmente se emita desde esta cotización.
+          const opGravada = Number(data.total_final ?? 0);
+          const igv = Math.round(opGravada * 0.18 * 100) / 100;
+          const importeTotal = Math.round((opGravada + igv) * 100) / 100;
+          const moneda = biz?.moneda ?? "PEN";
+          return (
+            <>
+              <View style={s.totales}>
+                <View style={s.totalRow}>
+                  <Text>Op. Gravada</Text>
+                  <Text>{fmtMoney(opGravada, biz?.simbolo)}</Text>
                 </View>
-              </React.Fragment>
-            );
-          })}
-        </View>
-
-        <View style={s.totales}>
-          <View style={s.totalRow}>
-            <Text>Materiales y partidas</Text>
-            <Text>{fmtMoney(Number(data.total_base))}</Text>
-          </View>
-          <View style={s.totalRow}>
-            <Text>Mano de obra</Text>
-            <Text>{fmtMoney(Number(data.total_labor))}</Text>
-          </View>
-          <View style={s.totalFinal}>
-            <Text>TOTAL</Text>
-            <Text>{fmtMoney(Number(data.total_final))}</Text>
-          </View>
-        </View>
+                <View style={s.totalRow}>
+                  <Text>I.G.V (18%)</Text>
+                  <Text>{fmtMoney(igv, biz?.simbolo)}</Text>
+                </View>
+                <View style={s.totalRow}>
+                  <Text>Op. Inafecta</Text>
+                  <Text>{fmtMoney(0, biz?.simbolo)}</Text>
+                </View>
+                <View style={s.totalRow}>
+                  <Text>Op. Exonerada</Text>
+                  <Text>{fmtMoney(0, biz?.simbolo)}</Text>
+                </View>
+                <View style={s.totalRow}>
+                  <Text>Op. Exportación</Text>
+                  <Text>{fmtMoney(0, biz?.simbolo)}</Text>
+                </View>
+                <View style={s.totalFinal}>
+                  <Text>Importe Total</Text>
+                  <Text>{fmtMoney(importeTotal, biz?.simbolo)}</Text>
+                </View>
+              </View>
+              <Text style={s.sonLetras}>SON: {montoALetras(importeTotal, moneda)}</Text>
+            </>
+          );
+        })()}
 
         {data.notes ? (
           <View style={s.notas}>
@@ -200,7 +268,7 @@ export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
         ) : null}
 
         <Text style={baseStyles.footer}>
-          Esta cotización tiene validez de 30 días desde su emisión · DARIVO PRO
+          Esta cotización tiene validez de 90 días desde su emisión · darivopro.com
         </Text>
       </Page>
     </Document>
