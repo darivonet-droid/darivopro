@@ -1,21 +1,44 @@
 # Darivo Pro — Guía para Claude Code
 
+## Regla de oro (metodología, antes de tocar nada)
+
+**Verificar antes de afirmar. Reproducir antes de arreglar. Buscar causa raíz, no síntoma.**
+
+- Ninguna afirmación de estado ("funciona", "está roto") vale sin **evidencia dura**
+  de esta sesión (HTTP status, bytes, píxeles, valores en BD). La confianza no es evidencia.
+- No se arregla nada que no se haya **reproducido** en esta sesión. Si no reproduce, se dice — no se "arregla" igual.
+- Etiquetar cada conclusión como *confirmada* o *sospecha*. "Apunta al build" ≠ "es el build".
+- Todo bug arreglado lleva su **test de regresión** (o los pasos manuales exactos de verificación).
+- El reporte final separa siempre: **verificado / sospecha / pendiente**.
+
 ## Autonomía de ejecución
 
 Por defecto, tienes autorización para ejecutar tareas de forma autónoma, sin pedir permiso paso a paso ni confirmación intermedia.
 
-### Autonomía total sobre main/producción (vigente desde 12/07/2026, mientras no haya clientes reales)
+### Dos modos de despliegue (regla nueva 19/07/2026 — reemplaza "Autonomía total sobre main")
 
-El propietario autorizó explícitamente mergear `develop` → `main` y hacer push a producción **sin pedir confirmación cada vez**, mientras el sistema no tenga clientes reales usándolo todavía. En cuanto el propietario avise que ya hay clientes reales, este permiso se revierte automáticamente y vuelve a aplicar la excepción de "Deploy" de abajo (pedir confirmación antes de tocar `main`) — no asumas que sigue vigente sin que te lo reconfirmen si ha pasado mucho tiempo o el contexto sugiere que el producto ya está en manos de usuarios reales.
+A partir de esta fecha queda **revertida** la "autonomía total sobre `main`" del 12/07/2026. Rigen dos modos:
 
-Bajo esta autonomía: cuando un cambio en `develop` esté listo y verificado (build/lint/typecheck limpios, sin regresiones), mergéalo a `main` y sube a producción tú mismo — luego avisa con un resumen breve de qué cambió.
+- **`main` = producción real: solo se despliega cuando el propietario lo avisa
+  explícitamente.** Claude NO mergea ni sube a `main` por su cuenta. Prepara el
+  cambio, lo deja verificado (build/lint/typecheck limpios, sin regresiones) y
+  **espera el aviso**.
+- **Producción autónoma (bajo demanda):** solo cuando el propietario diga la
+  frase **"producción autónomo"**, Claude despliega/trabaja de forma autónoma
+  para esa tarea, sin confirmación paso a paso. El permiso es **por tarea, no
+  permanente** — no se asume vigente en la siguiente sesión sin que se repita.
+- **Verificación siempre en:**
+  `https://darivo-saas-git-main-darivonet-droids-projects.vercel.app/`,
+  iniciando sesión con **Google usando la sesión ya abierta en el navegador**
+  (botón "Continuar con Google"). Claude **nunca escribe la contraseña**; si
+  algún login la pidiera, la escribe el propietario (regla permanente, excepción #3).
 
-**Las 2 excepciones de abajo siguen intactas, sin excepción, ahora y siempre** (la autonomía sobre main NO las anula):
+**Las excepciones de abajo siguen intactas, sin excepción, ahora y siempre.** El modo "producción autónoma" **solo** levanta la confirmación de **Deploy (#2)** para esa tarea; **nunca** anula Base de datos (#1), contraseñas (#3) ni endpoints de diagnóstico (#4):
 
 ÚNICAS EXCEPCIONES — debes parar y pedir confirmación explícita antes de actuar cuando la tarea implique:
 
 1. **Base de datos**: cualquier cambio en schema, migraciones, o datos (Supabase). Las migraciones siempre se entregan como SQL escrito, sin ejecutar — el propietario las corre él mismo en el SQL Editor.
-2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente) — **salvo mientras esté vigente la autonomía total de arriba**, en cuyo caso procede sin preguntar.
+2. **Deploy**: cualquier acción que dispare un despliegue a producción (push a main, redeploy manual, o equivalente) — **salvo cuando el propietario haya dicho "producción autónomo" para esa tarea** (ver "Dos modos de despliegue" arriba), en cuyo caso procede sin preguntar.
 3. **Nunca contraseñas en ningún login** — ni en formularios de navegador de preview, ni en ningún otro flujo de autenticación, sin importar la fuente (incluso archivos de credenciales QA propios del proyecto).
 4. **Nunca desplegar a producción un endpoint de diagnóstico sin autenticación** (regla agregada 14/07/2026 tras incidente real, ver abajo) — cualquier ruta que devuelva en su respuesta HTTP metadata de configuración interna (aunque sea parcial: `ref`/`role` de un JWT, longitud de una key, nombre de proyecto) debe ir gateada por la misma auth de Admin ya existente, o loguearse solo server-side vía `console.error` (visible únicamente en Vercel Runtime Logs, no en la respuesta pública) — nunca en el body de una respuesta HTTP alcanzable sin sesión. El repo es público en GitHub, así que un "query param secreto" en el código tampoco es una defensa real.
 
