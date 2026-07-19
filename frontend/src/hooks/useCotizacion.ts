@@ -315,26 +315,5 @@ export function useCotizacion() {
     }
   }, [supabase]);
 
-  /**
-   * Registra la fecha de apertura del enlace WhatsApp y guarda la URL del PDF.
-   * Silencioso — no propaga errores (puede fallar si la migración aún no está aplicada).
-   */
-  const registrarEnvioWA = useCallback(async (
-    id:      string,
-    pdfUrl?: string
-  ): Promise<void> => {
-    try {
-      await supabase
-        .from("cotizaciones")
-        .update({
-          wa_enviado_at: new Date().toISOString(),
-          ...(pdfUrl ? { pdf_url: pdfUrl } : {}),
-        })
-        .eq("id", id);
-    } catch (e) {
-      console.warn("[registrarEnvioWA] no disponible aún:", e);
-    }
-  }, [supabase]);
-
-  return { loading, error, listar, crear, actualizar, actualizarEstado, eliminar, generarPDF, registrarCalculo, registrarEnvioWA };
+  return { loading, error, listar, crear, actualizar, actualizarEstado, eliminar, generarPDF, registrarCalculo };
 }
