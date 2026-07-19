@@ -33,8 +33,14 @@ export function FloatBar({
         // safe-area (pantallas sin barra de gestos) env(...) resuelve a 0px,
         // así que queda igual que antes (20px).
         bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
-        left: "50%",
-        transform: "translateX(-50%)",
+        // Centrado con left/right/margin, NO con transform: la clase `.pi`
+        // (globals.css) anima `transform` hasta `scale(1)` con fill-mode `both`,
+        // y una animación CSS pisa el estilo inline — el `translateX(-50%)` que
+        // había aquí quedaba anulado en cuanto terminaba la animación, dejando
+        // la barra pegada al 50% de la pantalla y desbordando por la derecha.
+        left: 0,
+        right: 0,
+        margin: "0 auto",
         width: "calc(100% - 28px)",
         maxWidth: 362,
         zIndex: 200,

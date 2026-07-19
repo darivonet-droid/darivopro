@@ -20,8 +20,10 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
 
-    // Return cached PDF URL if already generated (avoids re-render + re-upload)
-    if (cotizacion.pdf_url) {
+    // Return cached PDF URL if already generated (avoids re-render + re-upload).
+    // Las URLs `/object/public/` cacheadas por la versión anterior están muertas
+    // (el bucket es privado): se ignoran para que se regeneren ya firmadas.
+    if (cotizacion.pdf_url && !cotizacion.pdf_url.includes("/object/public/")) {
       return NextResponse.json({ data: { url: cotizacion.pdf_url } });
     }
 

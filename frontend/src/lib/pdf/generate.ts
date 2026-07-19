@@ -14,6 +14,9 @@ function fechaHoy(): string {
   });
 }
 
+/** 1 año en segundos — vigencia del enlace firmado del PDF. */
+const VIGENCIA_URL_FIRMADA = 60 * 60 * 24 * 365;
+
 async function subirPdf(buffer: Buffer, filename: string): Promise<string> {
   const supabase = createAdminClient();
   const path = `pdfs/${filename}`;
@@ -25,8 +28,19 @@ async function subirPdf(buffer: Buffer, filename: string): Promise<string> {
 
   if (error) throw new Error(error.message);
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  // El bucket `documentos` es PRIVADO (baseline_v2.sql: public = false), así que
+  // getPublicUrl() devolvía una URL que responde 400 "Bucket not found" para
+  // todo el mundo — el PDF se subía bien pero nunca se podía abrir ni adjuntar
+  // por WhatsApp. Se firma la URL con el cliente service_role, que sí puede.
+  const { data, error: errFirma } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, VIGENCIA_URL_FIRMADA);
+
+  if (errFirma || !data?.signedUrl) {
+    throw new Error(errFirma?.message ?? "No se pudo firmar la URL del PDF");
+  }
+
+  return data.signedUrl;
 }
 
 export async function generarPdfCotizacion(data: CotizacionPdfData): Promise<string> {

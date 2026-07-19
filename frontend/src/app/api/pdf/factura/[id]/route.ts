@@ -21,8 +21,10 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "No encontrada" }, { status: 404 });
     }
 
-    // Return cached PDF URL if already generated (avoids re-render + re-upload)
-    if (factura.pdf_url) {
+    // Return cached PDF URL if already generated (avoids re-render + re-upload).
+    // Las URLs `/object/public/` cacheadas por la versión anterior están muertas
+    // (el bucket es privado): se ignoran para que se regeneren ya firmadas.
+    if (factura.pdf_url && !factura.pdf_url.includes("/object/public/")) {
       return NextResponse.json({ data: { url: factura.pdf_url } });
     }
 

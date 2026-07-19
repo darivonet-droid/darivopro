@@ -85,7 +85,13 @@ export function soportaCompartir(): boolean {
 export function abrirVentanaDiferida(): Window | null {
   if (typeof window === "undefined") return null;
   try {
-    return window.open("", "_blank", "noopener,noreferrer");
+    // SIN `noopener`: por especificación, window.open() devuelve `null` cuando se
+    // pasa `noopener`, así que la versión anterior nunca obtenía el handle. La
+    // pestaña en blanco quedaba huérfana para siempre (el usuario veía "la app
+    // salta a una página en blanco") y el destino acababa abriéndose con un
+    // window.open() posterior al await, que el navegador móvil bloquea. Aquí el
+    // handle es imprescindible: es justo lo que esta función existe para dar.
+    return window.open("", "_blank");
   } catch {
     return null;
   }
