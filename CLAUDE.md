@@ -852,6 +852,15 @@ Mohamed confirmó: terminar las 7 pantallas restantes de Admin **antes** de reto
 
 Las 2 secciones de abajo (Hallazgo 13/07/2026 y Diagnóstico ampliado 14/07/2026) se dejan intactas como historial de qué pasó y cómo se investigó — **cada mención de `kyckjapprmtfahnkuucz` en ellas está marcada inline con "⚠️ ID INCORRECTO, NO USAR"**. No son instrucciones vigentes.
 
+### ✅ Confusión reabierta y vuelta a cerrar — 19/07/2026 (reconfirma la corrección del 14/07, no la revierte)
+
+El 19/07/2026 se reabrió por error esta duda (se llegó a preparar una limpieza para eliminar `vyrtokggypcmpforglch` por creerlo el proyecto viejo). Antes de ejecutar nada se verificó de nuevo con evidencia dura, en 2 pasos independientes:
+
+1. **Bundle JS real servido en producción ahora mismo** (`www.darivopro.com/login`, sin sesión): `createBrowserClient("https://vyrtokggypcmpforglch.supabase.co", ...)` — confirma que Vercel Production sigue apuntando a `vyrtokggypcmpforglch`, igual que documenta la corrección del 14/07.
+2. **Comparación de estructura vía SQL Editor, en vivo, con el propietario confirmando el ID del proyecto por URL**: `kyckjapprmtfahnkuucz` tiene solo 17 tablas, con nombres **anteriores** al rename `presupuestos`→`cotizaciones` del 08/07/2026 (`presupuestos`, `presupuesto_items`, `referidos`, `users`) y sin ninguna tabla de lo construido entre el 08/07 y el 19/07 (`cotizaciones`, `empresas`, `empresa_empleados`, `partners`, `partner_comisiones_config`, `catalogo_*`, `suscripciones`, `pagos_eventos`, etc.) — es un snapshot congelado de antes del 08/07/2026, no el proyecto activo.
+
+**Conclusión sin ambigüedad: `vyrtokggypcmpforglch` es el único proyecto Supabase real de Darivo Pro.** `kyckjapprmtfahnkuucz` es un remanente viejo — el propietario confirmó el 19/07/2026 que no tiene datos de cliente importantes ahí y autorizó su eliminación manual desde el dashboard de Supabase (acción irreversible, la ejecuta el propietario, no Claude). Los 7 archivos del repo que referencian un project ref (`README.md`, `.env.example`, `supabase/.env.example`, `supabase/config.toml`, `scripts/supabase-migrate.ps1`, `scripts/schema-introspect-readonly.mjs`) ya apuntaban correctamente a `vyrtokggypcmpforglch` desde antes — no requirieron cambios. Búsqueda en GitHub (issues + PRs del repo `darivonet-droid/darivopro`) por ambos IDs: sin resultados, nada que limpiar ahí.
+
 ### ⚠️ Hallazgo 13/07/2026 — `/admin/partners` Y `/admin/empresas` caídos en producción, requiere decisión del propietario
 
 Ambas pantallas dan error ("Invalid API key" de Supabase) en producción real al consultar sus tablas (`partners`/`partner_comisiones_config` en un caso, `empresas` en el otro). `/admin/partners` es preexistente (primer registro 12/07/2026, no causado por el trabajo de hoy); `/admin/empresas` se descubrió hoy al construir su pantalla. Diagnóstico exhaustivo con logging temporal (ya retirado en ambos casos) confirmó, con el mensaje de error real capturado sin filtrar (antes se perdía silenciosamente — ver fix en `adminClientOrNull()`):
