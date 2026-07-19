@@ -6,6 +6,7 @@ import {
   esPartnerAutorizado,
   puedeAccederEmpresa,
 } from "@/lib/acceso-producto";
+import { baseDeSubdominio, destinoPostLogin } from "@/lib/subdominios";
 
 interface CookieASetear {
   name: string;
@@ -18,27 +19,13 @@ const RUTAS_PUBLICAS = ["/login", "/registro", "/recuperar", "/nueva-contrasena"
 const RUTAS_SOLO_INVITADO = ["/login", "/registro", "/recuperar"];
 
 // ── Enrutado por subdominio (PREPARADO, DESACTIVADO por defecto) ──────────────
-// Mapea cada subdominio real de producción a la sección raíz de su panel.
-// Se activa SOLO cuando SUBDOMAIN_ROUTING_ENABLED === "1" (ver .env.example).
-// En localhost/desarrollo y en el apex (darivopro.com) es un no-op total:
-// los hostnames aquí terminan en ".darivopro.com", que no ocurre en local.
-// No tocar next.config.mjs ni vercel.json hasta conectar el dominio en Vercel.
-const SUBDOMINIOS: Record<string, string> = {
-  app: "/dashboard", // Darivo Pro Móvil
-  empresa: "/empresa", // Darivo Pro Empresa
-  admin: "/admin", // Darivo Pro Admin
-  partner: "/partner", // Panel Partner
-};
-
-/** Devuelve la sección base del subdominio *.darivopro.com, o null si no aplica. */
-function baseDeSubdominio(host: string | null): string | null {
-  if (!host) return null;
-  const h = host.split(":")[0].toLowerCase();
-  const sufijo = ".darivopro.com";
-  if (!h.endsWith(sufijo)) return null; // apex, localhost, IPs → no aplica
-  const sub = h.slice(0, -sufijo.length);
-  return SUBDOMINIOS[sub] ?? null;
-}
+// Mapea cada subdominio real de producción a la sección raíz de su panel
+// (ver frontend/src/lib/subdominios.ts — fuente única de verdad del mapa,
+// compartida con login/page.tsx). Este rewrite de "/" se activa SOLO cuando
+// SUBDOMAIN_ROUTING_ENABLED === "1" (ver .env.example). En localhost/desarrollo
+// y en el apex (darivopro.com) es un no-op total: los hostnames aquí terminan
+// en ".darivopro.com", que no ocurre en local. No tocar next.config.mjs ni
+// vercel.json hasta conectar el dominio en Vercel.
 
 export async function middleware(req: NextRequest) {
   // Rewrite por hostname: solo la raíz "/" del subdominio se reescribe a la
@@ -79,8 +66,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
   if (user && RUTAS_SOLO_INVITADO.some((r) => req.nextUrl.pathname.startsWith(r))) {
+    // Antes caía siempre en /dashboard (Móvil) sin importar el subdominio —
+    // un Admin/Gerente/Partner que reabría /login ya logueado desde su
+    // propio subdominio terminaba en el panel equivocado. Ahora respeta el
+    // subdominio real (fix 19/07/2026, ver frontend/src/lib/subdominios.ts).
     const url = req.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = destinoPostLogin(req.headers.get("host"));
     return NextResponse.redirect(url);
   }
 

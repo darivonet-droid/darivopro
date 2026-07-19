@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { T } from "@/lib/theme";
+import { destinoPostLogin } from "@/lib/subdominios";
 
 const ERRORES: Record<string, string> = {
   invalid_credentials:         "Ese correo o contraseña no coinciden, revísalos 🔍",
@@ -44,17 +45,23 @@ export default function LoginPage() {
     }
     // Best-effort — nunca bloquea el login si falla (ver route.ts).
     void fetch("/api/empleados/marcar-actividad", { method: "POST" }).catch(() => {});
-    router.push("/dashboard");
+    // Antes siempre "/dashboard" (Móvil) sin importar el subdominio — un
+    // Admin/Gerente/Partner que iniciaba sesión desde admin./empresa./partners.
+    // caía en el panel equivocado y tenía que navegar manualmente al suyo.
+    // Fix 19/07/2026, ver frontend/src/lib/subdominios.ts.
+    router.push(destinoPostLogin(window.location.hostname));
     router.refresh();
   };
 
   // OAuth Google — reutiliza el callback existente (/auth/callback intercambia el
-  // código y enruta a next). Con next=/dashboard, el gating de onboarding del
-  // layout (auth) manda igual que en el login por email: usuario nuevo → /onboarding/1.
+  // código y enruta a next). El destino respeta el subdominio real (mismo fix de
+  // arriba); el gating de onboarding del layout (auth) sigue mandando igual que
+  // antes para usuario nuevo → /onboarding/1 (ver auth/callback/route.ts).
   const entrarConGoogle = async () => {
     setError(null);
     setLoading(true);
-    const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`;
+    const next = destinoPostLogin(window.location.hostname);
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },

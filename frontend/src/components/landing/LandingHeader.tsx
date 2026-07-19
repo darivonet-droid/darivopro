@@ -16,15 +16,17 @@ import {
 const NAVY = "#0A1628";
 const BLUE = "#2563EB";
 
-// Subdominios reales del ecosistema (frontend/src/middleware.ts SUBDOMINIOS) —
-// el enrutado por subdominio está preparado pero AÚN NO conectado en DNS
-// (SUBDOMAIN_ROUTING_ENABLED), así que estos enlaces no resuelven todavía en
-// producción hasta que el propietario conecte el dominio. Se dejan como URL
-// real de destino final, no como placeholder.
+// Subdominios reales del ecosistema (frontend/src/lib/subdominios.ts).
+// Verificado 19/07/2026 vía API de Vercel (get_project): empresa.darivopro.com
+// y partners.darivopro.com (con "s") SÍ están conectados y resuelven en
+// producción. "app.darivopro.com" NO está conectado (Móvil se sirve hoy
+// desde darivopro.com). Antes este menú enlazaba a "app.darivopro.com" y
+// "partner.darivopro.com" (sin "s") — ninguno de los dos resuelve DNS, un
+// visitante que le diera clic caía en un error de navegador. Corregido.
 const PRODUCTOS = [
   { nombre: "Darivo Pro Empresa", texto: "Para constructoras con equipo", href: "https://empresa.darivopro.com", icon: IconBuilding },
-  { nombre: "Darivo Pro Móvil", texto: "Para el maestro de obra, desde el celular", href: "https://app.darivopro.com", icon: IconSmartphone },
-  { nombre: "Darivo Pro Partner", texto: "Gana comisión por referir clientes", href: "https://partner.darivopro.com", icon: IconHandshake },
+  { nombre: "Darivo Pro Móvil", texto: "Para el maestro de obra, desde el celular", href: "https://darivopro.com", icon: IconSmartphone },
+  { nombre: "Darivo Pro Partner", texto: "Gana comisión por referir clientes", href: "https://partners.darivopro.com", icon: IconHandshake },
 ];
 
 export function LandingHeader() {

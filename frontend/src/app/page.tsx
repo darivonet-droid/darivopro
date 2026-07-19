@@ -97,15 +97,20 @@ const FEATURES = [
 
 // Un Darivo Pro por tipo de usuario — dobla como acceso directo a los 3
 // productos (ver LandingHeader) y como "casos de uso" de la landing.
-// Subdominios reales (frontend/src/middleware.ts SUBDOMINIOS) — aún sin
-// conectar en DNS, ver nota en LandingHeader.tsx.
+// Subdominios reales (frontend/src/lib/subdominios.ts, verificado 19/07/2026
+// vía API de Vercel): empresa.darivopro.com y partners.darivopro.com (con
+// "s") SÍ están conectados. "app.darivopro.com" NO está conectado todavía —
+// Móvil se sirve hoy desde darivopro.com. Antes esta tarjeta enlazaba a
+// "app.darivopro.com" y "partner.darivopro.com" (sin "s"), dos hostnames que
+// no resuelven DNS — cualquier visitante que le diera clic caía en un error
+// de navegador. Corregido.
 const PRODUCTOS_USO = [
   {
     icon: IconSmartphone,
     nombre: "Darivo Pro Móvil",
     para: "Para el maestro de obra independiente",
     texto: "Cotiza y factura tú mismo desde el celular, obra por obra, sin depender de nadie más.",
-    href: "https://app.darivopro.com",
+    href: "https://darivopro.com",
   },
   {
     icon: IconBuilding,
@@ -119,7 +124,7 @@ const PRODUCTOS_USO = [
     nombre: "Darivo Pro Partner",
     para: "Para quien quiere ganar refiriendo",
     texto: "Comparte tu enlace, gana comisión por cada cliente que se registre e invierta en Darivo Pro.",
-    href: "https://partner.darivopro.com",
+    href: "https://partners.darivopro.com",
   },
 ];
 
