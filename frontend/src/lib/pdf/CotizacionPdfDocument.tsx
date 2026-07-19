@@ -181,7 +181,7 @@ export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
             <Text>{fmtMoney(Number(data.total_base))}</Text>
           </View>
           <View style={s.totalRow}>
-            <Text>Mano de obra ({Number(data.margin ?? 0)}%)</Text>
+            <Text>Mano de obra</Text>
             <Text>{fmtMoney(Number(data.total_labor))}</Text>
           </View>
           <View style={s.totalFinal}>

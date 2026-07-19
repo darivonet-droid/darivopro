@@ -58,7 +58,7 @@ Toda migración que referencie columnas de una tabla ya existente debe incluir, 
 
 ## Cambios en curso 19/07/2026
 
-Pedido por Mohamed el 19/07/2026, 3 tareas, ejecutadas en este orden.
+Pedido por Mohamed el 19/07/2026 — 3 tareas iniciales (1-3) más 1 pedido aparte el mismo día (4), ejecutadas en este orden.
 
 ### 1. [x] Logo de empresa en documentos (Cotización y Factura), compartido Móvil/Empresa — hecho 19/07/2026
 
@@ -92,9 +92,22 @@ Búsqueda exhaustiva del string exacto `"Generado con DARIVO PRO"` en `frontend/
 
 Limpieza de imports/variables que quedaron sin uso tras quitar ese bloque (`buildWAMsgCotizacion`, `abrirVentanaDiferida`/`navegarVentanaDiferida` en Móvil, `registrarEnvioWA` del hook `useCotizacion` en ambos wizards).
 
-**Hallazgo colateral, no corregido**: `registrarEnvioWA` (función completa en `hooks/useCotizacion.ts:322-337`) queda sin ningún caller en todo el proyecto tras este cambio — candidata a eliminarse por separado si se confirma que no hace falta conservarla.
+**Hallazgo colateral — confirmado y corregido el mismo día**: `registrarEnvioWA` (`hooks/useCotizacion.ts`) quedó sin ningún caller tras este cambio; Mohamed confirmó la limpieza y se eliminó la función completa (antes en líneas 322-337) junto con su entrada en el `return` del hook — verificado que tampoco quedaba ninguna lectura de la columna `wa_enviado_at` que escribía.
 
 **Verificado**: `tsc`/`lint`/`build` limpios (ver Tarea 1). No verificado en vivo con guardado real de una Cotización (mismo bloqueo de credenciales) — el cambio es una eliminación quirúrgica de un bloque ya identificado con evidencia (archivo:línea), sin lógica nueva que pueda fallar de forma no obvia.
+
+### 4. [x] Ocultar el % de mano de obra en el PDF (Cotización y Factura) — hecho 19/07/2026, pedido aparte el mismo día
+
+Antes: el PDF mostraba "Mano de obra (40%)" — el % dejó de mostrarse, el monto en soles y el cálculo interno no cambiaron. Alcance explícito: **solo el PDF** — las vistas en pantalla dentro de la app que muestran el % por separado no se tocaron.
+
+Búsqueda exhaustiva de "Mano de obra" en `frontend/src` → 6 ocurrencias, 3 modificadas y 3 dejadas igual a propósito:
+- **Modificadas** (todas las que terminan impresas en un PDF):
+  - `frontend/src/lib/pdf/CotizacionPdfDocument.tsx` — fila de totales del PDF de Cotización, único lugar donde el % se formatea específicamente para el PDF (`Mano de obra ({data.margin}%)` → `Mano de obra`).
+  - `frontend/src/components/facturacion/NuevaFacturaForm.tsx` y `NuevaFacturaFormEscritorio.tsx` — al importar una Cotización aprobada a una Factura nueva, la mano de obra se agrega como línea de ítem (`items[].desc`) con el % incluido en el texto; ese mismo texto es lo que termina impreso en la tabla de ítems del PDF de Factura (Factura no tiene una fila de totales dedicada a mano de obra como Cotización — este es el único lugar donde aparece). Se quitó el % del texto (`Mano de obra (${p.margin}%)` → `"Mano de obra"`), monto sin cambios.
+  - **Nota de alcance**: esta descripción de ítem es también el valor pre-llenado de un campo editable en el formulario de Nueva Factura (el usuario puede modificarlo antes de guardar) — a diferencia de Cotización, Factura no tiene un paso separado que formatee el % solo para el PDF, así que no hay forma de "ocultar solo en el PDF" sin tocar también ese pre-llenado. Se aplicó igual porque es el único mecanismo real por el que el % llega al PDF de Factura.
+- **No tocadas (a propósito, son la "vista previa dentro de la app", no el PDF)**: `frontend/src/components/cotizacion/NuevoCotizacionWizard.tsx` y `NuevoCotizacionWizardEscritorio.tsx` (paso "Resumen" del wizard, en pantalla) y `frontend/src/lib/utils.ts` (texto del mensaje de WhatsApp) — las 3 siguen mostrando el % igual que antes.
+
+**Verificado**: `tsc`/`lint`/`build` limpios (81 rutas). No verificado visualmente contra el preview de Vercel (cambio hecho en esta sesión, aún no llega a `main` — ver "Dos modos de despliegue" arriba).
 
 ---
 

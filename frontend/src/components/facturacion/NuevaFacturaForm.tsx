@@ -96,7 +96,7 @@ export function NuevaFacturaForm({
       desc: it.svcLabel, cantidad: it.qty, pu: it.unitPrice, subtotal: it.subtotal,
     }));
     if (p.totalLabor > 0) {
-      lineas.push({ desc: `Mano de obra (${p.margin}%)`, cantidad: 1, pu: p.totalLabor, subtotal: p.totalLabor });
+      lineas.push({ desc: "Mano de obra", cantidad: 1, pu: p.totalLabor, subtotal: p.totalLabor });
     }
     setItems(lineas.length ? lineas : [{ ...LINEA_VACIA }]);
   };
