@@ -9,9 +9,9 @@ import { useRecentItems } from "@/hooks/useRecentItems";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase/client";
 import { cotizacionSchema } from "@/lib/validations";
-import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
+import { fmtPEN } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
-import { compartirPDF, abrirVentanaDiferida, navegarVentanaDiferida } from "@/lib/share";
+import { compartirPDF } from "@/lib/share";
 import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
 import { T } from "@/lib/design-system/tokens";
 import { DarkHeader } from "@/components/design-system/DarkHeader";
@@ -61,7 +61,7 @@ interface BasketItem {
 export function NuevoCotizacionWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, actualizar, loading, generarPDF, registrarCalculo, registrarEnvioWA } = useCotizacion();
+  const { crear, actualizar, loading, generarPDF, registrarCalculo } = useCotizacion();
   const { catalogo } = useCatalogo();
   const {
     trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
@@ -381,15 +381,10 @@ export function NuevoCotizacionWizard() {
     setPhase("cliente");
   };
 
-  // Save (crea nueva o actualiza existente según editandoId)
+  // Save (crea nueva o actualiza existente según editandoId) — solo guarda,
+  // sin disparar ningún envío automático; compartir es siempre una acción
+  // manual del usuario (botón "Compartir PDF" en la pantalla de éxito).
   const doSave = async () => {
-    // Abre la pestaña de WhatsApp YA (dentro del gesto de clic, antes de cualquier
-    // await) — si se abre después de guardar/generar el PDF, el navegador móvil
-    // normal (a diferencia de la PWA instalada) la bloquea como popup tardío.
-    const waWinPreabierta = !editandoId && phone.trim().replace(/\D/g, "").length >= 7
-      ? abrirVentanaDiferida()
-      : null;
-
     const calcInputs = buildCalcInputs(basket);
     const engineResult = calcBasket(calcInputs, margin);
     const items: LineaCotizacion[] = basket.map((it, idx) => {
@@ -408,7 +403,7 @@ export function NuevoCotizacionWizard() {
     });
     const payload = { clientName: clientName.trim() || "Sin cliente", phone: phone.trim() || undefined, city: city.trim() || undefined, items, margin, totalBase, totalLabor, totalFinal, status: "Borrador" as const, notes: notes.trim() || undefined };
     const valido = cotizacionSchema.safeParse(payload);
-    if (!valido.success) { waWinPreabierta?.close(); mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
+    if (!valido.success) { mostrarToast(valido.error.errors[0]?.message ?? "Revisa los datos", "error"); return; }
 
     // ── MODO EDICIÓN: actualizar registro existente ────────────────────────
     if (editandoId) {
@@ -433,7 +428,7 @@ export function NuevoCotizacionWizard() {
 
     // ── MODO CREACIÓN: crear nueva cotización ──────────────────────────────
     const creado = await crear(payload, mostrarUpgrade);
-    if (!creado) { waWinPreabierta?.close(); mostrarToast("No se pudo guardar la cotización", "error"); return; }
+    if (!creado) { mostrarToast("No se pudo guardar la cotización", "error"); return; }
 
     saveCalcSnapshot(engineResult);
     void registrarCalculo(creado.id, {
@@ -466,31 +461,6 @@ export function NuevoCotizacionWizard() {
 
     const pdfUrl = await generarPDF(creado.id).catch(() => null);
     setPdfUrlGuardado(pdfUrl);
-
-    // Auto-WhatsApp al crear (con PDF link incluido)
-    const cleanPhone = phone.trim().replace(/\D/g, "");
-    if (cleanPhone.length >= 7) {
-      const groupedForWA = basket.reduce<Record<string, { svcLabel: string; calcType: string; qty: number; unitPrice: number; subtotal: number; unit: string }[]>>(
-        (g, it) => {
-          const calc = calcItem(it);
-          (g[it.catLabel] = g[it.catLabel] || []).push({ svcLabel: it.svcLabel, calcType: it.calcType, qty: calc.qty, unitPrice: calc.unitPrice, subtotal: calc.subtotal, unit: it.unit });
-          return g;
-        },
-        {}
-      );
-      const msg = buildWAMsgCotizacion({
-        cotNum:       creado.cotNum,
-        clientName:   clientName.trim() || "Sin cliente",
-        groupedItems: groupedForWA,
-        totalBase, totalLabor, margin, totalFinal,
-        pdfUrl:       pdfUrl ?? undefined,
-      });
-      const numero = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
-      navegarVentanaDiferida(waWinPreabierta, `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`);
-    } else {
-      waWinPreabierta?.close();
-    }
-    await registrarEnvioWA(creado.id, pdfUrl ?? undefined);
   };
 
   const reset = () => {

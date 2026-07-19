@@ -90,7 +90,7 @@ Materiales:        ${fmt(params.totalBase)}
 Mano de obra (${params.margin}%): ${fmt(params.totalLabor)}
 *TOTAL: ${fmt(params.totalFinal)}*${pdfLine}
 
-Generado con DARIVO PRO`;
+Generado con darivopro.com`;
 }
 
 /** Construye mensaje WhatsApp para factura */
@@ -112,4 +112,4 @@ TOTAL: ${totales.sym} ${totales.total.toFixed(2)}
 
 ${empresa.razonSocial}
 RUC: ${empresa.ruc}
-Generado con DARIVO PRO`;
+Generado con darivopro.com`;

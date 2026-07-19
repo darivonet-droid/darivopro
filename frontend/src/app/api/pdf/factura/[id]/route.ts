@@ -28,6 +28,19 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ data: { url: factura.pdf_url } });
     }
 
+    // biz_data queda congelado en la factura al emitirse (registro legal) — el
+    // logo se resuelve en vivo desde perfiles para que subir/cambiar un logo
+    // se refleje también en facturas ya emitidas, no solo en las nuevas.
+    let biz_data = (factura.biz_data ?? null) as EmpresaData | null;
+    if (biz_data) {
+      const { data: perfilLogo } = await supabase
+        .from("perfiles")
+        .select("logo_url")
+        .eq("id", user.id)
+        .single();
+      biz_data = { ...biz_data, logoUrl: perfilLogo?.logo_url ?? null };
+    }
+
     const detraccion: Detraccion | undefined = factura.detraccion_tipo
       ? {
           tipo: factura.detraccion_tipo as TipoDetraccion,
@@ -53,7 +66,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       igv_amount: factura.igv_amount,
       total_final: factura.total_final,
       detraccion,
-      biz_data: (factura.biz_data ?? null) as EmpresaData | null,
+      biz_data,
     });
 
     // Persist URL for future requests (fire-and-forget)

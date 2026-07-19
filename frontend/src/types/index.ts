@@ -91,6 +91,7 @@ export interface EmpresaData {
   tipoComprobante?: "boleta" | "factura";
   formaPago?: "Efectivo" | "Yape" | "Transferencia" | "Crédito";
   cta_detracciones?: string;
+  logoUrl?: string | null;
 }
 
 export interface Partida {

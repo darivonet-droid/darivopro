@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import { baseStyles, C, fmtMoney } from "./styles";
 import type { Detraccion, EmpresaData, InvStatus, LineaFactura } from "@/types";
 import { OPCIONES_DETRACCION } from "@/lib/factura-utils";
@@ -24,6 +24,8 @@ export interface FacturaPdfData {
 
 const s = StyleSheet.create({
   top: { flexDirection: "row", justifyContent: "space-between" },
+  emisor: { flexDirection: "row", alignItems: "center" },
+  logo: { width: 46, height: 46, marginRight: 10, objectFit: "contain" },
   empresaName: { fontSize: 14, fontFamily: "Helvetica-Bold", color: C.navy },
   empresaLine: { fontSize: 9, color: C.textMid, marginTop: 2 },
   box: {
@@ -155,10 +157,14 @@ export function FacturaPdfDocument({ data, fechaGeneracion }: Props) {
 
         {/* Cabecera empresa + número */}
         <View style={s.top}>
-          <View>
-            <Text style={s.empresaName}>{biz.razonSocial ?? "Mi empresa"}</Text>
-            {biz.direccion ? <Text style={s.empresaLine}>{biz.direccion}</Text> : null}
-            {biz.telefono  ? <Text style={s.empresaLine}>Tel: {biz.telefono}</Text> : null}
+          <View style={s.emisor}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf/renderer (nodo de PDF), no <img> del DOM; no acepta prop alt */}
+            {biz.logoUrl ? <Image src={biz.logoUrl} style={s.logo} /> : null}
+            <View>
+              <Text style={s.empresaName}>{biz.razonSocial ?? "Mi empresa"}</Text>
+              {biz.direccion ? <Text style={s.empresaLine}>{biz.direccion}</Text> : null}
+              {biz.telefono  ? <Text style={s.empresaLine}>Tel: {biz.telefono}</Text> : null}
+            </View>
           </View>
           <View style={s.box}>
             <Text style={s.boxTipo}>
@@ -259,7 +265,7 @@ export function FacturaPdfDocument({ data, fechaGeneracion }: Props) {
 
         <Text style={baseStyles.footer}>
           {biz.formaPago ? `Forma de pago: ${biz.formaPago} · ` : ""}
-          Representación impresa del comprobante · Generado con DARIVO PRO · {fechaGeneracion}
+          Representación impresa del comprobante · Generado con darivopro.com · {fechaGeneracion}
         </Text>
       </Page>
     </Document>

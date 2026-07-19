@@ -13,7 +13,7 @@ import { useRecentItems } from "@/hooks/useRecentItems";
 import { useAppStore } from "@/store/useAppStore";
 import { createClient } from "@/lib/supabase/client";
 import { cotizacionSchema } from "@/lib/validations";
-import { fmtPEN, buildWAMsgCotizacion } from "@/lib/utils";
+import { fmtPEN } from "@/lib/utils";
 import { calcBasket, saveCalcSnapshot, type CalcInput } from "@/lib/calc";
 import { compartirPDF } from "@/lib/share";
 import { WIZARD_IA_SESSION_KEY } from "@/lib/cotizacion-ia";
@@ -77,7 +77,7 @@ function StepDotsClaro({ current, total = 4 }: { current: number; total?: number
 export function NuevoCotizacionWizardEscritorio() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { crear, actualizar, loading, generarPDF, registrarCalculo, registrarEnvioWA } = useCotizacion();
+  const { crear, actualizar, loading, generarPDF, registrarCalculo } = useCotizacion();
   const { catalogo } = useCatalogo();
   const {
     trackItems, getRecentSvcIds, getMostRecentCatId, getCatFrequency,
@@ -350,6 +350,8 @@ export function NuevoCotizacionWizardEscritorio() {
     setPhase("cliente");
   };
 
+  // Solo guarda, sin disparar ningún envío automático; compartir es siempre
+  // una acción manual del usuario (botón "Compartir PDF" en la pantalla de éxito).
   const doSave = async () => {
     const calcInputs = buildCalcInputs(basket);
     const engineResult = calcBasket(calcInputs, margin);
@@ -425,28 +427,6 @@ export function NuevoCotizacionWizardEscritorio() {
 
     const pdfUrl = await generarPDF(creado.id).catch(() => null);
     setPdfUrlGuardado(pdfUrl);
-
-    const cleanPhone = phone.trim().replace(/\D/g, "");
-    if (cleanPhone.length >= 7) {
-      const groupedForWA = basket.reduce<Record<string, { svcLabel: string; calcType: string; qty: number; unitPrice: number; subtotal: number; unit: string }[]>>(
-        (g, it) => {
-          const calc = calcItem(it);
-          (g[it.catLabel] = g[it.catLabel] || []).push({ svcLabel: it.svcLabel, calcType: it.calcType, qty: calc.qty, unitPrice: calc.unitPrice, subtotal: calc.subtotal, unit: it.unit });
-          return g;
-        },
-        {}
-      );
-      const msg = buildWAMsgCotizacion({
-        cotNum: creado.cotNum,
-        clientName: clientName.trim() || "Sin cliente",
-        groupedItems: groupedForWA,
-        totalBase, totalLabor, margin, totalFinal,
-        pdfUrl: pdfUrl ?? undefined,
-      });
-      const numero = cleanPhone.startsWith("51") ? cleanPhone : `51${cleanPhone}`;
-      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
-    }
-    await registrarEnvioWA(creado.id, pdfUrl ?? undefined);
   };
 
   const reset = () => {

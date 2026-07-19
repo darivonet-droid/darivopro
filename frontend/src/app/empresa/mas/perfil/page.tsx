@@ -10,12 +10,16 @@
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { createServerClient } from "@/lib/supabase/server";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
+import { LogoEmpresaUploader } from "@/components/perfil/LogoEmpresaUploader";
 
 export default async function EmpresaPerfilPage() {
   const supabase = createServerClient();
-  const [{ data: { user } }, { data: perfil }] = await Promise.all([
+  // logo_url se consulta aparte y tolerante a fallo: si la migración aún no
+  // corrió en producción, esto no debe romper el resto de la pantalla.
+  const [{ data: { user } }, { data: perfil }, { data: perfilLogo }] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("razon_social, telefono").single(),
+    supabase.from("perfiles").select("logo_url").single(),
   ]);
 
   return (
@@ -28,6 +32,17 @@ export default async function EmpresaPerfilPage() {
             <Row label="Empresa" valor={perfil?.razon_social || "—"} />
             {perfil?.telefono && <Row label="Teléfono" valor={perfil.telefono} ultimo />}
           </div>
+        </div>
+
+        <div style={{ borderRadius: 16, padding: 20, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
+          <p style={{ fontSize: 13, fontWeight: 900, color: ADMIN_COLORS.text }}>Logo de empresa</p>
+          <p style={{ marginTop: 2, marginBottom: 12, fontSize: 11, color: ADMIN_COLORS.textMid }}>
+            Se muestra en el header de tus Cotizaciones y Facturas
+          </p>
+          <LogoEmpresaUploader
+            logoUrl={perfilLogo?.logo_url ?? null}
+            colores={{ text: ADMIN_COLORS.text, textMid: ADMIN_COLORS.textMid, accent: ADMIN_COLORS.purple, slateD: ADMIN_COLORS.slateD }}
+          />
         </div>
 
         <div style={{ borderRadius: 16, padding: 20, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>

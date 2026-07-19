@@ -1,6 +1,7 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import { baseStyles, C, fmtMoney, fmtQty } from "./styles";
+import type { EmpresaData } from "@/types";
 
 export interface CotizacionItemRow {
   cat_label?: string | null;
@@ -24,9 +25,14 @@ export interface CotizacionPdfData {
   total_final?: number | null;
   notes?: string | null;
   items: CotizacionItemRow[];
+  biz_data?: EmpresaData | null;
 }
 
 const s = StyleSheet.create({
+  emisor: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  logo: { width: 42, height: 42, marginRight: 10, objectFit: "contain" },
+  emisorName: { fontSize: 12, fontFamily: "Helvetica-Bold", color: C.navy },
+  emisorLine: { fontSize: 9, color: C.textMid, marginTop: 1 },
   header: {
     backgroundColor: C.navy,
     color: C.white,
@@ -101,10 +107,23 @@ interface Props {
 
 export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
   let lastCap = "";
+  const biz = data.biz_data ?? null;
 
   return (
     <Document>
       <Page size="A4" style={baseStyles.page}>
+        {biz && (biz.logoUrl || biz.razonSocial) ? (
+          <View style={s.emisor}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text -- Image de @react-pdf/renderer (nodo de PDF), no <img> del DOM; no acepta prop alt */}
+            {biz.logoUrl ? <Image src={biz.logoUrl} style={s.logo} /> : null}
+            <View>
+              {biz.razonSocial ? <Text style={s.emisorName}>{biz.razonSocial}</Text> : null}
+              {biz.direccion ? <Text style={s.emisorLine}>{biz.direccion}</Text> : null}
+              {biz.telefono ? <Text style={s.emisorLine}>Tel: {biz.telefono}</Text> : null}
+            </View>
+          </View>
+        ) : null}
+
         <View style={s.header}>
           <Text style={s.headerTitle}>COTIZACIÓN</Text>
           {data.cot_num ? (
@@ -113,7 +132,7 @@ export function CotizacionPdfDocument({ data, fechaGeneracion }: Props) {
             </Text>
           ) : null}
           <Text style={s.headerSub}>
-            Generado con DARIVO PRO · {fechaGeneracion}
+            Generado con darivopro.com · {fechaGeneracion}
           </Text>
         </View>
 

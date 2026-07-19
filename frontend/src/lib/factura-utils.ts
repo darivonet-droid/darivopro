@@ -96,6 +96,6 @@ export function labelTipoComprobante(tipo: TipoComprobante): string {
 export function buildFacturaWhatsAppUrl(phone: string, invNum: string, total: number, sym: string): string {
   const digits = phone.replace(/\D/g, "");
   const num = digits.startsWith("51") ? digits : `51${digits}`;
-  const msg = `Hola, te envío el comprobante ${invNum} por ${sym} ${total.toFixed(2)}.\n\nGenerado con DARIVO PRO`;
+  const msg = `Hola, te envío el comprobante ${invNum} por ${sym} ${total.toFixed(2)}.\n\nGenerado con darivopro.com`;
   return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
 }

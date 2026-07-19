@@ -37,6 +37,7 @@ export default async function EmpresaNuevaFacturaPage({
         moneda: perfil.moneda ?? "PEN",
         simbolo: perfil.simbolo ?? "S/",
         cta_detracciones: perfil.cta_detracciones ?? undefined,
+        logoUrl: perfil.logo_url ?? null,
       }
     : null;
 
