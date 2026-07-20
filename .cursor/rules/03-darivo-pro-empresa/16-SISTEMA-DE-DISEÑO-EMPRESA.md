@@ -2,9 +2,14 @@
 
 # DARIVO PRO — SISTEMA DE DISEÑO OFICIAL (EMPRESA)
 
-Versión: 2.5
+Versión: 2.6
 
-Última actualización: 02/07/2026
+Última actualización: 20/07/2026
+
+Changelog v2.6 (20/07/2026): quitado "Multiempresa" de la lista de
+adjetivos de marca (§2, PRINCIPIOS/ADN) — no representa ninguna función
+real del producto (un Gerente pertenece a una sola empresa,
+`empresas.gerente_user_id` es `UNIQUE`) y podía sembrar confusión.
 
 Este documento reutiliza el sistema de diseño oficial de 
 02-darivo-pro-admin/16-SISTEMA-DE-DISEÑO-ADMIN.md (Visión §10, v2.14). 
@@ -125,7 +130,7 @@ Este documento **concreta** la referencia visual del Panel Administrador (Reglas
 
 # 2. PRINCIPIOS (ADN)
 
-Rápido · Sencillo · Intuitivo · Profesional · Escalable · Multiempresa · Multi-país.
+Rápido · Sencillo · Intuitivo · Profesional · Escalable · Multi-país.
 
 La adaptación es **solo de presentación visual en escritorio** (Panel Admin), nunca de lógica de negocio (Móvil).
 
