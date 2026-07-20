@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { TabPillSelector } from "@/components/design-system/TabPillSelector";
 import { Toggle } from "@/components/design-system/Toggle";
 import { FiltroFechaChips } from "@/components/design-system/FiltroFechaChips";
+import { DireccionAutocomplete } from "@/components/design-system/DireccionAutocomplete";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { boletaSchema, facturaSchema } from "@/lib/validations";
@@ -30,8 +31,15 @@ import type {
 const FORMAS_PAGO: FormaPago[] = ["Efectivo", "Yape", "Transferencia", "Crédito"];
 const LINEA_VACIA: LineaFactura = { desc: "", cantidad: 1, pu: 0, subtotal: 0 };
 
-/** Cliente + fecha de su última cotización — usada por el filtro Hoy/Semanal/Mensual del selector "Cliente guardado". */
-export type ClienteConUltimaCotizacion = Cliente & { ultimaCotizacion?: string };
+/**
+ * Cliente + su última cotización — la fecha alimenta el filtro Hoy/Semanal/Mensual
+ * del selector "Cliente guardado"; los datos completos alimentan el autocompletado
+ * de ítems/importe al elegir el cliente (un cliente = su cotización asociada).
+ */
+export type ClienteConUltimaCotizacion = Cliente & {
+  ultimaCotizacion?: string;
+  cotizacionAsociada?: Cotizacion;
+};
 
 interface Props {
   empresa:           EmpresaData | null;
@@ -95,9 +103,9 @@ export function NuevaFacturaForm({
     return calcularDetraccion(total, detTipo, empresa?.cta_detracciones ?? undefined);
   }, [aplicaDetraccion, detTipo, total, empresa]);
 
-  const importarCotizacion = (id: string) => {
+  const importarCotizacion = (id: string, cotizacionOverride?: Cotizacion) => {
     setDesdeQuote(id);
-    const p = aprobados.find((x) => x.id === id);
+    const p = cotizacionOverride ?? aprobados.find((x) => x.id === id);
     if (!p) return;
     setClientName(p.clientName);
     setSelectedClienteId(p.clienteId);
@@ -116,6 +124,9 @@ export function NuevaFacturaForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cotizacionId]);
 
+  // Un cliente = su cotización asociada (ver regla de datos en CLAUDE.md):
+  // elegir el cliente ya trae teléfono, dirección e importe de su cotización,
+  // sin necesidad de un selector aparte de "Importar cotización".
   const seleccionarCliente = (id: string) => {
     const c = clientes.find((x) => x.id === id);
     if (!c) return;
@@ -125,6 +136,9 @@ export function NuevaFacturaForm({
     setClientDir(c.direccion ?? "");
     setClientPhone(c.telefono ?? "");
     setClientEmail(c.email ?? "");
+    if (c.cotizacionAsociada) {
+      importarCotizacion(c.cotizacionAsociada.id, c.cotizacionAsociada);
+    }
   };
 
   useEffect(() => {
@@ -321,23 +335,6 @@ export function NuevaFacturaForm({
         </div>
       )}
 
-      {/* Importar cotización */}
-      {aprobados.length > 0 && (
-        <label className="block">
-          <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
-            Importar desde cotización
-          </span>
-          <select value={desdeQuote} onChange={(e) => importarCotizacion(e.target.value)}
-            className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-            style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
-            <option value="">— Desde cero —</option>
-            {aprobados.map((p) => (
-              <option key={p.id} value={p.id}>{p.clientName} · {fmtPEN(p.totalFinal)}</option>
-            ))}
-          </select>
-        </label>
-      )}
-
       {/* Campos del cliente */}
       <Input label="Cliente *" value={clientName} onChange={(e) => setClientName(e.target.value)} />
 
@@ -368,7 +365,7 @@ export function NuevaFacturaForm({
         </>
       )}
 
-      <Input label="Dirección" value={clientDir} onChange={(e) => setClientDir(e.target.value)} />
+      <DireccionAutocomplete value={clientDir} onChange={setClientDir} />
       <Input
         label="Teléfono WhatsApp"
         inputMode="tel"

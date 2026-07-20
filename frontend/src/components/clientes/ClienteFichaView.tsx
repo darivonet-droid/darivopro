@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { DireccionAutocomplete } from "@/components/design-system/DireccionAutocomplete";
 import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { FacturaCard } from "@/components/facturacion/FacturaCard";
 import { useClientes } from "@/hooks/useClientes";
@@ -177,7 +178,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
               error={validarTelefono(form.telefono).mensaje}
             />
             <Input label="RUC / DNI" inputMode="numeric" value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
-            <Input label="Dirección" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
+            <DireccionAutocomplete value={form.direccion} onChange={(v) => setForm({ ...form, direccion: v })} />
             <Input label="Ciudad" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />
             <Input label="Correo electrónico" type="email" placeholder="cliente@correo.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <Input label="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />

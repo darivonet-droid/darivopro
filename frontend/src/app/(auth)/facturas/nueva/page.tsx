@@ -26,7 +26,12 @@ export default async function NuevaFacturaPage({
       .select("*, items:cotizacion_items(*)")
       .eq("status", "Aprobado")
       .order("created_at", { ascending: false }),
-    supabase.from("clientes").select("*, cotizaciones(created_at)").order("nombre"),
+    supabase
+      .from("clientes")
+      .select(
+        "*, cotizaciones(id, user_id, client_name, phone, city, margin, total_base, total_labor, total_final, status, created_at, notes, items:cotizacion_items(*))"
+      )
+      .order("nombre"),
   ]);
 
   const perfil = perfilRes.data;
@@ -46,13 +51,16 @@ export default async function NuevaFacturaPage({
   const numerosExistentes = (facturasRes.data ?? []).map((r) => r.inv_num as string);
   const tipoInicial: TipoComprobante = searchParams.tipo === "boleta" ? "boleta" : "factura";
 
-  const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => ({
-    id: row.id,
-    tenant_id: row.user_id,
-    clientName: row.client_name,
-    phone: row.phone ?? undefined,
-    city: row.city ?? undefined,
-    items: (row.items ?? []).map((it: Record<string, unknown>): LineaCotizacion => ({
+  // Mismo mapeo para las cotizaciones "Aprobado" (banner) y para la última
+  // cotización de cada cliente (autocompletado al elegir "Cliente guardado").
+  const mapCotizacionRow = (row: Record<string, unknown>, clienteId?: string): Cotizacion => ({
+    id: row.id as string,
+    tenant_id: row.user_id as string,
+    clienteId,
+    clientName: row.client_name as string,
+    phone: (row.phone as string) ?? undefined,
+    city: (row.city as string) ?? undefined,
+    items: ((row.items as Record<string, unknown>[]) ?? []).map((it): LineaCotizacion => ({
       svcId: String(it.svc_id),
       catLabel: String(it.cat_label ?? ""),
       svcLabel: String(it.svc_label ?? ""),
@@ -67,13 +75,19 @@ export default async function NuevaFacturaPage({
     totalBase: Number(row.total_base ?? 0),
     totalLabor: Number(row.total_labor ?? 0),
     totalFinal: Number(row.total_final ?? 0),
-    status: row.status,
-    createdAt: row.created_at,
-    notes: row.notes ?? undefined,
-  }));
+    status: row.status as Cotizacion["status"],
+    createdAt: row.created_at as string,
+    notes: (row.notes as string) ?? undefined,
+  });
+
+  const aprobados: Cotizacion[] = (aprobadosRes.data ?? []).map((row) => mapCotizacionRow(row));
 
   const clientes: ClienteConUltimaCotizacion[] = (clientesRes.data ?? []).map((row) => {
-    const cotizacionesRows: { created_at: string }[] = Array.isArray(row.cotizaciones) ? row.cotizaciones : [];
+    const cotizacionesRows: Record<string, unknown>[] = Array.isArray(row.cotizaciones) ? row.cotizaciones : [];
+    const ultima = cotizacionesRows
+      .slice()
+      .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+      .at(-1);
     return {
       id: row.id,
       nombre: row.nombre,
@@ -84,7 +98,8 @@ export default async function NuevaFacturaPage({
       email: row.email ?? undefined,
       notas: row.notas ?? undefined,
       createdAt: row.created_at,
-      ultimaCotizacion: cotizacionesRows.map((c) => c.created_at).sort().at(-1),
+      ultimaCotizacion: ultima ? String(ultima.created_at) : undefined,
+      cotizacionAsociada: ultima ? mapCotizacionRow(ultima, row.id) : undefined,
     };
   });
 

@@ -271,16 +271,6 @@ export function NuevaFacturaFormEscritorio({
             </label>
           )}
 
-          {aprobados.length > 0 && (
-            <label>
-              <span style={{ display: "block", marginBottom: 6, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, color: ADMIN_COLORS.textMid }}>Importar desde cotización</span>
-              <select value={desdeQuote} onChange={(e) => importarCotizacion(e.target.value)} style={{ width: "100%", borderRadius: 12, padding: "10px 14px", fontSize: 13, background: ADMIN_COLORS.white, border: `1.5px solid ${ADMIN_COLORS.slateD}`, outline: "none" }}>
-                <option value="">— Desde cero —</option>
-                {aprobados.map((p) => <option key={p.id} value={p.id}>{p.clientName} · {fmtPEN(p.totalFinal)}</option>)}
-              </select>
-            </label>
-          )}
-
           <div style={{ display: "flex", gap: 12 }}>
             <div style={{ flex: 1 }}>
               <span style={{ display: "block", marginBottom: 6, fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid }}>Cliente *</span>
