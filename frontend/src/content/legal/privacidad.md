@@ -1,7 +1,7 @@
 # POLÍTICA DE PRIVACIDAD — DARIVO PRO
 
 **Última actualización:** [fecha de publicación]
-**Última revisión de este borrador:** 16/07/2026 (ver changelog al final del documento).
+**Última revisión de este borrador:** 16/07/2026.
 
 ---
 
