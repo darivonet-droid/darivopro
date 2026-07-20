@@ -75,7 +75,11 @@ Pedido por Mohamed el 20/07/2026: conectar credenciales reales de Google Cloud (
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` en Vercel (Production + Preview) — nombres ya confirmados contra `.env.example`.
 - `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` **también** en el Dashboard de Supabase (Authentication → Providers → Google, activar el proveedor) — **no van en Vercel para que el login funcione**, Supabase Auth hace el intercambio OAuth con Google desde su propio servidor, no la app Next.js. Activar un proveedor hoy apagado en producción es justo la excepción #3 de "Dos modos de despliegue" (arriba) — el asistente no lo activa por su cuenta aunque el resto de la tarea sea autónoma.
 
-**Verificado**: `tsc --noEmit`, `next lint` (mismos 3 warnings preexistentes) y `next build` limpios (81 rutas). Push a `main` (commit `ad26184`) — desplegado por "producción autónomo" de esta tarea. **No verificado visualmente**: autocompletado de Maps y login de Google no se pueden probar sin las credenciales reales (pendiente de Mohamed, arriba); clic en dirección → Maps en `/clientes` sí es verificable ahora en `darivopro.com` una vez el deploy termine.
+**Verificado**: `tsc --noEmit`, `next lint` (mismos 3 warnings preexistentes) y `next build` limpios (81 rutas). Push a `main` (commit `ad26184`, deploy `dpl_7Bp9xGyYjhjF2zTEkg4wx7o9tQk4` READY) — desplegado por "producción autónomo" de esta tarea.
+
+**Verificado en vivo (evidencia dura, `darivopro.com`, sin sesión)**: clic en "Continuar con Google" devuelve `400 {"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}` desde `vyrtokggypcmpforglch.supabase.co/auth/v1/authorize?provider=google...` — confirma con evidencia real (no suposición) que el proveedor Google todavía no está activo en Supabase, tal como se documentó arriba como pendiente del propietario.
+
+**No verificado, bloqueado por falta de sesión**: autocompletado de Maps (necesita la key real, pendiente) y el clic en dirección → Maps de `/clientes` (necesita iniciar sesión con datos reales de cliente; no hay cuenta a la que el asistente pueda entrar sin escribir una contraseña, regla permanente). Recomendado que Mohamed, tras configurar Vercel + Supabase: inicie sesión con Google desde `darivopro.com/login`, confirme que aterriza en `/dashboard`, y en `/clientes` haga clic en la dirección de un cliente con dato real para confirmar que abre Google Maps en pestaña nueva.
 
 ---
 
