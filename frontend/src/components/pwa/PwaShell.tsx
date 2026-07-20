@@ -9,19 +9,35 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+/** iOS/iPadOS nunca dispara `beforeinstallprompt` (solo Chromium) — sin esta
+ * detección, el banner de instalación queda mudo ahí para siempre. `standalone`
+ * es una propiedad no estándar de Safari, no está en el tipo `Navigator`. */
+function esIOS(): boolean {
+  const ua = navigator.userAgent;
+  const iOSClasico = /iPad|iPhone|iPod/.test(ua);
+  const iPadOSComoMac = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iOSClasico || iPadOSComoMac;
+}
+
+function yaInstaladoIOS(): boolean {
+  return (navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
 export function PwaShell() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [mostrarInstall, setMostrarInstall] = useState(false);
   const [instalado, setInstalado] = useState(false);
+  const [esDispositivoIOS, setEsDispositivoIOS] = useState(false);
   const setModoOffline = useAppStore((s) => s.setModoOffline);
   const setRedLenta = useAppStore((s) => s.setRedLenta);
   const modoOffline = useAppStore((s) => s.modoOffline);
   const redLenta = useAppStore((s) => s.redLenta);
 
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    if (window.matchMedia("(display-mode: standalone)").matches || yaInstaladoIOS()) {
       setInstalado(true);
     }
+    setEsDispositivoIOS(esIOS());
 
     const onInstall = (e: Event) => {
       e.preventDefault();
@@ -107,6 +123,31 @@ export function PwaShell() {
               style={{ color: T.textLight }}
             >
               Luego
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mostrarInstall && !installEvent && esDispositivoIOS && !instalado && (
+        <div
+          className="fixed bottom-20 left-1/2 z-[90] w-[calc(100%-2rem)] max-w-[358px] -translate-x-1/2 rounded-2xl p-4"
+          style={{ background: T.navy, boxShadow: "0 8px 32px rgba(10,22,40,0.35)" }}
+        >
+          <p className="text-sm font-bold" style={{ color: T.white }}>
+            Instala Darivo Pro en tu iPhone 👷‍♂️
+          </p>
+          <p className="mt-1 text-xs leading-relaxed" style={{ color: T.textLight }}>
+            Toca <span aria-hidden>􀈂</span> Compartir en Safari, luego{" "}
+            <b>&quot;Agregar a pantalla de inicio&quot;</b>
+          </p>
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setMostrarInstall(false)}
+              className="rounded-xl px-4 py-2.5 text-xs font-bold"
+              style={{ color: T.textLight }}
+            >
+              Entendido
             </button>
           </div>
         </div>

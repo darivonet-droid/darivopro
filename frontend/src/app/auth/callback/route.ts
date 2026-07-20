@@ -14,11 +14,17 @@ import { NextResponse } from "next/server";
 import { registrarReferidoSiCorresponde, REF_COOKIE_NAME } from "@/lib/ecosystem-store";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { enviarBienvenidaNuevaCuenta } from "@/lib/email/bienvenida-nueva-cuenta";
+import { resolverDestinoPostLogin } from "@/lib/destino-post-login";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/onboarding/1";
+  // `next` explícito solo lo manda registro/page.tsx (confirmación por correo,
+  // siempre "/onboarding/1") — el login por Google (login/page.tsx) ya no lo
+  // manda, así que su ausencia aquí es la señal de "resolver por rol real"
+  // (20/07/2026, ver destino-post-login.ts). Si algún día un enlace viejo
+  // trae un `next` con otro valor, se respeta igual (nunca queda sin usar).
+  const next = searchParams.get("next");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=confirmacion`);
@@ -94,8 +100,22 @@ export async function GET(request: Request) {
     }
   }
 
-  const destino = next.startsWith("/") ? next : "/onboarding/1";
-  const res = NextResponse.redirect(`${origin}${destino}`);
+  let destinoUrl: string;
+  if (next && next.startsWith("/")) {
+    // Confirmación de registro por correo — siempre "/onboarding/1" (ver nota
+    // de arriba). Se respeta literal, no se resuelve por rol: un usuario
+    // recién confirmado siempre necesita pasar por onboarding primero.
+    destinoUrl = `${origin}${next}`;
+  } else if (data.user) {
+    const destino = await resolverDestinoPostLogin(supabase, data.user);
+    if (destino.tipo === "externo") destinoUrl = destino.url;
+    else if (destino.tipo === "selector") destinoUrl = `${origin}/elige-panel`;
+    else destinoUrl = `${origin}${destino.ruta}`;
+  } else {
+    destinoUrl = `${origin}/dashboard`;
+  }
+
+  const res = NextResponse.redirect(destinoUrl);
   res.cookies.set(REF_COOKIE_NAME, "", { maxAge: 0, path: "/" });
   return res;
 }

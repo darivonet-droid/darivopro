@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingChatWidget } from "@/components/landing/LandingChatWidget";
@@ -149,7 +150,23 @@ const JSON_LD = {
   url: "https://darivopro.com",
 };
 
-export default function LandingPage() {
+export default function LandingPage({
+  searchParams,
+}: {
+  searchParams: { code?: string; next?: string };
+}) {
+  // Red de seguridad (20/07/2026): si el gateway de OAuth de Supabase alguna
+  // vez entrega el `code` aquí en la raíz en vez de en /auth/callback (Site
+  // URL de Supabase desalineada con el redirectTo real, o un Redirect URL
+  // que no matchea exacto en su allowlist — configuración del Dashboard de
+  // Supabase, no de este código) — nunca dejarlo expuesto sin procesar en la
+  // landing pública. Se reenvía al callback real, que sí lo intercambia por
+  // una sesión real.
+  if (searchParams.code) {
+    const next = searchParams.next ? `&next=${encodeURIComponent(searchParams.next)}` : "";
+    redirect(`/auth/callback?code=${encodeURIComponent(searchParams.code)}${next}`);
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <script

@@ -42,13 +42,28 @@ export const validarRUC = (ruc: string) => /^\d{11}$/.test(ruc);
 /** Filtro de fecha relativo a hoy — botones Hoy/Semanal/Mensual (Clientes/Facturas/Nueva factura). */
 export type FiltroFecha = "hoy" | "semana" | "mes";
 
+/** "Hoy" siempre en hora de Perú (America/Lima, UTC-5 fijo, sin horario de
+ * verano) — no la hora local del dispositivo del usuario ni la del servidor.
+ * Semanal/Mensual son ventana rolling de 7/30 días en tiempo absoluto, por lo
+ * que no dependen de zona horaria (a diferencia de "mismo día calendario"). */
+const FORMATO_DIA_LIMA = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Lima",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function diaEnLima(fecha: Date): string {
+  return FORMATO_DIA_LIMA.format(fecha);
+}
+
 /** ¿La fecha cae dentro del rango del filtro? `null` = sin filtro, siempre true. */
 export function cumpleFiltroFecha(fechaISO: string | null | undefined, filtro: FiltroFecha | null): boolean {
   if (!filtro) return true;
   if (!fechaISO) return false;
   const fecha = new Date(fechaISO);
   const ahora = new Date();
-  if (filtro === "hoy") return fecha.toDateString() === ahora.toDateString();
+  if (filtro === "hoy") return diaEnLima(fecha) === diaEnLima(ahora);
   const dias = filtro === "semana" ? 7 : 30;
   const limite = new Date(ahora.getTime() - dias * 86400000);
   return fecha >= limite && fecha <= ahora;

@@ -5,7 +5,20 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { T } from "@/lib/theme";
-import { destinoPostLogin } from "@/lib/subdominios";
+import type { DestinoPostLogin } from "@/lib/destino-post-login";
+
+/** Navega según el destino resuelto por producto+rol (ver destino-post-login.ts).
+ * "externo" cruza de dominio (admin./partners.darivopro.com) — el router de
+ * Next no puede navegar fuera de su propio origen, hace falta location real. */
+function navegarADestino(destino: DestinoPostLogin, router: ReturnType<typeof useRouter>) {
+  if (destino.tipo === "externo") {
+    window.location.href = destino.url;
+  } else if (destino.tipo === "selector") {
+    router.push("/elige-panel");
+  } else {
+    router.push(destino.ruta);
+  }
+}
 
 const ERRORES: Record<string, string> = {
   invalid_credentials:         "Ese correo o contraseña no coinciden, revísalos 🔍",
@@ -45,23 +58,23 @@ export default function LoginPage() {
     }
     // Best-effort — nunca bloquea el login si falla (ver route.ts).
     void fetch("/api/empleados/marcar-actividad", { method: "POST" }).catch(() => {});
-    // Antes siempre "/dashboard" (Móvil) sin importar el subdominio — un
-    // Admin/Gerente/Partner que iniciaba sesión desde admin./empresa./partners.
-    // caía en el panel equivocado y tenía que navegar manualmente al suyo.
-    // Fix 19/07/2026, ver frontend/src/lib/subdominios.ts.
-    router.push(destinoPostLogin(window.location.hostname));
+    // Destino real por producto+rol (Admin/Partner/Gerente Empresa/Móvil) —
+    // ya no por el subdominio de entrada (superado 20/07/2026, ver
+    // destino-post-login.ts). La resolución vive en el servidor (allowlists
+    // + BD), así que se pide a la API antes de navegar.
+    const destino: DestinoPostLogin = await fetch("/api/auth/destino-post-login").then((r) => r.json());
+    navegarADestino(destino, router);
     router.refresh();
   };
 
-  // OAuth Google — reutiliza el callback existente (/auth/callback intercambia el
-  // código y enruta a next). El destino respeta el subdominio real (mismo fix de
-  // arriba); el gating de onboarding del layout (auth) sigue mandando igual que
-  // antes para usuario nuevo → /onboarding/1 (ver auth/callback/route.ts).
+  // OAuth Google — reutiliza el callback existente (/auth/callback intercambia
+  // el código y resuelve destino por rol real, ver esa ruta). El gating de
+  // onboarding del layout (auth) sigue mandando igual que antes para usuario
+  // nuevo → /onboarding/1 (ver auth/callback/route.ts).
   const entrarConGoogle = async () => {
     setError(null);
     setLoading(true);
-    const next = destinoPostLogin(window.location.hostname);
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    const redirectTo = `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },

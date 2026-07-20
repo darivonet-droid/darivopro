@@ -6,7 +6,8 @@ import {
   esPartnerAutorizado,
   puedeAccederEmpresa,
 } from "@/lib/acceso-producto";
-import { baseDeSubdominio, destinoPostLogin } from "@/lib/subdominios";
+import { baseDeSubdominio } from "@/lib/subdominios";
+import { resolverDestinoPostLogin } from "@/lib/destino-post-login";
 
 interface CookieASetear {
   name: string;
@@ -66,12 +67,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
   if (user && RUTAS_SOLO_INVITADO.some((r) => req.nextUrl.pathname.startsWith(r))) {
-    // Antes caía siempre en /dashboard (Móvil) sin importar el subdominio —
-    // un Admin/Gerente/Partner que reabría /login ya logueado desde su
-    // propio subdominio terminaba en el panel equivocado. Ahora respeta el
-    // subdominio real (fix 19/07/2026, ver frontend/src/lib/subdominios.ts).
+    // Destino por producto+rol real, no por el subdominio de entrada
+    // (superado 20/07/2026, ver frontend/src/lib/destino-post-login.ts) — un
+    // Admin/Partner/Gerente que reabre /login ya logueado aterriza en su
+    // panel real sin importar desde qué dominio entró.
+    const destino = await resolverDestinoPostLogin(supabase, user);
+    if (destino.tipo === "externo") {
+      return NextResponse.redirect(destino.url);
+    }
     const url = req.nextUrl.clone();
-    url.pathname = destinoPostLogin(req.headers.get("host"));
+    url.pathname = destino.tipo === "selector" ? "/elige-panel" : destino.ruta;
     return NextResponse.redirect(url);
   }
 
