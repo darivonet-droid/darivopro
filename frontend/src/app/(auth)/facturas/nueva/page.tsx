@@ -1,10 +1,10 @@
 // DARIVO PRO — Nueva factura
 import { redirect } from "next/navigation";
-import { NuevaFacturaForm } from "@/components/facturacion/NuevaFacturaForm";
+import { NuevaFacturaForm, type ClienteConUltimaCotizacion } from "@/components/facturacion/NuevaFacturaForm";
 import { createServerClient } from "@/lib/supabase/server";
 import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 import { T } from "@/lib/theme";
-import type { Cliente, EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
+import type { EmpresaData, LineaCotizacion, Cotizacion } from "@/types";
 import type { TipoComprobante } from "@/lib/factura-utils";
 
 export default async function NuevaFacturaPage({
@@ -26,7 +26,7 @@ export default async function NuevaFacturaPage({
       .select("*, items:cotizacion_items(*)")
       .eq("status", "Aprobado")
       .order("created_at", { ascending: false }),
-    supabase.from("clientes").select("*").order("nombre"),
+    supabase.from("clientes").select("*, cotizaciones(created_at)").order("nombre"),
   ]);
 
   const perfil = perfilRes.data;
@@ -72,17 +72,21 @@ export default async function NuevaFacturaPage({
     notes: row.notes ?? undefined,
   }));
 
-  const clientes: Cliente[] = (clientesRes.data ?? []).map((row) => ({
-    id: row.id,
-    nombre: row.nombre,
-    telefono: row.telefono ?? undefined,
-    ruc: row.ruc ?? undefined,
-    direccion: row.direccion ?? undefined,
-    ciudad: row.ciudad ?? undefined,
-    email: row.email ?? undefined,
-    notas: row.notas ?? undefined,
-    createdAt: row.created_at,
-  }));
+  const clientes: ClienteConUltimaCotizacion[] = (clientesRes.data ?? []).map((row) => {
+    const cotizacionesRows: { created_at: string }[] = Array.isArray(row.cotizaciones) ? row.cotizaciones : [];
+    return {
+      id: row.id,
+      nombre: row.nombre,
+      telefono: row.telefono ?? undefined,
+      ruc: row.ruc ?? undefined,
+      direccion: row.direccion ?? undefined,
+      ciudad: row.ciudad ?? undefined,
+      email: row.email ?? undefined,
+      notas: row.notas ?? undefined,
+      createdAt: row.created_at,
+      ultimaCotizacion: cotizacionesRows.map((c) => c.created_at).sort().at(-1),
+    };
+  });
 
   return (
     <div className="min-h-screen" style={{ background: "#F8FAFF" }}>

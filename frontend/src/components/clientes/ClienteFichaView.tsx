@@ -12,7 +12,7 @@ import { CotizacionesList } from "@/components/cotizacion/CotizacionesList";
 import { FacturaCard } from "@/components/facturacion/FacturaCard";
 import { useClientes } from "@/hooks/useClientes";
 import { useAppStore } from "@/store/useAppStore";
-import { soloDigitos, fmtPEN } from "@/lib/utils";
+import { soloDigitos, fmtPEN, validarTelefono } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { Cliente, Factura, Cotizacion } from "@/types";
 
@@ -85,6 +85,8 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
 
   const guardar = async () => {
     if (form.nombre.trim().length < 2) { mostrarToast("Ingresa el nombre", "error"); return; }
+    const telefonoValido = validarTelefono(form.telefono);
+    if (!telefonoValido.valido) { mostrarToast(telefonoValido.mensaje!, "error"); return; }
     const ok = await actualizar(cliente.id, {
       nombre:    form.nombre.trim(),
       telefono:  form.telefono.trim(),
@@ -167,7 +169,13 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
         {editando ? (
           <div className="flex flex-col gap-3">
             <Input label="Nombre *" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
-            <Input label="Teléfono (WhatsApp)" inputMode="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            <Input
+              label="Teléfono (WhatsApp)"
+              inputMode="tel"
+              value={form.telefono}
+              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              error={validarTelefono(form.telefono).mensaje}
+            />
             <Input label="RUC / DNI" inputMode="numeric" value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
             <Input label="Dirección" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
             <Input label="Ciudad" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />

@@ -21,7 +21,7 @@ export default async function FacturasPage() {
   const [clientesRes, perfilRes, aprobadosRes] = await Promise.all([
     supabase
       .from("clientes")
-      .select("*, facturas!inner(inv_id, inv_num, inv_status, total_final, sym)")
+      .select("*, facturas!inner(inv_id, inv_num, inv_status, total_final, sym, created_at)")
       .order("nombre"),
     supabase.from("perfiles").select("ruc").single(),
     supabase
@@ -47,6 +47,7 @@ export default async function FacturasPage() {
       invStatus: String(f.inv_status),
       totalFinal: Number(f.total_final ?? 0),
       sym: String(f.sym ?? "S/"),
+      createdAt: String(f.created_at),
     })),
   }));
 

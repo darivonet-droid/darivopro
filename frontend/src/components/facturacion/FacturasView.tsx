@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
+import { FiltroFechaChips } from "@/components/design-system/FiltroFechaChips";
 import { guardarListaCache, leerListaCache } from "@/lib/offline-cache";
-import { fmtPEN } from "@/lib/utils";
+import { fmtPEN, cumpleFiltroFecha, type FiltroFecha } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { Cliente, Cotizacion } from "@/types";
 
@@ -13,8 +14,13 @@ const FILTROS = ["Todas", "Emitidas", "Cobradas", "Pendientes"] as const;
 type Filtro = (typeof FILTROS)[number];
 
 export type ClienteConFacturas = Cliente & {
-  facturas: { invId: string; invNum: string; invStatus: string; totalFinal: number; sym: string }[];
+  facturas: { invId: string; invNum: string; invStatus: string; totalFinal: number; sym: string; createdAt: string }[];
 };
+
+/** Última factura del cliente (para el filtro Hoy/Semanal/Mensual). */
+function ultimaFactura(c: ClienteConFacturas): string | undefined {
+  return c.facturas.map((f) => f.createdAt).sort().at(-1);
+}
 
 interface FacturasViewProps {
   clientes: ClienteConFacturas[];
@@ -37,6 +43,7 @@ export function FacturasView({ clientes: iniciales, rucEmpresa, aprobados }: Fac
     return leerListaCache<ClienteConFacturas>("facturas-clientes") ?? iniciales;
   });
   const [filtro, setFiltro] = useState<Filtro>("Todas");
+  const [filtroFecha, setFiltroFecha] = useState<FiltroFecha | null>(null);
 
   useEffect(() => {
     if (iniciales.length > 0) {
@@ -45,7 +52,10 @@ export function FacturasView({ clientes: iniciales, rucEmpresa, aprobados }: Fac
     }
   }, [iniciales]);
 
-  const filtrados = useMemo(() => clientes.filter((c) => cumpleFiltro(c, filtro)), [clientes, filtro]);
+  const filtrados = useMemo(
+    () => clientes.filter((c) => cumpleFiltro(c, filtro) && cumpleFiltroFecha(ultimaFactura(c), filtroFecha)),
+    [clientes, filtro, filtroFecha]
+  );
   const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(filtrados);
 
   return (
@@ -152,6 +162,8 @@ export function FacturasView({ clientes: iniciales, rucEmpresa, aprobados }: Fac
             <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.75)" }}>Con RUC</p>
           </Link>
         </div>
+
+        <FiltroFechaChips activo={filtroFecha} onChange={setFiltroFecha} />
 
         {/* Lista de clientes con factura */}
         {filtrados.length === 0 ? (

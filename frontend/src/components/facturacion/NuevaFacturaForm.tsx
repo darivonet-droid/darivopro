@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TabPillSelector } from "@/components/design-system/TabPillSelector";
 import { Toggle } from "@/components/design-system/Toggle";
+import { FiltroFechaChips } from "@/components/design-system/FiltroFechaChips";
 import { useFactura } from "@/hooks/useFactura";
 import { useAppStore } from "@/store/useAppStore";
 import { boletaSchema, facturaSchema } from "@/lib/validations";
@@ -19,7 +20,7 @@ import {
   type FormaPago,
   type TipoComprobante,
 } from "@/lib/factura-utils";
-import { calcIGV, fmtPEN, hoy } from "@/lib/utils";
+import { calcIGV, fmtPEN, hoy, cumpleFiltroFecha, validarTelefono, type FiltroFecha } from "@/lib/utils";
 import { RADII, T, WHATSAPP } from "@/lib/design-system/tokens";
 import type {
   Cliente, Detraccion, EmpresaData, Factura, LineaFactura,
@@ -29,11 +30,14 @@ import type {
 const FORMAS_PAGO: FormaPago[] = ["Efectivo", "Yape", "Transferencia", "Crédito"];
 const LINEA_VACIA: LineaFactura = { desc: "", cantidad: 1, pu: 0, subtotal: 0 };
 
+/** Cliente + fecha de su última cotización — usada por el filtro Hoy/Semanal/Mensual del selector "Cliente guardado". */
+export type ClienteConUltimaCotizacion = Cliente & { ultimaCotizacion?: string };
+
 interface Props {
   empresa:           EmpresaData | null;
   numerosExistentes: string[];
   aprobados:         Cotizacion[];
-  clientes:          Cliente[];
+  clientes:          ClienteConUltimaCotizacion[];
   cotizacionId?:    string;
   /** Tipo de comprobante elegido antes de entrar aquí (Clientes/Facturas) —
    * ya no se pregunta "¿Tu cliente tiene RUC?" dentro del formulario. */
@@ -68,6 +72,12 @@ export function NuevaFacturaForm({
   const [error,        setError]        = useState<string | null>(null);
   const [guardada,     setGuardada]     = useState<Factura | null>(null);
   const [pdfUrl,       setPdfUrl]       = useState<string | null>(null);
+  const [filtroFechaCliente, setFiltroFechaCliente] = useState<FiltroFecha | null>(null);
+
+  const clientesFiltrados = useMemo(
+    () => clientes.filter((c) => cumpleFiltroFecha(c.ultimaCotizacion, filtroFechaCliente)),
+    [clientes, filtroFechaCliente]
+  );
 
   const invNum = useMemo(
     () => tipo ? nextNumeroComprobante(tipo, numerosExistentes) : "",
@@ -157,6 +167,9 @@ export function NuevaFacturaForm({
       const valido = boletaSchema.safeParse({ clientName, clientDni, clientDir, items });
       if (!valido.success) { setError(valido.error.errors[0]?.message ?? "Revisa los datos"); return; }
     }
+
+    const telefonoValido = validarTelefono(clientPhone);
+    if (!telefonoValido.valido) { setError(telefonoValido.mensaje!); return; }
 
     // Detracción obligatoria en facturas > S/700
     if (aplicaDetraccion && !detTipo) {
@@ -290,19 +303,22 @@ export function NuevaFacturaForm({
 
       {/* Cliente autocompletado */}
       {clientes.length > 0 && (
-        <label className="block">
-          <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
+        <div className="flex flex-col gap-2">
+          <span className="block text-[11px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>
             Cliente guardado
           </span>
+          <FiltroFechaChips activo={filtroFechaCliente} onChange={setFiltroFechaCliente} />
           <select onChange={(e) => seleccionarCliente(e.target.value)} defaultValue=""
             className="w-full rounded-xl px-4 py-3 text-sm font-medium outline-none"
             style={{ background: T.white, border: `1.5px solid ${T.slateD}` }}>
-            <option value="">— Buscar o escribir abajo —</option>
-            {clientes.map((c) => (
+            <option value="">
+              {clientesFiltrados.length === 0 ? "— Sin clientes en este filtro —" : "— Buscar o escribir abajo —"}
+            </option>
+            {clientesFiltrados.map((c) => (
               <option key={c.id} value={c.id}>{c.nombre}{c.ruc ? ` · ${c.ruc}` : ""}</option>
             ))}
           </select>
-        </label>
+        </div>
       )}
 
       {/* Importar cotización */}
@@ -353,7 +369,13 @@ export function NuevaFacturaForm({
       )}
 
       <Input label="Dirección" value={clientDir} onChange={(e) => setClientDir(e.target.value)} />
-      <Input label="Teléfono WhatsApp" inputMode="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
+      <Input
+        label="Teléfono WhatsApp"
+        inputMode="tel"
+        value={clientPhone}
+        onChange={(e) => setClientPhone(e.target.value)}
+        error={validarTelefono(clientPhone).mensaje}
+      />
       {clientEmail && (
         <p className="px-1 text-xs" style={{ color: T.textMid }}>✉️ {clientEmail}</p>
       )}

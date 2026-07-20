@@ -15,7 +15,7 @@ export default async function ClientesPage() {
   // datos, ver app/(auth)/facturas/page.tsx).
   const { data } = await supabase
     .from("clientes")
-    .select("*, cotizaciones(count), facturas(count)")
+    .select("*, cotizaciones(created_at), facturas(count)")
     .order("nombre");
 
   const clientes: ClienteConConteo[] = (data ?? [])
@@ -23,17 +23,25 @@ export default async function ClientesPage() {
       const facturasCount = Array.isArray(row.facturas) ? (row.facturas[0]?.count ?? 0) : 0;
       return facturasCount === 0;
     })
-    .map((row) => ({
-      id: row.id,
-      nombre: row.nombre,
-      telefono: row.telefono ?? undefined,
-      ruc: row.ruc ?? undefined,
-      direccion: row.direccion ?? undefined,
-      ciudad: row.ciudad ?? undefined,
-      notas: row.notas ?? undefined,
-      createdAt: row.created_at,
-      cotizaciones: Array.isArray(row.cotizaciones) ? (row.cotizaciones[0]?.count ?? 0) : 0,
-    }));
+    .map((row) => {
+      const cotizacionesRows: { created_at: string }[] = Array.isArray(row.cotizaciones) ? row.cotizaciones : [];
+      const ultimaCotizacion = cotizacionesRows
+        .map((c) => c.created_at)
+        .sort()
+        .at(-1);
+      return {
+        id: row.id,
+        nombre: row.nombre,
+        telefono: row.telefono ?? undefined,
+        ruc: row.ruc ?? undefined,
+        direccion: row.direccion ?? undefined,
+        ciudad: row.ciudad ?? undefined,
+        notas: row.notas ?? undefined,
+        createdAt: row.created_at,
+        cotizaciones: cotizacionesRows.length,
+        ultimaCotizacion,
+      };
+    });
 
   return (
     <div>

@@ -39,6 +39,36 @@ export const agruparPorCapitulo = <T extends { catLabel?: string; capNombre?: st
 /** Valida RUC peruano */
 export const validarRUC = (ruc: string) => /^\d{11}$/.test(ruc);
 
+/** Filtro de fecha relativo a hoy — botones Hoy/Semanal/Mensual (Clientes/Facturas/Nueva factura). */
+export type FiltroFecha = "hoy" | "semana" | "mes";
+
+/** ¿La fecha cae dentro del rango del filtro? `null` = sin filtro, siempre true. */
+export function cumpleFiltroFecha(fechaISO: string | null | undefined, filtro: FiltroFecha | null): boolean {
+  if (!filtro) return true;
+  if (!fechaISO) return false;
+  const fecha = new Date(fechaISO);
+  const ahora = new Date();
+  if (filtro === "hoy") return fecha.toDateString() === ahora.toDateString();
+  const dias = filtro === "semana" ? 7 : 30;
+  const limite = new Date(ahora.getTime() - dias * 86400000);
+  return fecha >= limite && fecha <= ahora;
+}
+
+/**
+ * Valida teléfono peruano por cantidad de dígitos (sin selector de tipo visible):
+ * 9 dígitos → debe empezar en "9" (celular); 8 o menos → sin restricción (fijo);
+ * más de 9 → inválido. Vacío se considera válido (campo opcional).
+ */
+export function validarTelefono(telefono?: string | null): { valido: boolean; mensaje?: string } {
+  const digitos = soloDigitos(telefono);
+  if (digitos.length === 0) return { valido: true };
+  if (digitos.length > 9) return { valido: false, mensaje: "Máximo 9 dígitos" };
+  if (digitos.length === 9 && !digitos.startsWith("9")) {
+    return { valido: false, mensaje: "Un número de 9 dígitos debe empezar en 9" };
+  }
+  return { valido: true };
+}
+
 /** Contador correlativo de facturas */
 let _counter = 1;
 export const nextInvoiceNum = () => `F001-${String(_counter++).padStart(6, "0")}`;

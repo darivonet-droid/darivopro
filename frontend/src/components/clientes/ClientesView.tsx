@@ -1,20 +1,21 @@
 "use client";
 // DARIVO PRO — Gestión de clientes
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { PaginacionLista } from "@/components/ui/PaginacionLista";
+import { FiltroFechaChips } from "@/components/design-system/FiltroFechaChips";
 import { useClientes } from "@/hooks/useClientes";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useAppStore } from "@/store/useAppStore";
-import { soloDigitos } from "@/lib/utils";
+import { soloDigitos, cumpleFiltroFecha, validarTelefono, type FiltroFecha } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import type { Cliente } from "@/types";
 
-export type ClienteConConteo = Cliente & { cotizaciones: number };
+export type ClienteConConteo = Cliente & { cotizaciones: number; ultimaCotizacion?: string };
 
 const FORM_VACIO = { nombre: "", telefono: "", ruc: "", ciudad: "", email: "" };
 
@@ -24,9 +25,15 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
   const [mostrandoForm, setMostrandoForm] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
   const [error, setError] = useState<string | null>(null);
+  const [filtroFecha, setFiltroFecha] = useState<FiltroFecha | null>(null);
   const { crear, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
-  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(clientes);
+  const filtrados = useMemo(
+    () => clientes.filter((c) => cumpleFiltroFecha(c.ultimaCotizacion, filtroFecha)),
+    [clientes, filtroFecha]
+  );
+  const { slice, hayMas, cargarMas, total, visible } = usePaginatedList(filtrados);
+  const telefonoError = validarTelefono(form.telefono).mensaje;
 
   // Lectura fresca: siempre prevalece lo que envía el servidor
   useEffect(() => { setClientes(iniciales); }, [iniciales]);
@@ -36,6 +43,7 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
     // Solo Nombre y Teléfono son obligatorios (estilo WhatsApp)
     if (form.nombre.trim().length < 2) { setError("Ingresa el nombre"); return; }
     if (soloDigitos(form.telefono).length < 6) { setError("Ingresa un teléfono válido"); return; }
+    if (!validarTelefono(form.telefono).valido) { setError(validarTelefono(form.telefono).mensaje!); return; }
 
     const creado = await crear({
       nombre: form.nombre.trim(),
@@ -62,7 +70,14 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
         <Card>
           <div className="flex flex-col gap-3">
             <Input label="Nombre *" placeholder="Nombre o razón social" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} autoFocus />
-            <Input label="Teléfono (WhatsApp) *" placeholder="51 999 999 999" inputMode="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            <Input
+              label="Teléfono (WhatsApp) *"
+              placeholder="51 999 999 999"
+              inputMode="tel"
+              value={form.telefono}
+              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              error={telefonoError}
+            />
             <Input label="RUC / DNI (opcional)" placeholder="11 u 8 dígitos" inputMode="numeric" value={form.ruc} onChange={(e) => setForm({ ...form, ruc: e.target.value })} />
             <Input label="Ciudad (opcional)" placeholder="Ej: Lima" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />
             <Input label="Correo electrónico (opcional)" type="email" placeholder="cliente@correo.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
@@ -80,11 +95,17 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
         <Button full onClick={() => setMostrandoForm(true)}>+ Nuevo cliente</Button>
       )}
 
-      {clientes.length === 0 && !mostrandoForm && (
+      {!mostrandoForm && <FiltroFechaChips activo={filtroFecha} onChange={setFiltroFecha} />}
+
+      {filtrados.length === 0 && !mostrandoForm && (
         <EmptyState
           emoji="👷"
-          titulo="Sin clientes todavía"
-          descripcion="Guarda tus clientes para crear cotizaciones aún más rápido."
+          titulo={clientes.length === 0 ? "Sin clientes todavía" : "Sin clientes en este filtro"}
+          descripcion={
+            clientes.length === 0
+              ? "Guarda tus clientes para crear cotizaciones aún más rápido."
+              : "Ningún cliente tiene una cotización en este rango de fecha."
+          }
         />
       )}
 
