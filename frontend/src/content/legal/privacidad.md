@@ -33,7 +33,7 @@ Contacto para temas de privacidad: [email de contacto específico, ej. privacida
 
 ## 4. Con quién compartimos tus datos
 
-Darivo Pro utiliza los siguientes proveedores para prestar el servicio — cada uno trata datos únicamente para la finalidad indicada, bajo sus propias garantías de seguridad. Esta tabla se mantiene sincronizada con `INVENTARIO-PROVEEDORES-DATOS-DARIVO-PRO.md` (verificado contra el código real, última revisión 16/07/2026):
+Darivo Pro utiliza los siguientes proveedores para prestar el servicio — cada uno trata datos únicamente para la finalidad indicada, bajo sus propias garantías de seguridad. Esta tabla se mantiene sincronizada con el inventario interno de proveedores (verificado contra el código real, última revisión 16/07/2026):
 
 | Proveedor | Para qué | Qué datos toca |
 |---|---|---|
