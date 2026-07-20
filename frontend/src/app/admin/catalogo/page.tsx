@@ -24,7 +24,7 @@ export default async function AdminCatalogoPage() {
       <AdminShell titulo="Catálogo Maestro">
         <p className="text-sm" style={{ color: "#64748B" }}>
           No hay ningún producto registrado en <span className="font-mono">productos_master</span> —
-          el Catálogo Maestro necesita al menos uno para crear categorías (Doc 21).
+          el Catálogo Maestro necesita al menos uno para crear categorías.
         </p>
       </AdminShell>
     );

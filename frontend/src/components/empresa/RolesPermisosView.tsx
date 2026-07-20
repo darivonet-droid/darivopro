@@ -291,7 +291,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
           className="rounded-full px-3 py-1 text-xs font-bold"
           style={{ background: ADMIN_COLORS.white, color: ADMIN_COLORS.purple }}
         >
-          Fuente: Admin Suscripciones · 04 §6
+          Fuente: Admin Suscripciones
         </span>
       </div>
 
@@ -307,7 +307,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
               </p>
               <p className="mt-1 text-xs leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
                 Solo plan Business. Crea plantillas de permisos reutilizables y asígnalas a uno o
-                varios Técnicos (Doc 11 §6.1).
+                varios Técnicos.
               </p>
               {limiteInfo && (
                 <p className="mt-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.textLight }}>
@@ -361,7 +361,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
                 style={{ borderColor: ADMIN_COLORS.slateD, background: ADMIN_COLORS.white }}
               />
               <p className="mb-2 text-xs font-bold" style={{ color: ADMIN_COLORS.textMid }}>
-                Permisos (catálogo §5.2 — toggles sobre funcionalidades existentes)
+                Permisos (toggles sobre funcionalidades existentes)
               </p>
               <div className="mb-3 flex flex-col gap-2">
                 {MODULOS_PERMISO_ROL.map((mod) => (
@@ -550,14 +550,14 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: ADMIN_COLORS.textMid }}>
           El Gerente activa o desactiva permisos de cada Técnico. Los permisos nunca superan
-          el plan contratado (Visión §8 · Admin §16).
+          el plan contratado.
         </p>
         <p
           className="mt-3 rounded-xl px-3 py-2 text-xs font-semibold"
           style={{ background: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD }}
         >
-          Matriz detallada fila a fila — pendiente aprobación del propietario (Doc 11 §5.2 · Admin §8).
-          No se inventan permisos en código hasta dicha aprobación.
+          Matriz detallada fila a fila — pendiente de aprobación del propietario. No se inventan
+          permisos en código hasta dicha aprobación.
         </p>
 
         <div className="mt-5 overflow-x-auto">
@@ -594,7 +594,7 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
       </div>
 
       <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-        Entrada alternativa: Módulo Empleados → «Editar permisos» (Doc 10 · pendiente implementación).
+        Entrada alternativa: Módulo Empleados → «Editar permisos» (pendiente de implementación).
       </p>
     </div>
   );

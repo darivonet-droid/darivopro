@@ -10,7 +10,9 @@ export const metadata = {
 
 export default function CookiesPage() {
   // Documento legal publicado tal cual (borrador pendiente de revisión legal);
-  // los marcadores [pendiente] se mantienen visibles a propósito.
+  // los marcadores [pendiente] dentro de las cláusulas se mantienen visibles a
+  // propósito (decisión legal previa, no tocada). La referencia al .md interno
+  // de proveedores sí se quitó 20/07/2026 (ver REGLA PERMANENTE en CLAUDE.md).
   const source = readFileSync(join(process.cwd(), "src/content/legal/cookies.md"), "utf8");
   return (
     <article className="rounded-2xl bg-white p-6" style={{ boxShadow: "0 2px 20px rgba(10,22,40,0.09)" }}>

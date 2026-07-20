@@ -36,10 +36,8 @@ Darivo Pro no muestra actualmente un banner de gestión de cookies (mientras no 
 
 ## 5. Cambios en esta política
 
-Podemos actualizar esta Política de Cookies, especialmente si se incorpora algún proveedor nuevo que use cookies (ver `INVENTARIO-PROVEEDORES-DATOS-DARIVO-PRO.md`). Los cambios relevantes se notificarán mediante un aviso en la plataforma.
+Podemos actualizar esta Política de Cookies, especialmente si se incorpora algún proveedor nuevo que use cookies. Los cambios relevantes se notificarán mediante un aviso en la plataforma.
 
 ---
 
 Esta política complementa la Política de Privacidad de Darivo Pro (darivopro.com/privacidad).
-
-**Fin del documento — recuerda: revisión legal obligatoria antes de publicar, especialmente los puntos marcados con ⚠️.**

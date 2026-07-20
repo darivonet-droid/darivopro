@@ -166,7 +166,7 @@ export function EmpresaEmpleadosView() {
   return (
     <div>
       <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-        Gestión de técnicos de su empresa — Doc 10-MODULO-EMPLEADOS-EMPRESA.
+        Gestión de técnicos de su empresa.
       </p>
 
       <div className="mb-4 flex flex-wrap gap-2">

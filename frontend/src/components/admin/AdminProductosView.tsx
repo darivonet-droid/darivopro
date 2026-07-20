@@ -104,9 +104,8 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
   return (
     <div>
       <AdminNotice>
-        Solo se editan los productos ya definidos en la Visión del Producto (§3). No se
-        crean ni eliminan filas desde este panel (05-PANEL-ADMIN-EDICION-DE-PRODUCTOS.md §6, §12).
-        El <span className="font-mono text-xs">slug</span> es de solo lectura (clave funcional).
+        Solo se editan los productos ya definidos. No se crean ni eliminan filas desde este
+        panel. El <span className="font-mono text-xs">slug</span> es de solo lectura (clave funcional).
       </AdminNotice>
 
       <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -252,9 +251,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
           Historial de cambios
         </h2>
         <AdminNotice>
-          El esquema real de <span className="font-mono text-xs">productos_master</span> no
-          incluye columnas de auditoría (<span className="font-mono text-xs">updated_at</span>,
-          usuario). El historial de cambios (§5) queda pendiente de definir esas columnas en BD.
+          Todavía no hay historial de cambios disponible para este catálogo.
         </AdminNotice>
       </section>
     </div>

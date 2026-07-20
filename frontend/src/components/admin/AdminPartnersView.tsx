@@ -394,7 +394,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
 
       <section id="tabla-comisiones" className="mt-8">
         <h2 className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
-          Configurar tabla de comisiones (Doc 06 §5.1)
+          Configurar tabla de comisiones
         </h2>
         <p className="mb-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
           Comisión por venta: pago único sobre el primer pago del cliente referido. Además, bono
@@ -544,7 +544,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
           <AdminCard title="Información">
             <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
               Cada Partner activo recibe código y enlace únicos generados automáticamente, y
-              acceso gratuito al Plan Business mientras permanezca activo (Doc 06 §5.1). El
+              acceso gratuito al Plan Business mientras permanezca activo. El
               Panel Administrador es la única fuente autorizada para administrar Partners.
             </p>
           </AdminCard>
@@ -568,7 +568,7 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
               </a>
             </div>
             <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              &ldquo;Guía de uso&rdquo; no está construida todavía (Doc 06 §7). &ldquo;Consultar
+              &ldquo;Guía de uso&rdquo; no está construida todavía. &ldquo;Consultar
               registros asociados&rdquo; y Activar/Suspender están disponibles al seleccionar un
               partner de la tabla.
             </p>

@@ -87,10 +87,3 @@ Con carácter general, estos Términos se rigen por la legislación española. P
 
 * Moneda de facturación: [ ]
 * Condiciones específicas: [ ]
-
----
-
-**Changelog:**
-* 16/07/2026 — Fase 2 (Legal): confirmado el nombre real del proveedor de pagos (dLocal Go) en §4; añadido email de contacto provisional (info@darivopro.com) en §1 mientras se confirma un email dedicado. Sigue siendo un borrador, pendiente de revisión legal antes de publicar.
-
-**Fin del documento — recuerda: revisión legal obligatoria antes de publicar.**

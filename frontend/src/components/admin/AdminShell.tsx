@@ -107,21 +107,3 @@ export function AdminShell({
     </div>
   );
 }
-
-function PlaceholderModulo({ md }: { md: string }) {
-  return (
-    <div
-      className="rounded-2xl p-6"
-      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
-    >
-      <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-        Módulo en construcción conforme documentación oficial.
-      </p>
-      <p className="mt-2 text-xs font-mono" style={{ color: ADMIN_COLORS.textLight }}>
-        MD: {md}
-      </p>
-    </div>
-  );
-}
-
-export { PlaceholderModulo };

@@ -272,7 +272,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
             Fuente: <span className="font-mono">auth.users</span> (Supabase Auth) +{" "}
             <span className="font-mono">perfiles</span> — bloqueo vía{" "}
             <span className="font-mono">banned_until</span>, plan vía{" "}
-            <span className="font-mono">perfiles.plan_tipo</span> (03-PANEL-ADMIN-USUARIOS.md §5).
+            <span className="font-mono">perfiles.plan_tipo</span>.
             Importar/exportar Excel-CSV e invitación masiva no están construidos todavía.
           </p>
         </div>

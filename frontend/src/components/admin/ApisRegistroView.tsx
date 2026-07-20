@@ -28,7 +28,6 @@ const PENDIENTES = [
   {
     nombre: "Facturación electrónica (SUNAT o proveedor)",
     estado: "Pendiente propietario",
-    ref: "§5.4",
   },
 ] as const;
 
@@ -36,8 +35,7 @@ export function ApisRegistroView() {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-        Registro oficial de APIs — solo lectura. Fuente:{" "}
-        <span className="font-mono text-xs">08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md</span>
+        Registro oficial de APIs — solo lectura.
       </p>
       <div className="grid gap-3">
         {APIS_OFICIALES.map((api) => (
@@ -68,7 +66,7 @@ export function ApisRegistroView() {
       </div>
       <div>
         <p className="mb-2 text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
-          Pendientes §5.4
+          Pendientes
         </p>
         {PENDIENTES.map((p) => (
           <div

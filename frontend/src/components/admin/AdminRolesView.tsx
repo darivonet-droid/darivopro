@@ -31,7 +31,7 @@ export function AdminRolesView() {
               Roles de plataforma
             </h2>
             <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
-              Doc 12 §6.1 — equipo Darivo
+              Equipo Darivo
             </p>
             <ul className="mt-4 flex flex-col gap-2">
               {ROLES_PLATAFORMA.map((rol) => (
@@ -55,9 +55,6 @@ export function AdminRolesView() {
             <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
               Roles del cliente
             </h2>
-            <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textMid }}>
-              Doc 12 §6.2–§6.3 · Visión §8
-            </p>
             <ul className="mt-4 flex flex-col gap-2">
               <li className="rounded-xl px-4 py-3" style={{ background: ADMIN_COLORS.slate }}>
                 <p className="text-sm font-bold" style={{ color: ADMIN_COLORS.text }}>
@@ -87,7 +84,7 @@ export function AdminRolesView() {
         <div>
           <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
             Catálogo oficial — administración completa en{" "}
-            <strong>Gestión de Suscripciones</strong> (Doc 04 §6).
+            <strong>Gestión de Suscripciones</strong>.
           </p>
           <div className="mb-6 grid gap-4 md:grid-cols-2">
             {(Object.keys(PRECIOS_OFICIALES) as Array<keyof typeof PRECIOS_OFICIALES>).map(
@@ -160,8 +157,8 @@ export function AdminRolesView() {
             <AdminTable headers={["Permiso", "Estado"]} rows={[]} vacio="Sin permisos configurados" />
           ) : (
             <p className="mt-3 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-              Matriz detallada fila a fila — pendiente aprobación del propietario (Doc 12 §8).
-              Gestión desde Empresa → Roles y Permisos cuando esté aprobada.
+              Matriz detallada fila a fila — pendiente de aprobación. Gestión desde Empresa → Roles
+              y Permisos cuando esté aprobada.
             </p>
           )}
         </div>

@@ -106,10 +106,3 @@ Podemos actualizar esta Política de Privacidad. Los cambios relevantes se notif
 ### Anexo [Próximo país] — plantilla para replicar
 
 * [ ]
-
----
-
-**Changelog:**
-* 16/07/2026 — Fase 2 (Legal): completada la tabla de proveedores (§4) con la lista real verificada en `INVENTARIO-PROVEEDORES-DATOS-DARIVO-PRO.md` (Google Workspace, GitHub y Railway añadidos; dLocal Go confirmado por su nombre real); añadida la sección "Quién dentro de Darivo Pro puede ver tus datos" (§5), redactada exclusivamente a partir de las políticas RLS reales de Supabase y de `PANEL-PARTNER.md` — sin inventar ningún permiso no verificado en código; §9 (Cookies) enlaza ahora a la nueva Política de Cookies dedicada. Sigue siendo un borrador, pendiente de revisión legal antes de publicar.
-
-**Fin del documento — recuerda: revisión legal obligatoria antes de publicar, especialmente los puntos marcados con ⚠️.**

@@ -347,8 +347,7 @@ export function AdminEmpleadosInternosView({ empleados }: { empleados: AdminEmpl
 
             <AdminNotice>
               Importar/Exportar en lote, &ldquo;Publicar cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están
-              construidos todavía (07-PANEL-ADMIN-EMPLEADOS.md §5/§7) — requieren un flujo propio
-              no documentado a fondo aún. &ldquo;Exportar&rdquo; (CSV de la vista actual) sí está
+              construidos todavía. &ldquo;Exportar&rdquo; (CSV de la vista actual) sí está
               disponible en el panel lateral.
             </AdminNotice>
           </>
@@ -356,8 +355,7 @@ export function AdminEmpleadosInternosView({ empleados }: { empleados: AdminEmpl
 
         {(tab === "Invitaciones" || tab === "Actividad" || tab === "Historial de cambios") && (
           <div className="rounded-2xl p-8 text-center text-sm" style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}>
-            {tab} — pendiente de construir (Doc 07 §5, §8): requiere una tabla de auditoría propia
-            que hoy no existe (el MD prohíbe crear tablas sin aprobación, §10).
+            {tab} — no disponible todavía.
           </div>
         )}
       </div>

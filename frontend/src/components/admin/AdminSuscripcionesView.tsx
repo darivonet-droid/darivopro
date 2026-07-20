@@ -200,22 +200,17 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
             )}
 
             <AdminNotice>
-              Catálogo de solo lectura por diseño (Doc 04 §10 — sin tabla propia todavía; el precio
-              &ldquo;editable&rdquo; que describe el MD requeriría esa tabla, no construida). &ldquo;Nuevo
-              plan&rdquo; no aplica — el catálogo está fijado a los 3 planes oficiales (Básico/Pro/
-              Business), no se inventan planes adicionales. &ldquo;Importar planes&rdquo; y &ldquo;Publicar
-              cambios&rdquo; tampoco están construidos por el mismo motivo. &ldquo;Exportar&rdquo; sí está
-              disponible arriba.
+              Catálogo de solo lectura por diseño. &ldquo;Nuevo plan&rdquo; no aplica — el catálogo
+              está fijado a los 3 planes oficiales (Básico/Pro/Business), no se inventan planes
+              adicionales. &ldquo;Importar planes&rdquo; y &ldquo;Publicar cambios&rdquo; tampoco
+              están construidos. &ldquo;Exportar&rdquo; sí está disponible arriba.
             </AdminNotice>
           </>
         )}
 
         {tab === "Historial de cambios" && (
           <div className="rounded-2xl p-8 text-center" style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}>
-            <p className="text-sm">Historial de cambios — pendiente auditoría BD.</p>
-            <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              Solo tiene sentido una vez que el precio sea editable (Doc 04 §6/§10).
-            </p>
+            <p className="text-sm">No hay historial de cambios disponible todavía.</p>
           </div>
         )}
       </div>
@@ -259,7 +254,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
           <>
             <AdminCard title="Información">
               <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-                Fuente única del catálogo oficial de planes (Doc 04 §6). Los 3 planes tienen precio
+                Fuente única del catálogo oficial de planes. Los 3 planes tienen precio
                 definitivo confirmado por el propietario 17/07/2026 (Básico S/49/mes, Pro S/89/mes,
                 Business S/130/mes — precio anual = mensual × 10, sin descuento adicional).
               </p>
@@ -290,8 +285,7 @@ export function AdminSuscripcionesView({ planesOficiales, usuariosPorPlan }: Adm
                 </button>
               </div>
               <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                &ldquo;Importar planes&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas todavía
-                (Doc 04 §8).
+                &ldquo;Importar planes&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas todavía.
               </p>
             </AdminCard>
           </>

@@ -456,18 +456,14 @@ export function AdminCatalogoView({
         {(esTabCategorias || esTabPartidas) && (
           <AdminNotice>
             &ldquo;Importar (Excel/CSV)&rdquo; y &ldquo;Publicar cambios&rdquo; no están construidos
-            todavía (Doc 10 §6) — requieren un flujo propio no documentado a fondo. &ldquo;Exportar&rdquo;
-            sí está disponible arriba. Los cambios aquí se aplican directamente (no hay estado
-            borrador/publicado).
+            todavía. &ldquo;Exportar&rdquo; sí está disponible arriba. Los cambios aquí se aplican
+            directamente (no hay estado borrador/publicado).
           </AdminNotice>
         )}
 
         {tab === "Historial de cambios" && (
           <div className="rounded-2xl p-8 text-center" style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}>
-            <p className="text-sm">Historial de cambios — pendiente auditoría BD.</p>
-            <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              Doc 10 §9: sin tabla de auditoría todavía, no se inventa una sin aprobación.
-            </p>
+            <p className="text-sm">No hay historial de cambios disponible todavía.</p>
           </div>
         )}
       </div>
@@ -510,8 +506,7 @@ export function AdminCatalogoView({
           <>
             <AdminCard title="Trabajo en equipo">
               <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-                &ldquo;Usuarios editando el catálogo&rdquo; no está construido — requiere presencia en
-                tiempo real, infraestructura que no existe todavía (Doc 10 §7).
+                &ldquo;Usuarios editando el catálogo&rdquo; no está disponible todavía.
               </p>
             </AdminCard>
             <AdminCard title="Acciones rápidas">
@@ -527,7 +522,7 @@ export function AdminCatalogoView({
               </div>
               <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                 &ldquo;Importar categorías&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas
-                todavía (Doc 10 §7).
+                todavía.
               </p>
             </AdminCard>
           </>

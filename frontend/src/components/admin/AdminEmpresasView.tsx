@@ -314,18 +314,17 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
 
             <AdminNotice>
               Importar (Excel/CSV), &ldquo;Publicar cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están
-              construidos todavía (Doc 02 §5/§7) — requieren un flujo propio no documentado a fondo
-              aún. &ldquo;Exportar&rdquo; (CSV de la vista actual) y &ldquo;Descargar plantilla&rdquo;
-              sí están disponibles. &ldquo;Solicitar eliminación&rdquo; (Doc 02 §1) tampoco está
-              construido — el MD la describe como un procedimiento administrativo aparte, no un
-              borrado directo, y ese procedimiento no está definido todavía.
+              construidos todavía. &ldquo;Exportar&rdquo; (CSV de la vista actual) y &ldquo;Descargar
+              plantilla&rdquo; sí están disponibles. &ldquo;Solicitar eliminación&rdquo; tampoco está
+              construido — es un procedimiento administrativo aparte, no un borrado directo, y ese
+              procedimiento no está definido todavía.
             </AdminNotice>
             <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               Fuente: tabla <span className="font-mono">empresas</span> (Supabase) — el estado
               activo/suspendida vive en <span className="font-mono">empresas.activo</span>, el plan
               en <span className="font-mono">perfiles.plan_tipo</span> vía{" "}
-              <span className="font-mono">gerente_user_id</span> (Doc 02 §9). &ldquo;Última
-              actividad&rdquo; es el último acceso real del gerente.
+              <span className="font-mono">gerente_user_id</span>. &ldquo;Última actividad&rdquo; es
+              el último acceso real del gerente.
             </p>
           </>
         )}
@@ -333,9 +332,6 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
         {tab === "Solicitudes" && (
           <div className="rounded-2xl p-8 text-center" style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}>
             <p className="text-sm">No hay solicitudes de empresa pendientes.</p>
-            <p className="mt-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              Flujo solicitudes — pendiente definición oficial (Doc 02 §9).
-            </p>
           </div>
         )}
 
@@ -432,8 +428,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
 
             <AdminCard title="Trabajo en equipo">
               <p className="text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-                Actividad de los administradores sobre empresas no está construida — requiere un
-                registro de auditoría que hoy no existe (Doc 02 §9, no crear tablas sin aprobación).
+                Actividad de los administradores sobre empresas: no disponible todavía.
               </p>
             </AdminCard>
 
@@ -458,7 +453,7 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
               </div>
               <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
                 &ldquo;Importar empresas&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas
-                todavía (Doc 02 §7).
+                todavía.
               </p>
             </AdminCard>
           </>
