@@ -130,6 +130,18 @@ export function ClientesView({ iniciales }: { iniciales: ClienteConConteo[] }) {
                   {" · "}
                   {c.cotizaciones} cotizaci{c.cotizaciones === 1 ? "ón" : "ones"}
                 </div>
+                {c.direccion && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.direccion)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-0.5 block text-xs underline"
+                    style={{ color: T.blue }}
+                  >
+                    📍 {c.direccion}
+                  </a>
+                )}
               </div>
             </div>
             <span className="text-lg" style={{ color: T.textLight }}>›</span>

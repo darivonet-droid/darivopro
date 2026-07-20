@@ -1,18 +1,19 @@
 // DARIVO PRO — Callback Supabase Auth (confirmación email, login Google OAuth)
 //
-// Nota (12/07/2026): esta ruta también la usa el login con Google (ver
-// login/page.tsx), no solo la confirmación de registro nuevo. El email de
-// Bienvenida (info@) NO se dispara aquí por eso — no hay todavía una señal
-// fiable para distinguir "primera confirmación de una cuenta nueva" de "un
-// usuario existente volviendo a entrar por Google", y enviarlo sin esa
-// distinción mandaría "Bienvenida" en cada login recurrente. Sí se dispara
-// en el flujo de registro con sesión inmediata (registro/page.tsx) — ver
-// frontend/src/lib/email/send.ts para el resto de eventos conectados.
+// Nota (12/07/2026, actualizada 20/07/2026): esta ruta también la usa el
+// login con Google (ver login/page.tsx), no solo la confirmación de registro
+// nuevo. El email de Bienvenida (info@) se dispara en el flujo de registro
+// con sesión inmediata directamente desde registro/page.tsx; aquí (confirmación
+// por correo y Google OAuth) se dispara solo si created_at/last_sign_in_at del
+// usuario están a menos de 10s entre sí — señal de "primer login real de esta
+// cuenta", no una recurrente. Umbral es una interpretación propia (Supabase no
+// expone un flag "es la primera vez" directo) — ver enviarBienvenidaNuevaCuenta.
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { registrarReferidoSiCorresponde, REF_COOKIE_NAME } from "@/lib/ecosystem-store";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { enviarBienvenidaNuevaCuenta } from "@/lib/email/bienvenida-nueva-cuenta";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -45,6 +46,21 @@ export async function GET(request: Request) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=confirmacion`);
+  }
+
+  // Email de Bienvenida en el primer login real de esta cuenta (típicamente
+  // Google OAuth nuevo, o confirmación por correo si el proyecto la requiere)
+  // — best-effort, nunca bloquea el login. Ver nota de cabecera.
+  if (data.user) {
+    const creado = data.user.created_at ? new Date(data.user.created_at).getTime() : NaN;
+    const primerLogin = data.user.last_sign_in_at
+      ? new Date(data.user.last_sign_in_at).getTime()
+      : NaN;
+    const esPrimeraVez =
+      Number.isFinite(creado) && Number.isFinite(primerLogin) && Math.abs(primerLogin - creado) < 10_000;
+    if (esPrimeraVez) {
+      enviarBienvenidaNuevaCuenta(supabase, data.user).catch(() => {});
+    }
   }
 
   // Registra el referido de Partner si venía de /ref/{codigo} (caso: el
