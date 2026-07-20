@@ -28,7 +28,10 @@ A partir de esta fecha queda **revertida** la "autonomía total sobre `main`" de
   para esa tarea, sin confirmación paso a paso. El permiso es **por tarea, no
   permanente** — no se asume vigente en la siguiente sesión sin que se repita.
 - **Verificación siempre en:**
-  `https://darivo-saas-git-main-darivonet-droids-projects.vercel.app/`,
+  `https://darivopro.com/` (dominio real de producción — corregido 20/07/2026,
+  antes decía la URL alias `darivo-saas-git-main-...vercel.app`; ambas apuntan
+  al mismo deploy de producción, pero el propietario confirmó que entra por
+  `darivopro.com`, así que esa es la URL de referencia de aquí en adelante),
   iniciando sesión con **Google usando la sesión ya abierta en el navegador**
   (botón "Continuar con Google"). Claude **nunca escribe la contraseña**; si
   algún login la pidiera, la escribe el propietario (regla permanente, excepción #3).
