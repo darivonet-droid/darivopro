@@ -89,9 +89,10 @@ export function NuevoCotizacionWizard() {
   const [pdfUrlGuardado, setPdfUrlGuardado] = useState<string | null>(null);
   const [populated, setPopulated] = useState(false);
 
-  // Draft restore
-  const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
-  const { limpiar } = useCotizacionDraft(draftState);
+  // Draft restore — `basket` es el carrito real (antes se guardaba items:[]
+  // hardcodeado, el borrador nunca sobrevivía a salir a medio wizard).
+  const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null, basket };
+  const { cargar, limpiar } = useCotizacionDraft(draftState);
 
   // ── Catálogo ordenado por frecuencia global + boost por cliente ──────────
   const sortedCatalogo = useMemo(() => {
@@ -245,6 +246,22 @@ export function NuevoCotizacionWizard() {
       setClientName(lastClient.name);
       setPhone(lastClient.phone);
       setCity(lastClient.city);
+    }
+
+    // 5. Restaurar borrador local si el usuario salió a medio wizard sin
+    // guardar (ninguno de los casos de arriba aplicó — ?editar=/?from=/
+    // ?fromIA= siempre tienen prioridad sobre el borrador). Antes el
+    // borrador guardaba items:[] hardcodeado, así que nunca había nada real
+    // que restaurar (CLAUDE.md, hallazgo 16/07/2026).
+    const draft = cargar();
+    if (draft?.basket && Array.isArray(draft.basket) && draft.basket.length) {
+      setBasket(draft.basket as BasketItem[]);
+      setMargin(draft.margin);
+      setNotes(draft.notes ?? "");
+      if (draft.clientName) setClientName(draft.clientName);
+      if (draft.phone) setPhone(draft.phone);
+      if (draft.city) setCity(draft.city);
+      mostrarToast("Recuperamos tu cotización sin guardar");
     }
   }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
 
