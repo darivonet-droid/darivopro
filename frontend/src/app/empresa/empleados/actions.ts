@@ -19,9 +19,13 @@ type Resultado = { ok: true } | { ok: false; error: string };
  *    esto quedaría en el plan `gratis` por defecto del trigger
  *    `handle_new_user()`, con el límite de 5 cotizaciones de por vida) y
  *    salta su onboarding propio — se une a una empresa existente.
- * 3. Guarda el `user_id`, y los permisos por técnico (Tarea 2, CLAUDE.md
- *    17/07/2026: Factura OFF por defecto, Informe opcional, ambos los
- *    activa el Gerente aquí mismo al invitar) en `empresa_empleados`.
+ * 3. Guarda el `user_id`, y los permisos por técnico (Etapa 7, CLAUDE.md
+ *    21/07/2026, decisión 3 — reemplaza el default de la Tarea 2 del
+ *    17/07/2026: Factura nace ACTIVADA por defecto, Informe sigue opcional;
+ *    el Gerente decide ambos aquí mismo al invitar, y puede desactivar
+ *    Factura si no corresponde a este Técnico) en `empresa_empleados`.
+ *    No son "roles fijos" — cada módulo (Factura/Informe) es un flag
+ *    activable/desactivable en cualquier momento, no solo al invitar.
  * 4. Envía un segundo correo (best-effort, `lib/email/send.ts`) indicando el
  *    rol y los permisos asignados — el invite nativo de Supabase Auth no
  *    soporta variables de plantilla personalizadas, así que el rol no puede

@@ -7,10 +7,18 @@
  * - Partner: no es producto — programa gestionado desde Admin; bloqueo/activación
  *   manual vía `partners.estado`, sin regla automática de pago.
  * - Móvil independiente (sin empresa): aislado.
- * - Empresa: Gerente = acceso completo dentro del plan. Técnico = Cotización ON
- *   por defecto, Factura OFF hasta que el Gerente la active
- *   (`empresa_empleados.factura_habilitada`), Informe opcional
- *   (`empresa_empleados.informe_habilitado`), nunca ve "Mis planes".
+ * - Empresa (Etapa 7, 21/07/2026, decisión 3 — reemplaza el modelo anterior
+ *   de la Tarea 2 del 17/07/2026): Gerente = acceso completo dentro del plan,
+ *   y activa/desactiva LIBREMENTE cualquier módulo de cada Técnico en
+ *   cualquier momento — no son "roles fijos" (Gerente/Técnico como cajas
+ *   cerradas), son MÓDULOS ACTIVABLES por empleado
+ *   (`empresa_empleados.factura_habilitada`/`informe_habilitado`). Un
+ *   Técnico puede tener permisos ampliados sin volverse un segundo Gerente
+ *   (nunca administra empleados ni el plan de la empresa, eso sigue exclusivo
+ *   del Gerente). Cotización y Cliente son módulos base sin flag, siempre
+ *   disponibles. Técnico nuevo invitado nace con Cotización + Cliente +
+ *   Factura activas (antes Factura nacía en `false`); Informe sigue opcional
+ *   (el Gerente lo activa aparte). Nunca ve "Mis planes".
  * - Técnico vinculado comparte los datos de su empresa aunque entre por Móvil.
  * - Empresa y Móvil: 3 días de gracia tras fallo de pago → solo lectura.
  *   Admin y Partner exentos.
@@ -186,7 +194,7 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
     celdas: {
       admin: NA,
       gerente: { valor: "condicional", nota: "Requiere plan con facturación (Pro o Business)" },
-      tecnico: { valor: "condicional", nota: "Desactivada por defecto — solo si el Gerente la activa" },
+      tecnico: { valor: "condicional", nota: "Activada por defecto al invitarlo — el Gerente puede desactivarla en cualquier momento" },
       partner: NA,
       movil: { valor: "condicional", nota: "Requiere plan con facturación (Pro o Business)" },
     },
@@ -196,10 +204,10 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
   {
     id: "habilitar-permisos-tecnico",
     modulo: "Facturas",
-    accion: "Activar Factura / Informe a un Técnico",
+    accion: "Activar / desactivar Factura o Informe de un Técnico",
     celdas: {
       admin: { valor: "no", nota: "Decisión exclusiva del Gerente de cada empresa" },
-      gerente: SI,
+      gerente: { valor: "si", nota: "Libremente, en cualquier momento, módulo por módulo — no es una elección única al invitar" },
       tecnico: NO,
       partner: NA,
       movil: NA,
@@ -265,6 +273,25 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
   },
 
   // ───────────────────────── Empresa ─────────────────────────
+  {
+    id: "acceder-clientes-empresa",
+    modulo: "Empresa",
+    accion: "Ver y gestionar Clientes de la empresa",
+    celdas: {
+      admin: NA,
+      gerente: SI,
+      tecnico: { valor: "si", nota: "Módulo base, siempre disponible — no existe (ni se necesita) un flag de activación como en Factura/Informe" },
+      partner: NA,
+      movil: { valor: "noaplica", nota: "Sin empresa no hay clientes compartidos" },
+    },
+    // Investigado en la Etapa 7 (21/07/2026, decisión 3): a diferencia de
+    // Factura/Informe, "Cliente" no tiene columna de permiso en
+    // empresa_empleados — todo empleado vinculado ve el mismo listado que el
+    // Gerente, sin restricción de rol en ningún punto de gating. No hace
+    // falta un 3er flag: el propio acceso a la empresa (vía user_id) ya lo
+    // resuelve.
+    gating: "empresa_empleados (vínculo user_id↔empresa_id); sin columna de permiso propia, sin gate adicional por rol",
+  },
   {
     id: "gestionar-empleados-empresa",
     modulo: "Empresa",

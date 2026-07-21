@@ -49,7 +49,11 @@ export function EmpresaEmpleadosView() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [facturaHabilitada, setFacturaHabilitada] = useState(false);
+  // Etapa 7 (21/07/2026, decisión 3): un Técnico nuevo nace con Cotización +
+  // Cliente + Factura activas — Factura ya no es opt-in en el default del
+  // formulario (antes false). Informe sigue opcional, el Gerente lo activa
+  // aparte si quiere.
+  const [facturaHabilitada, setFacturaHabilitada] = useState(true);
   const [informeHabilitado, setInformeHabilitado] = useState(false);
   const [buscar, setBuscar] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -129,7 +133,7 @@ export function EmpresaEmpleadosView() {
       setNombre("");
       setEmail("");
       setTelefono("");
-      setFacturaHabilitada(false);
+      setFacturaHabilitada(true);
       setInformeHabilitado(false);
       setMostrarForm(false);
       void cargar(empresaId);
@@ -235,7 +239,8 @@ export function EmpresaEmpleadosView() {
               Permisos de este Técnico
             </p>
             <p className="mb-2 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-              Cotización siempre está habilitada. El resto lo decides tú:
+              Cotización y Cliente siempre están habilitadas. Factura nace activada — puedes
+              desactivarla si este Técnico no debe emitir facturas. Informe es opcional:
             </p>
             <label className="mb-1.5 flex items-center gap-2 text-sm" style={{ color: ADMIN_COLORS.text }}>
               <input
