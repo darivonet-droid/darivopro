@@ -617,6 +617,24 @@ Creado `frontend/docs-internos/TODO-PENDIENTES-DARIVO-PRO.md` — 6 categorías 
 
 ## ESTADO REAL DEL PROYECTO (única fuente de verdad — actualizar al final de cada bloque de trabajo)
 
+*Actualización 21/07/2026 — 10 de las 11 migraciones acumuladas, CORRIDAS por Mohamed en el SQL Editor de Supabase:*
+
+Confirmado por el propio Mohamed en el chat. Corridas, en orden, TODAS excepto `20260721180000_facturas_bizlinks_esquema.sql` (dejada fuera a propósito — toca el esquema de facturas de cara a la integración con Bizlinks/SUNAT, aún sin fecha de integración técnica real, ver preguntas abiertas #6/#7 "EN PAUSA" de la Etapa 4/5):
+
+1. ✅ `20260719140000_perfiles_logo.sql` — `perfiles.logo_url` + bucket Storage `logos` ya reales en producción. El logo de empresa en Cotización/Factura (construido 19/07/2026) queda con su dependencia de BD resuelta.
+2. ✅ `20260721120000_pago_fallido_solo_lectura.sql` — `perfiles.pago_fallido_desde` + `es_cuenta_solo_lectura()` + políticas RESTRICTIVE en 11 tablas ya activas. La mora de 3 días + solo lectura (`lib/mora-pagos.ts`, `AvisoCobroBanner`) deja de ser tolerante-a-ausencia y pasa a hacer cumplir de verdad en BD.
+3. ✅ `20260721160000_rls_etapa2_correcciones.sql` — los 3 gaps de escalada de privilegios (perfiles, `incrementar_ia_uso`, `soporte_mensajes`) quedan cerrados en RLS real, no solo en el código de aplicación.
+4. ⏸️ `20260721180000_facturas_bizlinks_esquema.sql` — **NO corrida, a propósito, por decisión explícita de Mohamed.** Sigue pendiente: índice único de `inv_num` por emisor, `comprobante_series` por usuario, inmutabilidad post-emisión, columnas `ose_*`, FK `from_quote_id` a RESTRICT, CHECK de RUC/DNI del comprador. El SQL completo sigue disponible más arriba en este documento si se decide correrla después — regla del proyecto: **no se implanta ninguna pieza nueva de este bloque sin que su MD oficial correspondiente esté documentado primero** (ver "Antes de modificar cualquier MD oficial" más abajo); antes de correr esta migración, confirmar que el esquema de facturas que describe sigue alineado con `09-FACTURACION-ELECTRONICA-DARIVO-PRO.md` y `21 – ARQUITECTURA DEL CATÁLOGO MAESTRO...md` si aplica, actualizando esos MD primero si divergen.
+5. ✅ `20260721190000_perfiles_ruc_emisor_check.sql` — CHECK `NOT VALID` sobre `perfiles.ruc` activo.
+6. ✅ `20260721200000_factura_items_tabla_preparada.sql` — tabla `factura_items` creada, sigue INERTE a propósito (ningún código la usa todavía, fase 0 del plan documentado en `TODO-PENDIENTES-DARIVO-PRO.md`).
+7. ✅ `20260721210000_darivo_admin_baja_darivonet.sql` — `darivonet@gmail.com` desactivado en `darivo_admin_empleados`. Pendiente de que Mohamed confirme además en Vercel Production que `DARIVO_ADMIN_EMAILS` solo contiene `yatriye@gmail.com` (pregunta #2 de la Etapa 4, sigue abierta — no verificable desde el repo).
+8. ✅ `20260721220000_partner_acceso_movil.sql` — `partners.acceso_movil` ya real; el toggle de `admin/partners` (Etapa 6 cierre, decisión 2) queda con su dependencia de BD resuelta.
+9. ✅ `20260721221000_empresa_empleados_factura_default_true.sql` — el `DEFAULT` de `factura_habilitada` ya es `true` en BD, coherente con el default ya cambiado en el formulario de invitación (`EmpresaEmpleadosView.tsx`, Etapa 6 cierre decisión 3).
+10. ✅ `20260721222000_planes_catalogo_datos_oficiales.sql` — `planes_catalogo` poblada con los 3 planes reales. **Recordatorio vigente**: editar un plan desde `admin/suscripciones` ya persiste en BD, pero checkout/`/precios`/`plan-limits.ts`/emails siguen leyendo `PRECIOS_OFICIALES`/`LIMITES_PLAN` (constante TS) — sigue sin efecto real hasta la fase 2 (no construida).
+11. ✅ `20260721230000_cotizaciones_limite_gratis_trigger.sql` — el límite de 5 cotizaciones de por vida en plan Gratis (Etapa 7 continuación, Tarea 3) ya tiene enforcement real en BD, no solo en `plan-limits.ts`.
+
+**No verificado en vivo desde código** (sin acceso directo a Supabase en esta sesión) — si algo no cuadra en mora de pagos, RUC de emisor, permisos de Técnico o el límite de cotizaciones, confirmar primero que las columnas/triggers de arriba existen tal como se describen.
+
 *Actualización 21/07/2026 — Reversión de bloqueo total por dispositivo → banner informativo (mismo día que la Etapa 7 "Restricción de acceso por dispositivo (BLOQUEO TOTAL)", REEMPLAZA esa implementación, no la complementa):*
 
 Decisión de Mohamed: el bloqueo total por dispositivo construido horas antes (Etapa 7 — continuación, ver esa sección más arriba, ahora marcada como historial) queda eliminado por completo — ningún usuario debe quedar impedido de navegar por tipo de dispositivo, nunca. Se reemplaza por un aviso informativo, no bloqueante y descartable.
