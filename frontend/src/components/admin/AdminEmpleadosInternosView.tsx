@@ -6,6 +6,7 @@ import { AdminBadge, AdminTabs, AdminNotice } from "@/components/admin/AdminTabs
 import { AdminKpiCard, AdminTable, AdminCard } from "@/components/admin/AdminUi";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { descargarCsv } from "@/lib/csv-export";
+import { ImportarCsvBoton } from "@/components/admin/ImportarCsvBoton";
 import type { AdminEmpleadoInternoRow } from "@/lib/admin-queries";
 import {
   nuevoEmpleadoAction,
@@ -346,9 +347,9 @@ export function AdminEmpleadosInternosView({ empleados }: { empleados: AdminEmpl
             )}
 
             <AdminNotice>
-              Importar/Exportar en lote, &ldquo;Publicar cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están
-              construidos todavía. &ldquo;Exportar&rdquo; (CSV de la vista actual) sí está
-              disponible en el panel lateral.
+              Importar (CSV), Exportar (CSV de la vista actual) y la plantilla de importación están
+              en el panel lateral. &ldquo;Publicar cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están
+              construidos todavía — pendientes de definición.
             </AdminNotice>
           </>
         )}
@@ -448,6 +449,23 @@ export function AdminEmpleadosInternosView({ empleados }: { empleados: AdminEmpl
                 >
                   Nuevo empleado
                 </button>
+                <ImportarCsvBoton
+                  label="Importar empleados (CSV)"
+                  columnas={["nombre", "email", "cargo", "departamento"]}
+                  notaExtra="Cada fila crea la ficha y envía una invitación de acceso real por correo."
+                  procesarFila={async (f) => {
+                    if (!f.email) return { ok: false, error: "Columna email vacía" };
+                    return nuevoEmpleadoAction({
+                      nombre: f.nombre ?? "",
+                      email: f.email,
+                      cargo: f.cargo,
+                      departamento: f.departamento,
+                    });
+                  }}
+                  onTerminado={(r) => {
+                    if (r.ok > 0) router.refresh();
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() =>
