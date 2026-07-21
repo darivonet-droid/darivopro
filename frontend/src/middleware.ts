@@ -8,6 +8,8 @@ import {
 } from "@/lib/acceso-producto";
 import { baseDeSubdominio } from "@/lib/subdominios";
 import { resolverDestinoPostLogin } from "@/lib/destino-post-login";
+import { esUserAgentMovil, dispositivoPermitido } from "@/lib/restriccion-dispositivo";
+import { resolverRolDispositivo } from "@/lib/restriccion-dispositivo-server";
 
 interface CookieASetear {
   name: string;
@@ -82,6 +84,24 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
   if (user) {
+    // Restricción de acceso por dispositivo (Etapa 7 — continuación,
+    // 21/07/2026, EN FASE DE PRUEBAS) — BLOQUEO TOTAL, no solo aviso. Se
+    // aplica lo antes posible tras resolver sesión, y solo a rutas
+    // protegidas por rol (nunca a públicas ni a la propia pantalla de
+    // bloqueo, para no generar un loop de redirect). Partner queda exento
+    // por diseño (dispositivoPermitido() siempre true para "partner").
+    if (path !== "/" && !path.startsWith("/dispositivo-no-disponible")) {
+      const rolDispositivo = await resolverRolDispositivo(supabase, user);
+      const esMobile = esUserAgentMovil(req.headers.get("user-agent"));
+      if (!dispositivoPermitido(rolDispositivo, esMobile)) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/dispositivo-no-disponible";
+        url.search = "";
+        url.searchParams.set("rol", rolDispositivo);
+        return NextResponse.redirect(url);
+      }
+    }
+
     if (path.startsWith("/admin") && !(await esAdministradorDarivo(user.email))) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";

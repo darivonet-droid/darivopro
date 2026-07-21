@@ -285,6 +285,20 @@ La definición funcional detallada de roles, permisos y roles personalizados se 
 
 Nunca crean funcionalidades nuevas.
 
+## 4.1 Restricción de acceso por dispositivo (EN FASE DE PRUEBAS, sujeta a ajuste — añadida 21/07/2026, Etapa 7 continuación)
+
+Además de Suscripción/Producto/Rol/Permisos, el acceso a los paneles protegidos por rol queda condicionado también al tipo de dispositivo desde el que se conecta el usuario — bloqueo total (no un aviso dentro del panel), aplicado en `middleware.ts` antes de dejar pasar la request a la ruta real:
+
+| Rol | Dispositivo permitido |
+| --- | --- |
+| Administrador Darivo | Solo ordenador (desktop) |
+| Empresa — Gerente | Solo ordenador (desktop) |
+| Técnico (vinculado a empresa) | Solo Móvil |
+| Darivo Pro Móvil independiente (sin empresa) | Solo Móvil |
+| Partner | Sin restricción (único rol así) |
+
+Un usuario que intenta entrar desde el dispositivo no permitido para su rol ve una pantalla de bloqueo (`/dispositivo-no-disponible`) indicando el dispositivo correcto — nunca llega a renderizar el panel. No aplica a rutas públicas (landing, `/login`, `/registro`, `/precios`, legales, etc.). Implementación: `frontend/src/lib/restriccion-dispositivo.ts` (tabla + detección de dispositivo por `user-agent`) y `frontend/src/lib/restriccion-dispositivo-server.ts` (resolución de rol), invocados desde `frontend/src/middleware.ts`.
+
 ## 5. Funcionalidades
 
 El usuario utiliza las funcionalidades permitidas por:
@@ -934,9 +948,11 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.16
+**Versión:** 2.17
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.17 — 21/07/2026, Etapa 7 continuación):** nueva §4.1 "Restricción de acceso por dispositivo" — tabla de dispositivo permitido por rol (Admin/Gerente solo ordenador; Técnico/Móvil-independiente solo Móvil; Partner sin restricción), marcada explícitamente **en fase de pruebas, sujeta a ajuste**. Implementación real en `middleware.ts` (bloqueo total, no aviso).
 
 **Cambio principal (v2.16 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7):** §12 "Regla de sincronización — planes y límites" — nota aclaratoria: desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10 los 3 planes existentes son editables desde BD (Admin → Suscripciones), sin que eso habilite un 4to plan ni cambie que `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única fuente oficial de nombres/límites/precios.
 

@@ -1,6 +1,8 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.3
+**Versión:** 1.4
+
+**Cambio principal (v1.4 — 21/07/2026, Etapa 7 continuación):** §6 — añadida la restricción de acceso por dispositivo (Gerente solo ordenador, Técnico solo Móvil), EN FASE DE PRUEBAS, referencia cruzada a Visión §4.1.
 
 **Cambio principal (v1.3 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 3):** reemplaza el modelo de "Técnico = rol fijo con Factura OFF por defecto" — Gerente y Técnico ya NO son cajas cerradas de permisos: el Gerente activa/desactiva **libremente cualquier módulo** (Factura, Informe) por Técnico, en cualquier momento, no solo al invitarlo. Un Técnico puede tener permisos ampliados sin convertirse en un segundo Gerente (nunca administra empleados ni el plan de la empresa — eso sigue exclusivo del Gerente). **Nuevo default real: un Técnico invitado nace con Cotización + Cliente + Factura activas** (antes Factura nacía en `false`, decisión de la Tarea 2 del 17/07/2026, ahora sustituida). Informe sigue opcional, el Gerente lo activa aparte. Cliente es un módulo base sin flag propio (investigado en esta etapa: no existe ni hace falta una 3ra columna de permiso — todo empleado vinculado ve el mismo listado de clientes que el Gerente).
 
@@ -126,6 +128,8 @@ Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de
 | **Técnico** | Permisos asignados; trabajo en Móvil |
 
 Roles base: Gerente y Técnico. Con plan **Business**, el Gerente puede además crear **roles personalizados** (§6.1).
+
+**Restricción de acceso por dispositivo (EN FASE DE PRUEBAS, sujeta a ajuste — Visión §4.1, 21/07/2026):** el **Gerente** solo puede usar Darivo Pro Empresa desde ordenador (bloqueo total); el **Técnico** solo puede usar Darivo Pro Móvil desde su teléfono (bloqueo total). Implementación real en `frontend/src/middleware.ts` vía `frontend/src/lib/restriccion-dispositivo.ts`.
 
 ## 6.1 Roles personalizados (solo plan Business)
 
