@@ -132,13 +132,22 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
     modulo: "Acceso a productos",
     accion: "Usar Darivo Pro Móvil",
     celdas: {
-      admin: { valor: "pendiente", nota: "Sin regla cerrada: ¿una cuenta Admin debe poder usar Móvil?" },
+      admin: { valor: "no", nota: "Decidido — Admin trabaja restringido a ordenador, nunca desde Móvil" },
       gerente: SI,
       tecnico: { valor: "si", nota: "Es su herramienta de trabajo diario" },
-      partner: { valor: "pendiente", nota: "Sin regla cerrada: ¿una cuenta Partner debe poder usar Móvil?" },
+      partner: {
+        valor: "condicional",
+        nota: "Decidido — un Partner puede usar Móvil solo si Admin lo activa explícitamente (toggle por partner, nunca automático)",
+      },
       movil: SI,
     },
-    gating: "(auth)/layout.tsx — hoy solo exige sesión; sin gate por rol (coherente con las celdas 'sí'; las 'pendiente' no tienen bloqueo construido)",
+    // Admin: decisión de negocio ya cerrada (21/07/2026), sin bloqueo real por
+    // dispositivo construido todavía — eso es una etapa aparte. Partner:
+    // columna partners.acceso_movil (toggle desde Admin) ya persiste la
+    // decisión administrativa; el enforcement real en (auth)/layout.tsx (leer
+    // ese flag y bloquear sesión) NO se construyó en esta pasada, mismo
+    // criterio que el bloqueo de Admin — decisión declarativa primero.
+    gating: "(auth)/layout.tsx — hoy solo exige sesión; sin gate por rol construido para ninguno de los 2 casos (declarativo por ahora)",
   },
   {
     id: "datos-empresa-movil",
