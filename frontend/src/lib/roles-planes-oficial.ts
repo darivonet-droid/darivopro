@@ -79,8 +79,16 @@ export const PRECIOS_OFICIALES: Record<
 export const ROL_IMPLICITO_MOVIL_SOLO = "gerente_tecnico" as const;
 
 /**
- * Matriz detallada de permisos por empleado: pendiente aprobación propietario (Doc 12 §8).
- * Móvil no implementa administración de permisos.
+ * Aprobación formal de la matriz detallada de permisos (Doc 12 §8) — decisión
+ * exclusiva del propietario, NO del código.
+ *
+ * Desde la Etapa 6 (21/07/2026) la matriz real vive en `lib/matriz-permisos.ts`
+ * (MATRIZ_PERMISOS) y la UI de Admin la renderiza dinámicamente aunque este
+ * flag siga en false — el flag ya no oculta contenido decorativo; hoy solo
+ * controla el banner de "aprobación formal pendiente" en Admin → Roles →
+ * Permisos. Se deja en `false` a propósito: la matriz contiene celdas
+ * "pendiente" que requieren decisión del propietario, y activar este flag
+ * equivaldría a inventar esa aprobación.
  */
 export const MATRIZ_PERMISOS_APROBADA = false;
 
