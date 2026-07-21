@@ -6,8 +6,10 @@ import { Toast } from "@/components/ui/Toast";
 import { UpgradeModal } from "@/components/plan/UpgradeModal";
 import { PwaShell } from "@/components/pwa/PwaShell";
 import { AvisoCobroBanner } from "@/components/plan/AvisoCobroBanner";
+import { AvisoDispositivoBanner } from "@/components/dispositivo/AvisoDispositivoBanner";
 import { createServerClient } from "@/lib/supabase/server";
 import { obtenerContextoAcceso } from "@/lib/rol-empleado";
+import { resolverRolDispositivo } from "@/lib/restriccion-dispositivo-server";
 
 // manifest/appleWebApp: solo aquí y en onboarding/layout.tsx (Móvil) — el
 // resto de la app (Admin, Empresa, landing) no debe ser instalable como PWA.
@@ -36,6 +38,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   // Factura habilitada no ve esa pestaña en la barra inferior.
   const contexto = await obtenerContextoAcceso();
   const ocultarFacturas = contexto.rol === "tecnico" && !contexto.facturaHabilitada;
+  const rolDispositivo = await resolverRolDispositivo(supabase, user);
 
   return (
     <MobileShell>
@@ -46,6 +49,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         {/* Mora de cobro (21/07/2026): aviso de gracia / solo lectura — el
             bloqueo real de escritura vive en RLS (es_cuenta_solo_lectura). */}
         <AvisoCobroBanner />
+        {/* Aviso informativo por dispositivo (reversión 21/07/2026) — nunca
+            bloquea, solo informa. Técnico/Móvil-independiente en ordenador. */}
+        <AvisoDispositivoBanner rol={rolDispositivo} />
         {children}
         <BottomNav ocultarFacturas={ocultarFacturas} />
       </div>

@@ -8,8 +8,6 @@ import {
 } from "@/lib/acceso-producto";
 import { baseDeSubdominio } from "@/lib/subdominios";
 import { resolverDestinoPostLogin } from "@/lib/destino-post-login";
-import { esUserAgentMovil, dispositivoPermitido } from "@/lib/restriccion-dispositivo";
-import { resolverRolDispositivo } from "@/lib/restriccion-dispositivo-server";
 
 interface CookieASetear {
   name: string;
@@ -84,23 +82,12 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
   if (user) {
-    // Restricción de acceso por dispositivo (Etapa 7 — continuación,
-    // 21/07/2026, EN FASE DE PRUEBAS) — BLOQUEO TOTAL, no solo aviso. Se
-    // aplica lo antes posible tras resolver sesión, y solo a rutas
-    // protegidas por rol (nunca a públicas ni a la propia pantalla de
-    // bloqueo, para no generar un loop de redirect). Partner queda exento
-    // por diseño (dispositivoPermitido() siempre true para "partner").
-    if (path !== "/" && !path.startsWith("/dispositivo-no-disponible")) {
-      const rolDispositivo = await resolverRolDispositivo(supabase, user);
-      const esMobile = esUserAgentMovil(req.headers.get("user-agent"));
-      if (!dispositivoPermitido(rolDispositivo, esMobile)) {
-        const url = req.nextUrl.clone();
-        url.pathname = "/dispositivo-no-disponible";
-        url.search = "";
-        url.searchParams.set("rol", rolDispositivo);
-        return NextResponse.redirect(url);
-      }
-    }
+    // NOTA (reversión 21/07/2026, ver CLAUDE.md): el bloqueo total por
+    // dispositivo que existía aquí (Etapa 7 — continuación) fue eliminado.
+    // El middleware ya nunca corta la navegación por tipo de dispositivo —
+    // se reemplazó por un aviso informativo, no bloqueante y descartable,
+    // renderizado en los layouts reales (ver
+    // frontend/src/components/dispositivo/AvisoDispositivoBanner.tsx).
 
     if (path.startsWith("/admin") && !(await esAdministradorDarivo(user.email))) {
       const url = req.nextUrl.clone();

@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.16
+**Versión:** 2.18
 
 **Estado:** Visión oficial aprobada
 
@@ -285,19 +285,19 @@ La definición funcional detallada de roles, permisos y roles personalizados se 
 
 Nunca crean funcionalidades nuevas.
 
-## 4.1 Restricción de acceso por dispositivo (EN FASE DE PRUEBAS, sujeta a ajuste — añadida 21/07/2026, Etapa 7 continuación)
+## 4.1 Aviso informativo por dispositivo (reemplaza el bloqueo total anterior — 21/07/2026)
 
-Además de Suscripción/Producto/Rol/Permisos, el acceso a los paneles protegidos por rol queda condicionado también al tipo de dispositivo desde el que se conecta el usuario — bloqueo total (no un aviso dentro del panel), aplicado en `middleware.ts` antes de dejar pasar la request a la ruta real:
+Además de Suscripción/Producto/Rol/Permisos, el tipo de dispositivo desde el que se conecta el usuario dispara un **aviso informativo, no bloqueante y descartable** — nunca impide la navegación. Un usuario puede usar cualquier panel desde cualquier dispositivo; el aviso solo sugiere la plataforma recomendada para una mejor experiencia:
 
-| Rol | Dispositivo permitido |
-| --- | --- |
-| Administrador Darivo | Solo ordenador (desktop) |
-| Empresa — Gerente | Solo ordenador (desktop) |
-| Técnico (vinculado a empresa) | Solo Móvil |
-| Darivo Pro Móvil independiente (sin empresa) | Solo Móvil |
-| Partner | Sin restricción (único rol así) |
+| Rol | Dispositivo | Aviso mostrado |
+| --- | --- | --- |
+| Administrador Darivo / Empresa — Gerente | Móvil | "Para una mejor experiencia, usa Darivo Pro Empresa desde un ordenador." |
+| Administrador Darivo / Empresa — Gerente | Ordenador | Sin aviso |
+| Técnico (vinculado a empresa) / Darivo Pro Móvil independiente | Ordenador | "Para una mejor experiencia, usa la app Darivo Pro Móvil desde tu celular." |
+| Técnico / Darivo Pro Móvil independiente | Móvil | Sin aviso |
+| Partner | Cualquiera | Sin aviso (único rol sin ningún aviso, en ningún dispositivo) |
 
-Un usuario que intenta entrar desde el dispositivo no permitido para su rol ve una pantalla de bloqueo (`/dispositivo-no-disponible`) indicando el dispositivo correcto — nunca llega a renderizar el panel. No aplica a rutas públicas (landing, `/login`, `/registro`, `/precios`, legales, etc.). Implementación: `frontend/src/lib/restriccion-dispositivo.ts` (tabla + detección de dispositivo por `user-agent`) y `frontend/src/lib/restriccion-dispositivo-server.ts` (resolución de rol), invocados desde `frontend/src/middleware.ts`.
+El usuario puede cerrar el aviso (botón ✕) y sigue navegando con normalidad; no reaparece en la misma sesión de navegador (`sessionStorage`). Implementación: `frontend/src/lib/restriccion-dispositivo.ts` (`avisoDispositivo()`, tabla + detección de dispositivo por `user-agent`) y `frontend/src/lib/restriccion-dispositivo-server.ts` (resolución de rol) resuelven el rol en el servidor; `frontend/src/components/dispositivo/AvisoDispositivoBanner.tsx` (Client Component) detecta el dispositivo real y renderiza el aviso, montado en los layouts de Admin, Empresa y Móvil — nunca en el de Partner.
 
 ## 5. Funcionalidades
 
@@ -948,11 +948,13 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.17
+**Versión:** 2.18
 
 **Estado:** Visión oficial aprobada.
 
-**Cambio principal (v2.17 — 21/07/2026, Etapa 7 continuación):** nueva §4.1 "Restricción de acceso por dispositivo" — tabla de dispositivo permitido por rol (Admin/Gerente solo ordenador; Técnico/Móvil-independiente solo Móvil; Partner sin restricción), marcada explícitamente **en fase de pruebas, sujeta a ajuste**. Implementación real en `middleware.ts` (bloqueo total, no aviso).
+**Cambio principal (v2.18 — 21/07/2026, reversión mismo día que v2.17):** §4.1 "Restricción de acceso por dispositivo" reemplazada por "Aviso informativo por dispositivo" — el bloqueo total de v2.17 queda eliminado (decisión de Mohamed: ningún usuario debe quedar impedido de navegar por tipo de dispositivo). Ahora es un aviso no bloqueante y descartable, con la misma tabla de rol×dispositivo pero sin ningún redirect/bloqueo — Partner sigue siendo el único rol sin ningún aviso, en ningún dispositivo. Implementación real: `AvisoDispositivoBanner.tsx` (Client Component, montado en los layouts de Admin/Empresa/Móvil, nunca en Partner), no en `middleware.ts`.
+
+**Cambio principal (v2.17 — 21/07/2026, Etapa 7 continuación, REVERTIDO el mismo día por v2.18):** nueva §4.1 "Restricción de acceso por dispositivo" — tabla de dispositivo permitido por rol (Admin/Gerente solo ordenador; Técnico/Móvil-independiente solo Móvil; Partner sin restricción), marcada explícitamente **en fase de pruebas, sujeta a ajuste**. Implementación real en `middleware.ts` (bloqueo total, no aviso).
 
 **Cambio principal (v2.16 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7):** §12 "Regla de sincronización — planes y límites" — nota aclaratoria: desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10 los 3 planes existentes son editables desde BD (Admin → Suscripciones), sin que eso habilite un 4to plan ni cambie que `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única fuente oficial de nombres/límites/precios.
 
