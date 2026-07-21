@@ -1,0 +1,83 @@
+# Auditoría MD↔código Empresa (funcional + visual) — 13/07/2026
+
+Primera auditoría de este tipo para Darivo Pro Empresa (no existía precedente — a diferencia de Admin, que ya tuvo la suya el mismo día). Mismo método: 3 agentes en paralelo, solo lectura, comparando cada una de las 9 pantallas oficiales de `.cursor/rules/03-darivo-pro-empresa/` (02, 03, 05, 06, 07, 08, 09, 10, 11) contra el código real. Nada se modificó en esta sesión.
+
+### Hallazgo raíz — mismo bug de color que Admin, todavía sin corregir en Empresa
+
+`frontend/src/lib/design-system/empresa-tokens.ts:11` (`sidebarBg: T.navy`) y `frontend/src/components/empresa/EmpresaShell.tsx:28,47-48` (ítem activo en `T.bluePale`/`T.blue`) siguen usando el navy `#0A1628`/azul `#2563EB` de Fable 5 — el mismo esquema que tenía `AdminShell.tsx` antes de su fix del 13/07/2026. Dado que "Admin y Empresa comparten diseño visual" es una decisión ya cerrada del proyecto, y el propio `16-SISTEMA-DE-DISEÑO-EMPRESA.md` (encabezado) dice que Empresa "reutiliza el sistema de diseño oficial de Admin", este es el mismo bug de color, sin corregir todavía.
+
+**Contradicción encontrada en el propio MD de diseño de Empresa:** `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.5 dice en su encabezado que reutiliza el sistema de Admin, pero su propia §3 "Paleta Oficial" documenta explícitamente los tokens viejos de Fable 5 (navy/blue) como si fueran la paleta vigente de Empresa. Es un documento oficial protegido — no se modificó, se informa aquí para que el propietario decida (¿actualizar §3 para que documente `ADMIN_COLORS`, o confirmar que Empresa debe quedarse en su propia paleta independiente de Admin?).
+
+**Efecto secundario nuevo, no anticipado:** el componente compartido `AdminTable` (`frontend/src/components/admin/AdminUi.tsx`) ya se migró a `ADMIN_COLORS` como parte del fix de Admin — como la pantalla Clientes de Empresa reutiliza ese mismo componente, su encabezado de tabla y fila seleccionada ya se ven en tonos morados de Admin, mientras el sidebar/header de Empresa alrededor siguen en navy/azul. Es una inconsistencia visual **dentro de la misma pantalla**, generada como efecto colateral del fix de Admin, no de un cambio intencional en Empresa.
+
+**Imágenes de referencia inconsistentes entre sí:** las imágenes oficiales de Facturas (navy/azul) y Cierre (blanco/morado, ya coincide con `ADMIN_COLORS`) no coinciden entre ellas en esquema de color — ni siquiera las imágenes de referencia están unificadas. Varias imágenes (Inicio, Empleados, Cotizaciones, Más) además muestran un sidebar con módulos genéricos/ficticios (Dashboard, Proyectos, Contactos, Catálogo, Inventario, etc.) que no corresponden a los 8 módulos reales de `empresa-modules.ts` — mockups placeholder que nunca se ajustaron a la navegación real del producto.
+
+### Por pantalla
+
+| # | Pantalla | Funcional | Visual |
+|---|---|---|---|
+| 02 | Inicio | MD §5.4 pide 2 tarjetas de acceso rápido (Clientes + Cotizaciones); el código solo tiene 1 ("Clientes"), con nota propia que contradice la tabla del MD. | Diferencias reales — la imagen usa "presupuesto" (terminología ya migrada a "cotización") y un estado "En revisión" que no existe en el enum real (`Borrador\|Pendiente de firma\|Aprobado`); imagen desactualizada respecto al MD vigente. |
+| 03 | Clientes | Faltan: subtítulo "N contactos", 3 botones de contacto rápido (WhatsApp/Llamar/Email) en la ficha, 3 tarjetas de estadística en la ficha. "Facturar" se muestra sin filtrar por estado Aprobado (debería). "Eliminar" oculto en modo ficha. Acciones del historial ocultas tras un acordeón en vez de visibles por fila. | Diferencias reales — más el efecto secundario de color descrito arriba (tabla ya en morado, chrome todavía en navy/azul). |
+| 05 | Cotizaciones | Acceso correcto (ya no hay lista global, `page.tsx` redirige a Clientes, coherente con el MD). Pero los 2 puntos de entrada reales (CTA Inicio, "+ Nueva cotización" en ficha Cliente) enlazan al wizard Móvil completo (`/cotizaciones/nuevo`, `MobileShell` 390px) — el Gerente pierde el sidebar/header de Empresa por completo. No existe ninguna adaptación de escritorio (3 paneles simultáneos que exige el MD). | Diferencias reales — no hay ningún layout de escritorio, es la pantalla Móvil sin adaptar. |
+| 06 | Facturas | `FacturasView` (compartido con Móvil) duplica un header navy propio dentro del header de `EmpresaShell`. Solo 4 chips de filtro de los 7 que exige el MD tras su "Corrección v1.1" (faltan Borrador/En proceso/Rechazadas); "Pendientes" filtra por el estado equivocado. No hay tabla (son cards apiladas). CTA "+ Nueva factura" y edición navegan a rutas Móvil-only, sacando al usuario de Empresa. `NuevaFacturaForm` es de una sola columna, no el layout ~60/40 que exige el MD. | Diferencias reales — y la propia imagen de referencia ya está desactualizada (solo muestra los mismos 4 chips viejos, no los 7 del MD vigente). |
+| 07 | Más | Reutiliza bien la lógica de Móvil (pestañas, tarifas, ítems). Único hueco real: Soporte sigue sin backend (INC-A01 ya conocido). | Diferencias reales — el MD exige panel "Más opciones" fijo a la derecha (58%/42%); el código lo apila debajo del contenido en una sola columna. Imagen de referencia con sidebar obsoleto/ficticio. |
+| 08 | IA | MD exige 3 tarjetas (Escribir/Hablar/Soporte con IA); el código solo ofrece Escribir/Hablar — no hay ningún acceso a "Soporte con IA" desde esta pantalla. El "Agente IA 2" conversacional no existe en ningún punto del código (solo el ticket manual de Soporte). | Diferencias reales — sin ninguna adaptación de escritorio, es el flujo Móvil incrustado en una columna angosta. |
+| 09 | Cierre | `CierreView` es exactamente el mismo componente que Móvil (correcto en lógica), pero sin ninguna de las adaptaciones de escritorio que exige el MD: layout de 2 columnas, tabla para "Gastos recientes" (son cards), panel lateral con step indicator para "Revisar gasto" (es un modal bottom-sheet a pantalla completa). | Diferencias reales — nota: esta imagen de referencia sí muestra blanco/morado (`ADMIN_COLORS`), a diferencia de la de Facturas. |
+| 10 | Empleados | Columna extra "Permisos" no documentada en el MD (mejora real ya construida el 12/07, el MD nunca se actualizó). Etiquetas de estado no coinciden con el MD ("Pendiente"/"Inactivo" en vez de "Invitación pendiente"/"Desactivado"). | Diferencias reales — el sidebar de la imagen muestra módulos completamente ficticios (Equipos, Órdenes de servicio, Inventario, etc.) que no existen en el producto real. |
+| 11 | Roles y Permisos | La matriz base (§5.2) refleja correctamente que sigue inerte (`MATRIZ_PERMISOS_APROBADA=false`). Pero "Roles personalizados" (§6.1) — que el propio MD marca como *propuesta pendiente de aprobación, sin imagen oficial* — está completamente construido y en producción (crear/editar/eliminar rol, toggles reales, persistido en `roles_personalizados`), presentándose como si ya estuviera aprobado. Confirmado que nada (middleware/Server Actions) aplica esos permisos a una ruta real todavía — coincide con "RBAC inerte" ya documentado, pero ahora se sabe que es específicamente §6.1 el que se muestra activo sin autorización. | Diferencias cosméticas menores en lo que la imagen sí cubre (falta banner "exclusivo Gerente" + badge "Solo lectura"); §6.1 no tiene imagen de referencia por decisión ya documentada del propio MD, no por bug. |
+
+### Siguiente paso — plan confirmado por el propietario 13/07/2026
+
+Mohamed confirmó el orden de trabajo (sesión continua, mismo día de la auditoría):
+
+1. **Prioridad máxima:** reconstruir la capa de presentación (no la lógica) de las 3 pantallas que sacan al Gerente al wizard Móvil sin adaptación de escritorio — **Cotizaciones**, **Facturas** y **Cierre** — en layout de escritorio real (2-3 columnas, como el resto de Empresa), reutilizando toda la lógica de negocio/cálculo/guardado ya probada en Móvil. Empezar por Cotizaciones (la más cara).
+2. Documentar explícitamente en este CLAUDE.md los elementos de las imágenes de referencia que **no** aplican al producto real (módulos de sidebar ficticios que no están en `empresa-modules.ts` ni en ningún MD funcional: Inventario, Calendario, Órdenes de servicio, Equipos, Catálogo genérico, etc.) — para que no se construyan por error.
+3. En cola, sin bloquear lo anterior, priorizadas por criterio del ejecutor: paneles laterales, toolbars de acciones masivas, Dashboard, Catálogo Maestro CRUD.
+
+Migración de Empresa a `ADMIN_COLORS` y decisión sobre "Roles personalizados" (§6.1 de Doc 11) siguen sin resolver — no forman parte de este bloque de trabajo.
+
+**⏸️ Pausado 13/07/2026 (mismo día):** Mohamed cambió la prioridad — terminar primero las 7 pantallas restantes de **Admin** (ver "Siguiente paso" en la sección de Admin, arriba) antes de retomar esto. Ningún código de Cotizaciones se llegó a escribir (se pausó en fase de plan, ver punto 1 arriba). Retomar aquí cuando Admin esté completo.
+
+**▶️ Retomado 14/07/2026:** Mohamed autorizó continuar con Empresa aunque Partners/Empresas/Catálogo Maestro sigan bloqueados por el hallazgo de infraestructura (no es código, ver sección Admin). Orden: Cotizaciones → Facturas → Cierre.
+
+- ✅ **Cotizaciones (05)** — capa de presentación de escritorio reconstruida: wizard de 4 pasos dentro de `EmpresaShell`, Paso 1 con panel categorías (~240px) + panel partidas simultáneos (`05-MODULO-COTIZACIONES-EMPRESA.md` §4/§5.1), Pasos 2-4 en columna central. Toda la lógica de `NuevoCotizacionWizard.tsx` (Móvil) reutilizada sin tocar — nuevo componente `NuevoCotizacionWizardEscritorio.tsx` + ruta `/empresa/cotizaciones/nuevo`. Los 3 puntos de entrada reales (CTA/pills Inicio, "+ Nueva cotización"/Editar/Re-cotizar en ficha Cliente) ya enlazan ahí; Móvil no se tocó (prop `nuevaCotizacionHref` con default a su ruta).
+- ✅ **Facturas (06)** — tabla en vez de cards (§5.5), 7 chips de filtro oficiales sustituyendo los 4 viejos con el bug conocido "Pendientes⊂Emitidas" (§5.2, Corrección v1.1), banner cotizaciones aprobadas, editor en layout ~60/40 (§4.2/§6: cliente/líneas a la izquierda, totales+detracción+forma de pago a la derecha). Nuevos `FacturasTableEmpresa.tsx` + `NuevaFacturaFormEscritorio.tsx` + ruta `/empresa/facturas/nueva`, misma lógica de `useFactura`/`NuevaFacturaForm` sin tocar. Botón "→ Factura" de la ficha de Cliente también respeta la ruta de escritorio (`nuevaFacturaHref`).
+- ✅ **Cierre (09)** — pestañas Gastos/Expediente + layout 58/42 (§4), tabla en vez de cards para "Gastos recientes", panel lateral en vez de modal bottom-sheet. Nuevo `CierreViewEscritorio.tsx`, misma lógica de `useGastos` (100% local) sin tocar. **Nota honesta dejada en el propio código**: el MD describe un step indicator navegable de 4 pasos para "Revisar gasto" que no tiene función de editar un gasto existente detrás (`useGastos.ts` solo tiene `agregarGasto`) — se implementó como marcador visual de etapa, no como wizard funcional, para no inventar lógica de guardado que no existe; clic en fila de tabla abre panel de solo lectura.
+
+Las 3 pantallas: tsc/lint/build limpios en cada una. **Verificación visual interactiva pendiente en las 3**: no hay sesión de rol Gerente/Empresa en el navegador de esta sesión (solo Admin), y no corresponde iniciar sesión por credenciales — pendiente de que el propietario la confirme con su propia sesión.
+
+**✅ Cola de auditoría de Empresa completa (14/07/2026)** — las 6 pantallas restantes (Inicio, Clientes, Más, IA, Empleados, Roles) quedaron presentación-completas, sumadas a Cotizaciones/Facturas/Cierre de arriba. Las 9 pantallas auditadas el 13/07/2026 están cerradas en capa de presentación:
+
+- **Inicio (02)** — 2ª tarjeta de acceso rápido añadida (Cotizaciones, junto a la ya existente de Clientes), cerrando el hallazgo funcional del MD §5.4. Commit `386e1c0`.
+- **Clientes (03)** — ficha con subtítulo "N contactos", 3 botones de contacto rápido (WhatsApp/Llamar/Email) y 3 tarjetas de estadística (aprobadas/total) añadidos a `ClienteFichaView.tsx` (compartido con Móvil, vía props). Commit `648774b`.
+- **Más (07)** — layout de 2 columnas real: contenido + panel fijo "Más opciones" (~320px) a la derecha, en vez de apilado en una sola columna (`MasTabs.tsx` gana prop `ocultarOpciones`). Commit `061d044`.
+- **IA (08)** — 3ª tarjeta "Soporte con IA" añadida junto a Escribir/Hablar (grid 2 columnas + card ancha), enlazando al soporte real ya existente (Más → Soporte) — no se inventó ningún chat conversacional nuevo (Agente IA 2 sigue sin existir). `IACotizacionFlow.tsx` gana prop opcional `soporteHref`. Commit `8c1056c`.
+- **Empleados (10)** — etiquetas de estado alineadas al MD ("Invitación pendiente"/"Desactivado" en vez de "Pendiente"/"Inactivo"), sin tocar el enum real de BD ni la lógica de `cambiarEstado()`. Commit `96c3b26`.
+- **Roles y Permisos (11)** — badge "🔒 Solo lectura" + banner "exclusivo para Gerente" añadidos, copiados verbatim de la imagen oficial de referencia. §6.1 "Roles personalizados" (decisión de negocio pendiente de aprobación) no se tocó. Commit `028626b`.
+
+Las 6: tsc/lint/build limpios en cada commit.
+
+**✅ Verificación visual interactiva completa (14/07/2026, tarde)** — Mohamed inició sesión real con `darivonet@gmail.com` (plan Business ya confirmado activo vía el grant SQL de esta misma sesión) y se verificaron en producción, con caché/Service Worker limpiados antes de cada pantalla: Cotizaciones (wizard de 3 pasos dentro de `EmpresaShell`, panel categorías+partidas simultáneos), Facturas (7 chips, editor 60/40), Cierre (pestañas Gastos/Expediente, panel lateral con step indicator), Clientes (subtítulo "N contactos", 3 botones de contacto + 3 stats en ficha), Más (panel fijo "Más opciones"), IA (3ª tarjeta "Soporte con IA"), Roles (badge "🔒 Solo lectura" + banner "exclusivo Gerente"). Ninguna diferencia real encontrada frente a los MD. Empleados (10) quedó sin verificación visual de las etiquetas de estado por falta de datos — invitar un empleado de prueba enviaría un correo real, así que se dejó pendiente de que el propietario lo pruebe con un caso real (el código del fix, commit `96c3b26`, ya está desplegado).
+
+**✅ Migración de Empresa a `ADMIN_COLORS` completa (14/07/2026, tarde)** — cierra el hallazgo raíz de color documentado arriba. Migrados a la paleta morado/blanco de Admin: `empresa-tokens.ts`, `EmpresaShell.tsx`, `RolesPermisosView.tsx`, `EmpresaEmpleadosView.tsx`, `EmpresaClientesPanel.tsx`, `EmpresaInicioView.tsx`, los 3 componentes de escritorio (`NuevoCotizacionWizardEscritorio.tsx`, `NuevaFacturaFormEscritorio.tsx`, `CierreViewEscritorio.tsx`), `FacturasTableEmpresa.tsx` y las páginas de Más/IA — 12 archivos en total. No se tocó `ClienteFichaView.tsx` (compartido con Móvil, mantiene el azul de Fable 5 por diseño) ni `CIERRE_ACCENT`/`INV_STATUS_COLORS` (paletas funcionales de categoría/estado, no de marca). Verificado: tsc/lint/build limpios (70 rutas) + visual real en producción (sidebar, header, cards y gradientes ya en morado/blanco en Inicio y Cierre, sin ningún resto de navy/azul). Commit `08cfc40`.
+
+La única pieza de este bloque que sigue sin resolver es la decisión de negocio de "Roles personalizados" §6.1 (Doc 11) — fuera de alcance, ya documentado arriba.
+
+### Elementos de mockup descartados — no aplican al producto real
+
+Los 8 módulos reales del sidebar de Empresa son, en este orden, exactamente los de `frontend/src/lib/empresa-modules.ts` (`EMPRESA_NAV`): **Inicio, Clientes, Facturas, Cierre, Calculadora inteligente (IA), Más, Empleados, Roles y Permisos**. "Cotizaciones" no es ítem de sidebar por diseño (§1/§3 de `05-MODULO-COTIZACIONES-EMPRESA.md`: acceso solo vía CTA en Inicio o ficha de Cliente).
+
+Varias de las imágenes de referencia oficiales (Inicio, Empleados, Cotizaciones, Más, Empleados-10) muestran un sidebar con módulos genéricos que **no existen en el producto real y no deben construirse** si aparecen en una imagen o mockup futuro:
+
+- Dashboard (como ítem de sidebar separado — sí existe como página, pero no es "Inicio")
+- Proyectos
+- Contactos (el módulo real equivalente es "Clientes")
+- Catálogo (genérico) — el único catálogo real es "Catálogo Maestro" de Admin, no un módulo de Empresa
+- Inventario
+- Calendario
+- Órdenes de servicio
+- Equipos
+
+Si una imagen de referencia futura muestra cualquiera de estos (o cualquier otro ítem que no esté en `EMPRESA_NAV` ni en un MD funcional aprobado de `.cursor/rules/03-darivo-pro-empresa/`), es la imagen la que está desactualizada/es un mockup placeholder — no una instrucción para ampliar el sidebar. Confirmar con el propietario antes de construir cualquier módulo nuevo de sidebar.
+
+
