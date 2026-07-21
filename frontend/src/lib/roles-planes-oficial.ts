@@ -86,11 +86,19 @@ export const ROL_IMPLICITO_MOVIL_SOLO = "gerente_tecnico" as const;
  * (MATRIZ_PERMISOS) y la UI de Admin la renderiza dinámicamente aunque este
  * flag siga en false — el flag ya no oculta contenido decorativo; hoy solo
  * controla el banner de "aprobación formal pendiente" en Admin → Roles →
- * Permisos. Se deja en `false` a propósito: la matriz contiene celdas
- * "pendiente" que requieren decisión del propietario, y activar este flag
- * equivaldría a inventar esa aprobación.
+ * Permisos.
+ *
+ * Activado a `true` en la Etapa 7 (21/07/2026, decisión 6) — el propietario
+ * aprobó formalmente la matriz tras resolver las decisiones de esa etapa
+ * (Admin/Partner y Móvil, modelo de módulos activables en Empresa, Mis
+ * Tarifas para Técnico, tickets de Partner). Efecto visible único: el banner
+ * "Matriz operativa vigente... celdas pendientes de decisión del propietario"
+ * ya no se muestra en Admin → Roles → Permisos. Las celdas que aún queden
+ * `"pendiente"` (ej. Roles personalizados del Gerente, sistema construido
+ * pero inerte) siguen sin resolver — este flag no las cierra, solo confirma
+ * que la matriz en su conjunto ya tiene aprobación formal del propietario.
  */
-export const MATRIZ_PERMISOS_APROBADA = false;
+export const MATRIZ_PERMISOS_APROBADA = true;
 
 export function planTieneLimitesIlimitados(plan: PlanTipoPersistido): boolean {
   return plan === "pro" || plan === "business";
