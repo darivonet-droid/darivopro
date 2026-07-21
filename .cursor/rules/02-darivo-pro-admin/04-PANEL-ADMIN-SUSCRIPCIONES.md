@@ -1,8 +1,10 @@
 ﻿# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.9
+**Versión:** 1.10
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.10 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 7):** el catálogo pasa de **solo lectura fija en código** (decisión cerrada en la auditoría del 21/07/2026 más temprano ese mismo día, Etapa 6 — "no se construyó nada, catálogo de solo lectura") a **editable desde BD**, pese a la advertencia de riesgo planteada en esa misma auditoría. Se usó la tabla `planes_catalogo` (ya existía en el schema desde el baseline, sin ningún consumidor real hasta ahora — no se creó una tabla nueva) y se construyó edición real de nombre/precio mensual/precio anual/límites/activo para cada uno de los **3 planes existentes** desde Admin → Suscripciones. **"Nuevo plan" sigue sin aplicar** — no se habilita creación de un 4to plan, ni Importar/Publicar cambios (siguen sin construir). **⚠️ Alcance real, léase antes de asumir control total:** editar un plan aquí actualiza únicamente esta tabla administrativa — el precio real cobrado en checkout, `/precios` y los límites de uso realmente aplicados (`lib/plan-limits.ts`) siguen leyendo la constante de código `PRECIOS_OFICIALES`/`LIMITES_PLAN`, no esta tabla. Hasta que exista una fase 2 que recablee esos consumidores a leer de BD, un cambio aquí es administrativo/visual, sin efecto en el producto real. Detalle completo en `CLAUDE.md`, sección "Etapa 7 — decisión 7".
 
 **Cambio principal (v1.9 — 17/07/2026, autorizado explícitamente por el propietario):** los 3 precios quedan **definitivos** — Básico S/49/mes, **Pro S/89/mes (antes S/79, provisional)**, **Business S/130/mes (antes S/120)**. Precio anual = precio mensual × 10 para los 3 planes, sin descuento adicional (Básico S/490, Pro S/890, Business S/1300). Ya no queda ningún plan "provisional" ni "pendiente" en este documento.
 
@@ -98,11 +100,12 @@ No modificar:
 
 ## Acciones principales
 
-* Nuevo plan
-* Importar planes (Excel/CSV)
-* Exportar planes
-* Publicar cambios
-* Ver historial
+* Nuevo plan *(no aplica — catálogo fijo a 3 planes)*
+* Editar plan *(real desde v1.10, 21/07/2026 — nombre/precio/límites/activo)*
+* Importar planes (Excel/CSV) *(no construido)*
+* Exportar planes *(real)*
+* Publicar cambios *(no construido — los cambios se guardan directos)*
+* Ver historial *(no construido)*
 
 ## Filtros
 
@@ -163,11 +166,13 @@ No documentar planes adicionales sin aprobación expresa del propietario.
 * **Técnicos adicionales en Business:** el plan Business permite añadir más de 5 Técnicos como ampliación. El precio de esa ampliación **no está decidido todavía**. Hasta que se defina, no debe documentarse ningún importe concreto para Técnicos adicionales.
 * Esta matriz sustituye y detalla el principio general de "servicios y módulos disponibles por plan" ya establecido en `01-VISION-DEL-PRODUCTO.md` §19.
 
-## Precio editable (no fijo)
+## Precio editable (no fijo) — implementación real desde el 21/07/2026 (v1.10)
 
-El precio de cada plan **no es un valor fijo**. Puede ser modificado por el **Administrador Darivo** en cualquier momento desde este módulo (acción "Nuevo plan" / edición de plan existente — §5).
+El precio (y el nombre y los límites) de cada uno de los **3 planes existentes** puede ser modificado por el **Administrador Darivo** en cualquier momento desde este módulo, mediante el botón "Editar" de cada plan (tarjeta, tabla o panel de detalle) — persistido en la tabla `planes_catalogo`.
 
-Todo cambio de precio debe registrarse en la pestaña **Historial de cambios** (§5) y se publica mediante la acción **Publicar cambios**.
+**Lo que NO existe todavía** (a diferencia de lo que sugerían versiones anteriores de este documento): no hay pestaña **Historial de cambios** funcional, no hay acción **Publicar cambios** (los cambios se guardan directos, sin flujo borrador/publicado) y **"Nuevo plan" sigue sin aplicar** — el catálogo permanece fijo a Básico/Pro/Business, nunca se crea un 4to plan.
+
+**⚠️ Repetido a propósito — alcance real:** esta edición es administrativa. NO cambia el precio real cobrado en checkout ni los límites de uso realmente aplicados, hasta que exista una fase 2 de recableado (ver Cambio principal v1.10 arriba y `CLAUDE.md`).
 
 ## Qué controla un plan
 
@@ -245,11 +250,16 @@ Las relaciones técnicas con Base de Datos y Arquitectura Maestra quedan reserva
 
 # 10. Base de datos
 
-Pendiente de documentación oficial.
+Desde v1.10 (21/07/2026): tabla real `public.planes_catalogo` (existía en el
+schema desde el baseline, sin consumidor real hasta esta versión) —
+`id, slug, nombre, precio_mensual, precio_anual, activo, limites jsonb,
+created_at`. Escritura restringida a Administrador Darivo por RLS. Es un
+catálogo ADMINISTRATIVO — no la fuente que usan checkout/límites reales (ver
+advertencia de alcance arriba).
 
-No crear tablas.
+No crear tablas adicionales.
 
-No crear relaciones.
+No crear relaciones adicionales.
 
 ---
 

@@ -1,8 +1,10 @@
 # PANEL PARTNER
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.3 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 5):** decidido — el Partner SÍ tiene flujo de tickets de soporte (antes su panel no lo tenía). Agregada sección **Soporte** (§4), que reutiliza el sistema real ya existente de Móvil/Empresa (`soporte_tickets`/`soporte_mensajes`, `api/soporte/tickets`) — no es un sistema nuevo. Confirmado que la RLS de esa tabla no tiene ninguna restricción de rol ni de plan (`auth.uid() = user_id`), así que no había bloqueo real de arquitectura.
 
 **Cambio principal (v1.2 — 11/07/2026):** añadido texto de cara al Partner sobre tiempos de pago (§ Tiempos de pago) — lenguaje estándar de ciclo de liquidación, sin mencionar el proceso de revisión interna. Es solo copy visible al usuario; no cambia la lógica de `partner_comisiones_historial` ni el proceso de revisión manual mensual por Admin ya definidos.
 
@@ -117,6 +119,10 @@ Texto visible al Partner (copy oficial, no modificar sin aprobación):
 > "Las comisiones se calculan sobre facturas ya cobradas a tus clientes referidos. Cada comisión pasa por un ciclo de verificación de pago antes de estar disponible para retiro — habitualmente entre 15 y 30 días desde que se generó. Una vez el pago esté listo, se transferirá a tu cuenta bancaria registrada en dLocal."
 
 Este texto es únicamente de cara al usuario. No documenta ni implica el proceso interno de revisión (revisión manual mensual por Admin, ya definido fuera de este documento) — el Partner solo ve el resultado (pendiente/pagada) y el rango de tiempo esperado, nunca el mecanismo de verificación interno.
+
+## Soporte
+
+Desde v1.3 (21/07/2026): sección para crear y consultar sus propios casos de soporte — mismo componente y API reales que usan Móvil y Empresa (`soporte_tickets`/`soporte_mensajes`, `api/soporte/tickets`), sin ningún sistema, tabla ni endpoint nuevo. El Partner ve únicamente sus propios casos (asunto, descripción, estado, fecha).
 
 ---
 

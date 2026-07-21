@@ -1,6 +1,8 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.2
+**Versión:** 1.3
+
+**Cambio principal (v1.3 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 3):** reemplaza el modelo de "Técnico = rol fijo con Factura OFF por defecto" — Gerente y Técnico ya NO son cajas cerradas de permisos: el Gerente activa/desactiva **libremente cualquier módulo** (Factura, Informe) por Técnico, en cualquier momento, no solo al invitarlo. Un Técnico puede tener permisos ampliados sin convertirse en un segundo Gerente (nunca administra empleados ni el plan de la empresa — eso sigue exclusivo del Gerente). **Nuevo default real: un Técnico invitado nace con Cotización + Cliente + Factura activas** (antes Factura nacía en `false`, decisión de la Tarea 2 del 17/07/2026, ahora sustituida). Informe sigue opcional, el Gerente lo activa aparte. Cliente es un módulo base sin flag propio (investigado en esta etapa: no existe ni hace falta una 3ra columna de permiso — todo empleado vinculado ve el mismo listado de clientes que el Gerente).
 
 **Estado:** ⚠️ Requiere nueva imagen oficial (roles personalizados, §6.1). Especificación funcional cerrada — sincronizado con `01-VISION-DEL-PRODUCTO.md` §8, `12 – ROLES… ADMIN.md` v1.6 y `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.6.
 
@@ -109,9 +111,10 @@ Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de
 ### Reglas de la matriz
 
 * Permiso **activa/desactiva** funcionalidad existente — nunca crea funcionalidades nuevas (Visión §8).
-* **Técnico** no administra Mis Tarifas ni Catálogo (Visión §11 · Admin §6.3).
+* **Técnico** no administra Mis Tarifas ni Catálogo (Visión §11 · Admin §6.3) — bloqueo real construido 21/07/2026 (Etapa 7).
 * Cambios respetan límites del plan (Admin §16).
 * **Darivo Pro Móvil** aplica permisos definidos aquí — no los administra (Admin §16 Darivo Pro).
+* **Defaults al invitar un Técnico (v1.3, 21/07/2026):** Cotización y Cliente siempre activas (sin flag, módulo base); **Factura nace activa** (el Gerente puede desactivarla); Informe nace inactivo (el Gerente lo activa si quiere). Ninguno de los 3 es una elección única e irreversible al invitar — el Gerente puede cambiar Factura/Informe en cualquier momento después.
 
 ---
 
@@ -175,6 +178,8 @@ Mi Plan (consulta/cambio): `07-MODULO-MAS-EMPRESA.md` §6.
 ---
 
 # 10. Estado
+
+✅ **Actualizado v1.3 (21/07/2026)** — modelo de permisos por módulo activable (no roles fijos) confirmado y con default real de Factura ON al invitar Técnico (§5.2). Bloqueo real de Mis Tarifas para Técnico construido en código.
 
 ⚠️ **Actualizado v1.2 (05/07/2026)** — cerrada la decisión pendiente: un rol personalizado puede asignarse a varios Técnicos (patrón RBAC estándar). **Pendiente: nueva imagen oficial** (§6.1).
 

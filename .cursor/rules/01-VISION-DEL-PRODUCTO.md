@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.15
+**Versión:** 2.16
 
 **Estado:** Visión oficial aprobada
 
@@ -525,6 +525,8 @@ Siempre deberá **referenciar** el documento oficial de Suscripciones (`04-PANEL
 
 Esto garantiza una única fuente oficial de verdad y evita inconsistencias cuando los planes cambien.
 
+**Nota (21/07/2026):** desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10, el nombre/precio/límites de los 3 planes existentes son editables desde Admin (tabla `planes_catalogo`) — esto **no** cambia esta regla ni habilita un 4to plan; `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única referencia oficial, ahora también como fuente administrativa de esos valores.
+
 ## Metodología de sincronización documental
 
 La Visión del Producto constituye la **referencia principal** del ecosistema Darivo Pro.
@@ -932,9 +934,11 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.15
+**Versión:** 2.16
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.16 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7):** §12 "Regla de sincronización — planes y límites" — nota aclaratoria: desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10 los 3 planes existentes son editables desde BD (Admin → Suscripciones), sin que eso habilite un 4to plan ni cambie que `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única fuente oficial de nombres/límites/precios.
 
 **Cambio principal (v2.15):** §3.2 — añadida referencia cruzada corta a la decisión de negocio de registro histórico y auditable de comisiones (detalle completo en `06-PANEL-ADMIN-PARTNERS.md` §5.2, sin duplicar aquí).
 
