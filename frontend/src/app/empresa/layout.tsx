@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireProducto } from "@/lib/guards/require-producto";
 import { createServerClient } from "@/lib/supabase/server";
+import { AvisoCobroBanner } from "@/components/plan/AvisoCobroBanner";
 
 export default async function EmpresaLayout({
   children,
@@ -25,5 +26,12 @@ export default async function EmpresaLayout({
 
   if (empresa && !empresa.activo) redirect("/dashboard?acceso=empresa_suspendida");
 
-  return <>{children}</>;
+  return (
+    <>
+      {/* Mora de cobro (21/07/2026): aviso de gracia / solo lectura — el
+          bloqueo real de escritura vive en RLS (es_cuenta_solo_lectura). */}
+      <AvisoCobroBanner />
+      {children}
+    </>
+  );
 }

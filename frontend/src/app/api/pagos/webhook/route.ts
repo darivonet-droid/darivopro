@@ -13,6 +13,7 @@ import {
   type PlanSuscripcionOficial,
 } from "@/lib/roles-planes-oficial";
 import { enviarPagoConfirmado, enviarPagoFallido, enviarCambioPlan } from "@/lib/email/send";
+import { marcarPagoFallido, limpiarMoraPago } from "@/lib/mora-pagos";
 import { appBaseUrl } from "@/lib/dlocal";
 import type { CicloPago } from "@/lib/pagos-suscripcion";
 
@@ -191,6 +192,10 @@ export async function POST(req: NextRequest) {
 
   // Pago fallido — email best-effort, no bloquea la respuesta del webhook.
   if (status && ESTADOS_PAGO_FALLIDO.has(status) && userId) {
+    // Inicio de los 3 días de gracia (regla de negocio cerrada, 21/07/2026):
+    // solo marca cuentas con plan pagado y no reinicia una mora ya activa —
+    // ver marcarPagoFallido() en lib/mora-pagos.ts.
+    await marcarPagoFallido(userId);
     const contacto = await obtenerContactoUsuario(userId, payload);
     if (contacto) {
       await enviarPagoFallido(contacto.email, {
@@ -227,6 +232,10 @@ export async function POST(req: NextRequest) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
+
+  // Pago exitoso — la cuenta vuelve a estar al día: cierra cualquier mora
+  // activa (3 días de gracia / solo lectura, 21/07/2026).
+  await limpiarMoraPago(userId);
 
   // Emails best-effort — nunca bloquean la respuesta del webhook.
   const contacto = await obtenerContactoUsuario(userId, payload);

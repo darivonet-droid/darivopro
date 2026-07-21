@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/ui/BottomNav";
 import { Toast } from "@/components/ui/Toast";
 import { UpgradeModal } from "@/components/plan/UpgradeModal";
 import { PwaShell } from "@/components/pwa/PwaShell";
+import { AvisoCobroBanner } from "@/components/plan/AvisoCobroBanner";
 import { createServerClient } from "@/lib/supabase/server";
 import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 
@@ -42,6 +43,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         <PwaShell />
         <Toast />
         <UpgradeModal />
+        {/* Mora de cobro (21/07/2026): aviso de gracia / solo lectura — el
+            bloqueo real de escritura vive en RLS (es_cuenta_solo_lectura). */}
+        <AvisoCobroBanner />
         {children}
         <BottomNav ocultarFacturas={ocultarFacturas} />
       </div>
