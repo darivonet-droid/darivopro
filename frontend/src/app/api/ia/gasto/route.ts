@@ -18,6 +18,7 @@ import {
   OpenAIConfigError,
   parseJSONFromModel,
 } from "@/lib/openai";
+import { capture } from "@/lib/latitude";
 
 export async function POST(req: NextRequest) {
   const supabase = createServerClient();
@@ -51,25 +52,31 @@ export async function POST(req: NextRequest) {
   const system = buildGastoSystemPrompt();
 
   try {
-    let text: string;
-    if (imageBase64) {
-      text = await openaiVisionJSON({
-        system,
-        userText:
-          descripcion ||
-          "Analiza este documento de gasto y extrae los campos en JSON.",
-        imageBase64,
-        mimeType,
-      });
-    } else {
-      text = await openaiChatJSON({
-        system,
-        user: `Extrae los datos del gasto descrito:\n\n${descripcion}`,
-      });
-    }
+    const data = await capture(
+      "ia-gasto",
+      async () => {
+        let text: string;
+        if (imageBase64) {
+          text = await openaiVisionJSON({
+            system,
+            userText:
+              descripcion ||
+              "Analiza este documento de gasto y extrae los campos en JSON.",
+            imageBase64,
+            mimeType,
+          });
+        } else {
+          text = await openaiChatJSON({
+            system,
+            user: `Extrae los datos del gasto descrito:\n\n${descripcion}`,
+          });
+        }
 
-    const raw = parseJSONFromModel<GastoIAExtraccion>(text);
-    const data = normalizarGastoIA(raw);
+        const raw = parseJSONFromModel<GastoIAExtraccion>(text);
+        return normalizarGastoIA(raw);
+      },
+      { userId: user.id, tags: ["ia", "gasto", imageBase64 ? "vision" : "texto"] }
+    );
 
     const plan = await obtenerPlanTipo(supabase);
     if (!planTieneLimitesIlimitados(plan)) {
