@@ -84,6 +84,33 @@ export async function reenviarInvitacionAction(email: string): Promise<Resultado
 }
 
 /**
+ * "Importar usuarios (CSV)" / "Enviar invitación masiva" (03-PANEL-ADMIN-USUARIOS.md
+ * §5 Acciones rápidas) — invita a un usuario NUEVO por correo real de Supabase
+ * Auth (el trigger handle_new_user crea su fila de `perfiles` en plan gratis,
+ * mismo flujo que un registro normal). Falla con error legible si el correo ya
+ * tiene cuenta confirmada. Se llama una vez por fila/correo desde el cliente.
+ */
+export async function invitarUsuarioAction(email: string): Promise<Resultado> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false, error: errorAuth };
+  const limpio = email.trim();
+  if (!limpio || !limpio.includes("@")) return { ok: false, error: "Correo inválido" };
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+  }
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const { error } = await admin.auth.admin.inviteUserByEmail(limpio, {
+    redirectTo: `${base}/auth/callback?next=/dashboard`,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/usuarios");
+  return { ok: true };
+}
+
+/**
  * "Restablecer acceso" — dispara el mismo flujo de "olvidé mi contraseña"
  * que usa el propio usuario en /recuperar (frontend/.../(public)/recuperar/page.tsx),
  * iniciado por el Admin. Usa un cliente normal (no service role): este

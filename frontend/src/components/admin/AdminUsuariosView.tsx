@@ -1,15 +1,19 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { AdminBadge } from "@/components/admin/AdminTabs";
 import { AdminErrorBanner, AdminKpiCard, AdminTable } from "@/components/admin/AdminUi";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
+import { descargarCsv } from "@/lib/csv-export";
+import { ImportarCsvBoton } from "@/components/admin/ImportarCsvBoton";
 import type { AdminPerfilRow } from "@/lib/admin-queries";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 import {
   bloquearUsuarioAction,
   cambiarPlanUsuarioAction,
   desbloquearUsuarioAction,
+  invitarUsuarioAction,
   reenviarInvitacionAction,
   restablecerAccesoAction,
 } from "@/app/admin/usuarios/actions";
@@ -69,8 +73,81 @@ interface AdminUsuariosViewProps {
   usuarios: AdminPerfilRow[];
 }
 
+/**
+ * "Enviar invitación masiva" (03-PANEL-ADMIN-USUARIOS.md §5 Acciones rápidas):
+ * lista de correos pegada a mano (uno por línea, o separados por coma/;) —
+ * cada correo invita vía la misma Server Action que el import CSV. Secuencial
+ * a propósito (cada correo dispara un email real de Supabase Auth).
+ */
+function InvitacionMasiva({ onTerminado }: { onTerminado: (ok: number, errores: string[]) => void }) {
+  const [texto, setTexto] = useState("");
+  const [procesando, setProcesando] = useState(false);
+  const [resumen, setResumen] = useState<string | null>(null);
+
+  async function enviar() {
+    const correos = Array.from(
+      new Set(
+        texto
+          .split(/[\s,;]+/)
+          .map((c) => c.trim())
+          .filter((c) => c.includes("@"))
+      )
+    );
+    if (correos.length === 0) {
+      setResumen("Pega al menos un correo válido.");
+      return;
+    }
+    setProcesando(true);
+    setResumen(null);
+    let ok = 0;
+    const errores: string[] = [];
+    for (const correo of correos) {
+      setResumen(`Enviando… (${ok + errores.length + 1} de ${correos.length})`);
+      const r = await invitarUsuarioAction(correo);
+      if (r.ok) ok++;
+      else errores.push(`${correo}: ${r.error}`);
+    }
+    setProcesando(false);
+    setResumen(`${ok} de ${correos.length} invitaciones enviadas${errores.length ? ` — ${errores.length} con error` : ""}`);
+    if (ok > 0 || errores.length > 0) onTerminado(ok, errores);
+    if (ok > 0) setTexto("");
+  }
+
+  return (
+    <div>
+      <p className="mb-2 text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+        Enviar invitación masiva
+      </p>
+      <textarea
+        value={texto}
+        onChange={(e) => setTexto(e.target.value)}
+        placeholder={"Un correo por línea (o separados por coma)"}
+        rows={4}
+        className="w-full rounded-xl border px-3 py-2 text-sm"
+        style={{ borderColor: ADMIN_COLORS.slateD }}
+      />
+      <button
+        type="button"
+        disabled={procesando}
+        onClick={enviar}
+        className="mt-2 w-full rounded-lg px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
+        style={{ background: ADMIN_COLORS.purple }}
+      >
+        {procesando ? "Enviando…" : "Enviar invitaciones"}
+      </button>
+      {resumen && (
+        <p className="mt-2 text-xs font-semibold" style={{ color: ADMIN_COLORS.textMid }}>
+          {resumen}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuariosViewProps) {
+  const router = useRouter();
   const [usuarios, setUsuarios] = useState(usuariosIniciales);
+  const [mostrarLote, setMostrarLote] = useState(false);
   const [buscar, setBuscar] = useState("");
   const [filtros, setFiltros] = useState(FILTROS_VACIOS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -220,7 +297,83 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
             Limpiar filtros
           </button>
         )}
+        <button
+          type="button"
+          onClick={() =>
+            descargarCsv("usuarios.csv", [
+              ["email", "razon_social", "telefono", "plan", "estado", "metodo_acceso", "onboarding", "registro", "ultimo_acceso"],
+              ...filtrados.map((u) => [
+                u.email ?? "",
+                u.razon_social ?? "",
+                u.telefono ?? "",
+                labelPlan(u.plan_tipo),
+                estaBloqueado(u.bannedUntil) ? "Bloqueado" : "Activo",
+                u.metodoAcceso ?? "email",
+                u.onboarding_done ? "Completado" : "Pendiente",
+                u.created_at,
+                u.lastSignInAt ?? "",
+              ]),
+            ])
+          }
+          className="rounded-xl px-3 py-2.5 text-sm font-bold"
+          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
+        >
+          Exportar
+        </button>
+        <button
+          type="button"
+          onClick={() => setMostrarLote((v) => !v)}
+          className="rounded-xl px-3 py-2.5 text-sm font-bold"
+          style={{ background: mostrarLote ? ADMIN_COLORS.purplePale : ADMIN_COLORS.slate, color: mostrarLote ? ADMIN_COLORS.purple : ADMIN_COLORS.text }}
+        >
+          Importar / Invitación masiva
+        </button>
       </div>
+
+      {mostrarLote && (
+        <div
+          className="mb-4 grid gap-4 rounded-2xl p-4 md:grid-cols-2"
+          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
+        >
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+              Importar usuarios (CSV)
+            </p>
+            <ImportarCsvBoton
+              label="Elegir archivo CSV…"
+              columnas={["email"]}
+              notaExtra="Cada fila invita al usuario por correo real (queda en plan Gratis, como un registro normal). Falla si el correo ya tiene cuenta confirmada."
+              procesarFila={async (f) => {
+                if (!f.email) return { ok: false, error: "Columna email vacía" };
+                return invitarUsuarioAction(f.email);
+              }}
+              onTerminado={(r) => {
+                if (r.ok > 0) {
+                  setMensaje(`${r.ok} invitación(es) enviada(s)`);
+                  router.refresh();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => descargarCsv("plantilla-usuarios.csv", [["email"], [""]])}
+              className="mt-2 text-xs font-bold"
+              style={{ color: ADMIN_COLORS.purple }}
+            >
+              Descargar plantilla (CSV)
+            </button>
+          </div>
+          <InvitacionMasiva
+            onTerminado={(ok, errores) => {
+              if (ok > 0) {
+                setMensaje(`${ok} invitación(es) enviada(s)`);
+                router.refresh();
+              }
+              if (errores.length > 0) setError(errores[0]);
+            }}
+          />
+        </div>
+      )}
 
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
@@ -272,8 +425,8 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
             Fuente: <span className="font-mono">auth.users</span> (Supabase Auth) +{" "}
             <span className="font-mono">perfiles</span> — bloqueo vía{" "}
             <span className="font-mono">banned_until</span>, plan vía{" "}
-            <span className="font-mono">perfiles.plan_tipo</span>.
-            Importar/exportar Excel-CSV e invitación masiva no están construidos todavía.
+            <span className="font-mono">perfiles.plan_tipo</span>. Exportar (CSV), Importar (CSV) e
+            invitación masiva están en la barra de herramientas.
           </p>
         </div>
 
