@@ -26,14 +26,30 @@ interface MasTabsProps {
    * "Informes" solo si su Gerente se lo habilitó. */
   ocultarMisPlanes?: boolean;
   ocultarInformes?: boolean;
+  /**
+   * Rol Técnico (Etapa 7, CLAUDE.md 21/07/2026, decisión 4): "Mis Tarifas"
+   * es exclusiva del Gerente — el Técnico solo consulta precios, nunca los
+   * administra. Divergencia real detectada en la Etapa 6 (la arquitectura
+   * oficial ya lo decía, pero no existía ningún bloqueo en código): esta
+   * prop cierra ese gap.
+   */
+  ocultarTarifas?: boolean;
 }
 
-export function MasTabs({ email, inicial, esBusiness, ocultarOpciones, ocultarMisPlanes, ocultarInformes }: MasTabsProps) {
+export function MasTabs({
+  email,
+  inicial,
+  esBusiness,
+  ocultarOpciones,
+  ocultarMisPlanes,
+  ocultarInformes,
+  ocultarTarifas,
+}: MasTabsProps) {
   const [tab, setTab] = useState<Tab>("categorias");
 
   const TABS: { id: Tab; label: string }[] = [
     { id: "categorias", label: "Categorías" },
-    { id: "tarifas", label: "Mis Tarifas" },
+    ...(ocultarTarifas ? [] : [{ id: "tarifas" as const, label: "Mis Tarifas" }]),
     { id: "empresa", label: "Empresa" },
   ];
 
@@ -68,7 +84,7 @@ export function MasTabs({ email, inicial, esBusiness, ocultarOpciones, ocultarMi
             <CategoriasManager />
           </div>
         )}
-        {tab === "tarifas" && <TarifasEditTab />}
+        {tab === "tarifas" && !ocultarTarifas && <TarifasEditTab />}
         {tab === "empresa" && <AjustesForm email={email} inicial={inicial} />}
 
         {!ocultarOpciones && (

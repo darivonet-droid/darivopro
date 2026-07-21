@@ -3,16 +3,19 @@ import { MasOpcionesList } from "@/components/mas/MasOpcionesList";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
 import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
+import { obtenerContextoAcceso } from "@/lib/rol-empleado";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 export default async function EmpresaMasPage() {
   const mod = empresaModulo("mas");
   const supabase = createServerClient();
 
-  const [{ data: { user } }, { data: perfil }] = await Promise.all([
+  const [{ data: { user } }, { data: perfil }, contexto] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("perfiles").select("*").single(),
+    obtenerContextoAcceso(),
   ]);
+  const esTecnico = contexto.rol === "tecnico";
 
   return (
     <EmpresaShell titulo={mod.label}>
@@ -35,6 +38,7 @@ export default async function EmpresaMasPage() {
               ctaDetracciones: perfil?.cta_detracciones ?? "",
             }}
             ocultarOpciones
+            ocultarTarifas={esTecnico}
           />
         </div>
         <div className="w-[320px] shrink-0" style={{ position: "sticky", top: 20 }}>

@@ -325,14 +325,16 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
     celdas: {
       admin: { valor: "no", nota: "Admin administra la Tarifa Pro del Catálogo Maestro, nunca las tarifas de una empresa" },
       gerente: SI,
-      tecnico: { valor: "pendiente", nota: "La arquitectura dice que el Técnico solo consulta tarifas, pero hoy no existe ningún bloqueo real — decidir si se aplica" },
+      tecnico: { valor: "no", nota: "Decidido — el Técnico solo consulta tarifas, nunca las administra" },
       partner: NA,
       movil: SI,
     },
-    // Doc 12 §6.3 dice que el Técnico no administra Mis Tarifas; el código no
-    // lo gatea en ningún punto — divergencia real, por eso la celda es
-    // "pendiente" y está en la lista de preguntas abiertas de la Etapa 6.
-    gating: "Sin gating por rol hoy (overlay per-usuario categorias/precios_usuario, RLS auth.uid()=user_id)",
+    // Divergencia real detectada en la Etapa 6 (21/07/2026) cerrada en la
+    // Etapa 7 (mismo día, decisión 4): la arquitectura oficial ya decía que
+    // el Técnico no administra Mis Tarifas, pero no existía ningún bloqueo
+    // real en código. MasTabs.tsx ahora oculta la pestaña "Mis Tarifas" por
+    // completo cuando obtenerContextoAcceso().rol === "tecnico".
+    gating: "MasTabs.tsx (prop ocultarTarifas, calculada desde obtenerContextoAcceso().rol==='tecnico') — (auth)/mas/page.tsx y empresa/mas/page.tsx",
   },
 
   // ───────────────────────── Administración de plataforma ─────────────────────────

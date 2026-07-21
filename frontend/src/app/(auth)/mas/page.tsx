@@ -25,6 +25,7 @@ export default async function MasPage() {
           esBusiness={perfil?.plan_tipo === "business"}
           ocultarMisPlanes={esTecnico}
           ocultarInformes={esTecnico && !contexto.informeHabilitado}
+          ocultarTarifas={esTecnico}
           inicial={{
             razonSocial: perfil?.razon_social ?? "",
             ruc: perfil?.ruc ?? "",
