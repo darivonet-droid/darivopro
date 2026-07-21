@@ -769,7 +769,7 @@ Estos documentos tienen protección explícita ("solo el propietario puede modif
 
 - Ninguna funcionalidad de marketing/anuncios dentro de la app (ni Admin, ni Empresa, ni Móvil). Las "APIs de marketing" documentadas en `08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` son herramientas externas del propio negocio, no una feature del producto.
 - "Referidos" no existe — se llama "Partners".
-- Integración SUNAT real — todavía no hay proveedor OSE contratado (Vision §18). No inventar código de integración real hasta confirmarlo.
+- Integración técnica de envío a SUNAT — **el proveedor OSE SÍ está contratado (corregido 21/07/2026, dato directo del propietario, más reciente que cualquier otro MD): Bizlinks**, pool de comprobantes ~S/500/mes. Bizlinks recibe los datos desde Darivo Pro, arma el XML UBL 2.1, lo firma digitalmente y lo envía a SUNAT — Darivo Pro no necesita certificado digital ni conexión directa a SUNAT, y **no genera XML firmado nunca**. Lo que sigue sin construirse es la integración técnica real (llamada a la API de Bizlinks, manejo de su respuesta/CDR) — no inventar ese código sin pedido explícito; el esquema de datos que la soportará quedó auditado/corregido en la Etapa 3 (ver "ESTADO REAL", cierre 21/07/2026).
 
 ## Migraciones de base de datos — cómo entregarlas (regla permanente, 11/07/2026)
 
@@ -840,7 +840,7 @@ Migraciones de terminología cotización (completo) · `roles-planes-oficial.ts`
 
 Este documento tenía un plan día-a-día (migración de terminología, Landing Page, `/precios` a 3 planes, Módulo Admin 05, middleware de subdominios) escrito antes de que existiera casi todo el resto de este `CLAUDE.md`. Los 5 puntos están confirmados completos, cada uno con su propia entrada más abajo (ver "Tareas de código pendientes conocidas", "Estado de remediación — Auditoría 09/07/2026" Prioridad 1, y "🔴 Sin auditar" para el middleware, que sigue **apagado a propósito**, no pendiente de terminar). No queda ninguna acción de este plan original por hacer.
 
-**SUNAT sigue sin integrarse** (esto sí sigue vigente, no es parte de lo ya completado): no hay proveedor OSE contratado todavía. No escribir código de integración real hasta que Mohamed confirme que el correo a Bizlinks se envió y las condiciones del proveedor están cerradas — ver también "Lo que NO existe en este producto" más abajo.
+**SUNAT sigue sin integrarse técnicamente, pero el proveedor OSE ya está contratado** (actualizado 21/07/2026 — la versión anterior de este párrafo decía "no hay proveedor OSE contratado todavía", desactualizada): el proveedor es **Bizlinks** (ya contratado por el propietario), que arma/firma el XML UBL 2.1 y lo envía a SUNAT. Lo pendiente es la integración técnica de envío desde Darivo Pro a Bizlinks — no escribir ese código hasta pedido explícito de Mohamed. Ver también "Lo que NO existe en este producto" más abajo.
 
 ## Antes de publicar la Política de Privacidad y Términos de Uso
 
