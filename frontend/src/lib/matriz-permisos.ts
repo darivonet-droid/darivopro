@@ -263,13 +263,21 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
     modulo: "Planes y pagos",
     accion: "Modificar el catálogo de planes o sus precios",
     celdas: {
-      admin: { valor: "no", nota: "Catálogo de solo lectura por diseño — fijo a 3 planes (Básico S/49, Pro S/89, Business S/130)" },
+      admin: {
+        valor: "si",
+        nota: "Editable desde Admin → Suscripciones (nombre/precio/límites de los 3 planes existentes, nunca un 4to plan) — todavía sin efecto en el precio real de checkout ni en los límites aplicados",
+      },
       gerente: NO,
       tecnico: NO,
       partner: NO,
       movil: NO,
     },
-    gating: "PRECIOS_OFICIALES/LIMITES_PLAN (lib/roles-planes-oficial.ts) — constantes sin UI de edición; Admin Suscripciones es de solo lectura",
+    // Etapa 7 (21/07/2026, decisión 7): planes_catalogo (tabla ya existente
+    // en el baseline, antes sin usar) ahora es editable desde Admin. Sigue
+    // sin ser la fuente real que usan checkout/plan-limits/emails — esos
+    // continúan en PRECIOS_OFICIALES/LIMITES_PLAN. Recablear esos consumidores
+    // a leer de BD es una fase 2, deliberadamente no construida aquí.
+    gating: "lib/planes-catalogo.ts + admin/suscripciones/actions.ts (errorSiNoEsAdmin) — escribe planes_catalogo; PRECIOS_OFICIALES/LIMITES_PLAN (lib/roles-planes-oficial.ts) siguen siendo la fuente real de checkout/plan-limits/emails",
   },
 
   // ───────────────────────── Empresa ─────────────────────────

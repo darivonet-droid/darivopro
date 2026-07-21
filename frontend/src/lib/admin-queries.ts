@@ -5,6 +5,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
 import { enviarTicketResuelto } from "@/lib/email/send";
+import { listarPlanesCatalogo } from "@/lib/planes-catalogo";
 
 export type AdminPerfilRow = {
   id: string;
@@ -277,9 +278,22 @@ export async function fetchAdminSuscripciones() {
   const { data: perfiles } = await admin.from("perfiles").select("plan_tipo");
   const rows = perfiles ?? [];
 
+  // planes_catalogo (Etapa 7, 21/07/2026, decisión 7) — catálogo
+  // administrativo editable, distinto de PRECIOS_OFICIALES/LIMITES_PLAN
+  // (que siguen siendo la fuente real de checkout/límites). Tolerante: si la
+  // migración de datos oficiales aún no se ejecutó, la tabla puede venir
+  // vacía o con precios desactualizados del seed local — no rompe la página.
+  let planesCatalogo: Awaited<ReturnType<typeof listarPlanesCatalogo>> = [];
+  try {
+    planesCatalogo = await listarPlanesCatalogo(admin);
+  } catch {
+    planesCatalogo = [];
+  }
+
   return {
     data: {
       planesOficiales: PRECIOS_OFICIALES,
+      planesCatalogo,
       usuariosPorPlan: {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
         pro: rows.filter((p) => p.plan_tipo === "pro").length,
