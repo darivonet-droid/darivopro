@@ -413,10 +413,10 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
       admin: { valor: "noaplica", nota: "Es quien atiende los tickets" },
       gerente: { valor: "si", nota: "Incluso en modo solo lectura por mora" },
       tecnico: { valor: "si", nota: "Incluso en modo solo lectura por mora" },
-      partner: { valor: "pendiente", nota: "Sin regla cerrada: el Panel Partner no tiene flujo de tickets propio" },
+      partner: { valor: "si", nota: "Decidido — mismo sistema real de tickets que Móvil/Empresa, sección propia en el Panel Partner" },
       movil: { valor: "si", nota: "Incluso en modo solo lectura por mora" },
     },
-    gating: "api/soporte/tickets (RLS fila propia); soporte_tickets excluida a propósito del solo-lectura por mora",
+    gating: "api/soporte/tickets (RLS fila propia, auth.uid()=user_id, sin restricción de rol/plan) + SoporteTicketsView en PartnerPanel.tsx",
   },
 ];
 

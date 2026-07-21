@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ADMIN_COLORS, ADMIN_LAYOUT } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
+import { SoporteTicketsView } from "@/components/soporte/SoporteTicketsView";
 import { fmtPEN } from "@/lib/utils";
 import {
   calcularProgresoHitos,
@@ -41,6 +42,10 @@ const NAV_ITEMS = [
   { id: "tabla-comisiones", label: "Tabla de comisiones", icon: "💰" },
   { id: "mis-comisiones", label: "Mis comisiones", icon: "💵" },
   { id: "tiempos-pago", label: "Tiempos de pago", icon: "⏱️" },
+  // Etapa 7 (21/07/2026, decisión 5): extiende el sistema real de tickets ya
+  // usado en Móvil/Empresa (soporte_tickets/soporte_mensajes, sin tabla ni
+  // sistema nuevo) — el Panel Partner no tenía ninguna sección propia.
+  { id: "soporte", label: "Soporte", icon: "🆘" },
 ] as const;
 
 function iniciales(nombre: string): string {
@@ -628,6 +633,20 @@ export function PartnerPanel({ nombre, email, telefono, partner, comisionesConfi
                   </p>
                 </div>
               )}
+            </Card>
+
+            {/* Soporte — Etapa 7 (21/07/2026, decisión 5): mismo sistema real
+                de tickets ya usado en Móvil/Empresa (soporte_tickets vía
+                RLS auth.uid()=user_id, sin restricción de rol/plan). */}
+            <SectionLabel>Ayuda</SectionLabel>
+            <Card
+              id="soporte"
+              icon="🆘"
+              title="Soporte"
+              subtitle="Crea y consulta tus casos con el equipo Darivo."
+              className="mb-8"
+            >
+              <SoporteTicketsView volverHref="#registros" volverLabel="↑ Volver arriba" embedded />
             </Card>
 
             {/* Banner de sincronización — PANEL-PARTNER.md §5 */}
