@@ -82,7 +82,7 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
   if (user) {
-    if (path.startsWith("/admin") && !esAdministradorDarivo(user.email)) {
+    if (path.startsWith("/admin") && !(await esAdministradorDarivo(user.email))) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
       url.searchParams.set("acceso", "admin_denegado");

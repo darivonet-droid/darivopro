@@ -12,7 +12,7 @@ async function requireAdmin() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user || !esAdministradorDarivo(user.email)) return null;
+  if (!user || !(await esAdministradorDarivo(user.email))) return null;
   try {
     return createAdminClient();
   } catch {

@@ -86,7 +86,7 @@ export async function obtenerEstadoCobro(): Promise<EstadoCobro> {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return OK;
-    if (esAdministradorDarivo(user.email)) return OK;
+    if (await esAdministradorDarivo(user.email)) return OK;
 
     const admin = createAdminClient();
     if (await esPartnerAutorizado(user.email, admin)) return OK;

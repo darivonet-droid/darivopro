@@ -52,7 +52,7 @@ export async function resolverDestinoPostLogin(
   supabase: SupabaseClient,
   user: User
 ): Promise<DestinoPostLogin> {
-  if (esAdministradorDarivo(user.email)) {
+  if (await esAdministradorDarivo(user.email)) {
     return { tipo: "externo", url: ADMIN_URL };
   }
   if (await esPartnerAutorizado(user.email, supabase)) {
