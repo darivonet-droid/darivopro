@@ -18,7 +18,7 @@ Mohamed reportó que en la práctica el panel Empresa "todavía no tiene el dise
 | 06 | Facturas | ✅ Migrada | `FacturasTableEmpresa.tsx` (40 usos) + `NuevaFacturaFormEscritorio.tsx` (95 usos) de `ADMIN_COLORS.*`, 0 de `T.blue`/`T.navy`. `PaginacionLista` (compartido) usa `Button variant="ghost"`, no la variante `secondary` que sí lleva `T.navy` — sin impacto visual real. |
 | 07 | Más | ⚠️ Parcial | `app/empresa/mas/page.tsx` (wrapper) migrado, pero renderiza dos componentes compartidos con Móvil sin migrar: `MasTabs.tsx` — botón "Guardar" del editor de tarifas con `background: linear-gradient(135deg,${T.blue},${T.blueL})` (línea 186); `MasOpcionesList.tsx` (panel fijo "Más opciones" a la derecha, visible siempre) — tarjetas "Perfil del usuario" y "Darivo Pro Empresa" con `color: T.blue, bg: T.bluePale` (líneas 21-22 y 79-80). |
 | 08 | IA (Calculadora inteligente) | ❌ No migrada (contenido principal) | `app/empresa/ia/page.tsx` solo migra 1 línea de texto (`ADMIN_COLORS.textMid`, un subtítulo). El contenido real de la pantalla — las 3 tarjetas Escribir/Hablar/Soporte — es `components/cotizacion/IACotizacionFlow.tsx`, **0 usos de `ADMIN_COLORS`**, con `T.blue`/`T.bluePale` en líneas 283, 294, 309 (ring de foco, fondo de botón, fondo de tarjeta). Es la pantalla donde más se nota el azul de Fable 5, porque ocupa prácticamente toda la vista. |
-| 09 | Cierre | ⚠️ Parcial | `CierreViewEscritorio.tsx` (pestaña Gastos) — 83 usos de `ADMIN_COLORS.*`, migrada. Pero la pestaña "Expediente" (línea 126) renderiza `components/informes/InformesTab.tsx` (compartido con Móvil, sin migrar), cuyo selector de sub-pestaña activa usa `background: T.blue, color: T.white` (línea 45). |
+| 09 | Cierre | ⚠️ Parcial | `CierreViewEscritorio.tsx` (pestañas Gastos/Expediente Mensual) — 83 usos de `ADMIN_COLORS.*`, migrada. Pero la pestaña "Informes" (línea 126; nombre corregido tras verificación en vivo del 22/07 — no es "Expediente" como se dijo inicialmente) renderiza `components/informes/InformesTab.tsx` (compartido con Móvil, sin migrar), cuyo selector de sub-pestaña activa usa `background: T.blue, color: T.white` (línea 45). |
 | 10 | Empleados | ✅ Migrada | `EmpresaEmpleadosView.tsx` — 47 usos de `ADMIN_COLORS.*`, 0 de `T.blue`/`T.navy`; importa `AdminBadge` de `components/admin/AdminTabs.tsx` (ya en `ADMIN_COLORS`), coherente. |
 | 11 | Roles y Permisos | ✅ Migrada | `RolesPermisosView.tsx` — 74 usos de `ADMIN_COLORS.*`, 0 de `T.blue`/`T.navy`. |
 
@@ -46,5 +46,38 @@ Decisión de Mohamed: los 5 componentes compartidos migran a `ADMIN_COLORS` **so
 Verificación técnica: `tsc --noEmit` limpio, `next lint` sin warnings nuevos (solo 3 warnings preexistentes de `react-hooks/exhaustive-deps` en `useCotizacion.ts`/`useFactura.ts`, no tocados), `next build` limpio (70+ rutas, incluida `/empresa/ia`, `/empresa/mas`, `/empresa/cierre`, `/empresa/clientes`). **Verificación visual interactiva no realizada en esta sesión** (regla del proyecto: verificar siempre en Vercel con sesión real, nunca con dev server local) — pendiente de que Mohamed la confirme tras el próximo deploy a `main`, igual que se hizo con Cotizaciones/Facturas/Cierre el 14/07/2026.
 
 **Hallazgos adicionales fuera de alcance de esta tarea (no corregidos, solo reportados):**
-- `components/informes/InformeSemanal.tsx`, `InformeMensual.tsx` e `InformeTrimestral.tsx` (renderizados dentro de `InformesTab.tsx`, que a su vez se usa en Cierre/Expediente) tienen bastante más azul/navy hardcodeado sin migrar (barras de gráfico, tarjetas de totales, textos) — no están entre los 5 componentes autorizados en este prompt, no se tocaron.
-- `components/ui/Button.tsx` variant `"primary"` (por defecto) sigue usando el gradiente azul de Fable 5 (`GRADIENTS.primary`) — es un componente global compartido por decenas de pantallas de Móvil, fuera de alcance total. Donde `Button` con variant por defecto aparece dentro de uno de los 5 componentes migrados (`ClienteFichaView.tsx`), se corrigió con un `style` inline específico de esa instancia, sin tocar el componente compartido.
+- `components/informes/InformeSemanal.tsx`, `InformeMensual.tsx` e `InformeTrimestral.tsx` (renderizados dentro de `InformesTab.tsx`, que a su vez se usa en Cierre → Informes) tienen bastante más azul/navy hardcodeado sin migrar (barras de gráfico, tarjetas de totales, textos) — no están entre los 5 componentes autorizados en este prompt, no se tocaron. **Migrados en la Tarea 2, ver más abajo.**
+- `components/ui/Button.tsx` variant `"primary"` (por defecto) sigue usando el gradiente azul de Fable 5 (`GRADIENTS.primary`) — es un componente global compartido por decenas de pantallas de Móvil, fuera de alcance total. Donde `Button` con variant por defecto aparece dentro de uno de los 5 componentes migrados (`ClienteFichaView.tsx`), se corrigió con un `style` inline específico de esa instancia, sin tocar el componente compartido. **Sigue pendiente, decisión aparte de Mohamed — ver cierre más abajo.**
+
+## Cierre final 22/07/2026 — Tarea 1 (merge a producción) y Tarea 2 (Informes)
+
+Autorización de Mohamed: "producción autónomo" solo para la Tarea 1 (llevar los 6 commits de la migración de los 5 componentes compartidos a `main`).
+
+### Tarea 1 — en producción
+
+1. `main` local confirmado ancestro directo de `origin/main` antes de actuar (`f8d2bad` → `57a839f`, sin divergencia) — actualizado con `git fetch origin main:main`.
+2. PR [#4](https://github.com/darivonet-droid/darivopro/pull/4) `develop` → `main`, 6 commits (`fba0451`…`cea9f43`). CI (`Test Backend Python`, `Test Frontend`, `Vercel`) verde antes de fusionar.
+3. Fusionado — merge commit `274df884f74af5a6d3c27d5d15d2f7eaa4aa72ca`.
+4. Deploy de producción confirmado vía Vercel MCP (`get_deployment`): `dpl_BnxJu5CgxdT5HxM1ozNUM8xmao3T`, `target: "production"`, `readyState: "READY"`, alias incluye `darivopro.com`, `www.darivopro.com`, `empresa.darivopro.com`.
+5. Verificación visual en vivo en `https://darivopro.com/` con Google ya autenticado (sin escribir contraseña en ningún momento):
+   - Sesión inicial del navegador era la cuenta real de Mohamed (sin acceso a Empresa) — se preguntó cómo proceder; Mohamed indicó usar `info@darivopro.com`. Vía "Continuar con Google" (selector de cuenta, sin contraseña) se entró como **cuenta demo móvil** (`demo@darivopro.com`, la cuenta QA Business ya documentada en `CLAUDE.md`), con acceso real a Empresa.
+   - **Empresa, las 9 pantallas, confirmado morado/blanco real**: Inicio, Clientes (lista + ficha — "Email"/"Editar"/CTA cotización en morado, "Factura" en `purpleDark` distinto de "Boleta" verde), Facturas, Cierre (pestaña Informes, selector "Semanal" en morado), Más (tarjeta "Perfil del usuario" en lavanda/morado), IA (botón "Generar cotización" — `getComputedStyle` confirmó `rgb(124, 58, 237)` = `ADMIN_COLORS.purple` exacto), Empleados, Roles y Permisos.
+   - **Móvil confirmado sin cambios**, con valores computados exactos (no solo visual): `/mas` → icono "Perfil del usuario" `background-color: rgb(239, 246, 255)` = `#EFF6FF` = `T.bluePale` exacto (no `ADMIN_COLORS.purplePale`); `/ia` → botón "Generar cotización" `background-color: rgb(37, 99, 235)` = `#2563EB` = `T.blue` exacto.
+
+### Tarea 2 — Informes migrados (hallazgo adicional cerrado)
+
+Revisión completa de los 3 componentes (no solo lo ya reportado) — todo el color hardcodeado encontrado:
+
+| Componente | Líneas migradas | Detalle |
+|---|---|---|
+| `InformeSemanal.tsx` | 46 (dentro de `StatCard`, helper interno) | Valor de cada tarjeta (Total cotizado/facturado/cobrado): `T.navy` → `ADMIN_COLORS.text`. |
+| `InformeMensual.tsx` | 54, 81, 83, 85, 97, 124 | Total del header, tooltip del gráfico (fondo), color de cursor del hover, **relleno de las barras del gráfico** (`recharts`, el elemento más visible), IGV acumulado, monto de Top 3 clientes. `T.navy`→`ADMIN_COLORS.text`, `T.blue`→`ADMIN_COLORS.purple`, `T.bluePale`→`ADMIN_COLORS.purplePale`. |
+| `InformeTrimestral.tsx` | 27 (`SectionTitle`, helper interno, 3 llamadas), 88, 102, 132, 134, 135, 142, 152 | Badge de período, los 3 títulos de sección, stat "Total facturado", tarjeta "Cliente principal" (fondo + label + valor), valor de "Categoría más frecuente", botón "Descargar PDF" (incluido su `boxShadow` con el rgba exacto de `T.blue` → rgba exacto de `ADMIN_COLORS.purple`). Era el componente con más azul sin migrar de los 3. |
+
+Gateado con `esEmpresa`, hilvanado desde `InformesTab.tsx` (que ya lo recibía desde la Tarea de los 5 componentes) — único punto de invocación real de los 3 en todo el repo, verificado (`grep` en `frontend/src` completo). Móvil no cambia: los 2 call sites de `InformesTab.tsx` en Móvil no pasan `esEmpresa`, cascada verificada.
+
+`tsc --noEmit`, `next lint` (mismos 3 warnings preexistentes, no tocados) y `next build` (70+ rutas) limpios en los 3 commits. **No se tocó** `lib/pdf/InformeTrimestralPdf.tsx` (el renderer del PDF descargable) ni `components/ui/Button.tsx` — fuera de los 3/5 componentes autorizados en cada tarea respectivamente. Verificación visual interactiva de esta Tarea 2 no realizada (no forma parte de los 6 commits ya en `main`; queda en `develop`, sin desplegar todavía).
+
+### Pendiente real, sin resolver (decisión aparte de Mohamed)
+
+- `components/ui/Button.tsx` variant `"primary"` (gradiente azul global) — afecta decenas de pantallas de Móvil, no se toca sin que Mohamed lo revise por separado.
