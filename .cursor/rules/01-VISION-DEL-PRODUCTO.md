@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.15
+**Versión:** 2.18
 
 **Estado:** Visión oficial aprobada
 
@@ -285,6 +285,20 @@ La definición funcional detallada de roles, permisos y roles personalizados se 
 
 Nunca crean funcionalidades nuevas.
 
+## 4.1 Aviso informativo por dispositivo (reemplaza el bloqueo total anterior — 21/07/2026)
+
+Además de Suscripción/Producto/Rol/Permisos, el tipo de dispositivo desde el que se conecta el usuario dispara un **aviso informativo, no bloqueante y descartable** — nunca impide la navegación. Un usuario puede usar cualquier panel desde cualquier dispositivo; el aviso solo sugiere la plataforma recomendada para una mejor experiencia:
+
+| Rol | Dispositivo | Aviso mostrado |
+| --- | --- | --- |
+| Administrador Darivo / Empresa — Gerente | Móvil | "Para una mejor experiencia, usa Darivo Pro Empresa desde un ordenador." |
+| Administrador Darivo / Empresa — Gerente | Ordenador | Sin aviso |
+| Técnico (vinculado a empresa) / Darivo Pro Móvil independiente | Ordenador | "Para una mejor experiencia, usa la app Darivo Pro Móvil desde tu celular." |
+| Técnico / Darivo Pro Móvil independiente | Móvil | Sin aviso |
+| Partner | Cualquiera | Sin aviso (único rol sin ningún aviso, en ningún dispositivo) |
+
+El usuario puede cerrar el aviso (botón ✕) y sigue navegando con normalidad; no reaparece en la misma sesión de navegador (`sessionStorage`). Implementación: `frontend/src/lib/restriccion-dispositivo.ts` (`avisoDispositivo()`, tabla + detección de dispositivo por `user-agent`) y `frontend/src/lib/restriccion-dispositivo-server.ts` (resolución de rol) resuelven el rol en el servidor; `frontend/src/components/dispositivo/AvisoDispositivoBanner.tsx` (Client Component) detecta el dispositivo real y renderiza el aviso, montado en los layouts de Admin, Empresa y Móvil — nunca en el de Partner.
+
 ## 5. Funcionalidades
 
 El usuario utiliza las funcionalidades permitidas por:
@@ -524,6 +538,8 @@ Ningún documento del ecosistema podrá duplicar:
 Siempre deberá **referenciar** el documento oficial de Suscripciones (`04-PANEL-ADMIN-SUSCRIPCIONES.md`).
 
 Esto garantiza una única fuente oficial de verdad y evita inconsistencias cuando los planes cambien.
+
+**Nota (21/07/2026):** desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10, el nombre/precio/límites de los 3 planes existentes son editables desde Admin (tabla `planes_catalogo`) — esto **no** cambia esta regla ni habilita un 4to plan; `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única referencia oficial, ahora también como fuente administrativa de esos valores.
 
 ## Metodología de sincronización documental
 
@@ -932,9 +948,15 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.15
+**Versión:** 2.18
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.18 — 21/07/2026, reversión mismo día que v2.17):** §4.1 "Restricción de acceso por dispositivo" reemplazada por "Aviso informativo por dispositivo" — el bloqueo total de v2.17 queda eliminado (decisión de Mohamed: ningún usuario debe quedar impedido de navegar por tipo de dispositivo). Ahora es un aviso no bloqueante y descartable, con la misma tabla de rol×dispositivo pero sin ningún redirect/bloqueo — Partner sigue siendo el único rol sin ningún aviso, en ningún dispositivo. Implementación real: `AvisoDispositivoBanner.tsx` (Client Component, montado en los layouts de Admin/Empresa/Móvil, nunca en Partner), no en `middleware.ts`.
+
+**Cambio principal (v2.17 — 21/07/2026, Etapa 7 continuación, REVERTIDO el mismo día por v2.18):** nueva §4.1 "Restricción de acceso por dispositivo" — tabla de dispositivo permitido por rol (Admin/Gerente solo ordenador; Técnico/Móvil-independiente solo Móvil; Partner sin restricción), marcada explícitamente **en fase de pruebas, sujeta a ajuste**. Implementación real en `middleware.ts` (bloqueo total, no aviso).
+
+**Cambio principal (v2.16 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7):** §12 "Regla de sincronización — planes y límites" — nota aclaratoria: desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10 los 3 planes existentes son editables desde BD (Admin → Suscripciones), sin que eso habilite un 4to plan ni cambie que `04-PANEL-ADMIN-SUSCRIPCIONES.md` sigue siendo la única fuente oficial de nombres/límites/precios.
 
 **Cambio principal (v2.15):** §3.2 — añadida referencia cruzada corta a la decisión de negocio de registro histórico y auditable de comisiones (detalle completo en `06-PANEL-ADMIN-PARTNERS.md` §5.2, sin duplicar aquí).
 

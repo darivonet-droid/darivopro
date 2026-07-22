@@ -6,6 +6,7 @@ import { AdminBadge, AdminNotice, AdminTabs } from "@/components/admin/AdminTabs
 import { AdminErrorBanner, AdminKpiCard, AdminTable, AdminCard } from "@/components/admin/AdminUi";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { descargarCsv } from "@/lib/csv-export";
+import { ImportarCsvBoton } from "@/components/admin/ImportarCsvBoton";
 import type { AdminEmpresaRow } from "@/lib/admin-queries";
 import { PRECIOS_OFICIALES, type PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 import { cambiarPlanEmpresaAction, setEmpresaActivaAction, crearEmpresaAction } from "@/app/admin/empresas/actions";
@@ -313,11 +314,12 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
             )}
 
             <AdminNotice>
-              Importar (Excel/CSV), &ldquo;Publicar cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están
-              construidos todavía. &ldquo;Exportar&rdquo; (CSV de la vista actual) y &ldquo;Descargar
-              plantilla&rdquo; sí están disponibles. &ldquo;Solicitar eliminación&rdquo; tampoco está
-              construido — es un procedimiento administrativo aparte, no un borrado directo, y ese
-              procedimiento no está definido todavía.
+              Importar (CSV) está en el panel lateral (Acciones rápidas); &ldquo;Exportar&rdquo;
+              (CSV de la vista actual) y la plantilla también están disponibles. &ldquo;Publicar
+              cambios&rdquo; y &ldquo;Guía de uso&rdquo; no están construidos — pendientes de
+              definición. &ldquo;Solicitar eliminación&rdquo; tampoco — es un procedimiento
+              administrativo aparte, no un borrado directo, y ese procedimiento no está definido
+              todavía.
             </AdminNotice>
             <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
               Fuente: tabla <span className="font-mono">empresas</span> (Supabase) — el estado
@@ -442,18 +444,39 @@ export function AdminEmpresasView({ empresas: empresasIniciales }: AdminEmpresas
                 >
                   Nueva empresa
                 </button>
+                <ImportarCsvBoton
+                  label="Importar empresas (CSV)"
+                  columnas={["razon_social", "email_gerente", "ruc", "telefono"]}
+                  notaExtra="Cada fila crea la empresa e invita a su gerente por correo real (misma validación que + Nueva empresa)."
+                  procesarFila={async (f) => {
+                    if (!f.razon_social || !f.email_gerente) {
+                      return { ok: false, error: "razon_social y email_gerente son obligatorios" };
+                    }
+                    return crearEmpresaAction({
+                      razonSocial: f.razon_social,
+                      email: f.email_gerente,
+                      ruc: f.ruc,
+                      telefono: f.telefono,
+                    });
+                  }}
+                  onTerminado={(r) => {
+                    if (r.ok > 0) {
+                      setAviso(`${r.ok} empresa(s) importada(s)`);
+                      router.refresh();
+                    }
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() => descargarCsv("plantilla-empresas.csv", [["razon_social", "email_gerente", "ruc", "telefono"], ["", "", "", ""]])}
                   className="rounded-lg px-3 py-2 text-left text-sm font-bold"
                   style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
                 >
-                  Descargar plantilla (CSV)
+                  Descargar plantilla de importación (CSV)
                 </button>
               </div>
               <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                &ldquo;Importar empresas&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas
-                todavía.
+                &ldquo;Guía de uso&rdquo; no está construida todavía.
               </p>
             </AdminCard>
           </>

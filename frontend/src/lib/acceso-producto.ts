@@ -6,6 +6,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import { createServerClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function emailsAllowlist(envKey: string): Set<string> {
   const raw = process.env[envKey] ?? "";
@@ -17,11 +18,77 @@ function emailsAllowlist(envKey: string): Set<string> {
   );
 }
 
-export function esAdministradorDarivo(email: string | null | undefined): boolean {
+// ── Fuente de verdad de Admin (Etapa 4, 21/07/2026 — pregunta abierta #1) ────
+// La tabla `darivo_admin_empleados` (auditable, la misma que ya usa RLS vía
+// is_darivo_admin()) es la fuente PRINCIPAL. La env `DARIVO_ADMIN_EMAILS`
+// queda solo como fallback de arranque: si la tabla no tiene NINGUNA fila
+// activa (entorno nuevo/vacío) o no se puede consultar (sin service role en
+// local), se usa la allowlist para no dejar el proyecto sin ningún Admin.
+// Si la tabla SÍ tiene filas activas, manda la tabla: un email presente en la
+// env pero sin fila activa NO es Admin.
+//
+// Cache en memoria con TTL corto para no pagar una consulta a Supabase por
+// cada verificación (middleware de /admin/*, 28 Server Actions, banner de
+// mora) — antes esto era un simple .includes() sobre la env. La tabla es
+// diminuta (empleados internos), así que se cachea el set completo de emails
+// activos, no una entrada por email. En Edge/serverless el cache es
+// best-effort por instancia; el peor caso es una consulta extra por instancia
+// cada 60s, y una revocación tarda como máximo 60s en propagarse por instancia.
+const ADMIN_CACHE_TTL_MS = 60_000;
+let adminEmailsCache: { activos: Set<string> | null; expira: number } | null = null;
+
+/**
+ * Emails con fila activa en `darivo_admin_empleados` (cache 60s).
+ * Devuelve `null` si la tabla no se pudo consultar (sin
+ * SUPABASE_SERVICE_ROLE_KEY, o error de Supabase): en ese caso el caller cae
+ * al fallback de env — mismo comportamiento que el histórico. Se usa el
+ * cliente service_role porque la RLS de esa tabla solo permite leerla a
+ * quien YA es admin (is_darivo_admin()) — con el cliente de sesión un
+ * no-admin vería siempre 0 filas, indistinguible de "tabla vacía".
+ */
+async function emailsAdminActivos(): Promise<Set<string> | null> {
+  const ahora = Date.now();
+  if (adminEmailsCache && adminEmailsCache.expira > ahora) {
+    return adminEmailsCache.activos;
+  }
+  let activos: Set<string> | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("darivo_admin_empleados")
+      .select("email")
+      .eq("activo", true);
+    if (!error && data) {
+      activos = new Set(
+        data
+          .map((f: { email: string | null }) => (f.email ?? "").trim().toLowerCase())
+          .filter(Boolean)
+      );
+    }
+  } catch {
+    activos = null; // sin service role key en este entorno → fallback env
+  }
+  adminEmailsCache = { activos, expira: ahora + ADMIN_CACHE_TTL_MS };
+  return activos;
+}
+
+export async function esAdministradorDarivo(
+  email: string | null | undefined
+): Promise<boolean> {
   if (!email) return false;
+  const emailNorm = email.trim().toLowerCase();
+
+  const activos = await emailsAdminActivos();
+  if (activos && activos.size > 0) {
+    // La tabla tiene filas activas → es la única fuente. La env no amplía.
+    return activos.has(emailNorm);
+  }
+
+  // Arranque (tabla vacía) o tabla inconsultable: fallback a la allowlist env.
+  // Falla cerrado si también está vacía — mismo comportamiento histórico.
   const list = emailsAllowlist("DARIVO_ADMIN_EMAILS");
   if (list.size === 0) return false;
-  return list.has(email.toLowerCase());
+  return list.has(emailNorm);
 }
 
 /**
@@ -99,7 +166,7 @@ export async function errorSiNoEsAdmin(): Promise<string | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!esAdministradorDarivo(user?.email)) return "No autorizado";
+  if (!(await esAdministradorDarivo(user?.email))) return "No autorizado";
   return null;
 }
 
@@ -114,7 +181,7 @@ export async function verificarAccesoProducto(
 
   switch (producto) {
     case "admin":
-      if (!esAdministradorDarivo(user.email)) {
+      if (!(await esAdministradorDarivo(user.email))) {
         return { ok: false, razon: "admin_denegado" };
       }
       return { ok: true };

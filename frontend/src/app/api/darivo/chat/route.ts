@@ -9,6 +9,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { openaiChatText, OpenAIConfigError } from "@/lib/openai";
 import { buildDarivoSystemPrompt, extraerEscalado, DARIVO_MAX_TURNOS_USUARIO } from "@/lib/darivo";
 import { crearTicketSoporte } from "@/lib/soporte-server";
+import { capture } from "@/lib/latitude";
 
 interface ChatTurno {
   role: "user" | "assistant";
@@ -75,21 +76,29 @@ export async function POST(req: NextRequest) {
   const systemPrompt = buildDarivoSystemPrompt(conocimiento, !!user);
 
   try {
-    const raw = await openaiChatText({ system: systemPrompt, history: messages });
-    const { visible, asunto } = extraerEscalado(raw);
+    const reply = await capture(
+      "darivo-chat",
+      async () => {
+        const raw = await openaiChatText({ system: systemPrompt, history: messages });
+        const { visible, asunto } = extraerEscalado(raw);
 
-    let reply = visible;
+        let replyText = visible;
 
-    if (asunto && user) {
-      const ultimoUsuario = [...messages].reverse().find((m) => m.role === "user");
-      const ticket = await crearTicketSoporte(supabase, user, {
-        asunto,
-        descripcion: ultimoUsuario?.content ?? asunto,
-      });
-      if (ticket) {
-        reply += "\n\nYa registré tu caso, en breve alguien del equipo te escribe.";
-      }
-    }
+        if (asunto && user) {
+          const ultimoUsuario = [...messages].reverse().find((m) => m.role === "user");
+          const ticket = await crearTicketSoporte(supabase, user, {
+            asunto,
+            descripcion: ultimoUsuario?.content ?? asunto,
+          });
+          if (ticket) {
+            replyText += "\n\nYa registré tu caso, en breve alguien del equipo te escribe.";
+          }
+        }
+
+        return replyText;
+      },
+      { userId: user?.id, tags: ["darivo", "soporte"] }
+    );
 
     return NextResponse.json({ reply });
   } catch (e) {

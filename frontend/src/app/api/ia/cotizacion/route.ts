@@ -15,6 +15,7 @@ import {
 } from "@/lib/plan-limits";
 import { planTieneLimitesIlimitados } from "@/lib/roles-planes-oficial";
 import { openaiChatJSON, OpenAIConfigError, parseJSONFromModel } from "@/lib/openai";
+import { capture } from "@/lib/latitude";
 import type { Capitulo, Partida } from "@/types";
 
 interface CategoriaRow {
@@ -122,6 +123,10 @@ interface IACotizacionIAJson {
   notasFaltantes?: string[];
 }
 
+type IACotizacionCaptura =
+  | { ok: true; resultado: IACotizacionResult }
+  | { ok: false; sinCatalogo: string[] };
+
 function findPartida(catalog: Capitulo[], svcId: string): { cap: Capitulo; partida: Partida } | null {
   for (const cap of catalog) {
     const partida = cap.partidas.find((p) => p.id === svcId);
@@ -167,63 +172,74 @@ export async function POST(req: NextRequest) {
   const systemPrompt = buildSystemPrompt(catalog);
 
   try {
-    const text = await openaiChatJSON({
-      system: systemPrompt,
-      user: `Analiza este trabajo y genera el JSON de cotización:\n\n${descripcion}`,
-    });
+    const captura = await capture(
+      "ia-cotizacion",
+      async (): Promise<IACotizacionCaptura> => {
+        const text = await openaiChatJSON({
+          system: systemPrompt,
+          user: `Analiza este trabajo y genera el JSON de cotización:\n\n${descripcion}`,
+        });
 
-    const iaResult = parseJSONFromModel<IACotizacionIAJson>(text);
-    if (!Array.isArray(iaResult.items)) {
-      throw new Error("Sin partidas en la respuesta");
-    }
+        const iaResult = parseJSONFromModel<IACotizacionIAJson>(text);
+        if (!Array.isArray(iaResult.items)) {
+          throw new Error("Sin partidas en la respuesta");
+        }
 
-    const mappedItems: IACotizacionItem[] = [];
-    const sinCatalogo: string[] = iaResult.notasFaltantes ?? [];
+        const mappedItems: IACotizacionItem[] = [];
+        const sinCatalogo: string[] = iaResult.notasFaltantes ?? [];
 
-    for (const ci of iaResult.items) {
-      const found = findPartida(catalog, ci.svcId);
-      if (!found) {
-        sinCatalogo.push(`${ci.svcId} — ID no encontrado en catálogo`);
-        continue;
-      }
-      const { cap, partida } = found;
-      const qty = Math.max(0, Number(ci.qty) || 0);
-      const price = partida.precio;
-      mappedItems.push({
-        descripcion: partida.nombre + (ci.sugerida ? " — sugerida" : ""),
-        cantidad: qty,
-        unidad: TIPO_UNIDAD[partida.calcType] ?? partida.unidad,
-        precio_unit: price,
-        total: Math.round(qty * price * 100) / 100,
-        svcId: partida.id,
-        catLabel: cap.nombre,
-        sugerida: ci.sugerida ?? false,
-      });
-    }
+        for (const ci of iaResult.items) {
+          const found = findPartida(catalog, ci.svcId);
+          if (!found) {
+            sinCatalogo.push(`${ci.svcId} — ID no encontrado en catálogo`);
+            continue;
+          }
+          const { cap, partida } = found;
+          const qty = Math.max(0, Number(ci.qty) || 0);
+          const price = partida.precio;
+          mappedItems.push({
+            descripcion: partida.nombre + (ci.sugerida ? " — sugerida" : ""),
+            cantidad: qty,
+            unidad: TIPO_UNIDAD[partida.calcType] ?? partida.unidad,
+            precio_unit: price,
+            total: Math.round(qty * price * 100) / 100,
+            svcId: partida.id,
+            catLabel: cap.nombre,
+            sugerida: ci.sugerida ?? false,
+          });
+        }
 
-    if (!mappedItems.length) {
+        if (!mappedItems.length) {
+          return { ok: false, sinCatalogo };
+        }
+
+        const resultado: IACotizacionResult = {
+          ...recalcularTotalesIA(mappedItems),
+          titulo: iaResult.titulo ?? "Cotización",
+          items: mappedItems,
+          notasFaltantes: sinCatalogo.length ? sinCatalogo : undefined,
+        };
+        return { ok: true, resultado };
+      },
+      { userId: user.id, tags: ["ia", "cotizacion"] }
+    );
+
+    if (!captura.ok) {
       return NextResponse.json(
         {
           error: "No se encontraron partidas del catálogo en la descripción. Intenta ser más específico.",
-          sinCatalogo,
+          sinCatalogo: captura.sinCatalogo,
         },
         { status: 422 }
       );
     }
-
-    const resultado: IACotizacionResult = {
-      ...recalcularTotalesIA(mappedItems),
-      titulo: iaResult.titulo ?? "Cotización",
-      items: mappedItems,
-      notasFaltantes: sinCatalogo.length ? sinCatalogo : undefined,
-    };
 
     const plan = await obtenerPlanTipo(supabase);
     if (!planTieneLimitesIlimitados(plan)) {
       await registrarUsoIA(supabase);
     }
 
-    return NextResponse.json({ data: resultado });
+    return NextResponse.json({ data: captura.resultado });
   } catch (e) {
     if (e instanceof OpenAIConfigError) {
       return NextResponse.json({ error: e.message }, { status: 503 });

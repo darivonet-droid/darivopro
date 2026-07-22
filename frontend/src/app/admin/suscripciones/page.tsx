@@ -16,11 +16,15 @@ export default async function AdminSuscripcionesPage() {
     );
   }
 
-  const { planesOficiales, usuariosPorPlan } = result.data;
+  const { planesOficiales, planesCatalogo, usuariosPorPlan } = result.data;
 
   return (
     <AdminShell titulo="Gestión de Suscripciones">
-      <AdminSuscripcionesView planesOficiales={planesOficiales} usuariosPorPlan={usuariosPorPlan} />
+      <AdminSuscripcionesView
+        planesOficiales={planesOficiales}
+        planesCatalogo={planesCatalogo}
+        usuariosPorPlan={usuariosPorPlan}
+      />
     </AdminShell>
   );
 }

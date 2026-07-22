@@ -31,6 +31,7 @@ interface PartnerRow {
   codigo: string;
   enlace: string;
   estado: EstadoPartner;
+  acceso_movil: boolean;
   created_at: string;
 }
 
@@ -82,6 +83,7 @@ async function mapPartner(
     codigo: row.codigo,
     enlace: row.enlace,
     estado: row.estado,
+    accesoMovil: row.acceso_movil ?? false,
     registros: ((referidos ?? []) as ReferidoRow[]).map((r) => ({
       email: r.email,
       fecha: r.fecha,
@@ -206,6 +208,30 @@ export async function updatePartnerEstado(
   }
 
   return mapPartner(admin, partner);
+}
+
+/**
+ * Toggle "Acceso a Móvil" — Etapa 7 (21/07/2026), decisión 2: Partner SÍ
+ * puede usar Darivo Pro Móvil, pero solo si Admin lo activa explícitamente
+ * por partner (nunca automático al pasar a Activo, a diferencia del Plan
+ * Business regalado). Solo persiste el flag — el enforcement real en
+ * (auth)/layout.tsx no se construyó en esta pasada (ver nota en
+ * matriz-permisos.ts, fila "Usar Darivo Pro Móvil").
+ */
+export async function updatePartnerAccesoMovil(
+  id: string,
+  accesoMovil: boolean
+): Promise<PartnerRegistro | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("partners")
+    .update({ acceso_movil: accesoMovil })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapPartner(admin, data as PartnerRow);
 }
 
 /**

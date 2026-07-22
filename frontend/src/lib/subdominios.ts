@@ -26,12 +26,9 @@ export function baseDeSubdominio(host: string | null | undefined): string | null
   return SUBDOMINIOS[sub] ?? null;
 }
 
-/**
- * Destino post-login: a diferencia de `baseDeSubdominio` (que solo aplica si
- * SUBDOMAIN_ROUTING_ENABLED === "1"), esta función siempre resuelve un
- * destino — se usa para que iniciar sesión desde admin./empresa./partners.
- * lleve directo a ese panel en vez de caer siempre en /dashboard (Móvil).
- */
-export function destinoPostLogin(host: string | null | undefined): string {
-  return baseDeSubdominio(host) ?? "/dashboard";
-}
+// `destinoPostLogin(hostname)` (fix 19/07/2026) fue eliminada en la auditoría
+// RBAC del 21/07/2026: quedó sin ningún caller desde que login/middleware/
+// callback resuelven por rol real (destino-post-login.ts, 20/07/2026), y
+// mantener un helper que mapea subdominio→panel invitaba a reusarlo como
+// fuente de verdad de rol — el subdominio es SOLO ruteo, nunca rol.
+// `baseDeSubdominio` (rewrite de "/" bajo SUBDOMAIN_ROUTING_ENABLED) se queda.

@@ -105,8 +105,10 @@ export function NuevoCotizacionWizardEscritorio() {
   const [pdfUrlGuardado, setPdfUrlGuardado] = useState<string | null>(null);
   const [populated, setPopulated] = useState(false);
 
-  const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null };
-  const { limpiar } = useCotizacionDraft(draftState);
+  // `basket` es el carrito real (antes se guardaba items:[] hardcodeado, el
+  // borrador nunca sobrevivía a salir a medio wizard — mismo fix que Móvil).
+  const draftState = { clientName, phone, city, items: [], margin, notes, iaResult: null, basket };
+  const { cargar, limpiar } = useCotizacionDraft(draftState);
 
   const sortedCatalogo = useMemo(() => {
     if (!catalogo.length) return catalogo;
@@ -237,6 +239,19 @@ export function NuevoCotizacionWizardEscritorio() {
       setClientName(lastClient.name);
       setPhone(lastClient.phone);
       setCity(lastClient.city);
+    }
+
+    // Restaurar borrador local si el usuario salió a medio wizard sin
+    // guardar (mismo fix que Móvil, ver NuevoCotizacionWizard.tsx).
+    const draft = cargar();
+    if (draft?.basket && Array.isArray(draft.basket) && draft.basket.length) {
+      setBasket(draft.basket as BasketItem[]);
+      setMargin(draft.margin);
+      setNotes(draft.notes ?? "");
+      if (draft.clientName) setClientName(draft.clientName);
+      if (draft.phone) setPhone(draft.phone);
+      if (draft.city) setCity(draft.city);
+      mostrarToast("Recuperamos tu cotización sin guardar");
     }
   }, [catalogo]); // eslint-disable-line react-hooks/exhaustive-deps
 

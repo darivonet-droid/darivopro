@@ -6,6 +6,7 @@ import { AdminBadge, AdminTabs, AdminNotice } from "@/components/admin/AdminTabs
 import { AdminCard, AdminTable, AdminErrorBanner } from "@/components/admin/AdminUi";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { descargarCsv } from "@/lib/csv-export";
+import { ImportarCsvBoton } from "@/components/admin/ImportarCsvBoton";
 import { fmtPEN } from "@/lib/utils";
 import type {
   AdminCategoriaMaestroRow,
@@ -455,9 +456,10 @@ export function AdminCatalogoView({
 
         {(esTabCategorias || esTabPartidas) && (
           <AdminNotice>
-            &ldquo;Importar (Excel/CSV)&rdquo; y &ldquo;Publicar cambios&rdquo; no están construidos
-            todavía. &ldquo;Exportar&rdquo; sí está disponible arriba. Los cambios aquí se aplican
-            directamente (no hay estado borrador/publicado).
+            &ldquo;Importar categorías (CSV)&rdquo; está en el panel lateral (Acciones rápidas).
+            &ldquo;Exportar&rdquo; está disponible arriba. &ldquo;Publicar cambios&rdquo; no está
+            construido — los cambios aquí se aplican directamente (no hay estado
+            borrador/publicado), pendiente de definición.
           </AdminNotice>
         )}
 
@@ -511,18 +513,51 @@ export function AdminCatalogoView({
             </AdminCard>
             <AdminCard title="Acciones rápidas">
               <div className="flex flex-col gap-2">
+                <ImportarCsvBoton
+                  label="Importar categorías (CSV)"
+                  columnas={["nombre", "sector", "emoji"]}
+                  notaExtra="El sector debe existir (ej. Electricidad, Pintura); con sector Construcción la fila se crea como subcategoría."
+                  procesarFila={async (f) => {
+                    if (!f.nombre) return { ok: false, error: "Columna nombre vacía" };
+                    if (!f.sector) return { ok: false, error: "Columna sector vacía" };
+                    const buscado = f.sector
+                      .normalize("NFD")
+                      .replace(/[̀-ͯ]/g, "")
+                      .toLowerCase();
+                    const sector = sectores.find(
+                      (s) =>
+                        s.slug === buscado ||
+                        s.nombre
+                          .normalize("NFD")
+                          .replace(/[̀-ͯ]/g, "")
+                          .toLowerCase() === buscado
+                    );
+                    if (!sector) return { ok: false, error: `Sector "${f.sector}" no existe en el catálogo` };
+                    return crearCategoriaAction({
+                      sectorId: sector.id,
+                      productoId,
+                      nombre: f.nombre,
+                      emoji: f.emoji,
+                    });
+                  }}
+                  onTerminado={(r) => {
+                    if (r.ok > 0) {
+                      setAviso(`${r.ok} categoría(s) importada(s)`);
+                      router.refresh();
+                    }
+                  }}
+                />
                 <button
                   type="button"
-                  onClick={() => descargarCsv("plantilla-catalogo.csv", [["nombre", "sector_o_categoria", "tipo_calculo", "precio"], ["", "", "", ""]])}
+                  onClick={() => descargarCsv("plantilla-categorias.csv", [["nombre", "sector", "emoji"], ["", "", ""]])}
                   className="rounded-lg px-3 py-2 text-left text-sm font-bold"
                   style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
                 >
-                  Descargar plantilla (CSV)
+                  Descargar plantilla de importación (CSV)
                 </button>
               </div>
               <p className="mt-3 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
-                &ldquo;Importar categorías&rdquo; y &ldquo;Guía de uso&rdquo; no están construidas
-                todavía.
+                &ldquo;Guía de uso&rdquo; no está construida todavía.
               </p>
             </AdminCard>
           </>

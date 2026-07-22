@@ -5,6 +5,7 @@ import {
   actualizarComisionConfig,
   createPartnerRecord,
   listPartners,
+  updatePartnerAccesoMovil,
   updatePartnerEstado,
 } from "@/lib/ecosystem-store";
 import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
@@ -38,6 +39,24 @@ export async function setPartnerEstadoAction(
   const errorAuth = await errorSiNoEsAdmin();
   if (errorAuth) return { ok: false };
   const updated = await updatePartnerEstado(id, estado);
+  if (updated) {
+    revalidatePath("/admin/partners");
+    revalidatePath("/partner");
+  }
+  return { ok: !!updated };
+}
+
+/**
+ * Toggle "Acceso a Móvil" por partner — Etapa 7 (21/07/2026), decisión 2.
+ * Activación manual y explícita desde Admin, nunca automática.
+ */
+export async function setPartnerAccesoMovilAction(
+  id: string,
+  accesoMovil: boolean
+): Promise<{ ok: boolean }> {
+  const errorAuth = await errorSiNoEsAdmin();
+  if (errorAuth) return { ok: false };
+  const updated = await updatePartnerAccesoMovil(id, accesoMovil);
   if (updated) {
     revalidatePath("/admin/partners");
     revalidatePath("/partner");

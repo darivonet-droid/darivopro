@@ -9,6 +9,8 @@ export interface PartnerRegistro {
   codigo: string;
   enlace: string;
   estado: EstadoPartner;
+  /** Acceso a Darivo Pro Móvil — toggle manual desde Admin (Etapa 7, 21/07/2026), nunca automático. */
+  accesoMovil: boolean;
   registros: PartnerReferido[];
   comisiones: ComisionPartner[];
   createdAt: string;

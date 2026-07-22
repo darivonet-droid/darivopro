@@ -1,6 +1,12 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.2
+**Versión:** 1.5
+
+**Cambio principal (v1.5 — 21/07/2026, reversión mismo día):** §6 — el bloqueo total por dispositivo (v1.4) queda reemplazado por un aviso informativo, no bloqueante y descartable — Gerente en móvil ve el aviso, Técnico en ordenador ve el aviso, ninguno de los dos queda impedido de navegar. Referencia cruzada actualizada a Visión §4.1.
+
+**Cambio principal (v1.4 — 21/07/2026, Etapa 7 continuación, REVERTIDO el mismo día por v1.5):** §6 — añadida la restricción de acceso por dispositivo (Gerente solo ordenador, Técnico solo Móvil), EN FASE DE PRUEBAS, referencia cruzada a Visión §4.1.
+
+**Cambio principal (v1.3 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 3):** reemplaza el modelo de "Técnico = rol fijo con Factura OFF por defecto" — Gerente y Técnico ya NO son cajas cerradas de permisos: el Gerente activa/desactiva **libremente cualquier módulo** (Factura, Informe) por Técnico, en cualquier momento, no solo al invitarlo. Un Técnico puede tener permisos ampliados sin convertirse en un segundo Gerente (nunca administra empleados ni el plan de la empresa — eso sigue exclusivo del Gerente). **Nuevo default real: un Técnico invitado nace con Cotización + Cliente + Factura activas** (antes Factura nacía en `false`, decisión de la Tarea 2 del 17/07/2026, ahora sustituida). Informe sigue opcional, el Gerente lo activa aparte. Cliente es un módulo base sin flag propio (investigado en esta etapa: no existe ni hace falta una 3ra columna de permiso — todo empleado vinculado ve el mismo listado de clientes que el Gerente).
 
 **Estado:** ⚠️ Requiere nueva imagen oficial (roles personalizados, §6.1). Especificación funcional cerrada — sincronizado con `01-VISION-DEL-PRODUCTO.md` §8, `12 – ROLES… ADMIN.md` v1.6 y `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.6.
 
@@ -109,9 +115,10 @@ Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de
 ### Reglas de la matriz
 
 * Permiso **activa/desactiva** funcionalidad existente — nunca crea funcionalidades nuevas (Visión §8).
-* **Técnico** no administra Mis Tarifas ni Catálogo (Visión §11 · Admin §6.3).
+* **Técnico** no administra Mis Tarifas ni Catálogo (Visión §11 · Admin §6.3) — bloqueo real construido 21/07/2026 (Etapa 7).
 * Cambios respetan límites del plan (Admin §16).
 * **Darivo Pro Móvil** aplica permisos definidos aquí — no los administra (Admin §16 Darivo Pro).
+* **Defaults al invitar un Técnico (v1.3, 21/07/2026):** Cotización y Cliente siempre activas (sin flag, módulo base); **Factura nace activa** (el Gerente puede desactivarla); Informe nace inactivo (el Gerente lo activa si quiere). Ninguno de los 3 es una elección única e irreversible al invitar — el Gerente puede cambiar Factura/Informe en cualquier momento después.
 
 ---
 
@@ -123,6 +130,8 @@ Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de
 | **Técnico** | Permisos asignados; trabajo en Móvil |
 
 Roles base: Gerente y Técnico. Con plan **Business**, el Gerente puede además crear **roles personalizados** (§6.1).
+
+**Aviso informativo por dispositivo (Visión §4.1, reversión 21/07/2026):** si el **Gerente** entra desde móvil, ve un aviso descartable sugiriendo usar Darivo Pro Empresa desde un ordenador; si el **Técnico** entra desde ordenador, ve un aviso descartable sugiriendo usar la app Darivo Pro Móvil desde su teléfono. Ninguno de los dos queda bloqueado — pueden cerrar el aviso y seguir usando el panel con normalidad desde cualquier dispositivo. Implementación real en `frontend/src/components/dispositivo/AvisoDispositivoBanner.tsx` (montado en `empresa/layout.tsx`) vía `frontend/src/lib/restriccion-dispositivo.ts`.
 
 ## 6.1 Roles personalizados (solo plan Business)
 
@@ -175,6 +184,8 @@ Mi Plan (consulta/cambio): `07-MODULO-MAS-EMPRESA.md` §6.
 ---
 
 # 10. Estado
+
+✅ **Actualizado v1.3 (21/07/2026)** — modelo de permisos por módulo activable (no roles fijos) confirmado y con default real de Factura ON al invitar Técnico (§5.2). Bloqueo real de Mis Tarifas para Técnico construido en código.
 
 ⚠️ **Actualizado v1.2 (05/07/2026)** — cerrada la decisión pendiente: un rol personalizado puede asignarse a varios Técnicos (patrón RBAC estándar). **Pendiente: nueva imagen oficial** (§6.1).
 

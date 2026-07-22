@@ -82,7 +82,14 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
   if (user) {
-    if (path.startsWith("/admin") && !esAdministradorDarivo(user.email)) {
+    // NOTA (reversión 21/07/2026, ver CLAUDE.md): el bloqueo total por
+    // dispositivo que existía aquí (Etapa 7 — continuación) fue eliminado.
+    // El middleware ya nunca corta la navegación por tipo de dispositivo —
+    // se reemplazó por un aviso informativo, no bloqueante y descartable,
+    // renderizado en los layouts reales (ver
+    // frontend/src/components/dispositivo/AvisoDispositivoBanner.tsx).
+
+    if (path.startsWith("/admin") && !(await esAdministradorDarivo(user.email))) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
       url.searchParams.set("acceso", "admin_denegado");

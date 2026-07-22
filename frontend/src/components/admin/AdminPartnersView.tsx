@@ -14,6 +14,7 @@ import {
 import {
   actualizarComisionConfigAction,
   createPartnerAction,
+  setPartnerAccesoMovilAction,
   setPartnerEstadoAction,
 } from "@/app/admin/partners/actions";
 
@@ -135,6 +136,19 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
         return;
       }
       setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, estado } : p)));
+      refresh();
+    });
+  };
+
+  const cambiarAccesoMovil = (id: string, accesoMovil: boolean) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await setPartnerAccesoMovilAction(id, accesoMovil);
+      if (!result.ok) {
+        setError("No se pudo actualizar el acceso a Móvil");
+        return;
+      }
+      setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, accesoMovil } : p)));
       refresh();
     });
   };
@@ -516,6 +530,22 @@ export function AdminPartnersView({ initialPartners, comisionesConfig }: AdminPa
                 Suspender partner
               </button>
             )}
+          </div>
+
+          <div className="mt-4 border-t pt-4" style={{ borderColor: ADMIN_COLORS.slateD }}>
+            <label className="flex items-center justify-between gap-2 text-sm font-semibold" style={{ color: ADMIN_COLORS.text }}>
+              <span>Acceso a Darivo Pro Móvil</span>
+              <input
+                type="checkbox"
+                disabled={pending}
+                checked={seleccionado.accesoMovil}
+                onChange={(e) => cambiarAccesoMovil(seleccionado.id, e.target.checked)}
+              />
+            </label>
+            <p className="mt-1 text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+              Desactivado por defecto — actívalo manualmente solo para este partner. Nunca se
+              activa junto con &ldquo;Activar partner&rdquo;.
+            </p>
           </div>
         </AdminCard>
       ) : (

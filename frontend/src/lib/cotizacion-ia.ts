@@ -36,6 +36,11 @@ export interface CotizacionDraft {
   margin:     number;
   notes:      string;
   iaResult?:  IACotizacionResult | null;
+  /** Carrito real del wizard manual (forma local `BasketItem[]`, distinta de
+   * `items`/`LineaCotizacion[]` que usa el flujo IA) — opcional para no
+   * afectar el draft del flujo IA, que nunca lo escribe. Ver hallazgo
+   * "borrador no persiste el basket real", CLAUDE.md 16/07/2026. */
+  basket?:    unknown[];
 }
 
 export const DRAFT_STORAGE_KEY = "darivo_cotizacion_draft";

@@ -1,8 +1,10 @@
 ﻿# 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.6
+**Versión:** 1.7
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.7 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 2):** decidido — un Partner **SÍ puede usar Darivo Pro Móvil**, pero únicamente si el Administrador Darivo lo activa explícitamente por partner (toggle "Acceso a Darivo Pro Móvil" en el panel de detalle de este módulo, desactivado por defecto, independiente de "Activar partner"/"Suspender partner" — nunca se activa automáticamente). Persistido en `partners.acceso_movil` (migración incluida, sin ejecutar). El enforcement real de ese acceso en el login/layout de Móvil **no se construyó todavía** (mismo criterio que el bloqueo de Admin — decisión declarativa primero, enforcement real es trabajo aparte); hoy el toggle solo queda guardado y visible en Admin.
 
 **Cambio principal (v1.6 — 11/07/2026):** §5.1 "Plan regalado" documenta ahora la revocación implementada: al suspender/desactivar un Partner, su Plan Business otorgado por esa vía se revoca automáticamente a `gratis`, salvo que tenga un pago real propio de Business (nunca se revoca un plan pagado). Requiere `perfiles.plan_origen_partner_id` (migración pendiente de ejecución — ver `supabase/migrations/20260711130000_plan_origen_partner.sql`).
 
@@ -256,6 +258,7 @@ Según el diseño oficial:
 * Crear partner
 * Activar partner
 * Suspender partner
+* Activar / desactivar acceso a Darivo Pro Móvil por partner *(real desde v1.7, 21/07/2026 — toggle independiente de Activar/Suspender, desactivado por defecto)*
 * Consultar registros asociados al enlace
 * Configurar tabla de comisiones
 

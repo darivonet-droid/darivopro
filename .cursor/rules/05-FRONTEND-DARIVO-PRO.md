@@ -1,8 +1,10 @@
 # 05 – FRONTEND – DARIVO PRO
 
-**Versión:** 2.3
+**Versión:** 2.4
 
-**Fecha:** 16/07/2026
+**Fecha:** 16/07/2026 (actualizado 21/07/2026)
+
+**Cambio v2.4 (21/07/2026):** auditoría de coherencia MD↔código — corregido §4 (`/admin/empleados` y guard de Admin ya no dependen solo de allowlist env, tabla `darivo_admin_empleados` es la fuente principal desde Etapa 4) y §5 (Persistencia de Partners ya no es JSON interim, es la tabla real `partners` desde 12/07/2026).
 
 **Estado:** Documento técnico oficial — **Post-V1 ecosistema completo cerrada** (Móvil · Empresa · Admin · Partner)
 
@@ -103,7 +105,7 @@ Rutas bajo `/admin` con menú lateral oficial (`00-PANEL-ADMIN-DASHBOARD.md` §4
 | `/admin/suscripciones` | Suscripciones | ✅ Catálogo oficial + distribución |
 | `/admin/roles` | Roles y Permisos | ✅ `AdminRolesView` — catálogo oficial + límites |
 | `/admin/empresas` | Empresas | ✅ `AdminEmpresasView` — perfiles Supabase |
-| `/admin/empleados` | Empleados | ✅ `AdminEmpleadosInternosView` — allowlist env |
+| `/admin/empleados` | Empleados | ✅ `AdminEmpleadosInternosView` — tabla `darivo_admin_empleados` |
 | `/admin/apis` | Configuración APIs | ✅ `ApisRegistroView` — §5.1–5.3 |
 | `/admin/partners` | Partners | ✅ `AdminPartnersView` — JSON servidor + Server Actions |
 | `/admin/soporte` | Soporte | ✅ `AdminSoporteView` — tickets reales, filtros y cambio de estado (16/07/2026) |
@@ -111,9 +113,9 @@ Rutas bajo `/admin` con menú lateral oficial (`00-PANEL-ADMIN-DASHBOARD.md` §4
 
 Shell: `frontend/src/components/admin/AdminShell.tsx`
 
-Guard: `requireProducto("admin")` + allowlist env (T11).
+Guard: `requireProducto("admin")` → `esAdministradorDarivo()` (tabla `darivo_admin_empleados`, fallback allowlist env — T11 v1.1).
 
-**Persistencia interim Partners:** `frontend/data/ecosystem-partners.json` vía `lib/ecosystem-store.ts` + `app/admin/partners/actions.ts`.
+**Persistencia Partners:** tabla real `public.partners` (Supabase) vía `lib/ecosystem-store.ts` + `app/admin/partners/actions.ts` — ya no es el JSON interim (`ecosystem-partners.json`) documentado originalmente, migrado a BD real desde 12/07/2026.
 
 ---
 

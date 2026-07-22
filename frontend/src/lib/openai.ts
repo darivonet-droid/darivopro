@@ -1,6 +1,9 @@
 /**
  * Cliente OpenAI API — registro oficial 08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md §5.2
+ * Usa el SDK oficial (no fetch manual) para que Latitude Telemetry (lib/latitude.ts)
+ * pueda instrumentar automáticamente cada llamada — ver frontend/.env.example.
  */
+import OpenAI from "openai";
 
 export class OpenAIConfigError extends Error {
   constructor(message: string) {
@@ -9,10 +12,14 @@ export class OpenAIConfigError extends Error {
   }
 }
 
-function apiKey(): string {
+let _client: OpenAI | null = null;
+
+function client(): OpenAI {
+  if (_client) return _client;
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new OpenAIConfigError("OPENAI_API_KEY no configurada");
-  return key;
+  _client = new OpenAI({ apiKey: key });
+  return _client;
 }
 
 function model(vision = false): string {
@@ -88,30 +95,22 @@ async function openaiRequest(
   vision: boolean,
   jsonMode: boolean
 ): Promise<string> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey()}`,
-    },
-    body: JSON.stringify({
+  const cli = client();
+  let res: OpenAI.Chat.ChatCompletion;
+  try {
+    res = await cli.chat.completions.create({
       model: model(vision),
       max_tokens: maxTokens,
       ...(jsonMode ? { response_format: { type: "json_object" as const } } : {}),
-      messages,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("OpenAI error:", err);
+      messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+      stream: false,
+    });
+  } catch (e) {
+    console.error("OpenAI error:", e);
     throw new Error("Error al procesar con OpenAI");
   }
 
-  const body = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const text = body.choices?.[0]?.message?.content ?? "";
+  const text = res.choices?.[0]?.message?.content ?? "";
   if (!text) throw new Error("Respuesta vacía de OpenAI");
   return text;
 }

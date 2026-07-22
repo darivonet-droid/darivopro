@@ -10,7 +10,42 @@ import {
   ROLES_PLATAFORMA,
   MATRIZ_PERMISOS_APROBADA,
 } from "@/lib/roles-planes-oficial";
+import {
+  MATRIZ_PERMISOS,
+  ROLES_MATRIZ,
+  celdasPendientes,
+  modulosMatriz,
+  type CeldaPermiso,
+} from "@/lib/matriz-permisos";
 import { useState } from "react";
+
+/** Presentación de una celda de la matriz (leyenda al pie de la tabla). */
+function CeldaMatrizUI({ celda }: { celda: CeldaPermiso }) {
+  const estilos: Record<CeldaPermiso["valor"], { simbolo: string; bg: string; color: string }> = {
+    si: { simbolo: "✔ Sí", bg: ADMIN_COLORS.greenPale, color: ADMIN_COLORS.greenD },
+    no: { simbolo: "✖ No", bg: ADMIN_COLORS.redPale, color: ADMIN_COLORS.red },
+    condicional: { simbolo: "◐ Condicional", bg: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD },
+    noaplica: { simbolo: "— No aplica", bg: ADMIN_COLORS.slate, color: ADMIN_COLORS.textLight },
+    pendiente: { simbolo: "❓ Pendiente", bg: ADMIN_COLORS.purplePale, color: ADMIN_COLORS.purple },
+  };
+  const e = estilos[celda.valor];
+  return (
+    <div>
+      <span
+        className="inline-block whitespace-nowrap rounded-lg px-2 py-1 text-xs font-bold"
+        style={{ background: e.bg, color: e.color }}
+        title={celda.nota}
+      >
+        {e.simbolo}
+      </span>
+      {celda.nota && (
+        <p className="mt-1 max-w-[200px] text-[11px] leading-snug" style={{ color: ADMIN_COLORS.textLight }}>
+          {celda.nota}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const TABS = ["Roles", "Planes", "Permisos"] as const;
 
@@ -146,21 +181,54 @@ export function AdminRolesView() {
       )}
 
       {tab === "Permisos" && (
-        <div
-          className="rounded-2xl p-6"
-          style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
-        >
-          <h2 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
-            Matriz de permisos
-          </h2>
-          {MATRIZ_PERMISOS_APROBADA ? (
-            <AdminTable headers={["Permiso", "Estado"]} rows={[]} vacio="Sin permisos configurados" />
-          ) : (
-            <p className="mt-3 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-              Matriz detallada fila a fila — pendiente de aprobación. Gestión desde Empresa → Roles
-              y Permisos cuando esté aprobada.
-            </p>
+        <div>
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            <AdminKpiCard label="Acciones en la matriz" value={MATRIZ_PERMISOS.length} />
+            <AdminKpiCard label="Roles" value={ROLES_MATRIZ.length} />
+            <AdminKpiCard
+              label="Celdas pendientes de decisión"
+              value={celdasPendientes().length}
+              hint="Requieren decisión del propietario"
+            />
+          </div>
+
+          {!MATRIZ_PERMISOS_APROBADA && (
+            <div
+              className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold"
+              style={{ background: ADMIN_COLORS.amberPale, color: ADMIN_COLORS.amberD }}
+            >
+              Matriz operativa vigente — refleja las reglas de negocio ya cerradas y el control de
+              acceso real. Las celdas marcadas ❓ y la aprobación formal de la matriz detallada por
+              empleado siguen pendientes de decisión del propietario.
+            </div>
           )}
+
+          {modulosMatriz().map((modulo) => {
+            const filas = MATRIZ_PERMISOS.filter((p) => p.modulo === modulo);
+            return (
+              <section key={modulo} className="mb-6">
+                <h2 className="mb-2 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
+                  {modulo}
+                </h2>
+                <AdminTable
+                  headers={["Acción / permiso", ...ROLES_MATRIZ.map((r) => r.label)]}
+                  vacio="Sin permisos"
+                  rows={filas.map((p) => [
+                    <span key="a" className="font-semibold" style={{ color: ADMIN_COLORS.text }}>
+                      {p.accion}
+                    </span>,
+                    ...ROLES_MATRIZ.map((r) => <CeldaMatrizUI key={r.id} celda={p.celdas[r.id]} />),
+                  ])}
+                />
+              </section>
+            );
+          })}
+
+          <p className="text-xs" style={{ color: ADMIN_COLORS.textLight }}>
+            Leyenda: ✔ permitido · ✖ denegado · ◐ condicional (depende de un plan o de un permiso
+            activable) · — no aplica al rol · ❓ sin regla cerrada, pendiente de decisión. Los roles
+            personalizados por empresa son un sistema aparte y no forman parte de esta matriz.
+          </p>
         </div>
       )}
     </div>
