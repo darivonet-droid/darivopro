@@ -3,12 +3,18 @@
 import { useEffect } from "react";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { DatosSemana } from "@/hooks/useInformes";
 
 interface Props {
   datos:   DatosSemana | null;
   cargando: boolean;
   onLoad:  () => void;
+  /** Empresa desktop (Cierre → Informes) pasa true para que el valor de cada
+   * StatCard use ADMIN_COLORS en vez del navy de Fable 5 — Móvil sigue con
+   * el navy por defecto (22/07/2026, corrección de la migración parcial de
+   * Empresa a ADMIN_COLORS: hallazgo adicional de la tarea de InformesTab). */
+  esEmpresa?: boolean;
 }
 
 function delta(actual: number, prev: number) {
@@ -32,8 +38,8 @@ function Flecha({ actual, prev }: { actual: number; prev: number }) {
 }
 
 function StatCard({
-  label, valor, actual, prev,
-}: { label: string; valor: string; actual: number; prev: number }) {
+  label, valor, actual, prev, esEmpresa,
+}: { label: string; valor: string; actual: number; prev: number; esEmpresa?: boolean }) {
   return (
     <div
       className="flex flex-col gap-1 rounded-2xl px-4 py-4"
@@ -43,7 +49,7 @@ function StatCard({
         {label}
       </span>
       <div className="flex items-baseline">
-        <span className="text-xl font-black" style={{ color: T.navy }}>{valor}</span>
+        <span className="text-xl font-black" style={{ color: esEmpresa ? ADMIN_COLORS.text : T.navy }}>{valor}</span>
         <Flecha actual={actual} prev={prev} />
       </div>
       {prev > 0 && (
@@ -55,7 +61,7 @@ function StatCard({
   );
 }
 
-export function InformeSemanal({ datos, cargando, onLoad }: Props) {
+export function InformeSemanal({ datos, cargando, onLoad, esEmpresa }: Props) {
   useEffect(() => { onLoad(); }, [onLoad]);
 
   if (cargando) {
@@ -79,9 +85,9 @@ export function InformeSemanal({ datos, cargando, onLoad }: Props) {
       </p>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Total cotizado"   valor={fmtPEN(cotizado)}  actual={cotizado}  prev={cotizadoPrev} />
-        <StatCard label="Total facturado"  valor={fmtPEN(facturado)} actual={facturado} prev={facturadoPrev} />
-        <StatCard label="Total cobrado"    valor={fmtPEN(cobrado)}   actual={cobrado}   prev={cobradoPrev} />
+        <StatCard label="Total cotizado"   valor={fmtPEN(cotizado)}  actual={cotizado}  prev={cotizadoPrev} esEmpresa={esEmpresa} />
+        <StatCard label="Total facturado"  valor={fmtPEN(facturado)} actual={facturado} prev={facturadoPrev} esEmpresa={esEmpresa} />
+        <StatCard label="Total cobrado"    valor={fmtPEN(cobrado)}   actual={cobrado}   prev={cobradoPrev} esEmpresa={esEmpresa} />
         <div
           className="flex flex-col gap-1 rounded-2xl px-4 py-4"
           style={{ background: "#FFFBEB", boxShadow: "0 2px 12px rgba(10,22,40,0.07)" }}

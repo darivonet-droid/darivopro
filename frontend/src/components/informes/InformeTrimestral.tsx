@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { DatosTrimestre } from "@/hooks/useInformes";
 
 interface Props {
   datos:    DatosTrimestre | null;
   cargando: boolean;
   onLoad:   () => void;
+  /** Empresa desktop (Cierre → Informes) pasa true para que el navy/azul de
+   * Fable 5 (badge de período, títulos de sección, stats, destacados, botón
+   * PDF) use ADMIN_COLORS — Móvil sigue con su paleta por defecto
+   * (22/07/2026, hallazgo adicional de la tarea de InformesTab). */
+  esEmpresa?: boolean;
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -20,11 +26,14 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children, esEmpresa }: { children: React.ReactNode; esEmpresa?: boolean }) {
   return (
     <p
       className="mb-3 mt-1 border-b-2 pb-1 text-xs font-extrabold uppercase tracking-wider"
-      style={{ color: T.navy, borderColor: T.blue }}
+      style={{
+        color: esEmpresa ? ADMIN_COLORS.text : T.navy,
+        borderColor: esEmpresa ? ADMIN_COLORS.purple : T.blue,
+      }}
     >
       {children}
     </p>
@@ -36,8 +45,11 @@ function trimLabel() {
   return `Q${q} ${new Date().getFullYear()}`;
 }
 
-export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
+export function InformeTrimestral({ datos, cargando, onLoad, esEmpresa }: Props) {
   const [descargando, setDescargando] = useState(false);
+  const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
+  const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
+  const darkText = esEmpresa ? ADMIN_COLORS.text : T.navy;
 
   useEffect(() => { onLoad(); }, [onLoad]);
 
@@ -85,7 +97,7 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
       <div className="flex items-center gap-2">
         <span
           className="rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide"
-          style={{ background: T.blue, color: T.white }}
+          style={{ background: accent, color: T.white }}
         >
           {trimLabel()}
         </span>
@@ -96,10 +108,10 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
 
       {/* Resumen financiero */}
       <div className="rounded-2xl bg-white px-4 py-4" style={{ boxShadow: "0 2px 12px rgba(10,22,40,0.07)" }}>
-        <SectionTitle>Resumen financiero</SectionTitle>
+        <SectionTitle esEmpresa={esEmpresa}>Resumen financiero</SectionTitle>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: "Total facturado",   valor: fmtPEN(datos.totalFacturado),  color: T.blue },
+            { label: "Total facturado",   valor: fmtPEN(datos.totalFacturado),  color: accent },
             { label: "Total cobrado",      valor: fmtPEN(datos.totalCobrado),    color: T.green },
             { label: "Pendiente cobro",    valor: fmtPEN(datos.pendienteCobro),  color: T.amber },
             { label: "IGV acumulado",      valor: fmtPEN(datos.igvAcumulado),    color: T.textMid },
@@ -118,7 +130,7 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
 
       {/* Documentos emitidos */}
       <div className="rounded-2xl bg-white px-4 py-4" style={{ boxShadow: "0 2px 12px rgba(10,22,40,0.07)" }}>
-        <SectionTitle>Documentos emitidos</SectionTitle>
+        <SectionTitle esEmpresa={esEmpresa}>Documentos emitidos</SectionTitle>
         <Row label="Nº de cotizaciones"   value={String(datos.numCotizaciones)} />
         <Row label="Nº de facturas"        value={String(datos.numFacturas)} />
         <Row label="Tasa de aprobación"    value={`${datos.tasaAprobacion}%`} />
@@ -126,20 +138,20 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
 
       {/* Destacados */}
       <div className="rounded-2xl bg-white px-4 py-4" style={{ boxShadow: "0 2px 12px rgba(10,22,40,0.07)" }}>
-        <SectionTitle>Destacados del trimestre</SectionTitle>
+        <SectionTitle esEmpresa={esEmpresa}>Destacados del trimestre</SectionTitle>
         <div
           className="mb-3 rounded-xl px-3 py-3"
-          style={{ background: T.bluePale }}
+          style={{ background: accentPale }}
         >
-          <p className="text-[9px] font-bold uppercase tracking-wide" style={{ color: T.blue }}>Cliente principal</p>
-          <p className="mt-1 text-sm font-black" style={{ color: T.navy }}>{datos.clientePrincipal}</p>
+          <p className="text-[9px] font-bold uppercase tracking-wide" style={{ color: accent }}>Cliente principal</p>
+          <p className="mt-1 text-sm font-black" style={{ color: darkText }}>{datos.clientePrincipal}</p>
         </div>
         <div
           className="rounded-xl px-3 py-3"
           style={{ background: T.amberPale }}
         >
           <p className="text-[9px] font-bold uppercase tracking-wide" style={{ color: T.amberD }}>Categoría más frecuente</p>
-          <p className="mt-1 text-sm font-black" style={{ color: T.navy }}>{datos.categoriaTop}</p>
+          <p className="mt-1 text-sm font-black" style={{ color: darkText }}>{datos.categoriaTop}</p>
         </div>
       </div>
 
@@ -149,7 +161,10 @@ export function InformeTrimestral({ datos, cargando, onLoad }: Props) {
         onClick={descargarPDF}
         disabled={descargando}
         className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
-        style={{ background: T.blue, boxShadow: "0 4px 20px rgba(37,99,235,0.35)" }}
+        style={{
+          background: accent,
+          boxShadow: esEmpresa ? "0 4px 20px rgba(124,58,237,0.35)" : "0 4px 20px rgba(37,99,235,0.35)",
+        }}
       >
         {descargando ? (
           <>⏳ Generando PDF…</>
