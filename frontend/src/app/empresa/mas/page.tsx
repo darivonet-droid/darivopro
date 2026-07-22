@@ -39,6 +39,7 @@ export default async function EmpresaMasPage() {
             }}
             ocultarOpciones
             ocultarTarifas={esTecnico}
+            esEmpresa
           />
         </div>
         <div className="w-[320px] shrink-0" style={{ position: "sticky", top: 20 }}>
