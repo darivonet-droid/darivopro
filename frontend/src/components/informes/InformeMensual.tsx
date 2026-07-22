@@ -6,15 +6,24 @@ import {
 } from "recharts";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { DatosMes } from "@/hooks/useInformes";
 
 interface Props {
   datos:    DatosMes | null;
   cargando: boolean;
   onLoad:   () => void;
+  /** Empresa desktop (Cierre → Informes) pasa true para que el navy/azul de
+   * Fable 5 (total, gráfico de barras, IGV, top clientes) use ADMIN_COLORS —
+   * Móvil sigue con su paleta por defecto (22/07/2026, hallazgo adicional de
+   * la tarea de InformesTab). */
+  esEmpresa?: boolean;
 }
 
-export function InformeMensual({ datos, cargando, onLoad }: Props) {
+export function InformeMensual({ datos, cargando, onLoad, esEmpresa }: Props) {
+  const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
+  const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
+  const darkText = esEmpresa ? ADMIN_COLORS.text : T.navy;
   useEffect(() => { onLoad(); }, [onLoad]);
 
   if (cargando) {
@@ -51,7 +60,7 @@ export function InformeMensual({ datos, cargando, onLoad }: Props) {
           Facturado en {mesActual}
         </p>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-2xl font-black" style={{ color: T.navy }}>{fmtPEN(totalMes)}</span>
+          <span className="text-2xl font-black" style={{ color: darkText }}>{fmtPEN(totalMes)}</span>
           {pct !== null && (
             <span
               className="text-sm font-bold"
@@ -78,11 +87,11 @@ export function InformeMensual({ datos, cargando, onLoad }: Props) {
               tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} />
             <Tooltip
               formatter={(v) => [fmtPEN(Number(v)), "Facturado"]}
-              contentStyle={{ fontSize: 11, borderRadius: 8, border: "none", background: T.navy, color: T.white }}
+              contentStyle={{ fontSize: 11, borderRadius: 8, border: "none", background: darkText, color: T.white }}
               labelStyle={{ color: T.textLight }}
-              cursor={{ fill: T.bluePale }}
+              cursor={{ fill: accentPale }}
             />
-            <Bar dataKey="monto" fill={T.blue} radius={[6, 6, 0, 0]} />
+            <Bar dataKey="monto" fill={accent} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -94,7 +103,7 @@ export function InformeMensual({ datos, cargando, onLoad }: Props) {
       >
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: T.textMid }}>IGV acumulado (18%)</p>
-          <p className="mt-0.5 text-lg font-black" style={{ color: T.navy }}>{fmtPEN(igvAcum)}</p>
+          <p className="mt-0.5 text-lg font-black" style={{ color: darkText }}>{fmtPEN(igvAcum)}</p>
         </div>
         <span className="text-2xl">🧾</span>
       </div>
@@ -121,7 +130,7 @@ export function InformeMensual({ datos, cargando, onLoad }: Props) {
                   {i + 1}
                 </span>
                 <span className="flex-1 text-sm font-medium truncate" style={{ color: T.text }}>{c.nombre}</span>
-                <span className="text-sm font-black" style={{ color: T.blue }}>{fmtPEN(c.total)}</span>
+                <span className="text-sm font-black" style={{ color: accent }}>{fmtPEN(c.total)}</span>
               </div>
             ))}
           </div>
