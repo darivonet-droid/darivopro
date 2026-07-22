@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { TabPillSelector } from "@/components/design-system/TabPillSelector";
 import { AjustesForm } from "@/components/ajustes/AjustesForm";
 import { CategoriasManager } from "@/components/ajustes/CategoriasManager";
@@ -34,6 +35,11 @@ interface MasTabsProps {
    * prop cierra ese gap.
    */
   ocultarTarifas?: boolean;
+  /** Empresa desktop pasa true para que el botón "Guardar" del editor de
+   * tarifas (pestaña Mis Tarifas) use ADMIN_COLORS en vez del azul de
+   * Fable 5 — Móvil sigue con el azul por defecto (22/07/2026, corrección
+   * de la migración parcial de Empresa a ADMIN_COLORS). */
+  esEmpresa?: boolean;
 }
 
 export function MasTabs({
@@ -44,6 +50,7 @@ export function MasTabs({
   ocultarMisPlanes,
   ocultarInformes,
   ocultarTarifas,
+  esEmpresa,
 }: MasTabsProps) {
   const [tab, setTab] = useState<Tab>("categorias");
 
@@ -84,7 +91,7 @@ export function MasTabs({
             <CategoriasManager />
           </div>
         )}
-        {tab === "tarifas" && !ocultarTarifas && <TarifasEditTab />}
+        {tab === "tarifas" && !ocultarTarifas && <TarifasEditTab esEmpresa={esEmpresa} />}
         {tab === "empresa" && <AjustesForm email={email} inicial={inicial} />}
 
         {!ocultarOpciones && (
@@ -99,7 +106,7 @@ export function MasTabs({
   );
 }
 
-function TarifasEditTab() {
+function TarifasEditTab({ esEmpresa }: { esEmpresa?: boolean }) {
   const { catalogo } = useCatalogo();
   const { editarPrecioPartida } = useCategorias();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -183,7 +190,11 @@ function TarifasEditTab() {
                 type="button"
                 onClick={savePrice}
                 className="flex-[2] rounded-[13px] py-3.5 text-[15px] font-extrabold text-white"
-                style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})` }}
+                style={{
+                  background: esEmpresa
+                    ? `linear-gradient(135deg,${ADMIN_COLORS.purple},${ADMIN_COLORS.purpleDark})`
+                    : `linear-gradient(135deg,${T.blue},${T.blueL})`,
+                }}
               >
                 Guardar
               </button>

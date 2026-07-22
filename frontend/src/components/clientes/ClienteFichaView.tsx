@@ -15,6 +15,7 @@ import { useClientes } from "@/hooks/useClientes";
 import { useAppStore } from "@/store/useAppStore";
 import { soloDigitos, fmtPEN, validarTelefono } from "@/lib/utils";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import type { Cliente, Factura, Cotizacion } from "@/types";
 
 interface Props {
@@ -28,9 +29,18 @@ interface Props {
   /** Base del editor de facturas. Empresa la sustituye por "/empresa/facturas/nueva"
    * (06-MODULO-FACTURAS-EMPRESA.md) — Móvil sigue usando la ruta por defecto. */
   nuevaFacturaHref?: string;
+  /** Empresa desktop pasa true para que el acento azul de Fable 5 (WhatsApp/
+   * Email/stats/Editar/CTA/Factura) se muestre en `ADMIN_COLORS` (morado) —
+   * Móvil sigue con el azul por defecto, sin cambios (22/07/2026, corrección
+   * de la migración parcial de Empresa a ADMIN_COLORS). */
+  esEmpresa?: boolean;
 }
 
-export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva" }: Props) {
+export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizacionHref = "/cotizaciones/nuevo", nuevaFacturaHref = "/facturas/nueva", esEmpresa }: Props) {
+  const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
+  const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
+  const accentGradEnd = esEmpresa ? ADMIN_COLORS.purpleDark : T.blueL;
+  const accentSolid = esEmpresa ? ADMIN_COLORS.purpleDark : T.navy;
   const router = useRouter();
   const { actualizar, eliminar, loading } = useClientes();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -143,7 +153,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
           type="button"
           onClick={email}
           className="flex flex-col items-center gap-1 rounded-xl py-3 text-xs font-bold"
-          style={{ background: T.bluePale, color: T.blue }}
+          style={{ background: accentPale, color: accent }}
         >
           ✉️ Email
         </button>
@@ -151,9 +161,9 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
 
       {/* ── Tarjetas de estadísticas (§6.3) ─────────────────── */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-xl py-3 text-center" style={{ background: T.bluePale }}>
-          <p className="text-lg font-black" style={{ color: T.blue }}>{cotizaciones.length}</p>
-          <p className="text-[10px] font-bold uppercase" style={{ color: T.blue }}>Cotizaciones</p>
+        <div className="rounded-xl py-3 text-center" style={{ background: accentPale }}>
+          <p className="text-lg font-black" style={{ color: accent }}>{cotizaciones.length}</p>
+          <p className="text-[10px] font-bold uppercase" style={{ color: accent }}>Cotizaciones</p>
         </div>
         <div className="rounded-xl py-3 text-center" style={{ background: T.greenPale }}>
           <p className="text-lg font-black" style={{ color: T.greenD }}>{aprobadas}</p>
@@ -184,7 +194,14 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
             <Input label="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setEditando(false)}>Cancelar</Button>
-              <Button full disabled={loading} onClick={guardar}>{loading ? "Guardando…" : "Guardar"}</Button>
+              <Button
+                full
+                disabled={loading}
+                onClick={guardar}
+                style={esEmpresa ? { background: `linear-gradient(135deg,${accent},${accentGradEnd})` } : undefined}
+              >
+                {loading ? "Guardando…" : "Guardar"}
+              </Button>
             </div>
           </div>
         ) : (
@@ -205,7 +222,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
               type="button"
               onClick={() => setEditando(true)}
               className="shrink-0 rounded-xl px-3 py-2 text-xs font-bold"
-              style={{ background: T.bluePale, color: T.blue }}
+              style={{ background: accentPale, color: accent }}
             >
               Editar
             </button>
@@ -217,7 +234,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
       <Link
         href={`${nuevaCotizacionHref}?cliente=${cliente.id}`}
         className="flex items-center justify-center rounded-2xl py-3.5 text-sm font-extrabold text-white"
-        style={{ background: `linear-gradient(135deg,${T.blue},${T.blueL})`, boxShadow: `0 4px 16px ${T.blue}35` }}
+        style={{ background: `linear-gradient(135deg,${accent},${accentGradEnd})`, boxShadow: `0 4px 16px ${accent}35` }}
       >
         + Nueva cotización para este cliente
       </Link>
@@ -234,7 +251,7 @@ export function ClienteFichaView({ cliente, cotizaciones, facturas, nuevaCotizac
         <Link
           href={`${nuevaFacturaHref}?tipo=factura&cliente=${cliente.id}`}
           className="flex items-center justify-center gap-1.5 rounded-2xl py-3 text-xs font-extrabold text-white"
-          style={{ background: T.navy }}
+          style={{ background: accentSolid }}
         >
           🏢 Factura
         </Link>

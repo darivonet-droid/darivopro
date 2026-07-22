@@ -123,7 +123,7 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
 
       {tab === "informes" && (
         <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white, padding: 20 }}>
-          <InformesTab />
+          <InformesTab esEmpresa />
         </div>
       )}
 

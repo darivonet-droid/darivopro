@@ -2,6 +2,7 @@
 // DARIVO PRO — Tab raíz del módulo Informes
 import { useCallback, useState } from "react";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { useInformes } from "@/hooks/useInformes";
 import { InformeSemanal }   from "./InformeSemanal";
 import { InformeMensual }   from "./InformeMensual";
@@ -15,7 +16,18 @@ const SUBTABS: { id: SubTab; label: string }[] = [
   { id: "trimestral",  label: "Trimestral"  },
 ];
 
-export function InformesTab() {
+interface InformesTabProps {
+  /** Empresa desktop (pestaña Expediente de Cierre) pasa true para que el
+   * selector de sub-pestaña activo use ADMIN_COLORS — Móvil sigue con el
+   * azul por defecto (22/07/2026, corrección de la migración parcial de
+   * Empresa a ADMIN_COLORS). Nota: los 3 componentes hijos (InformeSemanal/
+   * Mensual/Trimestral) siguen en azul de Fable 5, sin migrar — fuera de
+   * alcance de esta corrección, ver hallazgo adicional en
+   * docs-internos/tareas/2026-07-22-verificacion-admin-colors-empresa.md. */
+  esEmpresa?: boolean;
+}
+
+export function InformesTab({ esEmpresa }: InformesTabProps = {}) {
   const [sub, setSub] = useState<SubTab>("semanal");
   const {
     semana, mes, trimestre, cargando,
@@ -42,7 +54,7 @@ export function InformesTab() {
             className="flex-1 rounded-xl py-2 text-xs font-bold transition-all"
             style={
               sub === id
-                ? { background: T.blue, color: T.white }
+                ? { background: esEmpresa ? ADMIN_COLORS.purple : T.blue, color: T.white }
                 : { background: "transparent", color: T.textMid }
             }
           >

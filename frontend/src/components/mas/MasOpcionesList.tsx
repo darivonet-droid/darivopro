@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 export interface MasOpcion {
@@ -96,12 +97,17 @@ interface MasOpcionesListProps {
 export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes, esEmpresa }: MasOpcionesListProps) {
   let opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
   if (esEmpresa) {
+    // Corrección 22/07/2026: además de reescribir el href, el acento azul de
+    // Fable 5 de estas 2 tarjetas pasa a ADMIN_COLORS dentro de Empresa —
+    // Móvil sigue viendo T.blue sin cambios (esEmpresa nunca llega true ahí).
     opciones = opciones.map((o) =>
       o.href === "/mas/plan"
         ? { ...o, href: "/empresa/mas/plan" }
         : o.href === "/mas/perfil"
-          ? { ...o, href: "/empresa/mas/perfil" }
-          : o
+          ? { ...o, href: "/empresa/mas/perfil", color: ADMIN_COLORS.purple, bg: ADMIN_COLORS.purplePale }
+          : o.href === "/empresa"
+            ? { ...o, color: ADMIN_COLORS.purple, bg: ADMIN_COLORS.purplePale }
+            : o
     );
   }
   if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan" && o.href !== "/empresa/mas/plan");
