@@ -79,14 +79,10 @@ export function EmpresaInicioView({
         </div>
       </Link>
 
-      {/* 2 tarjetas de acceso rápido (02-MODULO-INICIO-EMPRESA.md §5.4) — ambas
-          navegan a Clientes (Cotizaciones no tiene lista global propia,
-          05-MODULO-COTIZACIONES-EMPRESA.md §3): "Clientes" para gestión general,
-          "Cotizaciones" para consultar el historial por cliente. */}
-      <div className="grid gap-3 md:grid-cols-2">
-        <QuickLink href="/empresa/clientes" label="Clientes" emoji="👥" />
-        <QuickLink href="/empresa/clientes" label="Cotizaciones" emoji="📋" />
-      </div>
+      {/* Corrección 22/07/2026: los accesos rápidos a Clientes/Cotizaciones
+          que había aquí se eliminaron — Móvil los quitó explícitamente el
+          06/07/2026 (02-MODULO-INICIO-EMPRESA.md §5.4, decisión del
+          propietario) y este código nunca se resincronizó con ese cambio. */}
 
       <div>
         <h3 className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
@@ -115,7 +111,7 @@ export function EmpresaInicioView({
           <h3 className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
             Últimas cotizaciones
           </h3>
-          <Link href="/empresa/clientes" className="text-xs font-bold" style={{ color: ADMIN_COLORS.purple }}>
+          <Link href="/empresa/cotizaciones" className="text-xs font-bold" style={{ color: ADMIN_COLORS.purple }}>
             Ver todos →
           </Link>
         </div>
@@ -157,21 +153,6 @@ function KpiCard({
         {value}
       </p>
     </div>
-  );
-}
-
-function QuickLink({ href, label, emoji }: { href: string; label: string; emoji: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 rounded-2xl px-4 py-4"
-      style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
-    >
-      <span className="text-xl">{emoji}</span>
-      <span className="text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
-        {label}
-      </span>
-    </Link>
   );
 }
 

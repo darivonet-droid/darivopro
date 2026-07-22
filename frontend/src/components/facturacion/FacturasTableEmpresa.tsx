@@ -62,6 +62,25 @@ function FilaFactura({ factura: f }: { factura: Factura }) {
     }
   };
 
+  /** Reintentar envío (Móvil §2, §7, §12 — acción visible en la fila para
+   * estado Pendiente de envío). Reenvía tal cual, sin corrección previa (a
+   * diferencia de Rechazada, que exige editar antes) — vuelve a "En
+   * proceso" mientras se resuelve. Nota: el "motivo del rechazo" que Móvil
+   * también exige para Rechazada NO se implementa aquí — no existe columna
+   * real para guardarlo hoy (queda en la migración en pausa
+   * 20260721180000_facturas_bizlinks_esquema.sql, ver informe final). */
+  const reintentarEnvio = async () => {
+    setCambiando(true);
+    const ok = await actualizarEstado(f.invId, "En proceso");
+    setCambiando(false);
+    if (ok) {
+      mostrarToast("Reintentando envío ✓");
+      router.refresh();
+    } else {
+      mostrarToast("No se pudo reintentar el envío", "error");
+    }
+  };
+
   const colorEstado = INV_STATUS_COLORS[f.invStatus] ?? ADMIN_COLORS.textMid;
   const doc = f.clientRuc || f.clientDni || "—";
 
@@ -85,6 +104,16 @@ function FilaFactura({ factura: f }: { factura: Factura }) {
               style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.green, background: "none", border: "none", cursor: "pointer" }}
             >
               {cambiando ? "…" : "→ Cobrada"}
+            </button>
+          )}
+          {f.invStatus === "Pendiente de envío" && (
+            <button
+              type="button"
+              onClick={reintentarEnvio}
+              disabled={cambiando}
+              style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.amberD, background: "none", border: "none", cursor: "pointer" }}
+            >
+              {cambiando ? "…" : "↻ Reintentar"}
             </button>
           )}
         </div>

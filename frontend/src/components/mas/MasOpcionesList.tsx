@@ -1,7 +1,12 @@
 "use client";
+// Exclusivo Darivo Pro Móvil desde 22/07/2026 — Darivo Pro Empresa ya no
+// agrupa estas 7 opciones bajo un panel "Más opciones": cada una es una
+// pantalla propia del sidebar (07-MODULO-MAS-EMPRESA.md §5.2–§5.7, Visión
+// §16 excepción de navegación Empresa). El parámetro `esEmpresa` y la
+// reescritura de hrefs que existían aquí quedaron sin uso tras ese cambio
+// y se retiraron (antes solo los fijaba `/empresa/mas/page.tsx`, eliminado).
 import Link from "next/link";
 import { T } from "@/lib/theme";
-import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
 
 export interface MasOpcion {
@@ -88,29 +93,11 @@ interface MasOpcionesListProps {
    * "Informes" solo si su Gerente se lo habilitó. */
   ocultarMisPlanes?: boolean;
   ocultarInformes?: boolean;
-  /** Tareas 5b/5e (CLAUDE.md 17/07/2026): en Empresa, "Mi Plan" y "Perfil del
-   * usuario" enlazan a su propia capa de presentación de escritorio
-   * (ADMIN_COLORS dentro de EmpresaShell) en vez de la ruta Móvil tal cual. */
-  esEmpresa?: boolean;
 }
 
-export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes, esEmpresa }: MasOpcionesListProps) {
+export function MasOpcionesList({ esBusiness, ocultarMisPlanes, ocultarInformes }: MasOpcionesListProps) {
   let opciones = esBusiness ? [...OPCIONES, OPCION_EMPRESA] : OPCIONES;
-  if (esEmpresa) {
-    // Corrección 22/07/2026: además de reescribir el href, el acento azul de
-    // Fable 5 de estas 2 tarjetas pasa a ADMIN_COLORS dentro de Empresa —
-    // Móvil sigue viendo T.blue sin cambios (esEmpresa nunca llega true ahí).
-    opciones = opciones.map((o) =>
-      o.href === "/mas/plan"
-        ? { ...o, href: "/empresa/mas/plan" }
-        : o.href === "/mas/perfil"
-          ? { ...o, href: "/empresa/mas/perfil", color: ADMIN_COLORS.purple, bg: ADMIN_COLORS.purplePale }
-          : o.href === "/empresa"
-            ? { ...o, color: ADMIN_COLORS.purple, bg: ADMIN_COLORS.purplePale }
-            : o
-    );
-  }
-  if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan" && o.href !== "/empresa/mas/plan");
+  if (ocultarMisPlanes) opciones = opciones.filter((o) => o.href !== "/mas/plan");
   if (ocultarInformes) opciones = opciones.filter((o) => o.href !== "/mas/informes");
   return (
     <div className="mt-6">

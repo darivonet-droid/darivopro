@@ -22,20 +22,16 @@ import { useGastos, type Gasto } from "@/hooks/useGastos";
 import { CATEGORIAS_GASTO } from "@/components/cierre/CierreView";
 import type { GastoIAExtraccion } from "@/lib/gasto-ia";
 import { useAppStore } from "@/store/useAppStore";
-import { InformesTab } from "@/components/informes/InformesTab";
 
-// Tarea 5c (CLAUDE.md 17/07/2026): "Informes" no es una sección nueva
-// independiente del menú de Empresa (que no tiene "Más" fuera de
-// Categorías) — se integra como 3ª pestaña aquí, dentro de Cierre, mismos
-// datos que Móvil (useInformes(), vía InformesTab.tsx sin tocar). No se
-// modificó nada de la lógica/JSX de Gastos ni Expediente Mensual que ya
-// funcionaba bien — es una pestaña hermana, no un reemplazo.
-// Nota honesta (parcial, ver CLAUDE.md): InformesTab.tsx y sus 3
-// sub-componentes (Semanal/Mensual/Trimestral) siguen usando los tokens
-// Fable 5 (`T`) internamente, no ADMIN_COLORS — los datos y la integración
-// son reales, la reskin visual completa a la paleta de Admin queda
-// pendiente.
-type Tab = "gastos" | "expediente" | "informes";
+// Corrección 22/07/2026 (Visión §16 excepción de navegación Empresa): la
+// pestaña "Informes" que vivía aquí (Tarea 5c, 17/07/2026) se retira —
+// "Informes" tiene ahora su propia entrada directa del sidebar
+// (07-MODULO-MAS-EMPRESA.md §5.3, `/empresa/informes`), consistente con
+// el resto de funcionalidades que antes se agrupaban bajo "Más": no deben
+// quedar ocultas dentro de otra pantalla. Mismo componente (InformesTab),
+// solo cambia dónde se monta. No se tocó nada de la lógica/JSX de Gastos
+// ni Expediente Mensual.
+type Tab = "gastos" | "expediente";
 
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -109,25 +105,18 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
     <div className="flex flex-col gap-5">
       {/* Pestañas (§3/§4) */}
       <div style={{ display: "inline-flex", borderRadius: 14, padding: 4, background: ADMIN_COLORS.slate, width: "fit-content" }}>
-        {(["gastos", "expediente", "informes"] as const).map((t) => (
+        {(["gastos", "expediente"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             style={{ padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 800, border: "none", cursor: "pointer", background: tab === t ? ADMIN_COLORS.white : "transparent", color: tab === t ? CIERRE_ACCENT : ADMIN_COLORS.textMid, boxShadow: tab === t ? "0 1px 6px rgba(0,0,0,0.08)" : "none" }}
           >
-            {t === "gastos" ? "Gastos" : t === "expediente" ? "Expediente Mensual" : "Informes"}
+            {t === "gastos" ? "Gastos" : "Expediente Mensual"}
           </button>
         ))}
       </div>
 
-      {tab === "informes" && (
-        <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white, padding: 20 }}>
-          <InformesTab esEmpresa />
-        </div>
-      )}
-
-      {tab !== "informes" && (
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
         {/* Columna principal ~58% */}
         <div style={{ flex: "1 1 58%", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -296,7 +285,6 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
           )}
         </div>
       </div>
-      )}
     </div>
   );
 }

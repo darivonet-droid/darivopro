@@ -1,18 +1,22 @@
-// DARIVO PRO EMPRESA — Perfil del usuario (Tarea 5e, CLAUDE.md 17/07/2026)
-// Mismos datos que Móvil (perfiles.razon_social/telefono, /mas/perfil/page.tsx) +
-// "Preferencias generales" (Idioma/Moneda/Notificaciones, /mas/preferencias/page.tsx
-// de Móvil — mismos 3 valores estáticos, misma nota de integración pendiente).
-// Nota de interpretación: la tarea pedía "Referencias generales", término que no
-// existe en ningún otro lugar del proyecto (confirmado por búsqueda exhaustiva) —
-// se interpretó como "Preferencias generales" (sección real de Móvil, ver arriba),
-// consistente con la propia instrucción de la tarea de "revisar primero cómo se ve
-// esa sección en Móvil antes de construirla", que solo aplica a esta última.
+// DARIVO PRO EMPRESA — Configuración (07-MODULO-MAS-EMPRESA.md §5.7).
+// Entrada directa del sidebar (posición 14) desde 22/07/2026 — movido desde
+// /empresa/mas/perfil y ampliado con "Preferencias de IA" (antes ítem
+// separado del panel "Más opciones", sin capa de escritorio propia) tras
+// retirar la pantalla "Más" (Visión §16 excepción de navegación Empresa).
+// Agrupa Perfil + Preferencias de IA + Preferencias generales, igual que el
+// "Configuración" de Darivo Pro Admin (11-PANEL-ADMIN-CONFIGURACION.md):
+// cuenta personal simple — no administra empresa, empleados, roles ni plan
+// (esas viven en sus propias pantallas: Empresa, Empleados, Roles y
+// Permisos, Mi Plan).
+import Link from "next/link";
 import { EmpresaShell } from "@/components/empresa/EmpresaShell";
+import { empresaModulo } from "@/lib/empresa-modules";
 import { createServerClient } from "@/lib/supabase/server";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { LogoEmpresaUploader } from "@/components/perfil/LogoEmpresaUploader";
 
-export default async function EmpresaPerfilPage() {
+export default async function EmpresaConfiguracionPage() {
+  const mod = empresaModulo("configuracion");
   const supabase = createServerClient();
   // logo_url se consulta aparte y tolerante a fallo: si la migración aún no
   // corrió en producción, esto no debe romper el resto de la pantalla.
@@ -23,7 +27,7 @@ export default async function EmpresaPerfilPage() {
   ]);
 
   return (
-    <EmpresaShell titulo="Perfil del usuario">
+    <EmpresaShell titulo={mod.label}>
       <div className="flex max-w-xl flex-col gap-5">
         <div style={{ borderRadius: 16, padding: 20, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
           <p style={{ fontSize: 13, fontWeight: 900, color: ADMIN_COLORS.text }}>Datos de acceso y cuenta</p>
@@ -43,6 +47,16 @@ export default async function EmpresaPerfilPage() {
             logoUrl={perfilLogo?.logo_url ?? null}
             colores={{ text: ADMIN_COLORS.text, textMid: ADMIN_COLORS.textMid, accent: ADMIN_COLORS.purple, slateD: ADMIN_COLORS.slateD }}
           />
+        </div>
+
+        <div style={{ borderRadius: 16, padding: 20, background: ADMIN_COLORS.purplePale, border: `1px solid ${ADMIN_COLORS.purple}33` }}>
+          <p style={{ fontSize: 13, fontWeight: 900, color: ADMIN_COLORS.text }}>Preferencias de IA</p>
+          <p style={{ marginTop: 4, fontSize: 12, color: ADMIN_COLORS.text }}>
+            El asistente se accede desde el módulo <strong>Darivo</strong> de la navegación principal. Cotizaciones por voz y texto usan OpenAI.
+          </p>
+          <Link href="/empresa/ia" className="mt-2 inline-block text-sm font-bold" style={{ color: ADMIN_COLORS.purple }}>
+            Ir a Darivo →
+          </Link>
         </div>
 
         <div style={{ borderRadius: 16, padding: 20, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
