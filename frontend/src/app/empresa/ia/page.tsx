@@ -16,6 +16,7 @@ export default function EmpresaIAPage() {
           nuevaCotizacionHref="/empresa/cotizaciones/nuevo"
           soporteHref="/empresa/mas/soporte"
           nombreAsistente="Darivo"
+          esEmpresa
         />
       </div>
     </EmpresaShell>

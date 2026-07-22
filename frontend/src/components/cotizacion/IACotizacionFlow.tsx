@@ -15,6 +15,7 @@ import {
 } from "@/lib/cotizacion-ia";
 import type { LineaCotizacion } from "@/types";
 import { T } from "@/lib/theme";
+import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 type Modo = "elegir" | "escribir" | "hablar";
 
 interface IaBasketItem {
@@ -69,13 +70,22 @@ interface IACotizacionFlowProps {
    * ya vigente en el resto de la app (nunca se comunica como IA/proveedor
    * de cara al usuario). */
   nombreAsistente?: string;
+  /** Empresa desktop pasa true para que el acento azul de Fable 5 (ring de
+   * foco, botón "Generar cotización", círculo de escucha por voz) se
+   * muestre en ADMIN_COLORS — Móvil sigue con el azul por defecto
+   * (22/07/2026, corrección de la migración parcial de Empresa a
+   * ADMIN_COLORS). */
+  esEmpresa?: boolean;
 }
 
 export function IACotizacionFlow({
   nuevaCotizacionHref = "/cotizaciones/nuevo",
   soporteHref,
   nombreAsistente = "Calculadora inteligente",
+  esEmpresa,
 }: IACotizacionFlowProps = {}) {
+  const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
+  const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
   const router = useRouter();
   const { catalogo } = useCatalogo();
   const mostrarToast = useAppStore((s) => s.mostrarToast);
@@ -280,7 +290,7 @@ export function IACotizacionFlow({
             color: T.text,
             border: `2px solid ${T.amber}`,
             // @ts-expect-error custom property
-            "--tw-ring-color": T.blue,
+            "--tw-ring-color": accent,
           }}
         />
         {procesando ? (
@@ -291,7 +301,7 @@ export function IACotizacionFlow({
             disabled={!descripcion.trim()}
             onClick={() => generarConIA(descripcion)}
             className="rounded-2xl py-4 text-sm font-bold text-white disabled:opacity-50"
-            style={{ background: T.blue }}
+            style={{ background: accent }}
           >
             Generar cotización ⚡
           </button>
@@ -306,7 +316,7 @@ export function IACotizacionFlow({
       <div className="flex flex-col items-center gap-4 py-10">
         <div
           className="flex h-20 w-20 animate-pulse items-center justify-center rounded-full text-4xl"
-          style={{ background: T.bluePale }}
+          style={{ background: accentPale }}
         >
           🎤
         </div>
