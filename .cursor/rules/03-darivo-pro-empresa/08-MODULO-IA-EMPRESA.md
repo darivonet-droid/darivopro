@@ -1,16 +1,16 @@
 # 08 – MÓDULO IA – DARIVO PRO EMPRESA
 
-**Versión:** 1.3
+**Versión:** 1.4
 
 **Estado:** ✅ Documentación sincronizada con Móvil v1.10 — imagen oficial previa (fase global §7 — 02/07/2026); **card Soporte con IA** pendiente de nueva imagen.
 
-**Cambio v1.3 (16/07/2026):** el Agente IA 2 tiene nombre oficial de cara al usuario, "Darivo" (ver Móvil `08-MODULO-IA.md` v1.10 §3-A) — mismo agente, misma identidad, en Empresa y Móvil. Estados de ticket corregidos en §10 para coincidir con el schema real.
+**Cambio v1.4 (22/07/2026):** este documento se declaraba "sincronizado con Móvil v1.10" en la cabecera, pero citaba internamente v1.6/v1.5 como fuente que "prevalece" (§0, §1, §11, §13) — el contenido añadido en Móvil v1.7–v1.10 nunca se incorporó. Añadidas a §10: identidad y fuente de conocimiento de Darivo (Móvil §3-A — nunca se presenta como IA/bot/chatbot, fuente única `DARIVO-CONOCIMIENTO-SOPORTE.md`, no revela documentación interna) y la sub-capacidad de ayuda a armar cotización (Móvil §3-B — nunca crea la cotización él mismo, pregunta en vez de inventar precios). Corregida la contradicción de §12: Plan Básico **sí** tiene IA de cotizaciones (limitada), no "sin acceso"; añadida la exención del Agente IA 2 de la matriz de planes. Todas las citas internas a Móvil actualizadas de v1.5/v1.6 a v1.10. Solo contenido funcional — sin cambios de diseño.
 
-**Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §13 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.6 · `01-darivo-pro-movil/08-MODULO-IA.md` v1.6 · `01-darivo-pro-movil/16-SISTEMA-DE-DISEÑO-FABLE5.md` §6.8.2
+**Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §13 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.6 · `01-darivo-pro-movil/08-MODULO-IA.md` v1.10 · `01-darivo-pro-movil/16-SISTEMA-DE-DISEÑO-FABLE5.md` §6.8.2
 
 ⚠️ Este documento es la **única fuente autorizada** para la adaptación a escritorio del **Módulo IA** en Darivo Pro Empresa.
 
-> **Lógica de negocio:** exclusivamente `01-darivo-pro-movil/08-MODULO-IA.md` v1.6. Dos agentes oficiales. Modelo soporte IA + humano. La IA es un **atajo** — nunca un flujo paralelo.
+> **Lógica de negocio:** exclusivamente `01-darivo-pro-movil/08-MODULO-IA.md` v1.10. Dos agentes oficiales. Modelo soporte IA + humano. La IA es un **atajo** — nunca un flujo paralelo.
 
 ---
 
@@ -18,7 +18,7 @@
 
 | Fuente | Documento | Uso en este MD |
 |--------|-----------|----------------|
-| Lógica de negocio | `01-darivo-pro-movil/08-MODULO-IA.md` v1.6 | Dos agentes, modelo soporte IA+humano, anti-robots |
+| Lógica de negocio | `01-darivo-pro-movil/08-MODULO-IA.md` v1.10 | Dos agentes, identidad Darivo, modelo soporte IA+humano, anti-robots |
 | Cotizaciones | `01-darivo-pro-movil/05-MODULO-COTIZACIONES.md` | Destino wizard post-IA (Agente 1) |
 | Facturas | `01-darivo-pro-movil/06-MODULO-FACTURAS.md` | Flujos Agente IA 1 |
 | Soporte | `01-darivo-pro-movil/07-MODULO-MAS.md` §6–§8 | Acceso Agente IA 2 |
@@ -67,7 +67,7 @@ No define Base de Datos, APIs técnicas ni permisos granulares.
 | Vistas | **Menú IA** (por defecto) · **Escribir con IA** · **Hablar con IA** · **Soporte con IA** · wizard Cotizaciones / Facturas (destino) |
 | Equivalente Móvil | `IAMenuScreen` §6.8.2 · flujos Móvil §7–§11 |
 
-**Agente IA 2 — acceso adicional:** **Más → Soporte** (`07-MODULO-MAS-EMPRESA.md`).
+**Agente IA 2 — acceso adicional:** pantalla **Soporte** (`07-MODULO-MAS-EMPRESA.md` §5.6, sidebar 13).
 
 ---
 
@@ -177,6 +177,17 @@ Regla fundamental (Móvil §9 · Cotizaciones §1):
 
 Referencia completa: Móvil §3, §11.
 
+### Identidad y fuente de conocimiento (Móvil §3-A — regla estricta, sin excepción)
+
+* **Nombre único y oficial de cara al usuario: "Darivo".** Nunca se presenta como "asistente de IA", "bot", "chatbot" ni menciona la palabra "IA" en ningún texto visible al usuario. Tono conversacional, sin jerga técnica.
+* **Fuente de conocimiento: únicamente `DARIVO-CONOCIMIENTO-SOPORTE.md`** (raíz del repo, sincronizado en `frontend/src/content/darivo/conocimiento.md`). Darivo **no consulta la base de datos, el código fuente ni ningún otro documento** para responder. Crear un ticket (§11 Móvil) es una acción estructurada de la interfaz, no una consulta de datos.
+* Darivo nunca da a entender que existe un documento o fuente interna detrás de sus respuestas (sección "NO PÚBLICO" del documento de conocimiento).
+* Fuera de ese ámbito, Darivo lo indica con naturalidad y redirige la conversación — nunca responde con conocimiento general ajeno a `DARIVO-CONOCIMIENTO-SOPORTE.md`.
+
+### Sub-capacidad: ayuda para armar una cotización (Móvil §3-B)
+
+Darivo puede ayudar a un usuario a **pensar y organizar** una cotización de forma conversacional (categoría, partidas, cantidades, precios de referencia del catálogo base) — pero **nunca crea la cotización él mismo**: esa responsabilidad sigue siendo exclusiva del Agente IA 1 (§5). Darivo siempre remite al usuario al flujo normal de Cotizaciones (`05-MODULO-COTIZACIONES-EMPRESA.md`) para elegir sus partidas reales y guardar el documento. Si tiene dudas sobre un producto/servicio/precio durante esa conversación, **debe preguntarle al usuario** en vez de asumir o inventar — solo puede citar precios de referencia del catálogo base documentados en `DARIVO-CONOCIMIENTO-SOPORTE.md`, aclarando siempre que son orientativos.
+
 ### Modelo de soporte oficial
 
 Mismo modelo de **dos niveles** que Darivo Pro Móvil:
@@ -207,7 +218,7 @@ El soporte humano revisa, comunica, solicita información, resuelve incidencias 
 ### Acceso escritorio
 
 * Card **Soporte con IA** en Menú IA (§4).
-* **Más → Soporte** (`07-MODULO-MAS-EMPRESA.md`).
+* Pantalla **Soporte** (`07-MODULO-MAS-EMPRESA.md` §5.6, sidebar 13) — tickets estructurados.
 
 ### Presentación
 
@@ -223,16 +234,18 @@ Vista conversacional (panel central o modal ancho) con historial de mensajes, ca
 | Mensaje fuera de ámbito | §4 |
 | Protección frente a robots | §5 |
 
-No duplicar listas completas — prevalece `08-MODULO-IA.md` v1.5.
+No duplicar listas completas — prevalece `08-MODULO-IA.md` v1.10.
 
 ---
 
 # 12. Límites por plan
 
-Referencia única: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (Móvil §12):
+Referencia única: `04-PANEL-ADMIN-SUSCRIPCIONES.md` · matriz real Móvil §12:
 
-* Plan **Básico:** sin acceso IA conversacional — mensaje claro invitando a Plan Pro.
-* Plan **Pro:** acceso según limitaciones del plan.
+* Plan **Básico:** IA para **cotizaciones SÍ**, con uso limitado (límite numérico pendiente de definir en `12 – ROLES… ADMIN.md`); IA para **facturas NO disponible**.
+* Plan **Pro y Business:** IA para cotizaciones SÍ (uso amplio); IA para facturas SÍ.
+* Si un usuario Básico intenta usar el Agente IA 1 para facturas, o agota su límite de cotizaciones, se muestra un mensaje claro invitando a subir de plan — nunca un error técnico confuso.
+* **El Agente IA 2 (Soporte y Tickets — Darivo) no está sujeto a esta tabla:** su disponibilidad no depende del plan, salvo que se documente lo contrario en `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
 
 **Necesidades API:** OpenAI API ✅ aprobada (`08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.2).
 
@@ -257,7 +270,7 @@ Referencia única: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (Móvil §12):
 | Cotizaciones (05) | Destino obligatorio post-generación Agente IA 1 |
 | Facturas (06) | Flujos Agente IA 1 |
 | Cierre (09) | IA automática en gastos — flujo distinto, no desde este menú |
-| Más (07) | Agente IA 2 vía Soporte |
+| Soporte (07 §5.6) | Tickets estructurados; el agente conversacional Darivo (Agente IA 2) vive en este módulo IA |
 | Clientes (03) | Paso 2 wizard tras IA |
 | Inicio (02) | Puede ofrecer atajos; acceso principal = sidebar IA |
 
@@ -273,7 +286,7 @@ Detalle: `11-ROLES-PLANES-PERMISOS-EMPRESA.md` — **matriz detallada pendiente 
 
 # 16. Validación (Reglas §9 · §15)
 
-* [x] Lógica ↔ Móvil `08-MODULO-IA.md` v1.6
+* [x] Lógica ↔ Móvil `08-MODULO-IA.md` v1.10
 * [x] Modelo soporte IA + humano ↔ Móvil §3
 * [x] Diseño cards ↔ Fable 5 §6.8.2 · Sistema Diseño Empresa §6.6
 * [x] Destino cotización ↔ `05-MODULO-COTIZACIONES-EMPRESA.md`

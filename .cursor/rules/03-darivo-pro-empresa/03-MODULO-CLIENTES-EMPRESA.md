@@ -1,6 +1,8 @@
 # 03 – MÓDULO CLIENTES – DARIVO PRO EMPRESA
 
-**Versión:** 1.0
+**Versión:** 1.1
+
+**Cambio principal (v1.1 — 22/07/2026):** sincronización funcional con Móvil v1.4 — añadida §8 "Relación con Facturación" (5 estados oficiales de facturación electrónica y reglas de sincronización de borrado Cliente↔Factura, antes ausentes); §6.6 ampliada con la regla anti-bug de no ocultar la fila hasta confirmar el DELETE real; §9 ampliada con la persistencia del nombre/teléfono como texto en cotizaciones desvinculadas. Solo contenido funcional — sin cambios de diseño (módulo bloqueado).
 
 **Estado:** ✅ Producción completada (Reglas §15 — 02/07/2026)
 
@@ -14,7 +16,7 @@
 
 | Fuente | Documento | Uso en este MD |
 |--------|-----------|----------------|
-| Lógica de negocio | `01-darivo-pro-movil/03-MODULO-CLIENTES.md` v1.3 | Datos, lista, ficha, historial, flujos, reglas |
+| Lógica de negocio | `01-darivo-pro-movil/03-MODULO-CLIENTES.md` v1.4 | Datos, lista, ficha, historial, flujos, reglas |
 | Referencia diseño escritorio | `02-darivo-pro-admin/03-PANEL-ADMIN-USUARIOS.md` v1.1 | Tabla + barra herramientas + panel lateral |
 | Sistema de Diseño Empresa | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.4 | Sidebar, header, tablas, paneles, §6.2 |
 
@@ -173,7 +175,7 @@ Cada cotización del cliente muestra (Móvil §4):
 
 ## 6.6 Eliminar cliente
 
-Acción destructiva en ficha — DELETE real; error visible si falla (Móvil §4 · §5).
+Acción destructiva en ficha — DELETE real en Supabase; si falla, debe mostrar error claro y **no ocultar la fila visualmente hasta confirmar que se borró de verdad** (Móvil §4 · §5 — regla anti-bug: evita que el botón "reaparezca" al recargar por un DELETE fallido de forma silenciosa).
 
 ---
 
@@ -209,8 +211,19 @@ Acción destructiva en ficha — DELETE real; error visible si falla (Móvil §4
 * Crear cliente: Nombre + Teléfono mínimos.
 * Ficha: historial solo de **ese** cliente.
 * Facturar desde cotización aprobada: pide RUC (Empresa) o DNI (Particular).
-* Eliminar cliente desvincula cotizaciones (`cliente_id = NULL`), no las borra.
+* Eliminar cliente desvincula cotizaciones (`cliente_id = NULL`), no las borra — **la cotización conserva el nombre y teléfono como texto**, para no quedar "sin identificar" en el historial (Móvil §5).
 * Un cliente = único por (usuario + teléfono normalizado).
+
+---
+
+# 8. Relación con Facturación (Móvil §8)
+
+* Una factura puede generarse a partir de una cotización Aprobada, o crearse directamente desde cero (`06-MODULO-FACTURAS-EMPRESA.md` §1).
+* Todas las facturas quedan asociadas al cliente. Desde la ficha del cliente pueden consultarse todas sus facturas.
+* Existe una única factura en el sistema, identificada por su número de factura. Los módulos Clientes y Facturas trabajan sobre esa misma factura; no existen copias. Cualquier modificación autorizada se refleja automáticamente en ambos módulos.
+* **Estados oficiales de facturación electrónica:** Borrador, En proceso, Emitida, Rechazada, Pendiente de envío (`01-VISION-DEL-PRODUCTO.md` §18 · `06-MODULO-FACTURAS-EMPRESA.md` §1).
+* Si una factura en estado **Borrador**, **Rechazada** o **Pendiente de envío** se elimina desde Clientes o desde Facturas, desaparece automáticamente del otro módulo.
+* Si una factura está **Emitida**, no puede eliminarse desde ningún módulo.
 
 ---
 
@@ -218,12 +231,11 @@ Acción destructiva en ficha — DELETE real; error visible si falla (Móvil §4
 
 | Módulo | Relación |
 |--------|----------|
-| Inicio (02) | Acceso rápido desde card Clientes |
 | Cotizaciones (05) | Wizard desde ficha · alta automática de cliente |
-| Facturas (06) | Facturar desde historial · consulta facturas del cliente |
+| Facturas (06) | Facturar desde historial · consulta facturas del cliente · §8 |
 | IA (08) | Sin acceso directo |
 | Cierre (09) | Sin acceso directo |
-| Más (07) | Sin acceso directo |
+| Navegación directa ex-Más (07) | Sin acceso directo |
 
 Flujos oficiales: Móvil §9.
 

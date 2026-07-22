@@ -22,7 +22,7 @@
 | Permisos Empresa | `11-ROLES-PLANES-PERMISOS-EMPRESA.md` | Enlace editar permisos |
 | Sistema Diseño | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.8 | |
 
-**Informe módulo anterior (Más):** ✅ Doc completada — sin incidencias bloqueantes.
+**Informe módulo anterior (Navegación directa ex-Más):** ✅ Doc completada — sin incidencias bloqueantes.
 
 ---
 
@@ -32,7 +32,7 @@ Permitir al **Gerente** gestionar **empleados de su empresa cliente** (Técnicos
 
 Diferencia funcional exclusiva de Darivo Pro Empresa respecto a Móvil (Visión §6).
 
-**Acceso:** módulo exclusivo sidebar **Empleados** — **no** forma parte del Módulo Más.
+**Acceso:** módulo exclusivo sidebar **Empleados** — no agrupado con las pantallas de configuración de `07-MODULO-MAS-EMPRESA.md` (ex-Más, `01-VISION-DEL-PRODUCTO.md` §16).
 
 Los **Técnicos** utilizan **Darivo Pro Móvil** para trabajo diario; no esta pantalla (Visión §6).
 
@@ -111,7 +111,7 @@ Conforme Visión §6 y Admin §16 (alcance Empresa):
 |--------------------|----------|
 | Roles y Permisos (11) | Destino «Editar permisos» |
 | Móvil | Destino trabajo diario del Técnico |
-| Más (07) | **Sin relación** — empleados no se gestionan desde Más |
+| Navegación directa ex-Más (07) | **Sin relación** — empleados no se gestionan desde ahí |
 | Admin Empleados (07) | **Ámbito distinto** — equipo Darivo, no empresa cliente |
 
 ---
@@ -129,7 +129,7 @@ Límites por plan (nº empleados, etc.): `04-PANEL-ADMIN-SUSCRIPCIONES.md` — r
 # 9. Validación (Reglas §9 · §15)
 
 * [x] Alcance ↔ Visión §6
-* [x] Separado de Más y de Admin empleados internos
+* [x] Sidebar independiente — no forma parte de `07-MODULO-MAS-EMPRESA.md` ni de Admin empleados internos
 * [x] Rol Técnico único asignable
 * [x] Diseño ↔ Sistema Diseño §6.8
 * [x] Imagen ↔ MD (fase global §7 — 02/07/2026)

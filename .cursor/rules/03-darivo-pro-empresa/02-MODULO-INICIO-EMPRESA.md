@@ -1,6 +1,8 @@
 # 02 – MÓDULO INICIO – DARIVO PRO EMPRESA
 
-**Versión:** 2.2
+**Versión:** 2.3
+
+**Cambio principal (v2.3 — 22/07/2026):** sincronización funcional con Móvil v1.1 (06/07/2026) — este documento se había construido contra Móvil v1.0 (§0) y nunca incorporó la decisión del propietario de **eliminar los accesos rápidos a Clientes y Cotizaciones** de Inicio. Eliminada la sección "Accesos rápidos" (antes §5.4) y sus referencias en §4 (layout), §6 (botones) y §8 (relaciones) — Empresa exponía una navegación que Móvil prohíbe explícitamente desde el 06/07/2026. Corregido también el destino de «Ver todos →» (§5.5): apunta a la lista global de cotizaciones (`05-MODULO-COTIZACIONES-EMPRESA.md` §3.1), no al módulo Clientes. Solo contenido funcional — módulo bloqueado, sin cambios de diseño más allá de retirar el bloque prohibido.
 
 **Estado:** ✅ Producción completada (Reglas §15 — 02/07/2026)
 
@@ -14,7 +16,7 @@
 
 | Fuente | Documento | Uso en este MD |
 |--------|-----------|----------------|
-| Lógica de negocio | `01-darivo-pro-movil/02-MODULO-INICIO.md` v1.0 | Funcionalidad, KPIs, atajos, relaciones, reglas |
+| Lógica de negocio | `01-darivo-pro-movil/02-MODULO-INICIO.md` v1.1 | Funcionalidad, KPIs, atajos, relaciones, reglas |
 | Referencia diseño escritorio | `02-darivo-pro-admin/00-PANEL-ADMIN-DASHBOARD.md` v1.0 | Layout: sidebar + header + tarjetas resumen + área principal + actividad reciente |
 | Sistema de Diseño Empresa | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.3 | Sidebar, header, cards, tablas, tokens, §6.1 Patrón Inicio |
 
@@ -26,7 +28,7 @@
 
 Pantalla de **bienvenida y resumen operativo** del **Gerente** en Darivo Pro Empresa (`empresa.darivopro.com`).
 
-Ofrece KPIs de actividad de cotizaciones e **atajos** a las acciones más frecuentes, sin duplicar Clientes, Facturas, Cierre ni Más.
+Ofrece KPIs de actividad de cotizaciones e **atajos** a las acciones más frecuentes, sin duplicar Clientes, Facturas, Cierre ni las pantallas de configuración (`07-MODULO-MAS-EMPRESA.md`, ex-Más).
 
 **Inicio no almacena datos propios** — es resumen y navegación rápida (Móvil §5).
 
@@ -70,11 +72,10 @@ Estructura de escritorio conforme a Sistema Diseño §5 y patrón Admin Dashboar
 │             ├──────────────────────────────────────────────────┤
 │  Inicio ●   │  CTA Nueva cotización (§5.3)                    │
 │  Clientes   ├──────────────────────────────────────────────────┤
-│  IA         │  ACCESOS RÁPIDOS — 2 cards (§5.4)                │
+│  IA         │  CAPÍTULOS DE OBRA — pills (§5.4)                │
 │  Facturas   ├──────────────────────────────────────────────────┤
-│  Cierre     │  CAPÍTULOS DE OBRA — pills (§5.5)                │
-│  Más        ├──────────────────────────────────────────────────┤
-│  …          │  ÚLTIMAS COTIZACIONES — tabla compacta (§5.6)    │
+│  Cierre     │  ÚLTIMAS COTIZACIONES — tabla compacta (§5.5)    │
+│  …          │  (Sistema Diseño §5.1 — sidebar completo)         │
 └─────────────┴──────────────────────────────────────────────────┘
 ```
 
@@ -131,18 +132,12 @@ Card de acción principal a ancho completo del área de contenido:
 
 **Acción:** abre el wizard manual de cotización — Selección → Cantidades → Resumen → Cliente (`05-MODULO-COTIZACIONES.md` v1.6 §2).
 
-## 5.4 Accesos rápidos
+### ❌ Prohibido en esta pantalla (Móvil §2, corregido 06/07/2026)
 
-Dos cards en fila horizontal (equivalente al grid 2 columnas móvil — Móvil §2 · Admin Dashboard §6 «Acciones rápidas»):
+* **No debe existir acceso rápido a Clientes ni a Cotizaciones** desde Inicio — el propietario eliminó estos accesos el 06/07/2026 (antes figuraban como "Accesos rápidos"). No reintroducir esta sección.
+* **No debe existir ningún bloque "Otros productos" ni enlace/promoción hacia Darivo Pro Empresa** desde Inicio (regla espejo — no aplica a este documento por ser el propio Empresa, se mantiene por completitud documental).
 
-| Card | Destino | Tipo navegación |
-|------|---------|-----------------|
-| **Clientes** | Módulo Clientes | Sidebar posición 2 |
-| **Cotizaciones** | Módulo Clientes | Sidebar posición 2 — historial por cliente (Cotizaciones §3) |
-
-Iconografía de las cards: **Pendiente de documentación oficial** en MD Móvil Inicio §2 — no inventar iconos hasta que existan en fuente Móvil o Fable 5 §5.2.
-
-## 5.5 Capítulos de obra
+## 5.4 Capítulos de obra
 
 Fila de pills/chips horizontales (Móvil §2 · Sistema Diseño §6 `Pill`):
 
@@ -150,11 +145,11 @@ Fila de pills/chips horizontales (Móvil §2 · Sistema Diseño §6 `Pill`):
 * Colores de categoría: tokens catálogo Fable 5 §3.2 (marca compartida).
 * **Acción al pulsar:** abre wizard de cotización con la categoría preseleccionada (`05-MODULO-COTIZACIONES.md` §2).
 
-## 5.6 Últimas cotizaciones
+## 5.5 Últimas cotizaciones
 
 Sección inferior — equivalente a «Actividad reciente» del Admin Dashboard §5, con alcance Inicio Móvil §2:
 
-**Encabezado de sección:** «Últimas cotizaciones» · enlace textual **Ver todos →** (destino: módulo **Clientes** — Cotizaciones §3: no existe lista global).
+**Encabezado de sección:** «Últimas cotizaciones» · enlace textual **Ver todos →** (destino: lista global de cotizaciones — `05-MODULO-COTIZACIONES-EMPRESA.md` §3.1, Móvil §2 "decisión vigente 07/2026, se mantiene lista global").
 
 **Tabla compacta** — máximo **4 filas** (Sistema Diseño §5.3 · §6):
 
@@ -178,10 +173,8 @@ Cabecera de tabla: fondo `T.navyLight`, texto claro (patrón Admin tablas).
 | Elemento | Tipo | Acción |
 |----------|------|--------|
 | CTA Nueva cotización | Primario | Wizard cotización |
-| Card Clientes | Acceso rápido | Navega a Clientes (sidebar 2) |
-| Card Cotizaciones | Acceso rápido | Navega a Clientes (sidebar 2) |
 | Pill capítulo obra | Chip | Wizard cotización (categoría) |
-| Ver todos → | Enlace | Módulo Clientes |
+| Ver todos → | Enlace | Lista global de cotizaciones (`05-MODULO-COTIZACIONES-EMPRESA.md` §3.1) |
 | Notificaciones | Icono header | Patrón header Empresa (Sistema Diseño §5.2) — acción específica **pendiente** en Móvil |
 | Menú usuario | Header | Patrón header Empresa (Sistema Diseño §5.2) — acción específica **pendiente** en Móvil |
 
@@ -191,10 +184,10 @@ Cabecera de tabla: fondo `T.navyLight`, texto claro (patrón Admin tablas).
 
 * Muestra resumen de cotizaciones aprobadas, pendientes e ingresos.
 * Acceso rápido al wizard manual (Selección → Cantidades → Resumen → Cliente — Regla 1).
-* Acceso rápido al módulo Clientes.
+* Acceso independiente al flujo IA (sidebar 3).
 * No duplica gestión de clientes, facturas ni cierre.
 * Las cotizaciones guardadas se consultan en la ficha de cada Cliente (Móvil §3).
-* Sin acceso directo a Facturas, Cierre ni Más (Móvil §4).
+* Sin acceso directo a Facturas, Cierre ni las pantallas de configuración (`07-MODULO-MAS-EMPRESA.md`, Móvil §4).
 * Sin flujos fiscales ni cierre mensual (Móvil §5).
 
 ---
@@ -203,12 +196,12 @@ Cabecera de tabla: fondo `T.navyLight`, texto claro (patrón Admin tablas).
 
 | Módulo | Relación |
 |--------|----------|
-| Clientes (03) | Acceso rápido desde card · historial autoritativo por cliente |
-| Cotizaciones (05) | CTA, pills y tabla → wizard o lista secundaria |
+| Clientes (03) | **Sin acceso directo desde Inicio** (Móvil §4, corregido 06/07/2026) — historial autoritativo por cliente permanece en `03-MODULO-CLIENTES-EMPRESA.md` |
+| Cotizaciones (05) | CTA, pills → wizard · «Ver todos →» → lista global (§3.1) |
 | IA (08) | El wizard también puede iniciarse desde IA (sidebar 3) |
 | Facturas (06) | Sin acceso directo desde Inicio |
 | Cierre (09) | Sin acceso directo desde Inicio |
-| Más (07) | Sin acceso directo desde Inicio |
+| Navegación directa ex-Más (07) | Sin acceso directo desde Inicio |
 
 ---
 

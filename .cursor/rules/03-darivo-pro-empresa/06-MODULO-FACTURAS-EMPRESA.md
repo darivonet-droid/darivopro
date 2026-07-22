@@ -1,6 +1,8 @@
 # 06 – MÓDULO FACTURAS – DARIVO PRO EMPRESA
 
-**Versión:** 1.3
+**Versión:** 1.4
+
+**Cambio principal (v1.4 — 22/07/2026):** añadida la visualización del **motivo del rechazo** (§5.5, §6.4 — Móvil §2/§7/§12 lo exige explícitamente y no tenía ubicación documentada aquí) y la ubicación concreta de la acción **Reintentar** para facturas en Pendiente de envío (§5.5, §6.4). Corregida la tabla de fuentes (§0): la lógica de Móvil citada era v1.2, desactualizada frente a la v1.6 ya referenciada en la cabecera. Solo contenido funcional — módulo bloqueado, sin cambios de diseño.
 
 **Estado:** ⚠️ Requiere nueva imagen oficial (ver §2 y §5.2, pendiente desde v1.1 + ahora también Cobrada + ahora también §5.4/§6.1). Lógica y texto sincronizados con `01-VISION-DEL-PRODUCTO.md` §18 y con Móvil `06-MODULO-FACTURAS.md` v1.6.
 
@@ -18,7 +20,7 @@
 
 | Fuente | Documento | Uso en este MD |
 |--------|-----------|----------------|
-| Lógica de negocio | `01-darivo-pro-movil/06-MODULO-FACTURAS.md` v1.2 | Estados, SUNAT, flujos, reglas, PDF, relaciones |
+| Lógica de negocio | `01-darivo-pro-movil/06-MODULO-FACTURAS.md` v1.6 | Estados, SUNAT, flujos, reglas, PDF, relaciones |
 | Referencia diseño escritorio | `02-darivo-pro-admin/03-PANEL-ADMIN-USUARIOS.md` v1.1 | Tabla principal + toolbar + panel lateral |
 | Referencia filtros | `02-darivo-pro-admin/04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.3 | Chips de filtro horizontales (Sistema Diseño §5.3) |
 | Sistema de Diseño Empresa | `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.4 | Sidebar, header, tablas, modales, §6.4 |
@@ -182,7 +184,11 @@ Sustituye las cards móviles (Móvil §2):
 | Fecha | Fecha emisión |
 | Total | Importe (`T.blue`, bold) |
 | Estado | Chips tocables: **Borrador · En proceso · Emitida · Rechazada · Pendiente de envío · Cobrada** (Móvil §2 · Fable 5 §6.5) |
-| Acciones | `[I.pdf Ver factura]` (secundario) |
+| Acciones | `[I.pdf Ver factura]` (secundario) · si **Rechazada**: `[I.retry Reintentar]` visible en la fila (Móvil §2, §7, §12) |
+
+**Fila en estado Rechazada:** debajo del número/cliente se muestra el **motivo del rechazo** truncado (Móvil §2, §7, §12) — texto devuelto por la API de facturación electrónica; ampliable dentro del editor (§6.4).
+
+**Fila en estado Pendiente de envío:** acción **Reintentar** visible directamente en la fila de la tabla (columna Acciones), junto a `[I.pdf Ver factura]` (Móvil §2, §7, §12).
 
 **Estado vacío:** icono 🧾 + «Sin facturas todavía» (Móvil §2).
 
@@ -251,6 +257,10 @@ Tabla de líneas en columna izquierda del editor (§4.2): Descripción | Cant | 
 
 (Móvil §1 · §12)
 
+**Rechazada — motivo visible:** el editor muestra el **motivo del rechazo** devuelto por la API (texto completo, no truncado) junto a los campos a corregir, antes del botón «Reenviar» (Móvil §2, §7, §12).
+
+**Pendiente de envío — Reintentar:** el editor muestra el botón **«Reintentar envío»** de forma visible (no solo en la lista §5.5) — reenvía la factura tal cual, sin pasar por corrección (a diferencia de Rechazada, que exige editar antes de reenviar) (Móvil §2, §7, §12).
+
 **Cobrada** es un 6º estado adicional a los 5 oficiales de facturación electrónica (Visión §18), para gestión de cobro en el mismo campo — solo alcanzable desde Emitida (Móvil §1, corrección v1.6).
 
 ## 6.5 PDF y compartir
@@ -314,7 +324,7 @@ Integración OSE/PSE autorizado: pendiente de documentación funcional futura. N
 | Inicio (02) | Sin acceso directo a lista (KPIs pueden referenciar totales — Móvil Inicio) |
 | IA (08) | Sin acceso directo |
 | Cierre (09) | Sin acceso directo |
-| Más (07) | Datos empresa / SUNAT configuración — no duplicar aquí |
+| Empresa (07 §5.2) | Datos empresa / SUNAT configuración — no duplicar aquí |
 
 Flujos oficiales: Móvil §11.
 
@@ -347,7 +357,7 @@ Limitaciones por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referencia única — 
 
 # 13. Validación (Reglas §9 · §15)
 
-* [x] Lógica ↔ Móvil `06-MODULO-FACTURAS.md` v1.2
+* [x] Lógica ↔ Móvil `06-MODULO-FACTURAS.md` v1.6
 * [x] Diseño ↔ Admin Usuarios (tabla) + Sistema Diseño §6.4
 * [x] Módulo anterior (Cotizaciones) sin incidencias abiertas
 * [x] Sin inventar tablas, APIs ni permisos no documentados
