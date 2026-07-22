@@ -81,3 +81,20 @@ Gateado con `esEmpresa`, hilvanado desde `InformesTab.tsx` (que ya lo recibía d
 ### Pendiente real, sin resolver (decisión aparte de Mohamed)
 
 - `components/ui/Button.tsx` variant `"primary"` (gradiente azul global) — afecta decenas de pantallas de Móvil, no se toca sin que Mohamed lo revise por separado.
+
+## Merge de Informes a producción — 22/07/2026 (sesión posterior)
+
+Los 3 commits de la Tarea 2 (`InformeSemanal`/`InformeMensual`/`InformeTrimestral`) habían quedado en `develop` sin desplegar. Autorización de Mohamed ("producción autónomo") solo para este merge.
+
+1. `main` local confirmado = `origin/main` antes de actuar (sin fetch necesario, ya estaba al día).
+2. PR [#5](https://github.com/darivonet-droid/darivopro/pull/5) `develop` → `main`, 4 commits (`8345b1b`, `5747aab`, `3fdcd30`, `a74b36b` — los 3 de Informes + el commit de documentación del cierre anterior). CI verde (Backend, Frontend, Vercel) antes de fusionar.
+3. Fusionado — merge commit `04f20a310d07b7f7a795203c9443ded3b438d71f`.
+4. Deploy de producción confirmado vía Vercel MCP (`get_deployment`): `dpl_AZRuyii3bNdtHGaGpURW4HLfZg1B`, `target: "production"`, `readyState: "READY"`, alias incluye `darivopro.com`/`www.darivopro.com`/`empresa.darivopro.com`.
+
+### Contradicción de cuenta de verificación — resuelta, verificación en vivo pendiente
+
+Instrucción de esta tarea: usar `yatriye@gmail.com` para la verificación en vivo (no `info@darivopro.com` ni la cuenta demo), salvo indicación directa de Mohamed en la sesión, y detenerse a preguntar ante cualquier duda en vez de improvisar.
+
+Se cerró la sesión activa (que había quedado en la cuenta demo de la tarea anterior) y se intentó re-entrar con "Continuar con Google" — el navegador **no mostró selector de cuentas** y volvió a autenticar automáticamente la misma cuenta demo (`demo@darivopro.com`, "cuenta demo movil"), confirmado leyendo el nombre de cuenta en `/dashboard`. `yatriye@gmail.com` no está disponible como sesión de Google en este Chrome. Se preguntó a Mohamed en el chat en vez de usar la cuenta demo por defecto; Mohamed eligió abrir él mismo la sesión de `yatriye@gmail.com`.
+
+**Estado**: merge y deploy de producción de la migración de Informes, confirmados. **Verificación visual en vivo de los 3 informes (Semanal/Mensual/Trimestral) en Empresa → Cierre → Informes, con valor RGB computado, queda pendiente** de que Mohamed confirme que la sesión de `yatriye@gmail.com` está abierta en el navegador de esta sesión — no se completó en esta tarea, no se dio por buena sin evidencia real (Regla de oro).
