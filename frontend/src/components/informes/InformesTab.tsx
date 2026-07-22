@@ -64,9 +64,9 @@ export function InformesTab({ esEmpresa }: InformesTabProps = {}) {
       </div>
 
       {/* Contenido */}
-      {sub === "semanal"    && <InformeSemanal    datos={semana}    cargando={cargando} onLoad={onLoadSemanal}    />}
-      {sub === "mensual"    && <InformeMensual    datos={mes}       cargando={cargando} onLoad={onLoadMensual}    />}
-      {sub === "trimestral" && <InformeTrimestral datos={trimestre} cargando={cargando} onLoad={onLoadTrimestral} />}
+      {sub === "semanal"    && <InformeSemanal    datos={semana}    cargando={cargando} onLoad={onLoadSemanal}    esEmpresa={esEmpresa} />}
+      {sub === "mensual"    && <InformeMensual    datos={mes}       cargando={cargando} onLoad={onLoadMensual}    esEmpresa={esEmpresa} />}
+      {sub === "trimestral" && <InformeTrimestral datos={trimestre} cargando={cargando} onLoad={onLoadTrimestral} esEmpresa={esEmpresa} />}
 
     </div>
   );
