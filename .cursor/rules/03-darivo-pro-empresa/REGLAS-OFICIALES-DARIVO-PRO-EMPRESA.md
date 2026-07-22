@@ -1,8 +1,10 @@
 # REGLAS OFICIALES DE TRABAJO — DARIVO PRO EMPRESA
 
-**Versión:** 2.5
+**Versión:** 2.6
 
-**Última actualización:** 02/07/2026
+**Cambio principal (v2.6 — 22/07/2026, pedido explícito del propietario):** actualizadas las referencias al ítem 7 de la tabla de producción (§13, §15) — ya no es la pantalla "Más", sino "Navegación directa (ex-Más)": sus 7 funcionalidades tienen entrada directa en el sidebar (`01-VISION-DEL-PRODUCTO.md` §16 v2.19). Sin cambios de metodología.
+
+**Última actualización:** 22/07/2026
 
 **Fase activa:** §15 — Producción automática Darivo Pro Empresa
 
@@ -390,13 +392,15 @@ Seguir el **recorrido natural del usuario** — no el avance documental previo n
 | 4 | 06 | Facturas |
 | 5 | 09 | Cierre |
 | 6 | 08 | IA |
-| 7 | 07 | Más |
+| 7 | 07 | Navegación directa (ex-Más) |
 | 8 | 10 | Empleados |
 | 9 | 11 | Roles, Planes y Permisos |
 
 Este orden coincide con `INDICE-OFICIAL-DARIVO-PRO-EMPRESA.md` §4.
 
 > **Nota:** el orden de producción documental **no modifica** la navegación del sidebar (Sistema Diseño Empresa §5.1), definida por la Visión del Producto §5.
+>
+> **Nota (22/07/2026):** el ítem 7 ya no es una pantalla única "Más" — desde `01-VISION-DEL-PRODUCTO.md` §16 v2.19, sus 7 funcionalidades tienen entrada directa propia en el sidebar (`07-MODULO-MAS-EMPRESA.md` §5.1–§5.7). Se conserva como un único ítem de esta tabla de producción por continuidad documental, no porque exista como pantalla agrupadora.
 
 ## Continuación automática
 
@@ -553,7 +557,7 @@ Marcar **Producción completada** solo si todas las auditorías superadas.
 
 ## Orden oficial de producción
 
-Coincide con §13 (Inicio → Clientes → Cotizaciones → Facturas → Cierre → IA → Más → Empleados → Roles y Permisos).
+Coincide con §13 (Inicio → Clientes → Cotizaciones → Facturas → Cierre → IA → Navegación directa ex-Más → Empleados → Roles y Permisos).
 
 ## Regla de detención (§15)
 

@@ -2,53 +2,74 @@
  * Metadatos módulos Empresa — server-safe (sin "use client")
  *
  * "Cotizaciones" deliberadamente NO tiene entrada aquí — no es ítem del
- * sidebar (05-MODULO-COTIZACIONES-EMPRESA.md §1/§3: "No es ítem del sidebar",
- * "Consulta de cotizaciones guardadas: únicamente en ficha de Cliente...
- * no existe lista global"). El acceso es vía CTA "Nueva cotización" en
- * Inicio y vía la ficha del Cliente, nunca un módulo propio. Corregido
- * 12/07/2026 — antes existía como sidebar item + lista global, contradiciendo
- * el MD directamente.
+ * sidebar (05-MODULO-COTIZACIONES-EMPRESA.md §1/§3), aunque desde
+ * 22/07/2026 sí existe como lista global (§3.1), accesible vía CTA
+ * "Nueva cotización"/pills en Inicio, "Ver todos →" y la ficha del Cliente
+ * — nunca como ítem propio del sidebar.
+ *
+ * Módulo "Más" eliminado del sidebar (22/07/2026, pedido explícito del
+ * propietario — 01-VISION-DEL-PRODUCTO.md §16 v2.19): sus 7
+ * funcionalidades pasan a tener entrada directa, igual que Darivo Pro
+ * Admin (00-PANEL-ADMIN-DASHBOARD.md §4, sin agrupador intermedio). "IA"
+ * deja de estar oculta del sidebar por la misma razón (ya no depende de
+ * "Categorías" dentro de Más para tener acceso).
  */
 // Doc fuente de cada módulo (para referencia de desarrollo, no vive en el
 // objeto de navegación para que nunca pueda terminar renderizado en UI):
 // Inicio→02-MODULO-INICIO-EMPRESA, Clientes→03-MODULO-CLIENTES-EMPRESA,
 // Facturas→06-MODULO-FACTURAS-EMPRESA, Cierre→09-MODULO-CIERRE-EMPRESA,
-// Darivo→08-MODULO-IA-EMPRESA, Más→07-MODULO-MAS-EMPRESA,
-// Empleados→10-MODULO-EMPLEADOS-EMPRESA, Roles y Permisos→11-ROLES-PLANES-PERMISOS-EMPRESA
-// (todos bajo .cursor/rules/03-darivo-pro-empresa/).
+// Darivo→08-MODULO-IA-EMPRESA, Empleados→10-MODULO-EMPLEADOS-EMPRESA,
+// Roles y Permisos→11-ROLES-PLANES-PERMISOS-EMPRESA, Catálogo·Mis Tarifas /
+// Empresa / Informes / Documentos / Mi Plan / Soporte / Configuración →
+// 07-MODULO-MAS-EMPRESA §5.1–§5.7 (todos bajo .cursor/rules/03-darivo-pro-empresa/).
 export const EMPRESA_NAV = [
   { href: "/empresa", label: "Inicio", ocultoEnSidebar: false },
   { href: "/empresa/clientes", label: "Clientes", ocultoEnSidebar: false },
+  { href: "/empresa/ia", label: "Darivo", ocultoEnSidebar: false },
   { href: "/empresa/facturas", label: "Facturas", ocultoEnSidebar: false },
   { href: "/empresa/cierre", label: "Cierre", ocultoEnSidebar: false },
-  // Tarea 5a (CLAUDE.md 17/07/2026): ya no es ítem propio del sidebar — se
-  // accede desde dentro de "Categorías" (módulo "mas"). La ruta /empresa/ia
-  // sigue existiendo (MasTabs.tsx enlaza ahí), solo se quitó del sidebar.
-  { href: "/empresa/ia", label: "Darivo", ocultoEnSidebar: true },
-  { href: "/empresa/mas", label: "Más", ocultoEnSidebar: false },
+  { href: "/empresa/catalogo", label: "Catálogo · Mis Tarifas", ocultoEnSidebar: false },
   { href: "/empresa/empleados", label: "Empleados", ocultoEnSidebar: false },
   { href: "/empresa/roles", label: "Roles y Permisos", ocultoEnSidebar: false },
+  { href: "/empresa/empresa", label: "Empresa", ocultoEnSidebar: false },
+  { href: "/empresa/informes", label: "Informes", ocultoEnSidebar: false },
+  { href: "/empresa/documentos", label: "Documentos", ocultoEnSidebar: false },
+  { href: "/empresa/plan", label: "Mi Plan", ocultoEnSidebar: false },
+  { href: "/empresa/soporte", label: "Soporte", ocultoEnSidebar: false },
+  { href: "/empresa/configuracion", label: "Configuración", ocultoEnSidebar: false },
 ] as const;
 
 export type EmpresaModuloSlug =
   | "inicio"
   | "clientes"
+  | "ia"
   | "facturas"
   | "cierre"
-  | "ia"
-  | "mas"
+  | "catalogo"
   | "empleados"
-  | "roles";
+  | "roles"
+  | "empresa"
+  | "informes"
+  | "documentos"
+  | "plan"
+  | "soporte"
+  | "configuracion";
 
 const SLUG_INDEX: Record<EmpresaModuloSlug, number> = {
   inicio: 0,
   clientes: 1,
-  facturas: 2,
-  cierre: 3,
-  ia: 4,
-  mas: 5,
+  ia: 2,
+  facturas: 3,
+  cierre: 4,
+  catalogo: 5,
   empleados: 6,
   roles: 7,
+  empresa: 8,
+  informes: 9,
+  documentos: 10,
+  plan: 11,
+  soporte: 12,
+  configuracion: 13,
 };
 
 export function empresaModulo(slug: EmpresaModuloSlug) {

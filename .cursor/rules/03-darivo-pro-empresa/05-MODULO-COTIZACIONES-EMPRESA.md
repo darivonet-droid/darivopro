@@ -1,6 +1,8 @@
 # 05 – MÓDULO COTIZACIONES – DARIVO PRO EMPRESA
 
-**Versión:** 1.2
+**Versión:** 1.3
+
+**Cambio principal (v1.3 — 22/07/2026):** corregida contradicción con Móvil §3 — este documento afirmaba que "no existe lista global", cuando Móvil §3 confirma expresamente que la lista global `/cotizaciones` sí existe y es la **decisión vigente desde 07/2026**. Añadida §3.1 documentando esa pantalla (accesible vía "Ver todos →" desde Inicio). §6 renombrada y ampliada con la acción **Compartir** (faltaba) y referencia al botón PDF independiente y al chip de estado tocable, ya documentados en `03-MODULO-CLIENTES-EMPRESA.md` §6.5. Solo contenido funcional — sin cambios de diseño.
 
 **Estado:** ✅ Sincronizado con Móvil v1.6 (05/07/2026)
 
@@ -51,7 +53,20 @@ Prevalece siempre este MD ante cualquier diferencia funcional. La imagen puede r
 | Clientes (03) | «+ Nuevo» en ficha · Editar / Re-cotizar en historial |
 | IA (08) | Flujos Escribir / Hablar con IA → converge a **Cantidades** (Móvil §2) |
 
-**Consulta de cotizaciones guardadas:** únicamente en ficha de Cliente (Móvil §3 — **no** existe lista global).
+**Consulta de cotizaciones guardadas:** en la ficha de Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5) **y** en la lista global (§3.1) — ambas muestran las mismas cotizaciones, sin copias (Móvil §3).
+
+## 3.1 Lista global de cotizaciones
+
+Equivalente Móvil §3 — ruta `/cotizaciones` (**decisión vigente 07/2026**: se mantiene lista global). No es ítem del sidebar (§1) — se accede vía enlace **"Ver todos →"** desde la tabla "Últimas cotizaciones" de `02-MODULO-INICIO-EMPRESA.md` §5.
+
+| Elemento | Descripción |
+|----------|-------------|
+| Acceso | «Ver todos →» — `02-MODULO-INICIO-EMPRESA.md` §5 (tabla "Últimas cotizaciones") |
+| Contenido | Listado completo de las cotizaciones del Gerente/empresa — mismas columnas que la tabla compacta de Inicio (Cliente · Resumen · Importe S/ · Estado) |
+| Acción | Botón «+ Nuevo» → wizard Paso 1 (Móvil §3) |
+| Relación | Misma cotización visible aquí y en la ficha del Cliente correspondiente — no son copias (Móvil §3) |
+
+Presentación escritorio: tabla con filtros (patrón Admin listados), sustituye a las cards móviles — la lógica (qué cotizaciones aparecen, cómo se vinculan al cliente) es idéntica a Móvil.
 
 ---
 
@@ -143,14 +158,17 @@ Selector estado: Borrador / Pendiente / Aprobado (en confirmación).
 
 ---
 
-# 6. Edición desde Clientes
+# 6. Acciones sobre una cotización guardada (desde Clientes o desde la lista global)
 
-Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
+Disponibles tanto en el historial de la ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5) como en la lista global (§3.1):
 
 * **Editar** — wizard precargado · mediciones en Cantidades · actualiza misma COT-
 * **Re-cotizar** — wizard precargado · nueva COT-
+* **Compartir** — Web Share API / PDFModal (Móvil §2 · `16-SISTEMA-DE-DISEÑO-FABLE5.md` §5.2)
 * **Eliminar** — borrado inmediato
 * **Facturar** — solo Aprobado → `06-MODULO-FACTURAS-EMPRESA.md`
+
+Cada cotización muestra además un botón `[I.pdf PDF]` independiente y un chip de estado (Borrador/Pendiente/Aprobado) tocable para cambiarlo sin reabrir el wizard — detalle completo: `03-MODULO-CLIENTES-EMPRESA.md` §6.5.
 
 ---
 
@@ -172,7 +190,7 @@ Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 | Facturas (06) | Convertir en factura |
 | IA (08) | Entrada al wizard → Cantidades |
 | Inicio (02) | CTA manual |
-| Más (07) | Mis Tarifas afecta precios (Doc 21) |
+| Catálogo · Mis Tarifas (07 §5.1) | Mis Tarifas afecta precios (Doc 21) |
 
 ---
 
@@ -186,8 +204,8 @@ Desde historial en ficha Cliente (`03-MODULO-CLIENTES-EMPRESA.md` §6.5):
 
 * [x] Lógica ↔ Móvil `05-MODULO-COTIZACIONES.md` v1.6 + Doc 21
 * [x] Diseño ↔ Sistema Diseño §5.3 multi-panel
-* [x] Sin lista global (coherente con Móvil §3)
-* [ ] Imagen ↔ MD (layout puede requerir actualización visual en fase posterior)
+* [x] Lista global documentada (§3.1) — coherente con Móvil §3 (decisión vigente 07/2026)
+* [ ] Imagen ↔ MD (layout puede requerir actualización visual en fase posterior, incluida la pantalla de lista global §3.1)
 
 ✅ **Sincronizado funcionalmente** — 05/07/2026.
 

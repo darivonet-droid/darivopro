@@ -14,7 +14,7 @@ export default function EmpresaIAPage() {
       <div className="max-w-2xl">
         <IACotizacionFlow
           nuevaCotizacionHref="/empresa/cotizaciones/nuevo"
-          soporteHref="/empresa/mas/soporte"
+          soporteHref="/empresa/soporte"
           nombreAsistente="Darivo"
           esEmpresa
         />

@@ -303,7 +303,7 @@ Límites de almacenamiento por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referenc
 | Cotizaciones (05) | Sin acceso directo |
 | IA (08) | IA de producto integrada en gastos (Móvil §14) |
 | Inicio (02) | Sin acceso directo |
-| Más (07) | Sin acceso directo |
+| Navegación directa ex-Más (07) | Sin acceso directo |
 
 ---
 

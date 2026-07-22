@@ -2,9 +2,11 @@
 
 # DARIVO PRO — SISTEMA DE DISEÑO OFICIAL (EMPRESA)
 
-Versión: 2.6
+Versión: 2.7
 
-Última actualización: 20/07/2026
+Última actualización: 22/07/2026
+
+Changelog v2.7 (22/07/2026, pedido explícito del propietario): eliminado el módulo "Más" del sidebar (§5.1) — sus 7 funcionalidades pasan a tener entrada directa en el panel lateral, igual que Darivo Pro Admin (`00-PANEL-ADMIN-DASHBOARD.md` §4, sin agrupador intermedio). §6.7 "Patrón Más" sustituida por §6.7 "Patrón navegación directa (ex-Más)". Solo reorganización de navegación — ninguna lógica ni funcionalidad cambia (`01-VISION-DEL-PRODUCTO.md` §16 v2.19).
 
 Changelog v2.6 (20/07/2026): quitado "Multiempresa" de la lista de
 adjetivos de marca (§2, PRINCIPIOS/ADN) — no representa ninguna función
@@ -41,7 +43,7 @@ Spec: `06-MODULO-FACTURAS-EMPRESA.md` v1.0 · imagen `06 - MODULO FACTURAS - DAR
 | `InvoiceModal` | Modal centrado escritorio |
 | Bottom nav Facturas | Sidebar posición 4 |
 
-**Producción §15:** §6.1 Inicio ✅ · §6.2 Clientes ✅ · §6.3 Cotizaciones ✅ · §6.4 Facturas ✅ · §6.5 Cierre ✅ · §6.6 IA ✅ · §6.7 Más ✅ · §6.8 Empleados ✅ · §6.9 Roles ✅ (doc + imágenes — fase global §7 completada 02/07/2026)
+**Producción §15:** §6.1 Inicio ✅ · §6.2 Clientes ✅ · §6.3 Cotizaciones ✅ · §6.4 Facturas ✅ · §6.5 Cierre ✅ · §6.6 IA ✅ · §6.7 Navegación directa (ex-Más) ✅ doc / ⏳ 7 imágenes · §6.8 Empleados ✅ · §6.9 Roles ✅ (fase global §7 completada 02/07/2026 — §6.7 reorganizada 22/07/2026)
 
 ## 6.5 Patrón Cierre
 
@@ -65,21 +67,26 @@ Spec: `08-MODULO-IA-EMPRESA.md` v1.1 · imagen `08 - MODULO IA - DARIVO PRO EMPR
 | Botón central elevado bottom nav | Ítem sidebar posición 3 |
 | `IAMenuScreen` tres cards (§6.8.2 Fable 5) | Dos cards horizontales Agente IA 1 + card ancho completo Agente IA 2 |
 | Agente IA 1 — Escribir / Hablar | Misma lógica · formulario/modal escritorio |
-| Agente IA 2 — Soporte con IA | Card teal + Más → Soporte |
+| Agente IA 2 — Soporte con IA | Card teal + pantalla Soporte (sidebar 13, `07-MODULO-MAS-EMPRESA.md` §5.6) |
 | Destino wizard cotización / factura | `05-MODULO-COTIZACIONES-EMPRESA.md` · `06-MODULO-FACTURAS-EMPRESA.md` |
 
 **Producción §15:** §6.1–§6.9 completos (doc + imágenes — fase global §7 completada 02/07/2026)
 
-## 6.7 Patrón Más
+## 6.7 Patrón navegación directa (ex-Más)
 
-Spec: `07-MODULO-MAS-EMPRESA.md` v1.0 · imagen `07 - MODULO MAS - DARIVO PRO EMPRESA.png` ✅.
+Spec: `07-MODULO-MAS-EMPRESA.md` v2.0 · imágenes previas de "Más" (`07 - MODULO MAS - DARIVO PRO EMPRESA.png`) **desactualizadas** — pendientes 7 imágenes nuevas, una por entrada directa (Reglas §7.1, no bloquea documentación).
 
-| Lógica (Móvil) | Presentación (Empresa) |
-|----------------|------------------------|
-| 3 pestañas pill | Pills bajo header + contenido central |
-| Lista «Más opciones» bajo tabs | Panel lateral fijo derecho §6 |
-| SettingsScreen | Layout 58% + 42% |
-| Bottom nav Más | Sidebar posición 6 |
+| Lógica (Móvil §6, dentro de "Más") | Presentación (Empresa — entrada directa) |
+|----------------------------------|--------------------------------------------|
+| Pestaña Categorías + Mis Tarifas | Sidebar posición 6 — pantalla propia, tabla/lista (patrón Admin Catálogo Maestro) |
+| Pestaña Empresa (datos) | Sidebar posición 9 — card formulario propia |
+| Ítem «Informes» | Sidebar posición 10 — pantalla propia |
+| Ítem «Documentos» | Sidebar posición 11 — pantalla propia |
+| Ítem «Mi Plan» | Sidebar posición 12 — pantalla propia (patrón Admin Suscripciones, solo lectura + cambio de plan) |
+| Ítem «Soporte» | Sidebar posición 13 — pantalla propia (patrón Admin Soporte) |
+| Ítem «Perfil» + «IA-Preferencias» + «Preferencias generales» | Sidebar posición 14 «Configuración» — pantalla propia (patrón Admin Configuración `11-PANEL-ADMIN-CONFIGURACION.md`, ampliada con preferencias de producto) |
+| Panel lateral fijo «Más opciones» | **Eliminado** — cada entrada es pantalla completa propia, no un panel lateral compartido |
+| Bottom nav Más (posición 6 Móvil) | **Sin equivalente en sidebar Empresa** — sustituido por las 7 entradas de arriba |
 
 ## 6.8 Patrón Empleados
 
@@ -177,9 +184,8 @@ Fondo `navy`. Módulos en lista vertical con icono + etiqueta.
 | 3 | IA | `08-MODULO-IA-EMPRESA.md` | `08-MODULO-IA.md` |
 | 4 | Facturas | `06-MODULO-FACTURAS-EMPRESA.md` | `06-MODULO-FACTURAS.md` |
 | 5 | Cierre | `09-MODULO-CIERRE-EMPRESA.md` | `09-MODULO-CIERRE.md` |
-| 6 | Más | `07-MODULO-MAS-EMPRESA.md` | `07-MODULO-MAS.md` |
 
-Cotizaciones: flujo secundario — `05-MODULO-COTIZACIONES-EMPRESA.md` / `05-MODULO-COTIZACIONES.md`.
+Cotizaciones: flujo secundario, sin ítem propio de sidebar — `05-MODULO-COTIZACIONES-EMPRESA.md` / `05-MODULO-COTIZACIONES.md`.
 
 ### Módulos exclusivos Empresa (§6 Visión)
 
@@ -187,6 +193,24 @@ Cotizaciones: flujo secundario — `05-MODULO-COTIZACIONES-EMPRESA.md` / `05-MOD
 |--------|-----|
 | Empleados | `10-MODULO-EMPLEADOS-EMPRESA.md` |
 | Roles y Permisos | `11-ROLES-PLANES-PERMISOS-EMPRESA.md` |
+
+### Navegación directa — antiguo Módulo Más (`01-VISION-DEL-PRODUCTO.md` §16, excepción 22/07/2026)
+
+"Más" **no existe** como pantalla en el sidebar de Empresa. Sus 7 funcionalidades tienen entrada directa, igual que Darivo Pro Admin (`00-PANEL-ADMIN-DASHBOARD.md` §4 — sin agrupador intermedio). Mismo contenido funcional que Móvil §6, solo cambia el contenedor de navegación:
+
+| Pos | Módulo (sidebar) | MD Empresa (sección) | Origen (Móvil §6 / Más) |
+|-----|-------------------|------------------------|--------------------------|
+| 6 | Catálogo · Mis Tarifas | `07-MODULO-MAS-EMPRESA.md` §5.1 | Pestaña Categorías + Mis Tarifas |
+| 9 | Empresa | `07-MODULO-MAS-EMPRESA.md` §5.2 | Pestaña Empresa (datos) |
+| 10 | Informes | `07-MODULO-MAS-EMPRESA.md` §5.3 | Ítem "Informes" |
+| 11 | Documentos | `07-MODULO-MAS-EMPRESA.md` §5.4 | Ítem "Documentos" |
+| 12 | Mi Plan | `07-MODULO-MAS-EMPRESA.md` §5.5 | Ítem "Mi Plan" |
+| 13 | Soporte | `07-MODULO-MAS-EMPRESA.md` §5.6 | Ítem "Soporte" (Agente IA 2 vive en IA, sidebar 3 — este ítem es solo tickets) |
+| 14 | Configuración | `07-MODULO-MAS-EMPRESA.md` §5.7 | Perfil + IA-Preferencias + Preferencias generales |
+
+Empleados (7) y Roles y Permisos (8) mantienen su posición ya documentada, entre Cierre (5) y Catálogo (6)/Empresa (9) — orden completo del sidebar: Inicio(1) · Clientes(2) · IA(3) · Facturas(4) · Cierre(5) · Catálogo·Mis Tarifas(6) · Empleados(7) · Roles y Permisos(8) · Empresa(9) · Informes(10) · Documentos(11) · Mi Plan(12) · Soporte(13) · Configuración(14).
+
+El archivo `07-MODULO-MAS-EMPRESA.md` se conserva con ese nombre por continuidad de referencias cruzadas del ecosistema — documenta las 7 entradas anteriores, ya no una pantalla "Más" única (ver su propio changelog).
 
 ## 5.2 Header superior
 

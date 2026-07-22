@@ -1,6 +1,8 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.5
+**Versión:** 1.6
+
+**Cambio principal (v1.6 — 22/07/2026):** corrección de referencia interna (§0) — citaba `12 – ROLES… ADMIN.md` v1.5, desactualizada frente a la v1.6 real (que añadió §7.1 Límite de Técnicos y §7.2 Roles personalizados). Verificado: el contenido funcional de §7.2 ya estaba correctamente incorporado en este documento desde v1.1 (§6.1); el límite de Técnicos (§7.1 Admin) ya se referencia sin duplicar cifras vía `10-MODULO-EMPLEADOS-EMPRESA.md` §8 → `04-PANEL-ADMIN-SUSCRIPCIONES.md`. Sin cambios de contenido funcional — solo corrección de cita.
 
 **Cambio principal (v1.5 — 21/07/2026, reversión mismo día):** §6 — el bloqueo total por dispositivo (v1.4) queda reemplazado por un aviso informativo, no bloqueante y descartable — Gerente en móvil ve el aviso, Técnico en ordenador ve el aviso, ninguno de los dos queda impedido de navegar. Referencia cruzada actualizada a Visión §4.1.
 
@@ -22,7 +24,7 @@
 
 | Fuente | Documento | Uso |
 |--------|-----------|-----|
-| Arquitectura funcional | `02-darivo-pro-admin/12 – ROLES… ADMIN.md` v1.5 §6–§9, §16 | Roles, planes, permisos, jerarquía |
+| Arquitectura funcional | `02-darivo-pro-admin/12 – ROLES… ADMIN.md` v1.6 §6–§9, §16 | Roles, planes, permisos, jerarquía |
 | Secuencia ecosistema | `01-VISION-DEL-PRODUCTO.md` §8 | Suscripción → Producto → Rol → Permisos → Funcionalidades → Limitaciones |
 | Planes | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Básico / Pro / Business — fuente única |
 | Empleados | `10-MODULO-EMPLEADOS-EMPRESA.md` | Origen enlace «Editar permisos» |
@@ -38,7 +40,7 @@ Permitir al **Gerente** activar o desactivar **permisos** por empleado (**Técni
 
 Darivo Pro Empresa **no** administra planes de suscripción ni roles de plataforma.
 
-**Acceso:** módulo exclusivo sidebar **Roles y Permisos** — **no** en Módulo Más.
+**Acceso:** módulo exclusivo sidebar **Roles y Permisos** — no agrupado con las pantallas de configuración de `07-MODULO-MAS-EMPRESA.md` (ex-Más, `01-VISION-DEL-PRODUCTO.md` §16).
 
 ---
 
@@ -175,7 +177,7 @@ Mi Plan (consulta/cambio): `07-MODULO-MAS-EMPRESA.md` §6.
 # 9. Validación (Reglas §9 · §15)
 
 * [x] Sincronizado funcionalmente con Admin §16–§17
-* [x] Separado de Módulo Más
+* [x] Sidebar independiente — no forma parte de `07-MODULO-MAS-EMPRESA.md`
 * [x] Secuencia Visión §8 respetada
 * [x] Matriz detallada marcada pendiente (coherente con Admin §8)
 * [x] Diseño ↔ Sistema Diseño §6.9

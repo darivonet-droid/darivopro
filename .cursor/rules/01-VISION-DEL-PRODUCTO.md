@@ -1,6 +1,6 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.18
+**Versión:** 2.19
 
 **Estado:** Visión oficial aprobada
 
@@ -771,6 +771,16 @@ El ecosistema Darivo Pro dispone del módulo oficial **Más**, compartido por Da
 
 En Darivo Pro Móvil, el **Módulo Más** ocupa la posición 6 de la **navegación oficial** (sección 5).
 
+## Excepción de navegación — Darivo Pro Empresa (22/07/2026)
+
+En **Darivo Pro Móvil**, "Más" es una pantalla contenedora porque la navegación inferior solo admite un número reducido de posiciones (sección 5).
+
+En **Darivo Pro Empresa**, esa limitación de espacio no existe: el panel lateral de escritorio admite una entrada por módulo, igual que **Darivo Pro Admin** (sección 10). Por tanto, en Darivo Pro Empresa **no existe una pantalla "Más"** — cada una de las funcionalidades listadas en el "Principio oficial" de esta sección (Empresa, Catálogo/Mis Tarifas, Perfil, Informes, Documentos, Mi Plan, Soporte, Configuraciones generales) tiene su **propia entrada directa** en el panel lateral, sin agruparse bajo un menú intermedio.
+
+Esta es una diferencia de **organización de navegación**, no de funcionalidad: las mismas funcionalidades, reglas y comportamiento definidos para el Módulo Más siguen aplicando sin cambios en Darivo Pro Empresa — únicamente cambia cómo se accede a ellas (sección 10, principio de diseño y funcionalidad compartida).
+
+Detalle de la redistribución: `03-darivo-pro-empresa/07-MODULO-MAS-EMPRESA.md` y `03-darivo-pro-empresa/16-SISTEMA-DE-DISEÑO-EMPRESA.md` §5.1.
+
 ## Principio oficial
 
 El Módulo Más centraliza las funcionalidades secundarias, administrativas y de configuración general del cliente.
@@ -948,9 +958,11 @@ Estos aspectos de detalle se documentarán en sus documentos oficiales correspon
 
 # 21. Estado del documento
 
-**Versión:** 2.18
+**Versión:** 2.19
 
 **Estado:** Visión oficial aprobada.
+
+**Cambio principal (v2.19 — 22/07/2026, pedido explícito del propietario):** §16 — añadida "Excepción de navegación — Darivo Pro Empresa": en Empresa, el Módulo Más deja de existir como pantalla contenedora; cada una de sus funcionalidades pasa a tener entrada directa en el panel lateral, igual que Darivo Pro Admin (sección 10). Cambio de organización de navegación únicamente — ninguna funcionalidad, regla ni comportamiento cambia. No afecta a Darivo Pro Móvil (conserva "Más" en posición 6 de su navegación inferior, sección 5).
 
 **Cambio principal (v2.18 — 21/07/2026, reversión mismo día que v2.17):** §4.1 "Restricción de acceso por dispositivo" reemplazada por "Aviso informativo por dispositivo" — el bloqueo total de v2.17 queda eliminado (decisión de Mohamed: ningún usuario debe quedar impedido de navegar por tipo de dispositivo). Ahora es un aviso no bloqueante y descartable, con la misma tabla de rol×dispositivo pero sin ningún redirect/bloqueo — Partner sigue siendo el único rol sin ningún aviso, en ningún dispositivo. Implementación real: `AvisoDispositivoBanner.tsx` (Client Component, montado en los layouts de Admin/Empresa/Móvil, nunca en Partner), no en `middleware.ts`.
 
