@@ -1,0 +1,80 @@
+-- 20260723120000_revocar_cotizaciones_service_role.sql
+-- Aislamiento de datos — estándar banco/fintech · RGPD-UE · Ley N.º 29733 (Perú).
+-- Tarea 1, punto 3 (23/07/2026): "RLS debe rechazar a nivel BD cualquier lectura
+-- de cotizaciones desde contexto Admin, aunque el frontend fallara."
+--
+-- POR QUÉ NO BASTA CON RLS (dato duro, no suposición):
+--   La policy real de cotizaciones ya es correcta y NO se toca:
+--     CREATE POLICY presupuestos_all ON public.presupuestos
+--       FOR ALL USING (auth.uid() = user_id);
+--     (baseline_v2.sql:708 — tabla `presupuestos`, renombrada a `cotizaciones` y
+--      la policy a `cotizaciones_all` en
+--      20260708120000_rename_presupuestos_to_cotizaciones.sql:28)
+--     CREATE POLICY presupuesto_items_all ON public.presupuesto_items FOR ALL
+--       USING (EXISTS (SELECT 1 FROM public.presupuestos p
+--                      WHERE p.id = presupuesto_id AND p.user_id = auth.uid()));
+--     (baseline_v2.sql:711-712 — renombrada a `cotizacion_items_all` en
+--      20260708120000:29, columna `presupuesto_id` → `cotizacion_id` en :14)
+--   Esa policy ya aísla correctamente a cualquier sesión de usuario. Pero el
+--   Panel Admin no consulta con una sesión de usuario: usa la SERVICE_ROLE_KEY
+--   (`lib/supabase/admin.ts` → `createAdminClient()`), y `service_role` tiene
+--   BYPASSRLS por diseño de Supabase. Ninguna policy puede frenarlo. El único
+--   corte real a nivel BD contra el contexto Admin es revocar el privilegio.
+--
+-- SCHEMA VERIFICADO (extracto literal, tablas afectadas):
+--   CREATE TABLE public.presupuestos (            -- hoy public.cotizaciones
+--     id            uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+--     user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+--     cliente_id    uuid REFERENCES public.clientes(id) ON DELETE SET NULL,
+--     ... client_name text NOT NULL, total_final numeric(12,2), status text ...
+--   );                                            (baseline_v2.sql:284-303)
+--   CREATE TABLE public.presupuesto_items (       -- hoy public.cotizacion_items
+--     id             uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+--     presupuesto_id uuid NOT NULL REFERENCES public.presupuestos(id) ON DELETE CASCADE,
+--     ...                                         (baseline_v2.sql:305-...)
+--   );
+--   Único ALTER posterior que las afecta: 20260708120000 (renombres de tabla,
+--   columna y policies; sin cambio de columnas de datos). Búsqueda realizada:
+--   `grep -rn "cotizaciones\|presupuestos" supabase/migrations/*.sql` — el resto
+--   de coincidencias son FKs (facturas.from_quote_id, gastos.presupuesto_id),
+--   índices y el trigger de límite, ninguna altera estas dos tablas.
+--
+-- POR QUÉ ES SEGURO REVOCAR (ningún flujo legítimo usa service_role aquí):
+--   Búsqueda `.from("cotizaciones")` en frontend/src — 34 llamadas, todas con el
+--   cliente de sesión (`createServerClient()` / `createClientComponentClient()`)
+--   de Móvil o Empresa: useCotizacion.ts, useClientes.ts, useInformes.ts,
+--   app/(auth)/*, app/empresa/*, api/pdf/cotizacion/[id]/route.ts, plan-limits.ts,
+--   los 2 wizards. La ÚNICA excepción era lib/admin-queries.ts:83-88 (Dashboard
+--   Admin), eliminada en este mismo cambio.
+--   El trigger `verificar_limite_cotizaciones_gratis()`
+--   (20260721230000) hace SELECT sobre `cotizaciones`, pero es SECURITY DEFINER
+--   → se ejecuta con los privilegios del owner (postgres), no con los de
+--   `service_role`. Este REVOKE no lo afecta.
+--   El backend FastAPI de `backend/` no usa service_role (grep: solo aparece en
+--   `.venv/site-packages`, nunca en código propio).
+--
+-- ALCANCE: se revoca TODO privilegio, no solo SELECT. Admin tampoco debe poder
+-- escribir ni borrar cotizaciones de un cliente. `postgres`/`supabase_admin`
+-- conservan sus privilegios (el propietario sigue viendo las tablas en el SQL
+-- Editor y las migraciones futuras siguen funcionando).
+--
+-- REVERSIBLE: para deshacerlo, `GRANT ALL ON public.cotizaciones,
+-- public.cotizacion_items TO service_role;` — pero eso reabre la fuga, no
+-- hacerlo sin decisión explícita del propietario.
+
+REVOKE ALL PRIVILEGES ON TABLE public.cotizaciones     FROM service_role;
+REVOKE ALL PRIVILEGES ON TABLE public.cotizacion_items FROM service_role;
+
+-- `ALTER DEFAULT PRIVILEGES` no aplica a tablas ya existentes, pero sí evita que
+-- un futuro `GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role` (patrón
+-- habitual en scripts de bootstrap de Supabase) reabra la fuga en silencio.
+-- No existe forma declarativa de excluir tablas concretas de ese GRANT masivo,
+-- así que se deja constancia explícita aquí: si alguna vez se ejecuta un GRANT
+-- masivo sobre el esquema `public`, hay que volver a correr este archivo.
+
+-- Verificación (debe devolver 0 filas después de correr esto):
+--   SELECT grantee, privilege_type
+--   FROM information_schema.role_table_grants
+--   WHERE table_schema = 'public'
+--     AND table_name IN ('cotizaciones', 'cotizacion_items')
+--     AND grantee = 'service_role';

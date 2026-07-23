@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@supabase/supabase-js";
-import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
+import { errorSiNoEsAdmin, adminAutenticadoOError } from "@/lib/acceso-producto";
+import { cambiarPlanCuenta } from "@/lib/plan-cuenta";
 import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
 
 /**
@@ -46,22 +47,38 @@ export async function desbloquearUsuarioAction(userId: string): Promise<Resultad
   return { ok: true };
 }
 
+/**
+ * ⚠️ EN RETIRADA — Tarea 3 (23/07/2026). El cambio de plan de una cuenta se
+ * administra ahora desde Admin → Suscripciones (`cambiarPlanCuentaAction`),
+ * porque el plan es metadato de facturación, no de identidad. Este punto de
+ * entrada se conserva solo durante la FASE A (aditiva) para no romper el
+ * módulo Usuarios mientras se verifica el nuevo; se elimina en la FASE C junto
+ * con el `<select>` de plan de `AdminUsuariosView`.
+ *
+ * Delega en la MISMA lógica (`lib/plan-cuenta.ts`) — no duplica el update — así
+ * que desde hoy también queda registrado en `admin_plan_auditoria`, con un
+ * motivo automático que deja claro por qué vía se hizo.
+ */
 export async function cambiarPlanUsuarioAction(
   userId: string,
   plan: PlanTipoPersistido
 ): Promise<Resultado> {
-  const errorAuth = await errorSiNoEsAdmin();
-  if (errorAuth) return { ok: false, error: errorAuth };
-  let admin;
-  try {
-    admin = createAdminClient();
-  } catch {
-    return { ok: false, error: "SUPABASE_SERVICE_ROLE_KEY no configurada" };
+  const auth = await adminAutenticadoOError();
+  if (!auth.ok) return auth;
+
+  const result = await cambiarPlanCuenta({
+    cuentaUserId: userId,
+    planNuevo: plan,
+    motivo: "Cambio desde Admin → Usuarios (punto de entrada en retirada, sin motivo indicado)",
+    adminUserId: auth.adminUserId,
+    adminEmail: auth.adminEmail,
+  });
+
+  if (result.ok) {
+    revalidatePath("/admin/usuarios");
+    revalidatePath("/admin/suscripciones");
   }
-  const { error } = await admin.from("perfiles").update({ plan_tipo: plan }).eq("id", userId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/admin/usuarios");
-  return { ok: true };
+  return result;
 }
 
 /**

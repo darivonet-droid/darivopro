@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { AdminKpiCard, AdminKpiGrid, AdminServiceRoleNotice, AdminTable, AdminCard } from "@/components/admin/AdminUi";
+import { AdminKpiCard, AdminKpiGrid, AdminServiceRoleNotice, AdminCard } from "@/components/admin/AdminUi";
 import { AdminDashboardToolbar } from "@/components/admin/AdminDashboardToolbar";
 import { AdminActividadChart } from "@/components/admin/AdminActividadChart";
 import { AdminPlanesDonut } from "@/components/admin/AdminPlanesDonut";
@@ -113,21 +113,10 @@ export default async function AdminDashboardPage({
         </AdminCard>
       </div>
 
-      <div className="mt-6">
-        <p className="mb-3 text-sm font-extrabold" style={{ color: ADMIN_COLORS.text }}>
-          Actividad reciente (cotizaciones)
-        </p>
-        <AdminTable
-          headers={["Cliente", "Importe", "Estado", "Fecha"]}
-          vacio="Sin actividad reciente"
-          rows={d.recientes.map((p) => [
-            p.client_name,
-            fmtPEN(Number(p.total_final ?? 0)),
-            p.status,
-            new Date(p.created_at).toLocaleDateString("es-PE"),
-          ])}
-        />
-      </div>
+      {/* Eliminado el bloque "Actividad reciente (cotizaciones)" (23/07/2026):
+          exponía cliente/importe/estado de cotizaciones de cuentas de cliente
+          dentro de Admin. Admin no consulta esa tabla — ver la nota de
+          aislamiento en `fetchAdminDashboard()`. */}
 
       <AdminCard title="Acciones rápidas" className="mt-6">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -161,6 +161,10 @@ Empresa **no** crea, modifica ni elimina planes.
 
 Mi Plan (consulta/cambio): `07-MODULO-MAS-EMPRESA.md` §6.
 
+**Autoservicio de plan — confirmado (23/07/2026).** El Gerente cambia el plan de **su propia cuenta** desde **Mi Plan**, pasando por checkout. Es el único camino de autoservicio y no cambia con la Tarea 3.
+
+Vía de operador, distinta y complementaria: un **Administrador Darivo** puede cambiar el plan de una cuenta desde Admin → Suscripciones → pestaña "Cuentas" (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1), con motivo obligatorio y registro de auditoría. Sirve para cortesías, correcciones de cobro y soporte — nunca sustituye al autoservicio ni permite a Empresa administrar planes ajenos.
+
 ---
 
 # 8. Relaciones

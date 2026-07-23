@@ -16,7 +16,7 @@ export default async function AdminSuscripcionesPage() {
     );
   }
 
-  const { planesOficiales, planesCatalogo, usuariosPorPlan } = result.data;
+  const { planesOficiales, planesCatalogo, usuariosPorPlan, cuentas, auditoria } = result.data;
 
   return (
     <AdminShell titulo="Gestión de Suscripciones">
@@ -24,6 +24,8 @@ export default async function AdminSuscripcionesPage() {
         planesOficiales={planesOficiales}
         planesCatalogo={planesCatalogo}
         usuariosPorPlan={usuariosPorPlan}
+        cuentas={cuentas}
+        auditoria={auditoria}
       />
     </AdminShell>
   );

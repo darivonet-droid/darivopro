@@ -170,6 +170,29 @@ export async function errorSiNoEsAdmin(): Promise<string | null> {
   return null;
 }
 
+/**
+ * Igual que `errorSiNoEsAdmin()` pero además devuelve la identidad real del
+ * administrador autenticado. Necesario para las acciones que deben quedar
+ * auditadas (quién hizo el cambio) — p. ej. el cambio de plan de una cuenta
+ * desde Admin → Suscripciones, que registra en `admin_plan_auditoria`.
+ *
+ * La identidad se resuelve SIEMPRE aquí, en el servidor, a partir de la
+ * sesión real; nunca se acepta un `adminEmail` enviado por el cliente, que
+ * permitiría firmar un cambio a nombre de otro empleado.
+ */
+export async function adminAutenticadoOError(): Promise<
+  { ok: true; adminUserId: string; adminEmail: string } | { ok: false; error: string }
+> {
+  const supabase = createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !(await esAdministradorDarivo(user.email))) {
+    return { ok: false, error: "No autorizado" };
+  }
+  return { ok: true, adminUserId: user.id, adminEmail: user.email ?? "" };
+}
+
 export type ProductoProtegido = "admin" | "empresa" | "partner";
 
 export async function verificarAccesoProducto(

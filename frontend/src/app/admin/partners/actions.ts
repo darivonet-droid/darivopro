@@ -8,7 +8,7 @@ import {
   updatePartnerAccesoMovil,
   updatePartnerEstado,
 } from "@/lib/ecosystem-store";
-import { errorSiNoEsAdmin } from "@/lib/acceso-producto";
+import { errorSiNoEsAdmin, adminAutenticadoOError } from "@/lib/acceso-producto";
 import type { EstadoPartner, PartnerRegistro } from "@/lib/partners-types";
 
 export async function getPartnersAction(): Promise<PartnerRegistro[]> {
@@ -36,9 +36,15 @@ export async function setPartnerEstadoAction(
   id: string,
   estado: EstadoPartner
 ): Promise<{ ok: boolean }> {
-  const errorAuth = await errorSiNoEsAdmin();
-  if (errorAuth) return { ok: false };
-  const updated = await updatePartnerEstado(id, estado);
+  // Identidad real del administrador: suspender un Partner revoca su Plan
+  // Business regalado, y esa degradación a `gratis` debe quedar firmada en el
+  // log de auditoría de planes. Mismo criterio de autorización que antes.
+  const auth = await adminAutenticadoOError();
+  if (!auth.ok) return { ok: false };
+  const updated = await updatePartnerEstado(id, estado, {
+    adminUserId: auth.adminUserId,
+    adminEmail: auth.adminEmail,
+  });
   if (updated) {
     revalidatePath("/admin/partners");
     revalidatePath("/partner");

@@ -1,8 +1,10 @@
 ﻿# 06 – PANEL ADMIN – PARTNERS
 
-**Versión:** 1.7
+**Versión:** 1.8
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.8 — 23/07/2026, pedido explícito del propietario):** queda escrito el límite de alcance de este módulo — administra el **programa de Partners** (alta, código, enlace, estado, comisiones, referidos), nunca datos operativos de las cuentas de cliente. Este módulo **no muestra ni consulta cotizaciones, clientes ni tarifas de ninguna cuenta** (`01-VISION-DEL-PRODUCTO.md` §4.1). Verificado en código el 23/07/2026: sus únicas fuentes son `partners`, `partner_referidos`, `partner_comisiones_config` y `partner_comisiones_historial`. Nota de ubicación: el **Panel Partner** propiamente dicho **no vive dentro de Admin** — es su propio panel en `/partner`, con layout, guard (`requireProducto("partner")`) y PWA independientes; lo que hay en Admin es este módulo de administración del programa, y esa separación es la correcta.
 
 **Cambio principal (v1.7 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 2):** decidido — un Partner **SÍ puede usar Darivo Pro Móvil**, pero únicamente si el Administrador Darivo lo activa explícitamente por partner (toggle "Acceso a Darivo Pro Móvil" en el panel de detalle de este módulo, desactivado por defecto, independiente de "Activar partner"/"Suspender partner" — nunca se activa automáticamente). Persistido en `partners.acceso_movil` (migración incluida, sin ejecutar). El enforcement real de ese acceso en el login/layout de Móvil **no se construyó todavía** (mismo criterio que el bloqueo de Admin — decisión declarativa primero, enforcement real es trabajo aparte); hoy el toggle solo queda guardado y visible en Admin.
 
@@ -224,6 +226,8 @@ El listado principal muestra:
 * Acciones
 
 No documentar información adicional no visible en el diseño oficial.
+
+"Registros asociados" son los correos de las cuentas referidas por ese Partner (`partner_referidos`) — dato del programa de Partners, necesario para calcular su comisión. **No incluye, ni puede incluir, el trabajo de esas cuentas**: ninguna cotización, cliente final, factura ni tarifa suya se muestra aquí (`01-VISION-DEL-PRODUCTO.md` §4.1).
 
 ---
 

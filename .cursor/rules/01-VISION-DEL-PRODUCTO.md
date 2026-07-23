@@ -1,8 +1,10 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.19
+**Versión:** 2.20
 
 **Estado:** Visión oficial aprobada
+
+**Cambio principal (v2.20 — 23/07/2026, pedido explícito del propietario):** queda escrito el **estándar de aislamiento de datos** (banco/fintech · RGPD-UE · Ley N.º 29733 Perú) como fuente de verdad no negociable — separación por funcionalidad y "Admin nunca ve datos operativos de cliente aunque la persona coincida entre dos cuentas". Nuevo §4.1 y nuevo bloque en §8.4 con la tabla de aislamiento entre paneles. Corrección real asociada: el Dashboard de Admin dejó de leer la tabla `cotizaciones` (lista "Actividad reciente" y serie del gráfico eliminadas), con revocación de privilegios de `service_role` sobre `cotizaciones`/`cotizacion_items` a nivel BD.
 
 ---
 
@@ -100,6 +102,16 @@ Desde Darivo Pro Admin se gestionan, entre otros elementos oficiales:
 Darivo Pro Admin no realiza el trabajo diario de los clientes.
 
 Su función es administrar la información que posteriormente utilizan Darivo Pro Móvil y Darivo Pro Empresa.
+
+## 4.1 Admin nunca ve datos operativos de cliente (regla dura, no negociable)
+
+Darivo Pro Admin **no consulta ni muestra cotizaciones, clientes, facturas ni tarifas de ninguna cuenta**. Ni en detalle, ni como conteo agregado, ni en un gráfico, ni en una exportación.
+
+Esta regla se cumple **aunque la misma persona tenga cuenta de Administrador Darivo y a la vez use Darivo Pro Móvil o Empresa**: tener las dos cuentas no da a Admin derecho a ver los datos de la cuenta operativa. El alcance se resuelve siempre por **rol + contexto real consultado en base de datos**, nunca por coincidencia de persona o de correo.
+
+Lo que Admin sí administra sigue siendo lo listado arriba (Catálogo Maestro, Tarifa Pro, planes, soporte, configuración global, información general del ecosistema) más los datos de identidad/suscripción de las cuentas — nunca el contenido de trabajo que esas cuentas producen.
+
+Refuerzo real a nivel de base de datos: el rol `service_role` (el que usa el Panel Admin, y que salta RLS por diseño de Supabase) tiene **revocado todo privilegio** sobre `cotizaciones` y `cotizacion_items`, de modo que un fallo del frontend no puede reabrir la fuga. Migración `20260723120000_revocar_cotizaciones_service_role.sql`.
 
 ---
 
@@ -285,7 +297,28 @@ La definición funcional detallada de roles, permisos y roles personalizados se 
 
 Nunca crean funcionalidades nuevas.
 
-## 4.1 Aviso informativo por dispositivo (reemplaza el bloqueo total anterior — 21/07/2026)
+### Estándar de aislamiento de datos (fuente de verdad — banco/fintech · RGPD-UE · Ley N.º 29733 Perú)
+
+Darivo Pro se rige por el estándar de aislamiento de banco/fintech y por la protección de datos de la Unión Europea (RGPD) y de Perú (Ley N.º 29733). De ahí se derivan dos reglas duras que ningún permiso, plan ni rol puede relajar:
+
+**1. Separación por funcionalidad.** Cada funcionalidad tiene su propia tabla y su propio alcance: cotizaciones la suya, empresa la suya, facturas la suya. Ninguna funcionalidad lee ni escribe datos de otra, salvo una conexión **diseñada y aprobada explícitamente**. Nada se mezcla "por conveniencia técnica".
+
+**2. Admin nunca ve datos operativos de cliente.** Ver §4.1. El alcance se resuelve por rol + contexto real consultado en base de datos, nunca porque la persona coincida entre dos cuentas.
+
+Aislamiento entre paneles:
+
+| Panel | Con quién se conecta |
+| --- | --- |
+| Admin | Admin únicamente |
+| Empresa | Empresa únicamente — cada empresa aislada de las demás |
+| Empresa ↔ Móvil (Técnicos) | **Sí se conectan** (clientes, tarifas y logo de ESA empresa) — conexión intencional y aprobada. No se mezclan: un Técnico solo ve datos de su empresa |
+| Partner | Su propio panel (`/partner`), datos del programa de partners únicamente |
+
+Cerrar fugas nunca justifica relajar RLS ni tocar la conexión legítima Empresa↔Móvil. Si un arreglo lo exigiera, se detiene el trabajo y se reporta al propietario con la razón concreta.
+
+## 8.4.1 Aviso informativo por dispositivo (reemplaza el bloqueo total anterior — 21/07/2026)
+
+> *Renumerada de "§4.1" a "§8.4.1" el 23/07/2026: siempre fue una subsección del factor 4 (Permisos) de esta sección 8, y "§4.1" pasó a designar la regla de aislamiento de Admin en la sección 4. Las menciones a "§4.1 dispositivo" en el changelog histórico de más abajo se refieren a esta sección.*
 
 Además de Suscripción/Producto/Rol/Permisos, el tipo de dispositivo desde el que se conecta el usuario dispara un **aviso informativo, no bloqueante y descartable** — nunca impide la navegación. Un usuario puede usar cualquier panel desde cualquier dispositivo; el aviso solo sugiere la plataforma recomendada para una mejor experiencia:
 

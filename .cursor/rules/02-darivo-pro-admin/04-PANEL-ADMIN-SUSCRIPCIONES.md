@@ -1,8 +1,10 @@
 ﻿# 04 – PANEL ADMIN – GESTIÓN DE SUSCRIPCIONES
 
-**Versión:** 1.10
+**Versión:** 1.11
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.11 — 23/07/2026, decisión explícita del propietario, Tarea 3):** este módulo pasa a administrar también el **plan de una cuenta concreta**, no solo el catálogo. El plan de una cuenta es **metadato de facturación**, así que su gestión sale de Admin → Usuarios (donde estaba, sin ningún registro) y entra aquí. Dos incorporaciones reales: nueva pestaña **Cuentas** (§6.1) con la acción "Cambiar plan" por cuenta, y la pestaña **Historial de cambios** —que era un placeholder vacío— conectada al **log de auditoría** real `admin_plan_auditoria` (§6.2). Queda superado el "se incorporará en una fase posterior" de §13. **Orden aditivo:** se construyó y verificó aquí antes de retirar nada de Usuarios; ver §6.3 para el estado de esa retirada. Fuera de alcance, aplazado a tarea propia: cambio de plan desde el panel Partner (depende del cálculo de comisiones).
 
 **Cambio principal (v1.10 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 7):** el catálogo pasa de **solo lectura fija en código** (decisión cerrada en la auditoría del 21/07/2026 más temprano ese mismo día, Etapa 6 — "no se construyó nada, catálogo de solo lectura") a **editable desde BD**, pese a la advertencia de riesgo planteada en esa misma auditoría. Se usó la tabla `planes_catalogo` (ya existía en el schema desde el baseline, sin ningún consumidor real hasta ahora — no se creó una tabla nueva) y se construyó edición real de nombre/precio mensual/precio anual/límites/activo para cada uno de los **3 planes existentes** desde Admin → Suscripciones. **"Nuevo plan" sigue sin aplicar** — no se habilita creación de un 4to plan, ni Importar/Publicar cambios (siguen sin construir). **⚠️ Alcance real, léase antes de asumir control total:** editar un plan aquí actualiza únicamente esta tabla administrativa — el precio real cobrado en checkout, `/precios` y los límites de uso realmente aplicados (`lib/plan-limits.ts`) siguen leyendo la constante de código `PRECIOS_OFICIALES`/`LIMITES_PLAN`, no esta tabla. Hasta que exista una fase 2 que recablee esos consumidores a leer de BD, un cambio aquí es administrativo/visual, sin efecto en el producto real. Detalle completo en `docs-internos/tareas/2026-07-21-etapa7-cierre-celdas-planes-editables.md`.
 
@@ -96,7 +98,8 @@ No modificar:
 ## Pestañas
 
 * Planes
-* Historial de cambios
+* Cuentas *(desde v1.11, 23/07/2026 — cambio de plan por cuenta, ver §6.1)*
+* Historial de cambios *(desde v1.11 muestra el log de auditoría real, ver §6.2)*
 
 ## Acciones principales
 
@@ -170,7 +173,39 @@ No documentar planes adicionales sin aprobación expresa del propietario.
 
 El precio (y el nombre y los límites) de cada uno de los **3 planes existentes** puede ser modificado por el **Administrador Darivo** en cualquier momento desde este módulo, mediante el botón "Editar" de cada plan (tarjeta, tabla o panel de detalle) — persistido en la tabla `planes_catalogo`.
 
-**Lo que NO existe todavía** (a diferencia de lo que sugerían versiones anteriores de este documento): no hay pestaña **Historial de cambios** funcional, no hay acción **Publicar cambios** (los cambios se guardan directos, sin flujo borrador/publicado) y **"Nuevo plan" sigue sin aplicar** — el catálogo permanece fijo a Básico/Pro/Business, nunca se crea un 4to plan.
+**Lo que NO existe todavía** (a diferencia de lo que sugerían versiones anteriores de este documento): no hay acción **Publicar cambios** (los cambios se guardan directos, sin flujo borrador/publicado) y **"Nuevo plan" sigue sin aplicar** — el catálogo permanece fijo a Básico/Pro/Business, nunca se crea un 4to plan. La pestaña **Historial de cambios** sí es funcional desde v1.11, pero registra los cambios de **plan de una cuenta** (§6.2), no las ediciones del catálogo de planes — esas siguen sin historial.
+
+---
+
+## 6.1 Cuentas — cambio de plan de una cuenta concreta (v1.11, 23/07/2026)
+
+Pestaña **Cuentas**: listado de las cuentas de la plataforma con **correo, razón social y plan actual**, buscador por correo/razón social, y acción **"Cambiar plan"** por fila.
+
+Reglas de la acción:
+
+* Solo **Administrador Darivo**. El rol se revalida **en el servidor en cada llamada**, no se confía en el cliente ni en que el middleware siga cubriendo las rutas de Admin.
+* La identidad del administrador que firma el cambio se resuelve de la **sesión real en el servidor**; el cliente no puede enviarla ni suplantar a otro empleado.
+* **Motivo obligatorio.** Sin motivo no se guarda: un cambio de plan sin motivo no es auditable.
+* Planes asignables: Gratis · Básico · Pro · Business (los mismos 4 valores que admite la base de datos).
+* Esta pestaña muestra **identidad y plan, nada más** — ninguna cotización, cliente ni factura de la cuenta (`01-VISION-DEL-PRODUCTO.md` §4.1).
+
+Esta vía de **operador** convive con el **autoservicio** del cliente: el Gerente cambia el plan de su propia cuenta desde Empresa → Mi Plan, pasando por checkout (`03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` §7). La vía de operador sirve para cortesías, correcciones de cobro y soporte, y no la sustituye.
+
+## 6.2 Historial de cambios — log de auditoría (v1.11, 23/07/2026)
+
+Cada cambio de plan por cuenta se registra en la tabla `admin_plan_auditoria`: **quién** (administrador), **qué cuenta**, **plan anterior → plan nuevo**, **cuándo** y **motivo**.
+
+Propiedades exigidas por el estándar de banco/fintech, garantizadas a nivel de base de datos, no solo por convención:
+
+* **Append-only real:** `service_role` —el rol con el que opera el Panel Admin— tiene revocados `UPDATE`, `DELETE` y `TRUNCATE`. Ni siquiera el propio operador puede reescribir o borrar el historial.
+* **Sobrevive a las bajas:** correo del administrador y correo de la cuenta quedan copiados en texto, de modo que el registro sigue siendo legible aunque cualquiera de las dos cuentas se elimine después.
+* **Cerrado a los clientes:** RLS habilitada sin ninguna política, así que ninguna sesión de usuario puede leerlo ni escribirlo.
+
+Migración: `20260723130000_admin_plan_auditoria.sql` (aditiva — tabla nueva, no reutiliza ninguna existente).
+
+## 6.3 Retirada del cambio de plan desde Admin → Usuarios
+
+La gestión del plan **sale** del módulo Usuarios, que queda solo para correos e identidad (`03-PANEL-ADMIN-USUARIOS.md` §5). La retirada es la última fase del movimiento y **está condicionada a que este módulo quede verificado en vivo**: hasta entonces, el punto de entrada de Usuarios sigue disponible para no dejar el producto sin ninguna vía, pero ya **delega en la misma lógica** que esta pestaña, así que también queda registrado en el log de auditoría.
 
 **⚠️ Repetido a propósito — alcance real:** esta edición es administrativa. NO cambia el precio real cobrado en checkout ni los límites de uso realmente aplicados, hasta que exista una fase 2 de recableado (ver Cambio principal v1.10 arriba y `CLAUDE.md`).
 
@@ -298,7 +333,8 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 
 ## Pendiente de resolución
 
-* La vista de suscripciones por usuario (tabla: usuario, plan, monto, estado de pago, fechas, MRR) se incorporará en una fase posterior.
+* La vista **por cuenta** existe desde v1.11 (§6.1), pero cubre solo **cuenta + plan actual + cambio auditado**. Las columnas económicas que se planteaban (monto, estado de pago, fechas de facturación, MRR) siguen **sin construir** — dependen de datos de cobro que hoy no se persisten.
+* Cambio de plan desde el **panel Partner** para las cuentas que administra: **aplazado a tarea propia** (decisión del propietario, 23/07/2026) — depende de cómo afecte al cálculo de comisiones.
 
 ---
 

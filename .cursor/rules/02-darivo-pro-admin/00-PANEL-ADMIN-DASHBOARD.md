@@ -1,7 +1,9 @@
 ﻿# 00 – PANEL ADMIN – DASHBOARD
 
-**Versión:** 1.4  
+**Versión:** 1.5  
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.5 — 23/07/2026, pedido explícito del propietario):** el Dashboard **deja de mostrar y de consultar cotizaciones de cliente**. Se elimina el bloque "Actividad reciente (cotizaciones)" (mostraba cliente, importe, estado y fecha de cotizaciones de cuentas de cliente) y la serie "Cotizaciones" del gráfico "Actividad de la plataforma" (conteo agregado — también prohibido). Motivo: estándar de aislamiento de datos, `01-VISION-DEL-PRODUCTO.md` §4.1 — Admin no consulta la tabla de cotizaciones en absoluto.
 
 **Cambio principal (v1.4 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar de Admin.
 
@@ -17,7 +19,9 @@
 
 El Dashboard es la pantalla principal del Panel Administrador de Darivo Pro.
 
-Permite visualizar un resumen general de la plataforma mediante indicadores, gráficos, actividad reciente y accesos rápidos.
+Permite visualizar un resumen general de la plataforma mediante indicadores, gráficos y accesos rápidos.
+
+Todos ellos son métricas de plataforma (cuentas, suscripciones, ingresos, soporte). El Dashboard **no muestra datos operativos de ninguna cuenta de cliente** — ni cotizaciones, ni clientes, ni tarifas (`01-VISION-DEL-PRODUCTO.md` §4.1).
 
 ---
 
@@ -115,7 +119,6 @@ La pantalla está compuesta por:
 
 ## Parte inferior
 
-- Actividad reciente
 - Acciones rápidas
 
 ---
@@ -134,7 +137,7 @@ Según el diseño aprobado, el Dashboard muestra:
 
 ## Gráfico
 
-- Actividad de la plataforma
+- Actividad de la plataforma — series **Registros** y **Facturas** únicamente. La serie "Cotizaciones" fue eliminada el 23/07/2026: aunque era un conteo agregado, obligaba a Admin a consultar la tabla de cotizaciones, prohibido por `01-VISION-DEL-PRODUCTO.md` §4.1.
 
 ## Estado de soporte
 
@@ -150,9 +153,9 @@ Según el diseño aprobado, el Dashboard muestra:
 
 > Nomenclatura oficial según `04-PANEL-ADMIN-SUSCRIPCIONES.md` (catálogo de planes).
 
-## Actividad reciente
+## Actividad reciente — eliminada (23/07/2026)
 
-Listado de eventos recientes.
+Este bloque **ya no existe** y no debe reconstruirse. Mostraba cotizaciones de cuentas de cliente (cliente, importe, estado, fecha), dato operativo que Admin no puede ver bajo el estándar de aislamiento (`01-VISION-DEL-PRODUCTO.md` §4.1).
 
 ## Acciones rápidas
 
