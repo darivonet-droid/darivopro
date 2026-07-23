@@ -8,12 +8,18 @@ import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { descargarCsv } from "@/lib/csv-export";
 import type { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
 import type { PlanCatalogoRow } from "@/lib/planes-catalogo";
-import { actualizarPlanCatalogoAction } from "@/app/admin/suscripciones/actions";
+import { actualizarPlanCatalogoAction, cambiarPlanCuentaAction } from "@/app/admin/suscripciones/actions";
 import { fmtPEN } from "@/lib/utils";
+import type { PlanTipoPersistido } from "@/lib/roles-planes-oficial";
+import type { AdminPerfilRow } from "@/lib/admin-queries";
+import type { PlanAuditoriaRow } from "@/lib/plan-cuenta";
 
-const TABS = ["Planes", "Historial de cambios"] as const;
+const TABS = ["Planes", "Cuentas", "Historial de cambios"] as const;
 const ORDEN_PLAN: Array<keyof typeof PRECIOS_OFICIALES> = ["basico", "pro", "business"];
 const PLAN_ICON: Record<string, string> = { basico: "🔹", pro: "⭐", business: "🏢" };
+
+/** Planes asignables a una cuenta — incluye "gratis", que no es un plan del catálogo de venta. */
+const PLANES_CUENTA: PlanTipoPersistido[] = ["gratis", "basico", "pro", "business"];
 
 /** Matriz oficial de funcionalidades por plan — 04-PANEL-ADMIN-SUSCRIPCIONES.md §6, texto fijo (no se infiere de BD). */
 const MATRIZ = [
@@ -48,9 +54,23 @@ interface AdminSuscripcionesViewProps {
    */
   planesCatalogo: PlanCatalogoRow[];
   usuariosPorPlan: { basico: number; pro: number; business: number; gratis: number };
+  /**
+   * Cuentas de la plataforma con su plan actual — pestaña "Cuentas"
+   * (Tarea 3 FASE A, 23/07/2026). Identidad + plan únicamente: ninguna
+   * cotización, cliente ni factura suya (`01-VISION-DEL-PRODUCTO.md` §4.1).
+   */
+  cuentas: AdminPerfilRow[];
+  /** Log append-only de cambios de plan — pestaña "Historial de cambios". */
+  auditoria: PlanAuditoriaRow[];
 }
 
-export function AdminSuscripcionesView({ planesOficiales, planesCatalogo, usuariosPorPlan }: AdminSuscripcionesViewProps) {
+export function AdminSuscripcionesView({
+  planesOficiales,
+  planesCatalogo,
+  usuariosPorPlan,
+  cuentas,
+  auditoria,
+}: AdminSuscripcionesViewProps) {
   const router = useRouter();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Planes");
   const [buscar, setBuscar] = useState("");
@@ -65,6 +85,54 @@ export function AdminSuscripcionesView({ planesOficiales, planesCatalogo, usuari
   const [editActivo, setEditActivo] = useState(true);
   const [editLimitesTexto, setEditLimitesTexto] = useState("");
   const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
+
+  // Pestaña "Cuentas" — cambio de plan de una cuenta concreta.
+  const [buscarCuenta, setBuscarCuenta] = useState("");
+  const [cuentaEditando, setCuentaEditando] = useState<AdminPerfilRow | null>(null);
+  const [planNuevo, setPlanNuevo] = useState<PlanTipoPersistido>("gratis");
+  const [motivo, setMotivo] = useState("");
+  const [errorCuenta, setErrorCuenta] = useState<string | null>(null);
+
+  const labelPlanCuenta = (plan: string | null | undefined) =>
+    plan === "basico" || plan === "pro" || plan === "business"
+      ? planesOficiales[plan].nombre
+      : "Gratis";
+
+  const abrirCambioPlan = (cuenta: AdminPerfilRow) => {
+    setErrorCuenta(null);
+    setCuentaEditando(cuenta);
+    setPlanNuevo((cuenta.plan_tipo as PlanTipoPersistido | null) ?? "gratis");
+    setMotivo("");
+  };
+
+  const guardarCambioPlan = () => {
+    if (!cuentaEditando) return;
+    if (!motivo.trim()) {
+      setErrorCuenta("Indica el motivo del cambio — queda registrado en el historial.");
+      return;
+    }
+    setErrorCuenta(null);
+    startTransition(async () => {
+      const result = await cambiarPlanCuentaAction(cuentaEditando.id, planNuevo, motivo.trim());
+      if (!result.ok) {
+        setErrorCuenta(result.error);
+        return;
+      }
+      setCuentaEditando(null);
+      setMotivo("");
+      router.refresh();
+    });
+  };
+
+  const cuentasFiltradas = useMemo(() => {
+    const q = buscarCuenta.trim().toLowerCase();
+    if (!q) return cuentas;
+    return cuentas.filter(
+      (c) =>
+        (c.email ?? "").toLowerCase().includes(q) ||
+        (c.razon_social ?? "").toLowerCase().includes(q)
+    );
+  }, [cuentas, buscarCuenta]);
 
   const catalogoDe = (id: keyof typeof PRECIOS_OFICIALES) => planesCatalogo.find((p) => p.slug === id);
 
@@ -309,10 +377,128 @@ export function AdminSuscripcionesView({ planesOficiales, planesCatalogo, usuari
           </>
         )}
 
+        {tab === "Cuentas" && (
+          <>
+            <AdminNotice>
+              El plan de una cuenta es un metadato de facturación y se administra aquí. Esta pestaña
+              muestra únicamente identidad y plan — nunca cotizaciones, clientes ni facturas de la
+              cuenta. Todo cambio exige un motivo y queda registrado en &ldquo;Historial de
+              cambios&rdquo;.
+            </AdminNotice>
+
+            {errorCuenta && !cuentaEditando && <AdminErrorBanner mensaje={errorCuenta} />}
+
+            <div className="my-4">
+              <input
+                type="search"
+                placeholder="Buscar cuenta por correo o razón social…"
+                value={buscarCuenta}
+                onChange={(e) => setBuscarCuenta(e.target.value)}
+                className="w-full rounded-xl border px-4 py-2 text-sm"
+                style={{ borderColor: ADMIN_COLORS.slateD }}
+              />
+            </div>
+
+            {cuentaEditando && (
+              <AdminCard title={`Cambiar plan — ${cuentaEditando.email || cuentaEditando.id}`} className="mb-4">
+                {errorCuenta && <AdminErrorBanner mensaje={errorCuenta} />}
+                <p className="mb-3 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
+                  Plan actual:{" "}
+                  <strong style={{ color: ADMIN_COLORS.text }}>{labelPlanCuenta(cuentaEditando.plan_tipo)}</strong>
+                </p>
+                <label className="mb-1 block text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+                  Plan nuevo
+                </label>
+                <select
+                  value={planNuevo}
+                  onChange={(e) => setPlanNuevo(e.target.value as PlanTipoPersistido)}
+                  className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
+                  style={{ borderColor: ADMIN_COLORS.slateD, color: ADMIN_COLORS.text }}
+                >
+                  {PLANES_CUENTA.map((p) => (
+                    <option key={p} value={p}>
+                      {labelPlanCuenta(p)}
+                    </option>
+                  ))}
+                </select>
+                <label className="mb-1 block text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>
+                  Motivo (obligatorio)
+                </label>
+                <input
+                  type="text"
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  placeholder="Ej.: cortesía acordada con el cliente, corrección de cobro…"
+                  className="mb-3 w-full rounded-xl border px-3 py-2 text-sm"
+                  style={{ borderColor: ADMIN_COLORS.slateD }}
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={guardarCambioPlan}
+                    className="rounded-xl px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                    style={{ background: ADMIN_COLORS.purple }}
+                  >
+                    {pending ? "Guardando…" : "Guardar cambio"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCuentaEditando(null)}
+                    className="rounded-xl px-4 py-2 text-sm font-bold"
+                    style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.text }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </AdminCard>
+            )}
+
+            <AdminTable
+              headers={["Cuenta", "Razón social", "Plan actual", "Acción"]}
+              vacio="Sin cuentas"
+              rows={cuentasFiltradas.map((c) => [
+                c.email || c.id,
+                c.razon_social ?? "—",
+                <AdminBadge
+                  key="p"
+                  label={labelPlanCuenta(c.plan_tipo)}
+                  tone={c.plan_tipo && c.plan_tipo !== "gratis" ? "success" : "neutral"}
+                />,
+                <button
+                  key="a"
+                  type="button"
+                  onClick={() => abrirCambioPlan(c)}
+                  className="text-xs font-bold"
+                  style={{ color: ADMIN_COLORS.purple }}
+                >
+                  Cambiar plan
+                </button>,
+              ])}
+            />
+          </>
+        )}
+
         {tab === "Historial de cambios" && (
-          <div className="rounded-2xl p-8 text-center" style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}>
-            <p className="text-sm">No hay historial de cambios disponible todavía.</p>
-          </div>
+          <>
+            <AdminNotice>
+              Registro permanente de los cambios de plan por cuenta: solo se añade, nunca se
+              modifica ni se borra — ni siquiera desde el Panel Admin.
+            </AdminNotice>
+            <div className="mt-4">
+              <AdminTable
+                headers={["Fecha", "Administrador", "Cuenta", "Cambio", "Motivo"]}
+                vacio="Todavía no se ha registrado ningún cambio de plan."
+                rows={auditoria.map((a) => [
+                  new Date(a.created_at).toLocaleString("es-PE"),
+                  a.admin_email,
+                  a.cuenta_email,
+                  `${labelPlanCuenta(a.plan_anterior)} → ${labelPlanCuenta(a.plan_nuevo)}`,
+                  a.motivo,
+                ])}
+              />
+            </div>
+          </>
         )}
       </div>
 

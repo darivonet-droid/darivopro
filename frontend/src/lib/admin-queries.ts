@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PRECIOS_OFICIALES } from "@/lib/roles-planes-oficial";
 import { enviarTicketResuelto } from "@/lib/email/send";
 import { listarPlanesCatalogo } from "@/lib/planes-catalogo";
+import { listarAuditoriaPlanes } from "@/lib/plan-cuenta";
 
 export type AdminPerfilRow = {
   id: string;
@@ -294,10 +295,19 @@ export async function fetchAdminSuscripciones() {
     planesCatalogo = [];
   }
 
+  // Cuentas + historial de cambios de plan — Tarea 3 FASE A (23/07/2026).
+  // `fetchAdminUsuarios()` se reutiliza tal cual (misma fuente que el módulo
+  // Usuarios: `perfiles` + `auth.users`), no se duplica la consulta.
+  const cuentasResult = await fetchAdminUsuarios();
+  const cuentas = "data" in cuentasResult ? cuentasResult.data : [];
+  const auditoria = await listarAuditoriaPlanes();
+
   return {
     data: {
       planesOficiales: PRECIOS_OFICIALES,
       planesCatalogo,
+      cuentas,
+      auditoria,
       usuariosPorPlan: {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
         pro: rows.filter((p) => p.plan_tipo === "pro").length,
