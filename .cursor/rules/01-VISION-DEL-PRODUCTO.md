@@ -1,8 +1,10 @@
 # 01 – VISIÓN DEL PRODUCTO – ECOSISTEMA DARIVO PRO
 
-**Versión:** 2.20
+**Versión:** 2.21
 
 **Estado:** Visión oficial aprobada
+
+**Cambio principal (v2.21 — 23/07/2026, aprobación explícita del propietario):** §8 (Rol) — los **roles personalizados** dejan de estar redactados como funcionalidad genérica "condicionada al plan" y quedan como **aprobados**: el plan **Business** los habilita dentro de la secuencia Plan → Rol → Permisos. Corregidas dos contradicciones de texto detectadas en el audit de sincronización Admin↔Empresa: (1) decía que se administran "desde Darivo Pro Empresa y Darivo Pro Móvil" — Móvil **no** administra roles ni permisos (§7, Admin §16), solo Empresa; (2) decía que el límite máximo lo "define el plan" — se administra **por cuenta** desde Gestión de Suscripciones, corregido también en §19.
 
 **Cambio principal (v2.20 — 23/07/2026, pedido explícito del propietario):** queda escrito el **estándar de aislamiento de datos** (banco/fintech · RGPD-UE · Ley N.º 29733 Perú) como fuente de verdad no negociable — separación por funcionalidad y "Admin nunca ve datos operativos de cliente aunque la persona coincida entre dos cuentas". Nuevo §4.1 y nuevo bloque en §8.4 con la tabla de aislamiento entre paneles. Corrección real asociada: el Dashboard de Admin dejó de leer la tabla `cotizaciones` (lista "Actividad reciente" y serie del gráfico eliminadas), con revocación de privilegios de `service_role` sobre `cotizaciones`/`cotizacion_items` a nivel BD.
 
@@ -278,16 +280,18 @@ Actualmente existen, por defecto, en Darivo Pro Empresa:
 
 Estos roles únicamente gestionan la actividad de la empresa cliente y utilizan Darivo Pro Móvil y, cuando corresponda, Darivo Pro Empresa.
 
-### Roles personalizados (condicionados al plan)
+### Roles personalizados (condicionados al plan) — aprobado 23/07/2026
 
-Cuando el plan contratado lo permita, el **Gerente** podrá crear **roles personalizados** adicionales a Gerente y Técnico, dentro del límite máximo de roles personalizados definido por ese plan (sección 19).
+**El plan Business habilita los roles personalizados** como parte de la secuencia Plan → Rol → Permisos: es el único plan con estructura multiusuario (Básico y Pro son de un único usuario y no aplican). Dentro de ese plan, el **Gerente** puede crear roles personalizados adicionales a Gerente y Técnico, hasta el límite máximo configurado para su cuenta (sección 19).
+
+Funcionalidad **aprobada** por el propietario el 23/07/2026 y pendiente solo de construcción. Especificación funcional detallada: `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` §6.1 · `02-darivo-pro-admin/12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` §7.2.
 
 Los roles personalizados:
 
-* Se crean y administran exclusivamente por el Gerente desde Darivo Pro Empresa y Darivo Pro Móvil.
+* Se crean y administran **exclusivamente por el Gerente desde Darivo Pro Empresa**. Darivo Pro Móvil no los administra: únicamente aplica lo definido en Empresa (sección 7).
 * Nunca sustituyen ni eliminan los roles base Gerente y Técnico.
 * Están sujetos a las mismas reglas de Permisos (sección 8.4): únicamente activan o desactivan funcionalidades ya existentes, nunca crean funcionalidades nuevas.
-* Su disponibilidad y límite máximo dependen exclusivamente del plan contratado, nunca de una decisión del Gerente por sí sola.
+* Su **disponibilidad** depende exclusivamente del plan contratado (solo Business), nunca de una decisión del Gerente por sí sola. Su **límite máximo** se administra individualmente por cuenta desde Gestión de Suscripciones (sección 19), no como un número fijo idéntico para todas las cuentas del mismo plan.
 
 La definición funcional detallada de roles, permisos y roles personalizados se documenta en los MD específicos oficiales de cada producto, en sincronía con este documento.
 
@@ -952,8 +956,8 @@ Desde Darivo Pro Admin se administra toda la información relativa a:
 * características comerciales
 * precios
 * servicios y módulos del producto disponibles por plan (ej. acceso a IA, Cierre u otras funcionalidades sujetas a plan)
-* límites de roles personalizados por plan (sección 8)
-* límites de empleados/Técnicos por plan
+* límites de roles personalizados, configurables **por cuenta** (sección 8)
+* límites de empleados/Técnicos, configurables **por cuenta**
 
 ### Principio de control total
 

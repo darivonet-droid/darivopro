@@ -14,8 +14,8 @@
 
 **Referencias:**
 
-* `02-darivo-pro-admin/12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` v1.5
-* `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` v1.0
+* `02-darivo-pro-admin/12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` v1.7
+* `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` v1.7
 * `02-darivo-pro-admin/04-PANEL-ADMIN-SUSCRIPCIONES.md` §6
 * `01-VISION-DEL-PRODUCTO.md` §8 · §18
 * `01-darivo-pro-movil/07-MODULO-MAS.md` §8 (Mi Plan)
