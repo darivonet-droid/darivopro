@@ -39,14 +39,31 @@ export function adminServiceRoleDisponible(): boolean {
   return adminClientOrNull() !== null;
 }
 
-/** Serie diaria para el bloque "Actividad de la plataforma" — 00-PANEL-ADMIN-DASHBOARD.md §5/§6. */
+/**
+ * Serie diaria para el bloque "Actividad de la plataforma" — 00-PANEL-ADMIN-DASHBOARD.md §5/§6.
+ *
+ * Sin serie de cotizaciones a propósito: Admin no consulta la tabla
+ * `cotizaciones` en absoluto (dato operativo de cliente), ni siquiera agregado.
+ * Ver la nota de aislamiento en `fetchAdminDashboard()`.
+ */
 export type AdminActividadDia = {
   fecha: string; // "DD/MM"
   registros: number;
-  cotizaciones: number;
   facturas: number;
 };
 
+/**
+ * Aislamiento de datos (estándar banco · RGPD-UE · Ley N.º 29733 Perú):
+ * el Dashboard de Admin NO lee la tabla `cotizaciones` — ni filas de detalle
+ * (cliente/importe/estado) ni conteos agregados. Las cotizaciones son dato
+ * operativo de la cuenta del cliente y solo las ven el Gerente (Empresa) y el
+ * Técnico (Móvil) de esa cuenta, vía RLS con su propia sesión. Que el mismo
+ * humano tenga cuenta Admin y cuenta Móvil no da a Admin derecho a verlas.
+ * A nivel BD el rol `service_role` tiene revocado el SELECT sobre
+ * `cotizaciones`/`cotizacion_items` (migración
+ * `20260723120000_revocar_cotizaciones_service_role.sql`), así que reintroducir
+ * aquí una query a esa tabla falla en Postgres, no solo en revisión de código.
+ */
 export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
   const admin = adminClientOrNull();
   if (!admin) {
@@ -72,20 +89,12 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
     { count: totalUsuarios },
     { data: perfiles },
     { data: facturasMes },
-    { data: recientes },
-    { data: cotizacionesActividad },
     { data: facturasActividad },
     { data: tickets },
   ] = await Promise.all([
     admin.from("perfiles").select("*", { count: "exact", head: true }),
     admin.from("perfiles").select("id, plan_tipo, onboarding_done, created_at"),
     admin.from("facturas").select("total_final, inv_status, created_at").gte("created_at", isoMes),
-    admin
-      .from("cotizaciones")
-      .select("client_name, total_final, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    admin.from("cotizaciones").select("created_at").gte("created_at", isoActividad),
     admin.from("facturas").select("created_at").gte("created_at", isoActividad),
     admin.from("soporte_tickets").select("estado, ultima_respuesta_at"),
   ]);
@@ -110,7 +119,6 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
   const actividad = construirSerieActividad(
     diasActividad,
     rows.map((p) => p.created_at),
-    (cotizacionesActividad ?? []).map((c) => c.created_at),
     (facturasActividad ?? []).map((f) => f.created_at)
   );
 
@@ -124,7 +132,6 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
       ticketsAbiertos,
       ticketsEnProgreso,
       ticketsResueltos30d,
-      recientes: recientes ?? [],
       actividad,
       distribucion: {
         basico: rows.filter((p) => p.plan_tipo === "basico").length,
@@ -139,7 +146,6 @@ export async function fetchAdminDashboard(diasActividad: 7 | 30 | 90 = 30) {
 function construirSerieActividad(
   dias: number,
   fechasRegistros: string[],
-  fechasCotizaciones: string[],
   fechasFacturas: string[]
 ): AdminActividadDia[] {
   const claveDia = (iso: string) => iso.slice(0, 10); // "YYYY-MM-DD"
@@ -153,7 +159,6 @@ function construirSerieActividad(
   };
 
   const registrosPorDia = contarPorDia(fechasRegistros);
-  const cotizacionesPorDia = contarPorDia(fechasCotizaciones);
   const facturasPorDia = contarPorDia(fechasFacturas);
 
   const serie: AdminActividadDia[] = [];
@@ -166,7 +171,6 @@ function construirSerieActividad(
     serie.push({
       fecha: `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`,
       registros: registrosPorDia.get(iso) ?? 0,
-      cotizaciones: cotizacionesPorDia.get(iso) ?? 0,
       facturas: facturasPorDia.get(iso) ?? 0,
     });
   }

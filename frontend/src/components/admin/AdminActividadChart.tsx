@@ -32,8 +32,9 @@ export function AdminActividadChart({ data }: { data: AdminActividadDia[] }) {
             fontSize: 12,
           }}
         />
+        {/* Sin serie "Cotizaciones": Admin no lee la tabla `cotizaciones` (dato
+            operativo de cliente), ni siquiera como conteo agregado. */}
         <Bar dataKey="registros" name="Registros" stackId="a" fill={ADMIN_COLORS.purple} radius={[0, 0, 0, 0]} />
-        <Bar dataKey="cotizaciones" name="Cotizaciones" stackId="a" fill={ADMIN_COLORS.purpleDark} />
         <Bar
           dataKey="facturas"
           name="Facturas"
