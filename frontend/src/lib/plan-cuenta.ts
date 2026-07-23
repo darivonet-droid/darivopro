@@ -106,6 +106,60 @@ export async function cambiarPlanCuenta(input: CambioPlanCuenta): Promise<Result
   return { ok: true };
 }
 
+/**
+ * Registra en el log un cambio de plan que YA ocurrió por otra vía.
+ *
+ * Existe para los flujos donde reenrutar la escritura por `cambiarPlanCuenta()`
+ * cambiaría el comportamiento de un flujo que no es "cambiar el plan" (el alta
+ * de empresa, que fija el plan dentro de un `upsert` con más campos; la
+ * revocación automática del Business regalado a un Partner). En esos casos se
+ * **añade** el registro, no se reencamina la escritura.
+ *
+ * No es una puerta trasera al invariante: sigue prohibido escribir
+ * `perfiles.plan_tipo` en crudo desde un punto nuevo. Esto solo da rastro a los
+ * dos flujos preexistentes que ya lo hacían (ver CLAUDE.md, "Invariante —
+ * camino único auditado para el cambio de plan").
+ *
+ * Nunca lanza: quien la llama ya completó su operación real y no debe fallar
+ * por el log. Devuelve `false` y deja el fallo en `console.error` para que sea
+ * investigable.
+ */
+export async function registrarCambioPlan(input: {
+  cuentaUserId: string;
+  /** `null` cuando la cuenta es nueva y no tenía plan previo. */
+  planAnterior: PlanTipoPersistido | null;
+  planNuevo: PlanTipoPersistido;
+  motivo: string;
+  adminUserId: string;
+  adminEmail: string;
+}): Promise<boolean> {
+  try {
+    const admin = createAdminClient();
+
+    const { data: authUser } = await admin.auth.admin.getUserById(input.cuentaUserId);
+    const cuentaEmail = authUser?.user?.email ?? input.cuentaUserId;
+
+    const { error } = await admin.from("admin_plan_auditoria").insert({
+      admin_user_id: input.adminUserId,
+      admin_email: input.adminEmail,
+      cuenta_user_id: input.cuentaUserId,
+      cuenta_email: cuentaEmail,
+      plan_anterior: input.planAnterior,
+      plan_nuevo: input.planNuevo,
+      motivo: input.motivo,
+    });
+
+    if (error) {
+      console.error("admin_plan_auditoria: no se pudo registrar el cambio de plan", error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("admin_plan_auditoria: no se pudo registrar el cambio de plan", e);
+    return false;
+  }
+}
+
 /** Historial de cambios de plan — pestaña "Historial de cambios" de Admin → Suscripciones. */
 export async function listarAuditoriaPlanes(limite = 100): Promise<PlanAuditoriaRow[]> {
   let admin;
