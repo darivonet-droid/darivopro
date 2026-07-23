@@ -1,6 +1,6 @@
 "use client";
-// DARIVO PRO — Informe Semanal
-import { useEffect } from "react";
+// DARIVO PRO — Informe Semanal con descarga PDF
+import { useEffect, useState } from "react";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
@@ -62,7 +62,34 @@ function StatCard({
 }
 
 export function InformeSemanal({ datos, cargando, onLoad, esEmpresa }: Props) {
+  const [descargando, setDescargando] = useState(false);
+  const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
+
   useEffect(() => { onLoad(); }, [onLoad]);
+
+  const descargarPDF = async () => {
+    if (!datos) return;
+    setDescargando(true);
+    try {
+      const { pdf }               = await import("@react-pdf/renderer");
+      const { InformeSemanalPdf } = await import("@/lib/pdf/InformeSemanalPdf");
+      const React                 = (await import("react")).default;
+
+      type DocumentProps = import("@react-pdf/renderer").DocumentProps;
+      type PdfElem = import("react").ReactElement<DocumentProps>;
+      const elem = React.createElement(InformeSemanalPdf, { data: datos }) as PdfElem;
+      const blob = await pdf(elem).toBlob();
+
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href     = url;
+      link.download = `informe-semanal-${new Date().toISOString().slice(0, 10)}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDescargando(false);
+    }
+  };
 
   if (cargando) {
     return (
@@ -98,6 +125,23 @@ export function InformeSemanal({ datos, cargando, onLoad, esEmpresa }: Props) {
           <span className="text-xl font-black" style={{ color: T.amberD }}>{fmtPEN(pendiente)}</span>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={descargarPDF}
+        disabled={descargando}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+        style={{
+          background: accent,
+          boxShadow: esEmpresa ? "0 4px 20px rgba(124,58,237,0.35)" : "0 4px 20px rgba(37,99,235,0.35)",
+        }}
+      >
+        {descargando ? (
+          <>⏳ Generando PDF…</>
+        ) : (
+          <>📄 Descargar PDF</>
+        )}
+      </button>
     </div>
   );
 }

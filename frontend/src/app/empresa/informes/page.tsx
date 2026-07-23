@@ -1,29 +1,9 @@
-// DARIVO PRO EMPRESA — Informes (07-MODULO-MAS-EMPRESA.md §5.3). Entrada
-// directa del sidebar (posición 10) desde 22/07/2026 — antes vivía como
-// ítem del panel "Más opciones" (ruta Móvil sin capa de escritorio propia)
-// y, por un tiempo, como 3ª pestaña dentro de Cierre (retirada de ahí en
-// este mismo cambio: no debía ocultarse dentro de otra pantalla, igual que
-// el resto de "Más" — Visión §16 excepción de navegación Empresa). Reutiliza
-// el mismo componente que Cierre-Empresa ya usaba (InformesTab, esEmpresa).
-import { EmpresaShell } from "@/components/empresa/EmpresaShell";
-import { empresaModulo } from "@/lib/empresa-modules";
-import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
-import { InformesTab } from "@/components/informes/InformesTab";
+// DARIVO PRO EMPRESA — Informes ya no es entrada directa del sidebar
+// (23/07/2026, reorganización del módulo Cierre, pedido explícito del
+// propietario): vuelve a integrarse como pestaña de /empresa/cierre. Esta
+// ruta se conserva solo como redirección, para no romper enlaces guardados.
+import { redirect } from "next/navigation";
 
 export default function EmpresaInformesPage() {
-  const mod = empresaModulo("informes");
-
-  return (
-    <EmpresaShell titulo={mod.label}>
-      <p className="mb-4 text-sm" style={{ color: ADMIN_COLORS.textMid }}>
-        Semana · Mes · Trimestral — consolida Clientes, Cotizaciones y Facturación
-      </p>
-      <div
-        className="max-w-2xl rounded-2xl p-5"
-        style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
-      >
-        <InformesTab esEmpresa />
-      </div>
-    </EmpresaShell>
-  );
+  redirect("/empresa/cierre?tab=informe");
 }

@@ -32,7 +32,7 @@ export interface DatosMes {
   igvAcum:    number;
 }
 
-export interface DatosTrimestre {
+export interface DatosAnual {
   totalFacturado:   number;
   totalCobrado:     number;
   pendienteCobro:   number;
@@ -60,9 +60,8 @@ function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
 
-function startOfQuarter(d: Date): Date {
-  const q = Math.floor(d.getMonth() / 3);
-  return new Date(d.getFullYear(), q * 3, 1);
+function startOfYear(d: Date): Date {
+  return new Date(d.getFullYear(), 0, 1);
 }
 
 /* ─── Hook ─────────────────────────────────────────────────── */
@@ -71,7 +70,7 @@ export function useInformes() {
 
   const [semana,     setSemana]     = useState<DatosSemana     | null>(null);
   const [mes,        setMes]        = useState<DatosMes        | null>(null);
-  const [trimestre,  setTrimestre]  = useState<DatosTrimestre  | null>(null);
+  const [anual,      setAnual]      = useState<DatosAnual      | null>(null);
   const [cargando,   setCargando]   = useState(false);
 
   /* ─── SEMANAL ─────────────────────────────────── */
@@ -157,15 +156,15 @@ export function useInformes() {
     setCargando(false);
   }, [supabase]);
 
-  /* ─── TRIMESTRAL ────────────────────────────────── */
-  const cargarTrimestre = useCallback(async () => {
+  /* ─── ANUAL ──────────────────────────────────── */
+  const cargarAnual = useCallback(async () => {
     setCargando(true);
     const hoy   = new Date();
-    const sq    = startOfQuarter(hoy);
+    const sy    = startOfYear(hoy);
 
     const [facsRes, presRes, perfilRes] = await Promise.all([
-      supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", sq.toISOString()),
-      supabase.from("cotizaciones").select("status, client_name, total_final, cotizacion_items(cat_label)").gte("created_at", sq.toISOString()),
+      supabase.from("facturas").select("total_final, inv_status, created_at").gte("created_at", sy.toISOString()),
+      supabase.from("cotizaciones").select("status, client_name, total_final, cotizacion_items(cat_label)").gte("created_at", sy.toISOString()),
       supabase.from("perfiles").select("razon_social, ruc").single(),
     ]);
 
@@ -200,7 +199,7 @@ export function useInformes() {
     }
     const categoriaTop = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
 
-    setTrimestre({
+    setAnual({
       totalFacturado, totalCobrado, pendienteCobro, igvAcumulado,
       numCotizaciones, numFacturas, tasaAprobacion,
       clientePrincipal, categoriaTop,
@@ -212,5 +211,5 @@ export function useInformes() {
     setCargando(false);
   }, [supabase]);
 
-  return { semana, mes, trimestre, cargando, cargarSemana, cargarMes, cargarTrimestre };
+  return { semana, mes, anual, cargando, cargarSemana, cargarMes, cargarAnual };
 }

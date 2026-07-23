@@ -22,20 +22,20 @@ import { useGastos, type Gasto } from "@/hooks/useGastos";
 import { CATEGORIAS_GASTO } from "@/components/cierre/CierreView";
 import type { GastoIAExtraccion } from "@/lib/gasto-ia";
 import { useAppStore } from "@/store/useAppStore";
+import { InformesTab } from "@/components/informes/InformesTab";
 
-// Corrección 22/07/2026 (Visión §16 excepción de navegación Empresa): la
-// pestaña "Informes" que vivía aquí (Tarea 5c, 17/07/2026) se retira —
-// "Informes" tiene ahora su propia entrada directa del sidebar
-// (07-MODULO-MAS-EMPRESA.md §5.3, `/empresa/informes`), consistente con
-// el resto de funcionalidades que antes se agrupaban bajo "Más": no deben
-// quedar ocultas dentro de otra pantalla. Mismo componente (InformesTab),
-// solo cambia dónde se monta. No se tocó nada de la lógica/JSX de Gastos
-// ni Expediente Mensual.
-type Tab = "gastos" | "expediente";
+// Corrección 23/07/2026 (pedido explícito del propietario, reorganización
+// del módulo Cierre): "Informes" vuelve a integrarse aquí como 3ª pestaña
+// — revierte la Corrección 22/07/2026 que la había retirado hacia una
+// entrada directa del sidebar. Mismo componente (InformesTab, esEmpresa),
+// solo cambia dónde se monta. No se tocó la lógica/JSX de Gastos ni
+// Expediente Mensual salvo la generación real del ZIP (antes placeholder).
+type Tab = "gastos" | "expediente" | "informe";
 
 const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
 interface CierreViewEscritorioProps {
+  tabInicial?: Tab;
   resumenExpediente: {
     cotizaciones: number;
     facturas: number;
@@ -43,8 +43,8 @@ interface CierreViewEscritorioProps {
   };
 }
 
-export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorioProps) {
-  const [tab, setTab] = useState<Tab>("gastos");
+export function CierreViewEscritorio({ tabInicial, resumenExpediente }: CierreViewEscritorioProps) {
+  const [tab, setTab] = useState<Tab>(tabInicial ?? "gastos");
   const { gastos, listo, agregarGasto, gastosDelMes } = useGastos();
   const [registrando, setRegistrando] = useState(false);
   const [prefill, setPrefill] = useState<Partial<GastoIAExtraccion> | null>(null);
@@ -52,6 +52,9 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
   const [gastoSeleccionado, setGastoSeleccionado] = useState<Gasto | null>(null);
   const [verTodos, setVerTodos] = useState(false);
   const [expedienteGenerado, setExpedienteGenerado] = useState(false);
+  const [generandoZip, setGenerandoZip] = useState(false);
+  const [zipUrl, setZipUrl] = useState<string | null>(null);
+  const [zipNombre, setZipNombre] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mostrarToast = useAppStore((s) => s.mostrarToast);
   const mostrarUpgrade = useAppStore((s) => s.mostrarUpgrade);
@@ -101,22 +104,63 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
   const totalGastosMes = gastosMes.reduce((s, g) => s + g.total, 0);
   const listaGastos = verTodos ? gastos : gastos.slice(0, 5);
 
+  const generarExpediente = async () => {
+    setGenerandoZip(true);
+    try {
+      const res = await fetch("/api/expediente/zip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mes: mesExp, anio: anioExp, gastos: gastosMes }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        mostrarToast(json.error ?? "No se pudo generar el expediente", "error");
+        return;
+      }
+      const blob = await res.blob();
+      if (zipUrl) URL.revokeObjectURL(zipUrl);
+      const url = URL.createObjectURL(blob);
+      const nombre = `expediente-${MESES[mesExp].toLowerCase()}-${anioExp}.zip`;
+      setZipUrl(url);
+      setZipNombre(nombre);
+      setExpedienteGenerado(true);
+      descargarZip(url, nombre);
+      mostrarToast("Expediente generado ✓");
+    } catch {
+      mostrarToast("No se pudo generar el expediente", "error");
+    } finally {
+      setGenerandoZip(false);
+    }
+  };
+
+  const descargarZip = (url: string, nombre: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = nombre;
+    link.click();
+  };
+
   return (
     <div className="flex flex-col gap-5">
       {/* Pestañas (§3/§4) */}
       <div style={{ display: "inline-flex", borderRadius: 14, padding: 4, background: ADMIN_COLORS.slate, width: "fit-content" }}>
-        {(["gastos", "expediente"] as const).map((t) => (
+        {(["gastos", "expediente", "informe"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             style={{ padding: "9px 20px", borderRadius: 10, fontSize: 13, fontWeight: 800, border: "none", cursor: "pointer", background: tab === t ? ADMIN_COLORS.white : "transparent", color: tab === t ? CIERRE_ACCENT : ADMIN_COLORS.textMid, boxShadow: tab === t ? "0 1px 6px rgba(0,0,0,0.08)" : "none" }}
           >
-            {t === "gastos" ? "Gastos" : "Expediente Mensual"}
+            {t === "gastos" ? "Gastos" : t === "expediente" ? "Expediente Mensual" : "Informe"}
           </button>
         ))}
       </div>
 
+      {tab === "informe" ? (
+        <div style={{ maxWidth: 720, borderRadius: 16, padding: 20, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
+          <InformesTab esEmpresa />
+        </div>
+      ) : (
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
         {/* Columna principal ~58% */}
         <div style={{ flex: "1 1 58%", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -237,10 +281,11 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
 
               <button
                 type="button"
-                onClick={() => setExpedienteGenerado(true)}
-                style={{ width: "100%", padding: 16, borderRadius: 16, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 800, color: ADMIN_COLORS.white, background: `linear-gradient(135deg, ${ADMIN_COLORS.purple}, #9333EA)`, boxShadow: `0 4px 16px ${ADMIN_COLORS.purple}44` }}
+                onClick={generarExpediente}
+                disabled={generandoZip}
+                style={{ width: "100%", padding: 16, borderRadius: 16, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 800, color: ADMIN_COLORS.white, background: `linear-gradient(135deg, ${ADMIN_COLORS.purple}, #9333EA)`, boxShadow: `0 4px 16px ${ADMIN_COLORS.purple}44`, opacity: generandoZip ? 0.7 : 1 }}
               >
-                Generar expediente
+                {generandoZip ? "Generando…" : "Generar expediente"}
               </button>
             </>
           )}
@@ -275,8 +320,28 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
                 <StatExp label="Gastos" valor={String(gastosMes.length)} />
                 <StatExp label="Total gastos" valor={fmtPEN(totalGastosMes)} />
               </div>
-              <p style={{ marginTop: 12, fontSize: 11, color: ADMIN_COLORS.textLight }}>Exportación PDF/ZIP — pendiente integración (Tarea 07/09)</p>
-              <button type="button" onClick={() => setExpedienteGenerado(false)} style={{ marginTop: 12, width: "100%", padding: "11px 0", borderRadius: 12, border: `1.5px solid ${ADMIN_COLORS.slateD}`, background: "none", color: ADMIN_COLORS.textMid, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+              <p style={{ marginTop: 12, fontSize: 11, color: ADMIN_COLORS.textLight }}>Expediente guardado — incluye facturas emitidas (PDF) y gastos registrados del período en un solo ZIP.</p>
+              <button
+                type="button"
+                onClick={() => zipUrl && descargarZip(zipUrl, zipNombre)}
+                disabled={!zipUrl}
+                style={{ marginTop: 12, width: "100%", padding: "12px 0", borderRadius: 12, border: "none", background: CIERRE_ACCENT, color: ADMIN_COLORS.white, fontSize: 13, fontWeight: 800, cursor: "pointer", opacity: zipUrl ? 1 : 0.5 }}
+              >
+                ⬇ Descargar ZIP
+              </button>
+              <button
+                type="button"
+                disabled
+                title="Envío a gestoría — próximamente"
+                style={{ marginTop: 8, width: "100%", padding: "11px 0", borderRadius: 12, border: `1.5px solid ${ADMIN_COLORS.slateD}`, background: "none", color: ADMIN_COLORS.textLight, fontSize: 12, fontWeight: 700, cursor: "not-allowed" }}
+              >
+                Enviar a gestoría (próximamente)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setExpedienteGenerado(false); if (zipUrl) URL.revokeObjectURL(zipUrl); setZipUrl(null); }}
+                style={{ marginTop: 8, width: "100%", padding: "11px 0", borderRadius: 12, border: `1.5px solid ${ADMIN_COLORS.slateD}`, background: "none", color: ADMIN_COLORS.textMid, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+              >
                 Generar otro expediente
               </button>
             </div>
@@ -285,6 +350,7 @@ export function CierreViewEscritorio({ resumenExpediente }: CierreViewEscritorio
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

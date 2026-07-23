@@ -4,16 +4,16 @@ import { useCallback, useState } from "react";
 import { T } from "@/lib/theme";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { useInformes } from "@/hooks/useInformes";
-import { InformeSemanal }   from "./InformeSemanal";
-import { InformeMensual }   from "./InformeMensual";
-import { InformeTrimestral } from "./InformeTrimestral";
+import { InformeSemanal } from "./InformeSemanal";
+import { InformeMensual } from "./InformeMensual";
+import { InformeAnual }   from "./InformeAnual";
 
-type SubTab = "semanal" | "mensual" | "trimestral";
+type SubTab = "semanal" | "mensual" | "anual";
 
 const SUBTABS: { id: SubTab; label: string }[] = [
-  { id: "semanal",     label: "Semanal"     },
-  { id: "mensual",     label: "Mensual"     },
-  { id: "trimestral",  label: "Trimestral"  },
+  { id: "semanal", label: "Semanal" },
+  { id: "mensual", label: "Mensual" },
+  { id: "anual",   label: "Anual"   },
 ];
 
 interface InformesTabProps {
@@ -21,7 +21,7 @@ interface InformesTabProps {
    * selector de sub-pestaña activo use ADMIN_COLORS — Móvil sigue con el
    * azul por defecto (22/07/2026, corrección de la migración parcial de
    * Empresa a ADMIN_COLORS). Nota: los 3 componentes hijos (InformeSemanal/
-   * Mensual/Trimestral) siguen en azul de Fable 5, sin migrar — fuera de
+   * Mensual/Anual) siguen en azul de Fable 5, sin migrar — fuera de
    * alcance de esta corrección, ver hallazgo adicional en
    * docs-internos/tareas/2026-07-22-verificacion-admin-colors-empresa.md. */
   esEmpresa?: boolean;
@@ -30,13 +30,13 @@ interface InformesTabProps {
 export function InformesTab({ esEmpresa }: InformesTabProps = {}) {
   const [sub, setSub] = useState<SubTab>("semanal");
   const {
-    semana, mes, trimestre, cargando,
-    cargarSemana, cargarMes, cargarTrimestre,
+    semana, mes, anual, cargando,
+    cargarSemana, cargarMes, cargarAnual,
   } = useInformes();
 
-  const onLoadSemanal    = useCallback(() => { if (!semana)    cargarSemana();    }, [semana,    cargarSemana]);
-  const onLoadMensual    = useCallback(() => { if (!mes)       cargarMes();       }, [mes,       cargarMes]);
-  const onLoadTrimestral = useCallback(() => { if (!trimestre) cargarTrimestre(); }, [trimestre, cargarTrimestre]);
+  const onLoadSemanal = useCallback(() => { if (!semana) cargarSemana(); }, [semana, cargarSemana]);
+  const onLoadMensual = useCallback(() => { if (!mes)    cargarMes();    }, [mes,    cargarMes]);
+  const onLoadAnual    = useCallback(() => { if (!anual)  cargarAnual();  }, [anual,  cargarAnual]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,9 +64,9 @@ export function InformesTab({ esEmpresa }: InformesTabProps = {}) {
       </div>
 
       {/* Contenido */}
-      {sub === "semanal"    && <InformeSemanal    datos={semana}    cargando={cargando} onLoad={onLoadSemanal}    esEmpresa={esEmpresa} />}
-      {sub === "mensual"    && <InformeMensual    datos={mes}       cargando={cargando} onLoad={onLoadMensual}    esEmpresa={esEmpresa} />}
-      {sub === "trimestral" && <InformeTrimestral datos={trimestre} cargando={cargando} onLoad={onLoadTrimestral} esEmpresa={esEmpresa} />}
+      {sub === "semanal" && <InformeSemanal datos={semana} cargando={cargando} onLoad={onLoadSemanal} esEmpresa={esEmpresa} />}
+      {sub === "mensual" && <InformeMensual datos={mes}    cargando={cargando} onLoad={onLoadMensual} esEmpresa={esEmpresa} />}
+      {sub === "anual"   && <InformeAnual   datos={anual}  cargando={cargando} onLoad={onLoadAnual}   esEmpresa={esEmpresa} />}
 
     </div>
   );

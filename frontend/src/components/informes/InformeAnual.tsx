@@ -1,16 +1,16 @@
 "use client";
-// DARIVO PRO — Informe Trimestral con descarga PDF
+// DARIVO PRO — Informe Anual con descarga PDF
 import { useEffect, useState } from "react";
 import { fmtPEN } from "@/lib/utils";
 import { T } from "@/lib/theme";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
-import type { DatosTrimestre } from "@/hooks/useInformes";
+import type { DatosAnual } from "@/hooks/useInformes";
 
 interface Props {
-  datos:    DatosTrimestre | null;
+  datos:    DatosAnual | null;
   cargando: boolean;
   onLoad:   () => void;
-  /** Empresa desktop (Cierre → Informes) pasa true para que el navy/azul de
+  /** Empresa desktop (Cierre → Informe) pasa true para que el navy/azul de
    * Fable 5 (badge de período, títulos de sección, stats, destacados, botón
    * PDF) use ADMIN_COLORS — Móvil sigue con su paleta por defecto
    * (22/07/2026, hallazgo adicional de la tarea de InformesTab). */
@@ -40,12 +40,11 @@ function SectionTitle({ children, esEmpresa }: { children: React.ReactNode; esEm
   );
 }
 
-function trimLabel() {
-  const q = Math.floor(new Date().getMonth() / 3) + 1;
-  return `Q${q} ${new Date().getFullYear()}`;
+function anioLabel() {
+  return String(new Date().getFullYear());
 }
 
-export function InformeTrimestral({ datos, cargando, onLoad, esEmpresa }: Props) {
+export function InformeAnual({ datos, cargando, onLoad, esEmpresa }: Props) {
   const [descargando, setDescargando] = useState(false);
   const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
   const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
@@ -58,19 +57,19 @@ export function InformeTrimestral({ datos, cargando, onLoad, esEmpresa }: Props)
     setDescargando(true);
     try {
       // Importación dinámica para evitar SSR del renderer
-      const { pdf }                    = await import("@react-pdf/renderer");
-      const { InformeTrimestralPdf }   = await import("@/lib/pdf/InformeTrimestralPdf");
-      const React                      = (await import("react")).default;
+      const { pdf }              = await import("@react-pdf/renderer");
+      const { InformeAnualPdf }  = await import("@/lib/pdf/InformeAnualPdf");
+      const React                = (await import("react")).default;
 
       type DocumentProps = import("@react-pdf/renderer").DocumentProps;
       type PdfElem = import("react").ReactElement<DocumentProps>;
-      const elem = React.createElement(InformeTrimestralPdf, { data: datos }) as PdfElem;
+      const elem = React.createElement(InformeAnualPdf, { data: datos }) as PdfElem;
       const blob = await pdf(elem).toBlob();
 
       const url  = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href     = url;
-      link.download = `informe-trimestral-${trimLabel()}.pdf`;
+      link.download = `informe-anual-${anioLabel()}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -99,7 +98,7 @@ export function InformeTrimestral({ datos, cargando, onLoad, esEmpresa }: Props)
           className="rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide"
           style={{ background: accent, color: T.white }}
         >
-          {trimLabel()}
+          {anioLabel()}
         </span>
         <span className="text-xs" style={{ color: T.textLight }}>
           {datos.empresa.razonSocial}
@@ -138,7 +137,7 @@ export function InformeTrimestral({ datos, cargando, onLoad, esEmpresa }: Props)
 
       {/* Destacados */}
       <div className="rounded-2xl bg-white px-4 py-4" style={{ boxShadow: "0 2px 12px rgba(10,22,40,0.07)" }}>
-        <SectionTitle esEmpresa={esEmpresa}>Destacados del trimestre</SectionTitle>
+        <SectionTitle esEmpresa={esEmpresa}>Destacados del año</SectionTitle>
         <div
           className="mb-3 rounded-xl px-3 py-3"
           style={{ background: accentPale }}

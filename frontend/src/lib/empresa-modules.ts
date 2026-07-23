@@ -13,14 +13,22 @@
  * Admin (00-PANEL-ADMIN-DASHBOARD.md §4, sin agrupador intermedio). "IA"
  * deja de estar oculta del sidebar por la misma razón (ya no depende de
  * "Categorías" dentro de Más para tener acceso).
+ *
+ * "Informes" deja de tener entrada directa (23/07/2026, pedido explícito
+ * del propietario — reorganización del módulo Cierre): vuelve a integrarse
+ * como 3ª pestaña dentro de "Cierre" (09-MODULO-CIERRE-EMPRESA.md §3),
+ * junto a Gastos y Expediente Mensual. La ruta /empresa/informes redirige
+ * a /empresa/cierre?tab=informe en vez de desaparecer, para no romper
+ * enlaces guardados.
  */
 // Doc fuente de cada módulo (para referencia de desarrollo, no vive en el
 // objeto de navegación para que nunca pueda terminar renderizado en UI):
 // Inicio→02-MODULO-INICIO-EMPRESA, Clientes→03-MODULO-CLIENTES-EMPRESA,
-// Facturas→06-MODULO-FACTURAS-EMPRESA, Cierre→09-MODULO-CIERRE-EMPRESA,
-// Darivo→08-MODULO-IA-EMPRESA, Empleados→10-MODULO-EMPLEADOS-EMPRESA,
-// Roles y Permisos→11-ROLES-PLANES-PERMISOS-EMPRESA, Catálogo·Mis Tarifas /
-// Empresa / Informes / Documentos / Mi Plan / Soporte / Configuración →
+// Facturas→06-MODULO-FACTURAS-EMPRESA, Cierre→09-MODULO-CIERRE-EMPRESA
+// (incluye Informes desde 23/07/2026), Darivo→08-MODULO-IA-EMPRESA,
+// Empleados→10-MODULO-EMPLEADOS-EMPRESA, Roles y Permisos→
+// 11-ROLES-PLANES-PERMISOS-EMPRESA, Catálogo·Mis Tarifas / Empresa /
+// Documentos / Mi Plan / Soporte / Configuración →
 // 07-MODULO-MAS-EMPRESA §5.1–§5.7 (todos bajo .cursor/rules/03-darivo-pro-empresa/).
 export const EMPRESA_NAV = [
   { href: "/empresa", label: "Inicio", ocultoEnSidebar: false },
@@ -32,7 +40,6 @@ export const EMPRESA_NAV = [
   { href: "/empresa/empleados", label: "Empleados", ocultoEnSidebar: false },
   { href: "/empresa/roles", label: "Roles y Permisos", ocultoEnSidebar: false },
   { href: "/empresa/empresa", label: "Empresa", ocultoEnSidebar: false },
-  { href: "/empresa/informes", label: "Informes", ocultoEnSidebar: false },
   { href: "/empresa/documentos", label: "Documentos", ocultoEnSidebar: false },
   { href: "/empresa/plan", label: "Mi Plan", ocultoEnSidebar: false },
   { href: "/empresa/soporte", label: "Soporte", ocultoEnSidebar: false },
@@ -49,7 +56,6 @@ export type EmpresaModuloSlug =
   | "empleados"
   | "roles"
   | "empresa"
-  | "informes"
   | "documentos"
   | "plan"
   | "soporte"
@@ -65,11 +71,10 @@ const SLUG_INDEX: Record<EmpresaModuloSlug, number> = {
   empleados: 6,
   roles: 7,
   empresa: 8,
-  informes: 9,
-  documentos: 10,
-  plan: 11,
-  soporte: 12,
-  configuracion: 13,
+  documentos: 9,
+  plan: 10,
+  soporte: 11,
+  configuracion: 12,
 };
 
 export function empresaModulo(slug: EmpresaModuloSlug) {

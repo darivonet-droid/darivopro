@@ -51,9 +51,9 @@
 | 2 | 03 | Clientes | `03-MODULO-CLIENTES-EMPRESA.md` v1.1 | ✅ | ✅ Producción completada |
 | 3 | 05 | Cotizaciones | `05-MODULO-COTIZACIONES-EMPRESA.md` v1.3 | ✅ | ✅ Producción completada — pantalla "lista global" (§3.1) pendiente de imagen |
 | 4 | 06 | Facturas | `06-MODULO-FACTURAS-EMPRESA.md` v1.4 | ✅ | ✅ Producción completada |
-| 5 | 09 | Cierre | `09-MODULO-CIERRE-EMPRESA.md` v1.0 | ✅ | ✅ Producción completada |
+| 5 | 09 | Cierre — incluye Informe (§7, desde 23/07/2026) | `09-MODULO-CIERRE-EMPRESA.md` v1.1 | ⏳ pendiente actualizar | ✅ Producción completada — pendiente verificación visual v1.1 |
 | 6 | 08 | IA | `08-MODULO-IA-EMPRESA.md` v1.4 | ✅ | ✅ Producción completada |
-| 7 | 07 | Navegación directa (ex-Más) — 7 pantallas (§3) | `07-MODULO-MAS-EMPRESA.md` v2.0 | ⏳ 7 pendientes | ✅ Documentación reorganizada — imágenes pendientes |
+| 7 | 07 | Navegación directa (ex-Más) — 6 pantallas (§3) | `07-MODULO-MAS-EMPRESA.md` v2.1 | ⏳ 6 pendientes | ✅ Documentación reorganizada — imágenes pendientes |
 | 8 | 10 | Empleados | `10-MODULO-EMPLEADOS-EMPRESA.md` v1.0 | ✅ | ✅ Producción completada |
 | 9 | 11 | Roles y Permisos | `11-ROLES-PLANES-PERMISOS-EMPRESA.md` v1.6 | ✅ | ✅ Producción completada |
 
@@ -61,7 +61,9 @@
 
 **Corrección de navegación (22/07/2026):** el módulo "Más" (fila 7) se eliminó como pantalla — sus 7 funcionalidades ahora son entradas directas del sidebar (posiciones 6, 9–14). Detalle: `docs-internos/tareas/2026-07-22-eliminacion-modulo-mas-navegacion-directa.md`.
 
-**Completados:** **9 / 9 módulos con documentación** (8 con imagen completa; fila 7 con 7 imágenes pendientes tras la reorganización de navegación).
+**Reorganización Cierre/Informes (23/07/2026, pedido explícito del propietario):** Informes deja de ser entrada directa (fila 7 pasa de 7 a 6 pantallas) y se reintegra como 3ª pestaña de Cierre (fila 5). Sidebar Empresa pasa de 14 a 13 entradas. Detalle: `docs-internos/tareas/2026-07-23-reorganizacion-modulo-cierre-informes.md`.
+
+**Completados:** **9 / 9 módulos con documentación** (7 con imagen completa; fila 5 pendiente de actualizar imagen tras añadir la pestaña Informe, fila 7 con 6 imágenes pendientes tras la reorganización de navegación).
 
 **Estado producción:** ✅ **Proyecto Documental Finalizado**
 
@@ -91,12 +93,14 @@ La **identificación** de necesidades API (§8) sí forma parte de esta fase. No
 | 03 Clientes | `03 - MODULO CLIENTES - DARIVO PRO EMPRESA.png` | ✅ |
 | 05 Cotizaciones | `05 - MODULO COTIZACIONES - DARIVO PRO EMPRESA.png` | ✅ |
 | 06 Facturas | `06 - MODULO FACTURAS - DARIVO PRO EMPRESA.png` | ✅ |
-| 09 Cierre | `09 - MODULO CIERRE - DARIVO PRO EMPRESA.png` | ✅ |
+| 09 Cierre | `09 - MODULO CIERRE - DARIVO PRO EMPRESA.png` | ⏳ desactualizada (23/07/2026, falta pestaña Informe) |
 | 08 IA | `08 - MODULO IA - DARIVO PRO EMPRESA.png` | ✅ |
 | 10 Empleados | `10 - MODULO EMPLEADOS - DARIVO PRO EMPRESA.png` | ✅ |
 | 11 Roles y Permisos | `11 - MODULO ROLES Y PERMISOS - DARIVO PRO EMPRESA.png` | ✅ |
 
-**07 — Navegación directa (ex-Más), 22/07/2026:** `07 - MODULO MAS - DARIVO PRO EMPRESA.png` queda **obsoleta** (documentaba un layout de tabs + panel lateral que ya no existe). Pendientes **7 imágenes nuevas**, una por pantalla (`07-MODULO-MAS-EMPRESA.md` §5.1–§5.7): Catálogo·Mis Tarifas, Empresa, Informes, Documentos, Mi Plan, Soporte, Configuración. No bloquea la documentación (Reglas §7.1).
+**07 — Navegación directa (ex-Más), 22/07/2026:** `07 - MODULO MAS - DARIVO PRO EMPRESA.png` queda **obsoleta** (documentaba un layout de tabs + panel lateral que ya no existe). Pendientes **6 imágenes nuevas**, una por pantalla (`07-MODULO-MAS-EMPRESA.md` §5.1, §5.2, §5.4–§5.7): Catálogo·Mis Tarifas, Empresa, Documentos, Mi Plan, Soporte, Configuración. No bloquea la documentación (Reglas §7.1).
+
+**09 — Cierre, 23/07/2026:** `09 - MODULO CIERRE - DARIVO PRO EMPRESA.png` queda **desactualizada** (no incluye la 3ª pestaña Informe). Pendiente imagen nueva con las 3 pestañas (`09-MODULO-CIERRE-EMPRESA.md` §2). No bloquea la documentación (Reglas §7.1).
 
 **Nomenclatura oficial:** formato ASCII `NN - MODULO … - DARIVO PRO EMPRESA.png` (coherente en los 8 módulos con imagen vigente).
 

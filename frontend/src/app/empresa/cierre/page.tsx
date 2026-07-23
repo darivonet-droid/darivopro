@@ -5,7 +5,11 @@ import { createServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmpresaCierrePage() {
+interface Props {
+  searchParams: { tab?: string };
+}
+
+export default async function EmpresaCierrePage({ searchParams }: Props) {
   const supabase = createServerClient();
   const inicioMes = new Date();
   inicioMes.setDate(1);
@@ -32,10 +36,12 @@ export default async function EmpresaCierrePage() {
     .reduce((s, f) => s + Number(f.total_final ?? 0), 0);
 
   const mod = empresaModulo("cierre");
+  const tabInicial = searchParams.tab === "informe" || searchParams.tab === "expediente" ? searchParams.tab : "gastos";
 
   return (
     <EmpresaShell titulo={mod.label}>
       <CierreViewEscritorio
+        tabInicial={tabInicial}
         resumenExpediente={{
           cotizaciones: cotizaciones ?? 0,
           facturas: facturas ?? 0,

@@ -1,6 +1,6 @@
 "use client";
-// DARIVO PRO — Informe Mensual
-import { useEffect } from "react";
+// DARIVO PRO — Informe Mensual con descarga PDF
+import { useEffect, useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -24,7 +24,32 @@ export function InformeMensual({ datos, cargando, onLoad, esEmpresa }: Props) {
   const accent = esEmpresa ? ADMIN_COLORS.purple : T.blue;
   const accentPale = esEmpresa ? ADMIN_COLORS.purplePale : T.bluePale;
   const darkText = esEmpresa ? ADMIN_COLORS.text : T.navy;
+  const [descargando, setDescargando] = useState(false);
   useEffect(() => { onLoad(); }, [onLoad]);
+
+  const descargarPDF = async () => {
+    if (!datos) return;
+    setDescargando(true);
+    try {
+      const { pdf }               = await import("@react-pdf/renderer");
+      const { InformeMensualPdf } = await import("@/lib/pdf/InformeMensualPdf");
+      const React                 = (await import("react")).default;
+
+      type DocumentProps = import("@react-pdf/renderer").DocumentProps;
+      type PdfElem = import("react").ReactElement<DocumentProps>;
+      const elem = React.createElement(InformeMensualPdf, { data: datos }) as PdfElem;
+      const blob = await pdf(elem).toBlob();
+
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href     = url;
+      link.download = `informe-mensual-${new Date().toISOString().slice(0, 7)}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDescargando(false);
+    }
+  };
 
   if (cargando) {
     return (
@@ -136,6 +161,23 @@ export function InformeMensual({ datos, cargando, onLoad, esEmpresa }: Props) {
           </div>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={descargarPDF}
+        disabled={descargando}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-60"
+        style={{
+          background: accent,
+          boxShadow: esEmpresa ? "0 4px 20px rgba(124,58,237,0.35)" : "0 4px 20px rgba(37,99,235,0.35)",
+        }}
+      >
+        {descargando ? (
+          <>⏳ Generando PDF…</>
+        ) : (
+          <>📄 Descargar PDF</>
+        )}
+      </button>
 
     </div>
   );

@@ -1,8 +1,12 @@
 # 09 – MÓDULO CIERRE – DARIVO PRO EMPRESA
 
-**Versión:** 1.0
+**Versión:** 1.1
 
-**Estado:** ✅ Producción completada — imagen oficial (fase global §7 — 02/07/2026).
+**Changelog:**
+- v1.1 (23/07/2026) — Reorganización pedida por el propietario: el módulo "Informes" (antes entrada directa del sidebar, `07-MODULO-MAS-EMPRESA.md` §5.3) se retira de ahí y se integra como 3ª pestaña de Cierre (§7). Periodicidad Semanal/Mensual/Anual (antes Trimestral en código, desalineado con esta MD). §6 (Expediente Mensual) corregido para reflejar el comportamiento real: solo ZIP descargable (facturas SUNAT en PDF + gastos en CSV + resumen), sin "Ver expediente" ni exportación PDF/Carpeta organizada separadas — no documentadas como implementadas hasta que existan. Envío a gestoría: pendiente, fuera de alcance de esta versión.
+- v1.0 (02/07/2026) — Versión original.
+
+**Estado:** ✅ Producción completada — imagen oficial (fase global §7 — 02/07/2026). ⚠️ Pendiente verificación visual de los cambios de v1.1 (ver §15).
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §5, §15, §17 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.5 · `01-darivo-pro-movil/09-MODULO-CIERRE.md` v2.0
 
@@ -32,9 +36,9 @@
 
 # 1. Objetivo
 
-Módulo compartido **Cierre** en escritorio: registro de **gastos**, **expediente mensual** del período y **exportación** para la gestoría (`01-VISION-DEL-PRODUCTO.md` §15).
+Módulo compartido **Cierre** en escritorio: registro de **gastos**, **expediente mensual** del período, **exportación** para la gestoría e **informe** de actividad (`01-VISION-DEL-PRODUCTO.md` §15).
 
-Equivalente funcional Móvil: pestañas **Gastos** y **Expediente Mensual** (Móvil §5–§12).
+Equivalente funcional Móvil: pestañas **Gastos** y **Expediente Mensual** (Móvil §5–§12). La pestaña **Informe** (§7) es exclusiva de Empresa — reutiliza el mismo componente que Móvil usa en Más → Informes, sin cambiar la lógica de negocio.
 
 **Acceso:** sidebar posición **Cierre** (5) · equivalente Móvil bottom nav posición 5.
 
@@ -61,10 +65,12 @@ Cuando exista, prevalecerá siempre este MD ante cualquier diferencia con la ima
 | Elemento | Valor |
 |----------|-------|
 | Sidebar | Posición **Cierre** (5) |
-| Pestañas superiores | **Gastos** · **Expediente Mensual** (Móvil §5) |
-| Equivalente Móvil | Bottom nav posición 5 → mismas dos pestañas |
+| Pestañas superiores | **Gastos** · **Expediente Mensual** · **Informe** (23/07/2026) |
+| Equivalente Móvil | Bottom nav posición 5 → solo Gastos y Expediente Mensual (Móvil §5) |
 
-Las pestañas son **funcionalmente idénticas** a Móvil; solo cambia la presentación escritorio.
+Las pestañas **Gastos** y **Expediente Mensual** son **funcionalmente idénticas** a Móvil; solo cambia la presentación escritorio. **Informe** (§7) es exclusiva de esta capa Empresa.
+
+`/empresa/informes` (ruta directa anterior, 22/07/2026–23/07/2026) queda como redirección a `/empresa/cierre?tab=informe`, no se elimina.
 
 ---
 
@@ -78,7 +84,7 @@ Las pestañas son **funcionalmente idénticas** a Móvil; solo cambia la present
 ┌─────────────┬──────────────────────────────────────────────────┐
 │  SIDEBAR    │  HEADER — Cierre · notificaciones · usuario      │
 │  240px      ├──────────────────────────────────────────────────┤
-│             │  PESTAÑAS: [ Gastos ] [ Expediente Mensual ]    │
+│             │  PESTAÑAS: [ Gastos ] [ Expediente Mensual ] [ Informe ] │
 │  Cierre ●   ├────────────────────────┬─────────────────────────┤
 │             │  COLUMNA PRINCIPAL ~58%│  PANEL LATERAL ~42%     │
 │             │  (contenido pestaña)   │  (detalle / resumen)    │
@@ -86,7 +92,8 @@ Las pestañas son **funcionalmente idénticas** a Móvil; solo cambia la present
 ```
 
 * En **Gastos**, el panel lateral muestra el flujo **Revisar gasto** (pasos Documento → Información → Revisar → Guardar) cuando hay registro activo; vacío en reposo.
-* En **Expediente Mensual**, el panel lateral muestra resumen del período, estado «¡Expediente listo!» y formatos de exportación tras generar.
+* En **Expediente Mensual**, el panel lateral muestra resumen del período, estado «¡Expediente listo!» y la descarga del ZIP tras generar.
+* En **Informe** (§7) no hay panel lateral con detalle/resumen — usa el layout de una sola columna del antiguo módulo Informes (tarjeta blanca centrada, máx. 720px).
 
 ---
 
@@ -224,45 +231,71 @@ Presentación: dos `<select>` o date-pickers en fila (formulario amplio Admin).
 
 ## 6.2 Panel lateral — Expediente generado
 
-Tras generación correcta (Móvil §11):
+Tras generación correcta:
 
 | Elemento | Contenido |
 |----------|-----------|
-| Iconografía | Éxito (carpeta confirmada) |
+| Iconografía | Éxito (✓ verde) |
 | Título | **¡Expediente listo!** |
 | Subtítulo | Mes y año del período |
 
-### Resumen del período (tabla o cards)
+### Resumen del período (cards)
 
 | Dato | Descripción |
 |------|-------------|
-| Facturas | Nº facturas del período |
-| Gastos | Nº gastos del período |
-| Comprobantes | Nº total comprobantes |
-| Total período | Importe acumulado S/ |
+| Cotizaciones | Nº cotizaciones del período (Supabase) |
+| Facturas | Nº facturas del período (Supabase) |
+| Gastos | Nº gastos del período (`useGastos`, local) |
+| Total gastos | Importe acumulado S/ del período |
+
+### Formato de entrega (real, 23/07/2026)
+
+Un único **ZIP descargable** (`POST /api/expediente/zip`), con:
+
+| Contenido del ZIP | Descripción |
+|---|---|
+| `facturas-sunat/*.pdf` | Un PDF por factura emitida en el período (mismo PDF que ya genera Facturas — reutiliza `facturas.pdf_url` si ya existe, lo genera si falta) |
+| `gastos-registrados.csv` | Gastos del período tal como están en `useGastos` (proveedor, categoría, fecha, total, método de pago, estado) |
+| `resumen.txt` | Conteos y totales del período |
 
 ### Acciones
 
 | Botón | Acción |
 |-------|--------|
-| **Ver expediente** | Consulta del expediente generado |
-| **Generar otro expediente** | Reinicia flujo otro período |
+| **Generar expediente** | Genera el ZIP, lo descarga automáticamente y lo deja disponible para volver a descargar sin regenerar |
+| **Descargar ZIP** | Vuelve a descargar el mismo ZIP ya generado |
+| **Enviar a gestoría** | Deshabilitado — *"próximamente"*. No implementado (pedido explícito del propietario: fuera de alcance hasta que se defina el flujo de envío) |
+| **Generar otro expediente** | Reinicia flujo, descarta el ZIP en memoria, para otro período |
 
-### Formatos disponibles (Móvil §12 · Visión §15)
-
-| Formato | Descripción |
-|---------|-------------|
-| **Exportar en PDF** | Documento PDF completo |
-| **Descargar ZIP** | Archivo comprimido |
-| **Carpeta organizada** | Carpeta estructurada |
-
-**Regla:** mismos datos en los tres formatos; solo cambia presentación/entrega.
+**Nota honesta:** no existe "Exportar en PDF" ni "Carpeta organizada" como formatos separados (la versión v1.0 de este MD los describía como objetivo de diseño, nunca se construyeron) — el ZIP ya incluye los PDF de cada factura. Tampoco existe una pantalla "Ver expediente" para consultar expedientes generados anteriormente — no hay persistencia en base de datos de expedientes generados, solo la descarga inmediata.
 
 **Límite:** Darivo Pro **no sustituye** gestoría ni SUNAT (Móvil §12 · Visión §15).
 
 ---
 
-# 7. Inteligencia Artificial
+# 7. Pestaña — Informe
+
+Reintegrada aquí el 23/07/2026 (pedido explícito del propietario) — antes vivió como entrada directa del sidebar (`07-MODULO-MAS-EMPRESA.md` §5.3, 22/07/2026–23/07/2026), y antes de eso ya había sido una pestaña de Cierre (17/07/2026). Exclusiva de Empresa — Móvil accede al mismo componente desde Más → Informes (`01-darivo-pro-movil/07-MODULO-MAS.md` §6), no desde Cierre.
+
+Informe sencillo de actividad de la empresa, de solo consulta — **no genera datos propios**, consolida Clientes, Cotizaciones y Facturación ya existentes.
+
+## 7.1 Sub-pestañas de período
+
+| Sub-pestaña | Contenido |
+|---|---|
+| **Semanal** | Total cotizado / facturado / cobrado / pendiente de cobro, comparado con la semana anterior |
+| **Mensual** | Total facturado del mes (comparado con el mes anterior), gráfico de barras por semana, IGV acumulado (18%), top 3 clientes del mes |
+| **Anual** | Resumen financiero (facturado/cobrado/pendiente/IGV), documentos emitidos (nº cotizaciones/facturas, tasa de aprobación), cliente principal y categoría más frecuente del año |
+
+**"Trimestral" no existe** — la versión anterior de este componente (17/07/2026–23/07/2026) tenía Semanal/Mensual/Trimestral en el código, desalineado con esta MD y con `07-MODULO-MAS-EMPRESA.md` §5.3, que ya especificaban "Anual". Corregido el 23/07/2026.
+
+## 7.2 Descarga en PDF
+
+Las 3 sub-pestañas tienen botón **Descargar PDF** (antes solo Trimestral lo tenía) — genera el PDF en el navegador (`@react-pdf/renderer`, sin backend) con los mismos datos mostrados en pantalla.
+
+---
+
+# 8. Inteligencia Artificial
 
 IA transparente — sin configuración manual (Móvil §14 · Visión §13):
 
@@ -273,7 +306,7 @@ Comportamiento detallado producto: `01-darivo-pro-movil/08-MODULO-IA.md` (ámbit
 
 ---
 
-# 8. Gestión documental
+# 9. Gestión documental
 
 Utiliza gestión documental transversal (`01-VISION-DEL-PRODUCTO.md` §17):
 
@@ -284,30 +317,31 @@ Límites de almacenamiento por plan: `04-PANEL-ADMIN-SUSCRIPCIONES.md` (referenc
 
 ---
 
-# 9. Funcionalidad (referencia Móvil)
+# 10. Funcionalidad (referencia Móvil)
 
 * Moneda **S/** en todo el módulo.
 * IA invisible en flujo de registro.
 * Expediente organizado por **mes** y **año**.
 * Categorías oficiales + personalizadas por empresa.
-* Exportación triple formato con contenido idéntico.
+* Expediente entregado en un único ZIP (facturas PDF + gastos CSV + resumen) — ver §6.2.
+* Informe de solo consulta en 3 periodicidades (Semanal/Mensual/Anual) con descarga PDF — ver §7.
 
 ---
 
-# 10. Relaciones con otros módulos
+# 11. Relaciones con otros módulos
 
 | Módulo | Relación |
 |--------|----------|
-| Facturas (06) | Incluidas en expediente mensual del período |
-| Clientes (03) | Sin acceso directo |
-| Cotizaciones (05) | Sin acceso directo |
+| Facturas (06) | Incluidas en expediente mensual del período y en el Informe |
+| Clientes (03) | Sin acceso directo (Informe consulta cotizaciones/facturas, no clientes) |
+| Cotizaciones (05) | Sin acceso directo — datos consultados en modo lectura por el Informe |
 | IA (08) | IA de producto integrada en gastos (Móvil §14) |
 | Inicio (02) | Sin acceso directo |
-| Navegación directa ex-Más (07) | Sin acceso directo |
+| Navegación directa ex-Más (07) | Ya no incluye Informes (retirado el 23/07/2026) |
 
 ---
 
-# 11. Permisos
+# 12. Permisos
 
 Usuario principal: **Gerente** (`01-VISION-DEL-PRODUCTO.md` §6).
 
@@ -317,33 +351,35 @@ Permisos plataforma Admin: `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` 
 
 ---
 
-# 12. Referencias oficiales
+# 13. Referencias oficiales
 
 | Documento | Uso |
 |-----------|-----|
 | `01-darivo-pro-movil/09-MODULO-CIERRE.md` v2.0 | Lógica y diseño funcional |
 | `01-VISION-DEL-PRODUCTO.md` §15, §17 | Estrategia Cierre y documental |
 | `01-darivo-pro-movil/08-MODULO-IA.md` | IA integrada en gastos |
-| `06-MODULO-FACTURAS-EMPRESA.md` | Facturas en expediente |
+| `06-MODULO-FACTURAS-EMPRESA.md` | Facturas en expediente e Informe |
 | `04-PANEL-ADMIN-SUSCRIPCIONES.md` | Límites almacenamiento |
+| `07-MODULO-MAS-EMPRESA.md` §5.3 (histórico) | Especificación original del Informe (Semana/Mes/Anual) antes de reintegrarse aquí |
 
 **Necesidades API:** OpenAI API ✅ aprobada (`08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.2) — análisis documentos gastos.
 
 ---
 
-# 13. Validación (Reglas §9 · §15)
+# 14. Validación (Reglas §9 · §15)
 
 * [x] Lógica ↔ Móvil `09-MODULO-CIERRE.md` v2.0
 * [x] Diseño ↔ Sistema Diseño §6.5 + acentos morados Móvil
 * [x] Módulo anterior (Facturas) aprobado — sin incidencias bloqueantes
-* [x] Sin inventar tablas, APIs ni formatos no documentados
-* [x] Pestañas Gastos / Expediente Mensual preservadas
-* [x] Imagen oficial ↔ MD (fase global §7 — 02/07/2026)
+* [x] Sin inventar tablas, APIs ni formatos no documentados — Expediente Mensual (§6.2) corregido para no afirmar formatos/pantallas que no existen
+* [x] Pestañas Gastos / Expediente Mensual / Informe preservadas y funcionando
+* [x] Imagen oficial ↔ MD (fase global §7 — 02/07/2026) — **pendiente**: la imagen oficial no incluye la 3ª pestaña Informe (nueva desde 23/07/2026)
+* [ ] Verificación visual en vivo de v1.1 — pendiente (ver §15)
 
 ---
 
-# 14. Estado
+# 15. Estado
 
-✅ **Producción completada** — Reglas §15 (02/07/2026).
+✅ **Producción completada** (v1.0, 02/07/2026) — v1.1 (23/07/2026, reintegración de Informe + ZIP real de Expediente Mensual) implementada en código, `build`/`lint`/`typecheck` en verde. **Pendiente verificación visual en vivo** (Vercel, cuenta `yatriye@gmail.com`) y actualización de la imagen oficial §2. Detalle: `docs-internos/tareas/2026-07-23-reorganizacion-modulo-cierre-informes.md`.
 
 **Fin del documento.**
