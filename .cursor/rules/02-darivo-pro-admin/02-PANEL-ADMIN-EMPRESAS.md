@@ -4,7 +4,7 @@
 
 **Estado:** Diseño oficial aprobado
 
-**Cambio principal (v1.3 — 23/07/2026, Tarea 3):** confirmado que la vía de cambio de plan de este módulo **es legítima y se mantiene** — opera sobre el gerente de **una empresa concreta**, que es el contexto propio del módulo, a diferencia del cambio genérico por cuenta que salió de Usuarios hacia Suscripciones. Lo que sí cambia: **ya no escribe el plan directamente**. Delega en la lógica única de cambio de plan, así que **queda auditado** igual que las otras vías (§5.1). Ningún cambio de plan del ecosistema queda ya sin registro.
+**Cambio principal (v1.3 — 23/07/2026, Tarea 3):** confirmado que la vía de cambio de plan de este módulo **es legítima y se mantiene** — opera sobre el gerente de **una empresa concreta**, que es el contexto propio del módulo, a diferencia del cambio genérico por cuenta que salió de Usuarios hacia Suscripciones. Lo que sí cambia: **ya no escribe el plan directamente**. Delega en la lógica única de cambio de plan, así que **queda auditado** igual que las otras vías (§5.1). Añadido además el registro del **plan Business que asigna el alta de empresa**, que hasta entonces no dejaba ningún rastro. Ningún cambio de plan hecho por un operador desde este módulo queda ya sin registro.
 
 **Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar; §8 actualiza el catálogo de planes de 2 a los 3 planes reales (Básico/Pro/Business). Módulo migrado en código de lectura de `perfiles` a la tabla real `empresas` (cambiar plan / activar / desactivar).
 
@@ -34,6 +34,8 @@ Desde este módulo el administrador podrá:
 El selector de Plan de la tabla de empresas **se mantiene**. Su alcance es el que corresponde a este módulo: cambia el plan del **gerente de una empresa concreta**, en el contexto de esa empresa. Es distinto del cambio de plan genérico por cuenta, que dejó de estar en el módulo Usuarios y ahora vive en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1.
 
 **Ningún cambio de plan queda sin registro.** Esta acción ya no escribe el plan por su cuenta: delega en la lógica única del ecosistema, de modo que cada cambio hecho desde aquí se anota en el log de auditoría (quién, qué cuenta, plan anterior → nuevo, cuándo, motivo) y es consultable desde Suscripciones → "Historial de cambios" (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.2). Como el selector de la tabla no pide motivo, el registro queda con un motivo automático que identifica la vía; para dejar constancia de una razón concreta, usar la pestaña "Cuentas" de Suscripciones.
+
+**El alta de empresa también queda registrada.** Registrar una nueva empresa desde este módulo asigna automáticamente el **plan Business** a su gerente —sin ese plan no podría ni entrar al producto Empresa— y esa asignación **se anota igualmente en el log de auditoría**, con plan anterior vacío (la cuenta se acaba de invitar, no tenía plan previo) y motivo automático "Alta de empresa desde Admin con plan Business". Antes del 23/07/2026 esta asignación no dejaba ningún rastro.
 * Solicitar la eliminación de una empresa mediante el procedimiento administrativo correspondiente.
 
 Este módulo también permite conocer el estado general de las empresas registradas mediante indicadores visibles en el Panel Administrador.

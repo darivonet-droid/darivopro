@@ -157,26 +157,32 @@ Barrido de todo el repo (`frontend/src` TS/TSX, `supabase/migrations` SQL, `back
 
 El único `.update({ plan_tipo })` que queda dentro del camino auditado es `lib/plan-cuenta.ts:74`, que es precisamente el que escribe el log.
 
-#### Escrituras crudas que se saltan el log — REPORTADAS, NO CORREGIDAS
+#### Escrituras crudas fuera del camino — estado tras el cierre de #2 y #3
 
-Como se pidió, se reportan sin tocarlas. Clasificadas por si son o no una decisión de operador:
+Primero se reportaron sin tocarlas; el propietario decidió cerrar las dos zonas grises (#2 y #3) el mismo día. Estado final:
 
 | # | Archivo:línea | Qué hace | ¿Decisión de operador? | Veredicto |
 | --- | --- | --- | --- | --- |
 | 1 | `frontend/src/lib/activar-plan.ts:88` | `.update({ plan_tipo: plan })` tras **pago confirmado** (llamada desde `api/pagos/webhook/route.ts:231`) y al otorgar Business a un Partner activo (`ecosystem-store.ts:191`) | **No** — automatismo de facturación | Aceptable fuera del log de planes: el pago ya deja su propio rastro. Se documenta como excepción. |
-| 2 | `frontend/src/lib/activar-plan.ts:153` | `.update({ plan_tipo: 'gratis', plan_origen_partner_id: null })` — revoca el Business regalado al suspender un Partner (`ecosystem-store.ts:193`) | **Zona gris** — la dispara un Admin al suspender el Partner | ⚠️ Degrada el plan de una cuenta a `gratis` **sin rastro en el log**. Candidato claro a auditar. |
-| 3 | `frontend/src/app/admin/empresas/actions.ts:115` | `.upsert({ ..., plan_tipo: "business" })` al **crear una empresa** desde Admin | **Sí** — acción de operador | ⚠️ El hueco más relevante: un Admin fija plan Business a una cuenta y no queda registrado. |
+| 2 | `frontend/src/lib/activar-plan.ts` (`revocarBusinessSiFueRegaloPartner`) | `.update({ plan_tipo: 'gratis', plan_origen_partner_id: null })` — revoca el Business regalado al suspender un Partner | **Sí** — la dispara un Admin al suspender el Partner | ✅ **CERRADO** (commit `6803b39`) |
+| 3 | `frontend/src/app/admin/empresas/actions.ts` (`crearEmpresaAction`) | `.upsert({ ..., plan_tipo: "business" })` al **crear una empresa** desde Admin | **Sí** — acción de operador | ✅ **CERRADO** (commit `32d92fe`) |
 | 4 | `frontend/src/app/empresa/empleados/actions.ts:90` | `.upsert({ ..., plan_tipo: gerentePerfil?.plan_tipo ?? "gratis" })` al invitar un Técnico | **No** — herencia del plan del Gerente al crear su perfil | Aceptable: no es una decisión de plan, es propagación. Auditarlo generaría ruido por cada invitación. |
 | 5 | `supabase/migrations/20260706123000_plan_tipo_business.sql:27` y `:55` | `SET plan_tipo = 'business'` — renombre histórico `'empresa'`→`'business'` | **No** — migración one-off ya ejecutada | Sin acción. No es código vivo. |
 
 Sin hallazgos en `backend/` (Python): no toca `plan_tipo`.
 
-**Preguntas abiertas para el propietario** (nada se corrige hasta que respondas):
-1. ¿Se audita también la **revocación del Business regalado** al suspender un Partner (#2)? Es un cambio de plan real hecho a raíz de una acción de Admin.
-2. ¿Se audita el **plan Business que se fija al crear una empresa** desde Admin (#3)? Es la escritura de operador más clara que hoy queda fuera del log.
-3. ¿Se audita también la **activación por pago** (#1), para tener el ciclo de vida completo del plan en un solo sitio, o se deja al rastro del webhook de pagos?
+#### Cierre de #2 y #3 (23/07/2026, decisión del propietario)
 
-Invariante escrito en `CLAUDE.md` ("Invariante — camino único auditado para el cambio de plan"), con estas excepciones listadas para que un cambio futuro no las reintroduzca por descuido.
+Ambos cerrados **de forma aditiva**: se añadió el registro, sin cambiar el comportamiento del cambio de plan y **sin reencaminar** las escrituras por `cambiarPlanCuenta()`. El motivo de no reencaminarlas es que ninguna de las dos es "solo un cambio de plan": el alta de empresa fija el plan dentro de un `upsert` que también crea razón social, `empresa_id` y onboarding; la revocación toca además `plan_origen_partner_id`. Reencaminarlas habría alterado flujos ajenos.
+
+Herramienta: nuevo `registrarCambioPlan()` en `lib/plan-cuenta.ts` — helper de **solo-log**, que nunca lanza (quien lo llama ya completó su operación real y no debe fallar por el log) y deja los fallos en `console.error`.
+
+- **#3 — Alta de empresa** (commit `32d92fe`): registro tras el `upsert`, con `plan_anterior = null` (la cuenta se acaba de invitar, no tenía plan previo — la columna es nullable a propósito, verificado en la migración) y motivo "Alta de empresa desde Admin con plan Business". `crearEmpresaAction` pasa de `errorSiNoEsAdmin()` a `adminAutenticadoOError()` para firmar con el admin real; mismo criterio de autorización, ninguna vía nueva de acceso. Si el log fallara, se devuelve `ok` igual: la empresa ya está creada y un error haría creer al administrador que el alta no se hizo, peor que un log incompleto.
+- **#2 — Revocación de Business** (commit `6803b39`): registro tras la degradación, con `plan_anterior='business'`, `plan_nuevo='gratis'` y motivo "Revocación automática de Business por suspensión del partner &lt;correo&gt;". **Sobre la identidad del actor:** sí había admin en sesión —cadena verificada sin otros llamadores: `setPartnerEstadoAction` → `updatePartnerEstado` → `revocarBusinessSiFueRegaloPartner`— pero se pasa **explícitamente** como parámetro desde la Server Action en vez de leer la sesión dentro de la lib, porque si algún día se llamara desde un cron o webhook no habría sesión que leer. El parámetro es opcional; cuando falta **no se inventa un actor**: se omite el registro y queda un `console.error` nombrando la cuenta degradada.
+
+**Sin tocar, por decisión explícita:** #1 (activación por pago) y #4 (herencia del plan por el Técnico invitado) siguen siendo excepciones vigentes, con su razón documentada en `CLAUDE.md`.
+
+Invariante escrito en `CLAUDE.md` ("Invariante — camino único auditado para el cambio de plan"), separando ya las escrituras auditadas de las excepciones vigentes, para que un cambio futuro no las reintroduzca por descuido.
 
 ### Diagnóstico previo que motivó el alto (se conserva como contexto)
 

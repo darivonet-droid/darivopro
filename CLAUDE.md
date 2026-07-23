@@ -61,14 +61,16 @@ Para todo lo demás (código de frontend/backend, commits a develop, buscar e im
 
 Las 3 vías de operador ya delegan ahí y están cerradas: Admin → Suscripciones (`cambiarPlanCuentaAction`), Admin → Usuarios (`cambiarPlanUsuarioAction`, en retirada) y Admin → Empresas (`cambiarPlanEmpresaAction`, legítima — opera sobre el gerente de una empresa concreta).
 
-**Excepciones conocidas y aceptadas** (escrituras crudas que quedan fuera del log **a propósito**, porque no son decisiones de un operador; auditadas y reportadas el 23/07/2026, ninguna se corrigió sin pedirlo):
-- `lib/activar-plan.ts:88` — activación tras **pago confirmado** (webhook de pagos) y otorgamiento del Business regalado a un Partner activo. Es un automatismo de facturación, no una decisión manual.
-- `lib/activar-plan.ts:153` — revocación del Business regalado al suspender un Partner. **Zona gris**: la dispara un Admin al suspender el partner, y degrada a `gratis` sin dejar rastro en el log de planes.
-- `app/admin/empresas/actions.ts:115` — `upsert` con `plan_tipo:'business'` al **crear** una empresa desde Admin. **Zona gris real**: es una acción de operador que fija un plan y hoy no queda registrada.
-- `app/empresa/empleados/actions.ts:90` — el Técnico invitado **hereda** el `plan_tipo` del Gerente al crearse su perfil. No es una decisión de plan, es propagación del plan del Gerente.
+**Escrituras que no pasan por `cambiarPlanCuenta()` pero SÍ quedan auditadas** (cerradas el 23/07/2026): flujos preexistentes donde reencaminar la escritura habría alterado un flujo que no es "cambiar el plan", así que se **añadió** el registro con `registrarCambioPlan()` (helper de solo-log de `plan-cuenta.ts`) en vez de tocar la escritura:
+- `app/admin/empresas/actions.ts` — alta de empresa desde Admin: el `upsert` fija `plan_tipo:'business'` junto con razón social, `empresa_id` y onboarding. Registrado con `plan_anterior = null` (cuenta recién invitada) y motivo automático.
+- `lib/activar-plan.ts` (`revocarBusinessSiFueRegaloPartner`) — revocación del Business regalado al suspender un Partner: el `update` toca además `plan_origen_partner_id`. Registrado con la identidad del admin **pasada explícitamente** desde `setPartnerEstadoAction` → `updatePartnerEstado`; si algún día se llamara sin sesión (cron/webhook), **no se inventa un actor**: se omite el registro y queda un `console.error`.
+
+**Excepciones vigentes** (escrituras crudas que quedan fuera del log **a propósito**, porque no son decisiones de un operador):
+- `lib/activar-plan.ts` (`activarPlanUsuario`) — activación tras **pago confirmado** (webhook de pagos) y otorgamiento del Business regalado a un Partner activo. Es un automatismo de facturación, no una decisión manual: el pago ya deja su propio rastro.
+- `app/empresa/empleados/actions.ts` — el Técnico invitado **hereda** el `plan_tipo` del Gerente al crearse su perfil. No es una decisión de plan, es propagación; auditarlo generaría una entrada por cada invitación.
 - `supabase/migrations/20260706123000_plan_tipo_business.sql:27,55` — migración histórica del renombre `'empresa'`→`'business'`, ya ejecutada. One-off, no es código vivo.
 
-Las dos zonas grises (revocación de Partner y creación de empresa) están **pendientes de decisión del propietario**: detalle en `docs-internos/tareas/2026-07-23-aislamiento-cotizaciones-fuera-de-admin.md`.
+Detalle del barrido completo: `docs-internos/tareas/2026-07-23-aislamiento-cotizaciones-fuera-de-admin.md`.
 
 ### Verificación obligatoria de schema en migraciones
 
