@@ -165,7 +165,14 @@ export async function createPartnerRecord(
  */
 export async function updatePartnerEstado(
   id: string,
-  estado: EstadoPartner
+  estado: EstadoPartner,
+  /**
+   * Administrador que ejecuta el cambio de estado. Solo se usa para firmar el
+   * registro de auditoría de la revocación del Business regalado (ver
+   * `revocarBusinessSiFueRegaloPartner`). Opcional para no romper llamadores;
+   * si falta, la revocación no se registra en vez de inventar un actor.
+   */
+  actor?: { adminUserId: string; adminEmail: string }
 ): Promise<PartnerRegistro | null> {
   const admin = createAdminClient();
 
@@ -190,7 +197,11 @@ export async function updatePartnerEstado(
     if (estado === "Activo") {
       await activarPlanUsuario(partner.user_id, "business", { origenPartnerId: partner.id });
     } else {
-      await revocarBusinessSiFueRegaloPartner(partner.id, partner.user_id);
+      await revocarBusinessSiFueRegaloPartner(
+        partner.id,
+        partner.user_id,
+        actor ? { ...actor, partnerEmail: partner.email } : undefined
+      );
     }
   }
 

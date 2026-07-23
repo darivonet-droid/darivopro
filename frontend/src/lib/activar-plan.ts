@@ -11,6 +11,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PlanSuscripcionOficial } from "@/lib/roles-planes-oficial";
 import { ESTADOS_PAGO_EXITOSO, parseOrderId } from "@/lib/pagos-suscripcion";
+import { registrarCambioPlan } from "@/lib/plan-cuenta";
 
 /**
  * ¿Este usuario tiene al menos un pago real y exitoso del plan Business?
@@ -134,7 +135,19 @@ export async function activarPlanUsuario(
  */
 export async function revocarBusinessSiFueRegaloPartner(
   partnerId: string,
-  userId: string
+  userId: string,
+  /**
+   * Administrador que dispara la suspensión del Partner, para firmar el
+   * registro de auditoría (hueco #2 del blindaje del 23/07/2026: esta
+   * revocación degradaba una cuenta a `gratis` sin dejar rastro).
+   *
+   * Se pasa **explícitamente** desde la Server Action en vez de resolverlo
+   * aquí leyendo la sesión: esta función es una lib, y si algún día se llamara
+   * desde un cron o un webhook no habría sesión que leer. Es opcional para no
+   * romper a ningún llamador; si falta, NO se inventa un actor — se omite el
+   * registro y se deja constancia en `console.error`.
+   */
+  actor?: { adminUserId: string; adminEmail: string; partnerEmail?: string }
 ): Promise<void> {
   const admin = createAdminClient();
   const { data: perfil } = await admin
@@ -148,10 +161,34 @@ export async function revocarBusinessSiFueRegaloPartner(
   if (perfil.plan_tipo !== "business") return;
   if (await tienePagoRealBusiness(userId)) return;
 
-  await admin
+  const { error } = await admin
     .from("perfiles")
     .update({ plan_tipo: "gratis", plan_origen_partner_id: null })
     .eq("id", userId);
+
+  if (error) {
+    console.error("revocarBusinessSiFueRegaloPartner:", error);
+    return;
+  }
+
+  // Rastro de la degradación. Se AÑADE el registro tras la escritura, sin
+  // reencaminarla por `cambiarPlanCuenta()`: ese update toca además
+  // `plan_origen_partner_id`, no es solo un cambio de plan.
+  if (!actor) {
+    console.error(
+      `revocarBusinessSiFueRegaloPartner: cuenta ${userId} degradada a 'gratis' por la suspensión del partner ${partnerId}, SIN registrar en auditoría — no se recibió la identidad del administrador. No se inventa un actor.`
+    );
+    return;
+  }
+
+  await registrarCambioPlan({
+    cuentaUserId: userId,
+    planAnterior: "business",
+    planNuevo: "gratis",
+    motivo: `Revocación automática de Business por suspensión del partner ${actor.partnerEmail ?? partnerId}`,
+    adminUserId: actor.adminUserId,
+    adminEmail: actor.adminEmail,
+  });
 }
 
 /** Resuelve userId por email cuando el webhook de suscripción no trae order_id */
