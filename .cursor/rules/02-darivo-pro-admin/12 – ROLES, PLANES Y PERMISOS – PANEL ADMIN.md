@@ -1,8 +1,10 @@
 # 12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN
 
-**Versión:** 1.6
+**Versión:** 1.7
 
 **Estado:** Documento oficial
+
+**Cambio principal (v1.7 — 23/07/2026, autorizado explícitamente por el propietario):** §7.2 sincroniza la **aprobación** de los roles personalizados (antes propuesta pendiente en `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` §6.1, ahora aprobada y pendiente solo de construcción). Se confirma sin duplicar cifras que el **límite máximo de roles personalizados se administra por cuenta desde Suscripciones** (`04-PANEL-ADMIN-SUSCRIPCIONES.md`), no como valor fijo por plan.
 
 **Cambio principal (v1.6):** §7 ampliado a 3 planes (Básico, Pro, Business); añadido §7.1 (límite de Técnicos, solo Business, configurable por empresa) y §7.2 (roles personalizados, solo Business, límite por empresa); §14 con las reglas correspondientes.
 
@@ -154,9 +156,10 @@ El límite exacto de Técnicos de cada empresa se administra individualmente des
 Cuando el plan lo permita, el **Gerente** puede crear roles personalizados adicionales a Gerente y Técnico (`01-VISION-DEL-PRODUCTO.md` §8).
 
 * Disponible únicamente en plan **Business** — es el único plan con estructura multiusuario; Básico y Pro son de un único usuario y no aplican roles personalizados.
-* El límite máximo de roles personalizados por empresa se administra desde Suscripciones (Panel Admin), igual que el límite de Técnicos.
+* El límite máximo de roles personalizados **se administra individualmente por cuenta desde Suscripciones** (Panel Admin, `04-PANEL-ADMIN-SUSCRIPCIONES.md`), igual que el límite de Técnicos — no es un número fijo por plan. Este documento **no duplica ninguna cifra**; la fuente única es Suscripciones.
 * Los roles personalizados nunca crean funcionalidades nuevas — únicamente activan o desactivan funcionalidades ya existentes (`01-VISION-DEL-PRODUCTO.md` §8, Permisos).
-* La especificación funcional detallada (pantalla, campos, validaciones) se documenta en `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md`.
+* La especificación funcional detallada (pantalla, campos, validaciones) se documenta en `03-darivo-pro-empresa/11-ROLES-PLANES-PERMISOS-EMPRESA.md` §6.1 — **aprobada por el propietario el 23/07/2026** (antes propuesta). Pendiente únicamente su construcción real: el enforcement de los permisos del rol y la alineación del catálogo de permisos con la matriz aprobada (ver §6.2 de ese documento).
+* Los roles personalizados se crean y administran **exclusivamente desde Darivo Pro Empresa**, por el Gerente. **Darivo Pro Móvil no los administra** — solo aplica lo definido en Empresa (§16).
 
 ---
 

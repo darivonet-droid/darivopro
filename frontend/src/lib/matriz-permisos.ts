@@ -39,8 +39,10 @@
  *
  * NO confundir con "Roles personalizados" (RBAC custom por empresa,
  * `roles_personalizados` en BD + RolesPermisosView.tsx) — es un sistema
- * DISTINTO, con su propia decisión de negocio pendiente. Esta matriz cubre los
- * 5 roles del ecosistema, no los roles custom de cada empresa.
+ * DISTINTO. Su catálogo (Factura/Informe) y su enforcement quedaron cerrados
+ * y construidos el 23/07/2026 (Fase 2, decisión del propietario): el rol
+ * asignado reemplaza los flags del Técnico en obtenerContextoAcceso(). Esta
+ * matriz cubre los 5 roles del ecosistema, no los roles custom de cada empresa.
  *
  * IMPORTANTE (regla permanente del proyecto): las `nota` y `accion` de este
  * archivo SÍ se renderizan en la UI de Admin — nunca citar en ellas nombres de
@@ -319,12 +321,16 @@ export const MATRIZ_PERMISOS: PermisoMatriz[] = [
     accion: "Crear roles personalizados (sistema aparte, por empresa)",
     celdas: {
       admin: NA,
-      gerente: { valor: "pendiente", nota: "Sistema ya construido (plan Business) — su activación real es una decisión de negocio pendiente" },
+      gerente: { valor: "condicional", nota: "Solo plan Business — crea roles con permisos Factura/Informe y los asigna a Técnicos; el permiso del rol reemplaza los del Técnico" },
       tecnico: NO,
       partner: NA,
       movil: NA,
     },
-    gating: "RolesPermisosView.tsx + tabla roles_personalizados — construido pero sin enforcement en rutas (RBAC custom inerte, decisión pendiente)",
+    // Decisión del propietario 23/07/2026 (Fase 2): catálogo cerrado a
+    // Factura/Informe y enforcement real construido. El rol asignado a un
+    // Técnico REEMPLAZA sus flags factura_habilitada/informe_habilitado; sin
+    // rol, rigen los flags. Aislamiento por empresa_id. Deja de ser "pendiente".
+    gating: "RolesPermisosView.tsx (creación/asignación) + roles_personalizados.permisos leído en obtenerContextoAcceso() (lib/rol-empleado.ts), mismo punto de gating que factura_habilitada/informe_habilitado",
   },
   {
     id: "mis-tarifas",

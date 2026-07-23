@@ -1,6 +1,10 @@
 # 11 – ROLES, PLANES Y PERMISOS – DARIVO PRO EMPRESA
 
-**Versión:** 1.6
+**Versión:** 1.8
+
+**Cambio principal (v1.8 — 23/07/2026, Fase 2 construida, decisión del propietario):** el rol personalizado deja de ser inerte. (1) §5.2 fija el **catálogo cerrado del rol personalizado a Factura + Informe** (se eliminó de la UI el toggle de Mis Tarifas, que contradecía la regla cerrada). (2) §6.2 registra el **enforcement real construido**: `obtenerContextoAcceso()` aplica la **regla de combinación** aprobada — rol asignado ⇒ el permiso del rol reemplaza los flags individuales Factura/Informe; sin rol ⇒ rigen los flags. Borrado el "pendiente/❌ inerte" que ya no aplica. Pendiente solo: verificación en vivo (sin mergear a `main`) e imagen oficial (§2).
+
+**Cambio principal (v1.7 — 23/07/2026, aprobación explícita del propietario):** §6.1 **Roles personalizados** deja de ser una propuesta: pasa de "⚠️ propuesta, pendiente de aprobación" a **✅ aprobada**, tal como estaba escrita (solo Business · nombre único y no reservado · mismo catálogo de permisos de la matriz §5.2 · asignable a varios Técnicos como plantilla editable · al eliminar el rol, sus Técnicos vuelven al rol Técnico base). Añadido §6.2 con el estado real de construcción. Sigue pendiente, sin bloquear nada de backend, la **nueva imagen oficial** de §2.
 
 **Cambio principal (v1.6 — 22/07/2026):** corrección de referencia interna (§0) — citaba `12 – ROLES… ADMIN.md` v1.5, desactualizada frente a la v1.6 real (que añadió §7.1 Límite de Técnicos y §7.2 Roles personalizados). Verificado: el contenido funcional de §7.2 ya estaba correctamente incorporado en este documento desde v1.1 (§6.1); el límite de Técnicos (§7.1 Admin) ya se referencia sin duplicar cifras vía `10-MODULO-EMPLEADOS-EMPRESA.md` §8 → `04-PANEL-ADMIN-SUSCRIPCIONES.md`. Sin cambios de contenido funcional — solo corrección de cita.
 
@@ -10,7 +14,7 @@
 
 **Cambio principal (v1.3 — 21/07/2026, autorizado explícitamente por el propietario, Etapa 7 decisión 3):** reemplaza el modelo de "Técnico = rol fijo con Factura OFF por defecto" — Gerente y Técnico ya NO son cajas cerradas de permisos: el Gerente activa/desactiva **libremente cualquier módulo** (Factura, Informe) por Técnico, en cualquier momento, no solo al invitarlo. Un Técnico puede tener permisos ampliados sin convertirse en un segundo Gerente (nunca administra empleados ni el plan de la empresa — eso sigue exclusivo del Gerente). **Nuevo default real: un Técnico invitado nace con Cotización + Cliente + Factura activas** (antes Factura nacía en `false`, decisión de la Tarea 2 del 17/07/2026, ahora sustituida). Informe sigue opcional, el Gerente lo activa aparte. Cliente es un módulo base sin flag propio (investigado en esta etapa: no existe ni hace falta una 3ra columna de permiso — todo empleado vinculado ve el mismo listado de clientes que el Gerente).
 
-**Estado:** ⚠️ Requiere nueva imagen oficial (roles personalizados, §6.1). Especificación funcional cerrada — sincronizado con `01-VISION-DEL-PRODUCTO.md` §8, `12 – ROLES… ADMIN.md` v1.6 y `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.6.
+**Estado:** ⚠️ Requiere nueva imagen oficial (roles personalizados, §6.1) — **pendiente exclusivamente visual, no bloquea la construcción del backend**. Especificación funcional cerrada y aprobada — sincronizado con `01-VISION-DEL-PRODUCTO.md` §8, `12 – ROLES… ADMIN.md` v1.7 y `04-PANEL-ADMIN-SUSCRIPCIONES.md` v1.10.
 
 **Relacionado:** `02-darivo-pro-admin/12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md` §6–§9, §16–§17 · `01-VISION-DEL-PRODUCTO.md` §8 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §6.9
 
@@ -110,9 +114,9 @@ Presentación escritorio (patrón tabla Admin):
 | **Columnas** | Empleados **Técnicos** activos de la empresa |
 | **Celda** | Toggle activar/desactivar permiso |
 
-**Matriz detallada fila a fila:** pendiente de aprobación del propietario conforme Admin §8 (*«Las matrices de permisos se documentarán conforme se aprueben los módulos oficiales»*).
+**Matriz detallada fila a fila (Técnico base, por flag individual):** pendiente de aprobación del propietario conforme Admin §8 (*«Las matrices de permisos se documentarán conforme se aprueben los módulos oficiales»*). Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de permisos para la matriz general.
 
-Hasta entonces: documentar **estructura** y reglas; no inventar lista cerrada de permisos.
+**Catálogo cerrado del ROL PERSONALIZADO (aprobado 23/07/2026):** independientemente de lo anterior, el catálogo de permisos toggleables de un **rol personalizado** (§6.1) sí quedó cerrado por decisión del propietario a **Factura** e **Informe** únicamente — son los dos módulos con flag real hoy. Cotización y Cliente son módulos base sin flag (siempre disponibles) y Mis Tarifas nunca es administrable por un Técnico, por eso ninguno figura en ese catálogo. Implementado en `MODULOS_PERMISO_ROL` (`frontend/src/lib/roles-personalizados.ts`).
 
 ### Reglas de la matriz
 
@@ -137,19 +141,38 @@ Roles base: Gerente y Técnico. Con plan **Business**, el Gerente puede además 
 
 ## 6.1 Roles personalizados (solo plan Business)
 
-⚠️ **Funcionalidad nueva — propuesta de diseño funcional, pendiente de aprobación e imagen oficial.** No forma parte de la imagen oficial actual (§2), que queda desactualizada en este punto.
+✅ **Aprobado por el propietario (23/07/2026).** La especificación funcional de abajo queda cerrada tal como está escrita y es la base de construcción. Lo único que sigue pendiente es la **nueva imagen oficial** (§2, que queda desactualizada en este punto) — es un pendiente **visual**, no bloquea la construcción del backend ni de la pantalla.
 
 **Disponibilidad:** únicamente si el plan contratado es **Business** (`12 – ROLES… ADMIN.md` §7.2). Básico y Pro son de un único usuario y no aplican.
 
 **Quién los crea:** exclusivamente el **Gerente**, desde este mismo módulo (Roles y Permisos).
 
-**Propuesta de flujo:**
+**Flujo aprobado:**
 
 1. Botón **"Crear rol personalizado"**, visible solo si plan = Business y no se ha alcanzado el límite máximo de roles personalizados de la empresa (límite configurado individualmente por cuenta desde Suscripciones — `04-PANEL-ADMIN-SUSCRIPCIONES.md`, `12 – ROLES… ADMIN.md` §7.2).
 2. Formulario: **nombre del rol** (obligatorio, único dentro de la empresa, no puede ser "Gerente" ni "Técnico" — nombres reservados) y **selección de permisos** sobre el mismo catálogo de funcionalidades toggleables ya usado en la matriz (§5.2) — nunca funcionalidades nuevas (Visión §8).
 3. Una vez creado, el rol personalizado se asigna a un empleado **Técnico** existente desde `10-MODULO-EMPLEADOS-EMPRESA.md`, como una variante con permisos propios — no sustituye el rol base Técnico, lo especializa.
 4. **Un rol personalizado puede asignarse a varios Técnicos a la vez** (patrón RBAC estándar de mercado: el rol es una plantilla de permisos reutilizable, no una configuración individual por persona). El Gerente crea el rol una vez y lo asigna a cuantos Técnicos necesite; si edita el rol, el cambio se aplica automáticamente a todos los Técnicos que lo tengan asignado.
 5. Eliminar un rol personalizado no elimina al empleado; el/los empleado(s) que lo tenían asignado vuelven a los permisos del rol Técnico base.
+
+## 6.2 Estado real de construcción (Fase 2 cerrada — 23/07/2026)
+
+Todas las piezas del rol personalizado están construidas y verificadas (typecheck/lint/build en verde). Estado por pieza:
+
+| Pieza | Estado real |
+|-------|-------------|
+| Tabla `roles_personalizados` (nombre único por empresa, `CHECK` de nombres reservados, `permisos` jsonb, RLS por Gerente + Admin) | ✅ Construida (`supabase/migrations/20260706140000_roles_personalizados.sql`) |
+| `empresa_empleados.rol_personalizado_id` (`ON DELETE SET NULL` → el Técnico vuelve al rol base) | ✅ Construida, cumple §6.1 punto 5 |
+| Límite por cuenta (`suscripciones.limite_roles_personalizados`) | ✅ Construido y aplicado en UI |
+| Pantalla: crear / editar / eliminar / asignar a varios Técnicos, gateada a plan Business | ✅ Construida (`RolesPermisosView.tsx`), asignación también desde Empleados |
+| Catálogo de permisos del rol | ✅ Cerrado a **Factura** e **Informe** (`MODULOS_PERMISO_ROL`) — el toggle de Mis Tarifas, que contradecía la regla cerrada, fue eliminado (Fase 2 B) |
+| **Enforcement real de los permisos del rol** | ✅ Construido (Fase 2 A): `obtenerContextoAcceso()` (`frontend/src/lib/rol-empleado.ts`) — punto único de gating del Técnico — lee `roles_personalizados.permisos` y aplica la regla de combinación de abajo |
+
+### Regla de combinación (aprobada por el propietario, 23/07/2026)
+
+Si un Técnico tiene un **rol personalizado asignado** (`rol_personalizado_id`), el permiso del **ROL rige Factura/Informe y REEMPLAZA sus flags individuales** (`factura_habilitada`/`informe_habilitado`) — es reemplazo, no intersección. Al **desasignar** el rol, vuelven a regir los flags individuales del Técnico: no se borran, quedan en pausa mientras el rol está asignado. Un rol de otra empresa nunca puede regir sobre un Técnico de esta (aislamiento por `empresa_id`, verificado en tabla + RLS + guard de lectura). Mis Tarifas sigue bloqueado para el Técnico en todos los casos.
+
+**Pendiente:** solo la **verificación en vivo** (login del Gerente, crear/asignar rol) sobre el preview desplegado — el código está en `develop`, sin mergear a `main` todavía. Y, aparte, la **nueva imagen oficial** (§2), pendiente exclusivamente visual.
 
 ---
 
@@ -190,6 +213,10 @@ Vía de operador, distinta y complementaria: un **Administrador Darivo** puede c
 ---
 
 # 10. Estado
+
+✅ **Actualizado v1.8 (23/07/2026)** — Fase 2 construida: catálogo del rol cerrado a Factura/Informe (toggle de Mis Tarifas eliminado) y **enforcement real** con regla de combinación (rol reemplaza flag individual) en `obtenerContextoAcceso()`. typecheck/lint/build en verde. Pendiente solo: verificación en vivo (sin mergear a `main`) e imagen oficial (§2).
+
+✅ **Actualizado v1.7 (23/07/2026)** — §6.1 **aprobada** por el propietario (deja de ser propuesta). El enforcement y la alineación del catálogo pasaron a v1.8 (construidos). Pendiente aparte, solo visual: nueva imagen oficial (§2).
 
 ✅ **Actualizado v1.3 (21/07/2026)** — modelo de permisos por módulo activable (no roles fijos) confirmado y con default real de Factura ON al invitar Técnico (§5.2). Bloqueo real de Mis Tarifas para Técnico construido en código.
 

@@ -78,10 +78,40 @@ export async function obtenerContextoAcceso(): Promise<ContextoAcceso> {
 
   const { data: empleado } = await admin
     .from("empresa_empleados")
-    .select("factura_habilitada, informe_habilitado")
+    .select("factura_habilitada, informe_habilitado, rol_personalizado_id")
     .eq("user_id", user.id)
     .eq("empresa_id", perfil.empresa_id)
     .maybeSingle();
+
+  // Base = flags individuales del Técnico. Quedan "en pausa" (no se borran)
+  // mientras tenga un rol personalizado asignado.
+  let facturaHabilitada = empleado?.factura_habilitada ?? false;
+  let informeHabilitado = empleado?.informe_habilitado ?? false;
+
+  // Roles personalizados — enforcement real (Fase 2 A, decisión del propietario
+  // 23/07/2026): si el Técnico tiene un rol asignado, el permiso del ROL RIGE
+  // Factura/Informe y REEMPLAZA sus flags individuales (no los intersecta). Al
+  // desasignar el rol (rol_personalizado_id = null) vuelven a regir los flags.
+  // Catálogo cerrado a Factura/Informe (MODULOS_PERMISO_ROL, roles-personalizados.ts).
+  if (empleado?.rol_personalizado_id) {
+    const { data: rol } = await admin
+      .from("roles_personalizados")
+      .select("permisos")
+      .eq("id", empleado.rol_personalizado_id)
+      // Aislamiento multi-tenant (paso 6): con service_role la RLS no aplica,
+      // así que este filtro por empresa_id es la barrera real — un rol de otra
+      // empresa NUNCA puede regir sobre un Técnico de esta. Si el rol no existe
+      // o no es de esta empresa, se conservan los flags individuales; nunca se
+      // concede acceso por defecto.
+      .eq("empresa_id", perfil.empresa_id)
+      .maybeSingle();
+
+    if (rol) {
+      const permisos = (rol.permisos ?? {}) as Record<string, unknown>;
+      facturaHabilitada = permisos.Factura === true;
+      informeHabilitado = permisos.Informe === true;
+    }
+  }
 
   return {
     rol: "tecnico",
@@ -92,7 +122,7 @@ export async function obtenerContextoAcceso(): Promise<ContextoAcceso> {
     // cada límite; si el Gerente cambia de plan, el Técnico requiere
     // re-invitación o ajuste manual (limitación conocida, documentada).
     planEfectivo: planPropio,
-    facturaHabilitada: empleado?.factura_habilitada ?? false,
-    informeHabilitado: empleado?.informe_habilitado ?? false,
+    facturaHabilitada,
+    informeHabilitado,
   };
 }

@@ -218,7 +218,9 @@ Cada plan de suscripción determina, como mínimo:
 * **Roles y límites de uso**: número de Técnicos (solo Business, ampliable), límites de uso de IA, y demás restricciones cuantitativas (`12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`).
 * **Producto(s) accesibles**: únicamente **Business** da acceso a Darivo Pro Empresa como producto (ver nota de nomenclatura arriba).
 
-El detalle fino de límites numéricos de IA y roles personalizados **no se define en este documento** — pertenece a la matriz de `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`, que deberá sincronizarse con esta sección.
+El detalle fino de **límites numéricos de IA** no se define en este documento — pertenece a la matriz de `12 – ROLES, PLANES Y PERMISOS – PANEL ADMIN.md`, que deberá sincronizarse con esta sección.
+
+**Roles personalizados (corregido 23/07/2026, audit de sincronización):** su **límite máximo sí vive aquí** — se configura **individualmente por cuenta** desde este módulo (columna `suscripciones.limite_roles_personalizados`), no es un número fijo por plan ni se define en el documento 12, que solo remite a este. La versión anterior de esta línea decía lo contrario y creaba una referencia circular entre ambos documentos.
 
 ---
 

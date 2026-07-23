@@ -244,16 +244,28 @@ export function RolesPermisosView({ planTipo }: RolesPermisosViewProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Badge + banner de la imagen oficial (11-ROLES-PLANES-PERMISOS-EMPRESA.md
-          §2/§5.1) — la matriz detallada sigue pendiente de aprobación (§5.2),
-          esto es solo el badge/banner visual, no cambia la interactividad. */}
+      {/* Chip de estado real de la pantalla (Fase 2, B2 — 23/07/2026). Antes
+          decía "🔒 Solo lectura", lo que contradecía tanto el banner de abajo
+          ("administrar los permisos") como la capacidad real: con plan Business
+          el Gerente crea, edita, elimina y asigna roles personalizados que SÍ
+          se aplican (enforcement en rol-empleado.ts, Fase 2 A). Sin Business el
+          bloque de roles no se muestra y esto es solo consulta. */}
       <div>
-        <span
-          className="inline-block rounded-full px-3 py-1 text-xs font-bold"
-          style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
-        >
-          🔒 Solo lectura
-        </span>
+        {esBusiness ? (
+          <span
+            className="inline-block rounded-full px-3 py-1 text-xs font-bold"
+            style={{ background: ADMIN_COLORS.purplePale, color: ADMIN_COLORS.purple }}
+          >
+            ✏️ Administras los roles y permisos de tus Técnicos
+          </span>
+        ) : (
+          <span
+            className="inline-block rounded-full px-3 py-1 text-xs font-bold"
+            style={{ background: ADMIN_COLORS.slate, color: ADMIN_COLORS.textMid }}
+          >
+            Consulta — los roles personalizados requieren plan Business
+          </span>
+        )}
       </div>
       <div
         className="flex items-start gap-3 rounded-2xl p-4"

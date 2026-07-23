@@ -1,15 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-/** Catálogo toggleable — misma referencia que matriz §5.2 (Doc 11) */
-export const MODULOS_PERMISO_ROL = [
-  "Inicio",
-  "Clientes",
-  "Cotizaciones",
-  "Facturas",
-  "Cierre",
-  "IA",
-  "Más — Mis Tarifas",
-] as const;
+/**
+ * Catálogo toggleable de un rol personalizado — cerrado a Factura + Informe
+ * (decisión del propietario 23/07/2026, Fase 2). Es exactamente el catálogo
+ * aprobado de la matriz §5.2 (Doc 11): Cotización y Cliente son módulos base
+ * sin flag (siempre disponibles) y Mis Tarifas nunca es administrable por un
+ * Técnico (regla cerrada), por eso ninguno figura aquí. Las claves "Factura"
+ * e "Informe" son las que lee el enforcement en `rol-empleado.ts`
+ * (`obtenerContextoAcceso`) — no renombrar sin actualizar ese punto.
+ */
+export const MODULOS_PERMISO_ROL = ["Factura", "Informe"] as const;
 
 export type ModuloPermisoRol = (typeof MODULOS_PERMISO_ROL)[number];
 export type PermisosRolMap = Partial<Record<ModuloPermisoRol, boolean>>;
