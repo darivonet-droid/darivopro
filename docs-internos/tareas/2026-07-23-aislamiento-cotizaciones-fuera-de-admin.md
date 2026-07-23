@@ -87,9 +87,65 @@ Se revoca **todo** privilegio, no solo `SELECT`: Admin tampoco debe poder escrib
 
 ---
 
-## Tarea 3 — ALTO OBLIGATORIO (sin tocar, esperando confirmación)
+## Tarea 3 — RESUELTA por el propietario (23/07/2026): mover a Suscripciones, orden aditivo
 
-Se pidió quitar el cambio de plan de Admin → Usuarios. **No se ha tocado nada.** Contradice `04-PANEL-ADMIN-SUSCRIPCIONES.md`, como se anticipó. Qué existe hoy:
+**Decisión:** el plan de una cuenta es metadato de facturación → el operador (Admin) lo conserva, pero en Suscripciones, no en Usuarios. Construir y verificar en Suscripciones **antes** de quitar nada de Usuarios. Partner fuera de alcance (tarea propia, por comisiones).
+
+### FASE A — construida ✅
+
+| Pieza | Archivo |
+| --- | --- |
+| Lógica única del cambio de plan + lectura del log | `frontend/src/lib/plan-cuenta.ts` (nuevo) |
+| Acción de Suscripciones (`cambiarPlanCuentaAction`) | `frontend/src/app/admin/suscripciones/actions.ts` |
+| Identidad real del admin, server-side (`adminAutenticadoOError`) | `frontend/src/lib/acceso-producto.ts` |
+| Pestañas "Cuentas" e "Historial de cambios" | `frontend/src/components/admin/AdminSuscripcionesView.tsx` |
+| Datos (cuentas + auditoría) | `frontend/src/lib/admin-queries.ts`, `app/admin/suscripciones/page.tsx` |
+| Punto de entrada de Usuarios, ahora delegando | `frontend/src/app/admin/usuarios/actions.ts` |
+| Tabla de auditoría (aditiva) | `supabase/migrations/20260723130000_admin_plan_auditoria.sql` |
+
+Cumplimiento de lo pedido:
+
+1. **Vista/acción de cambio de plan por cuenta** — pestaña "Cuentas" en Suscripciones: listado con correo, razón social y plan actual, buscador y acción "Cambiar plan". Es la "vista por usuario" que el MD 04 dejaba como fase posterior. **No se duplicó la lógica**: `cambiarPlanUsuarioAction` (Usuarios) y `cambiarPlanCuentaAction` (Suscripciones) llaman ambas a `cambiarPlanCuenta()` en `lib/plan-cuenta.ts`.
+2. **Restringida a Admin, revalidado server-side** — `adminAutenticadoOError()` en cada llamada, sin confiar en el cliente ni en el middleware. La identidad del administrador que firma sale de la sesión real del servidor; el cliente no puede enviarla ni suplantar a otro empleado. Validación del plan contra una lista blanca y motivo obligatorio, también en el servidor.
+3. **Auditoría** — tabla **nueva** `admin_plan_auditoria` (no se reutilizó ninguna): quién, qué cuenta, plan anterior → nuevo, timestamp, motivo. Propiedades garantizadas en BD, no por convención:
+   - **Append-only real:** `REVOKE UPDATE, DELETE, TRUNCATE ... FROM service_role` — ni el propio Panel Admin puede reescribir el log.
+   - **Sobrevive a bajas:** los dos correos quedan copiados en texto y las FK son `ON DELETE SET NULL`.
+   - **Cerrada a clientes:** RLS habilitada sin ninguna policy.
+   - Si el `UPDATE` del plan tiene éxito pero el log falla, **no se revierte en silencio**: se devuelve un error explícito diciendo que el plan cambió pero no quedó registrado.
+
+Efecto colateral positivo: el punto de entrada de Usuarios, que hasta hoy cambiaba planes **sin ningún rastro**, queda auditado desde ya (con un motivo automático que identifica la vía).
+
+`typecheck` limpio · `lint` sin warnings nuevos · `build` en verde. Commit `dd79b95`.
+
+### FASE B — BLOQUEADA ⛔
+
+**No se puede verificar sin correr la migración `20260723130000_admin_plan_auditoria.sql`**, y las migraciones son excepción #1 de `CLAUDE.md` (las ejecuta el propietario en el SQL Editor). Sin la tabla, el insert de auditoría falla y `cambiarPlanCuenta()` devuelve error — el cambio de plan no se puede probar de extremo a extremo.
+
+Verificación pendiente, en este orden:
+1. Correr la migración.
+2. En `https://darivopro.com/` → Admin → Suscripciones → Cuentas, cambiar el plan de la cuenta demo (`demo@darivopro.com`) con un motivo.
+3. Confirmar que el plan persiste tras recargar y que la fila aparece en "Historial de cambios" con admin, cuenta, plan anterior → nuevo, fecha y motivo.
+4. Confirmar que `UPDATE`/`DELETE` sobre el log fallan desde el Panel Admin (query de verificación incluida al final de la migración).
+
+### FASE C — NO EJECUTADA (correcto) ⛔
+
+La instrucción es explícita: *"no ejecutes FASE C si FASE A no está verificada"*. Como FASE B está bloqueada por la migración, **no se ha tocado el `<select>` de plan de `AdminUsuariosView.tsx` ni se ha borrado `cambiarPlanUsuarioAction`**. Usuarios conserva su punto de entrada (ya auditado) para no dejar el producto sin ninguna vía.
+
+Cuando FASE B esté verificada, FASE C es: quitar el `<select>` de plan de `AdminUsuariosView.tsx:396-397`, borrar `cambiarPlanUsuarioAction` de `app/admin/usuarios/actions.ts`, y actualizar `03-PANEL-ADMIN-USUARIOS.md` §5.1 para que describa el módulo sin ninguna mención a planes.
+
+**Nada que reportar bajo el "DETENTE si mover la lógica rompe algún flujo":** `cambiarPlanUsuarioAction` no tiene ningún otro consumidor. Verificado por grep — su única referencia es `AdminUsuariosView.tsx` (import + llamada en `cambiarPlan`).
+
+### Hallazgo no pedido: un TERCER punto de cambio de plan
+
+Al verificar los consumidores apareció `cambiarPlanEmpresaAction` (`app/admin/empresas/actions.ts:16`), usada desde `AdminEmpresasView.tsx:74`: Admin → Empresas también hacía su propio `UPDATE perfiles SET plan_tipo` (sobre el gerente de la empresa), **sin ningún registro**. No estaba en el encargo, que nombraba solo Usuarios.
+
+**Qué se hizo y por qué:** se le aplicó la misma delegación a `lib/plan-cuenta.ts`, de modo que también queda auditada. Es aditivo y no cambia su comportamiento visible. La razón es que dejar una segunda vía sin auditar habría vaciado de sentido el requisito 3 del encargo ("registra **cada** cambio en un log"): bastaría con usar Empresas para cambiar planes sin rastro.
+
+**Qué NO se hizo, y queda para el propietario:** no se retiró la acción de Empresas. `02-PANEL-ADMIN-EMPRESAS.md` §5/§12 dice explícitamente que el cambio de plan se hace desde ese módulo, y retirarlo no estaba pedido. **Pregunta abierta:** si la decisión es "el plan solo se gestiona desde Suscripciones", ¿Empresas también debe perderlo, o su vía se considera legítima por operar sobre el gerente de una empresa concreta?
+
+### Diagnóstico previo que motivó el alto (se conserva como contexto)
+
+Qué existía antes de esta fase:
 
 **Admin → Usuarios** (`03-PANEL-ADMIN-USUARIOS.md` §5): la acción "Cambiar plan" existe y es real — `cambiarPlanUsuarioAction()` (`app/admin/usuarios/actions.ts:49-66`) hace `UPDATE perfiles SET plan_tipo` con service role, expuesta como un `<select>` por fila en `AdminUsuariosView.tsx:396-397`. Las demás acciones del módulo son Bloquear/Desbloquear, Reenviar invitación, Invitar (CSV) y Restablecer acceso — todas de gestión de cuenta/correo, no de plan.
 

@@ -1,8 +1,10 @@
 ﻿# 03 – PANEL ADMIN – USUARIOS
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.3 — 23/07/2026, decisión explícita del propietario, Tarea 3):** este módulo queda acotado a **correos e identidad de la cuenta** — alta/invitación, bloqueo, restablecimiento de acceso y datos de contacto. **La gestión del plan sale de aquí**: el plan es metadato de facturación y se administra desde `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1 (pestaña "Cuentas"), con motivo obligatorio y registro de auditoría. Retirada en curso — ver §5.1.
 
 **Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar; catálogo de planes actualizado de 2 a los 3 planes reales (Básico/Pro/Business).
 
@@ -127,9 +129,16 @@ Muestra la información de los usuarios registrados.
 
 * Bloquear usuario
 * Desbloquear usuario
-* Cambiar plan
 * Reenviar invitación
 * Restablecer acceso
+
+Todas son acciones de **correo e identidad**. Este módulo **no administra planes**.
+
+## 5.1 "Cambiar plan" — retirada en curso (23/07/2026)
+
+La acción **"Cambiar plan" deja de pertenecer a este módulo**. Su sitio oficial es Admin → Suscripciones → pestaña "Cuentas" (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1), donde exige motivo y queda auditada.
+
+Estado real: el punto de entrada de este módulo sigue temporalmente disponible para no dejar el producto sin ninguna vía mientras el nuevo se verifica en vivo, pero ya **delega en la misma lógica** que Suscripciones, así que también queda registrado en el log de auditoría. En cuanto la verificación esté cerrada se elimina de aquí, y este documento pasa a describir el módulo sin ninguna mención a planes.
 
 ---
 
@@ -159,7 +168,7 @@ Este módulo forma parte del Panel Administrador.
 
 El catálogo oficial de planes (**Básico**, **Pro** y **Business**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 (fuente única de precios y límites — no duplicar aquí).
 
-Este módulo utiliza ese catálogo para el campo "Plan" asociado a cada usuario y para la acción "Cambiar plan".
+Este módulo usa ese catálogo **solo para mostrar** el plan actual de cada usuario (lectura y filtro). **Cambiarlo no le corresponde** — ver §5.1.
 
 No duplicar la definición de planes en este documento.
 
