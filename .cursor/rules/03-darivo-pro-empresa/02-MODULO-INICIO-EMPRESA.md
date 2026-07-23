@@ -79,7 +79,7 @@ Estructura de escritorio conforme a Sistema Diseño §5 y patrón Admin Dashboar
 └─────────────┴──────────────────────────────────────────────────┘
 ```
 
-* Fondo área de contenido: `T.slate` · padding 24–32px · ancho útil mín. 1024px (Sistema Diseño §5.3).
+* Fondo área de contenido: `T.slate` · padding 24–32px en escritorio, responsive en teléfono desde 23/07/2026 (Sistema Diseño §5.3).
 * Cards: radius 14px · fondo `T.white` (Sistema Diseño §6).
 
 ---

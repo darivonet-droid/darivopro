@@ -71,7 +71,7 @@ export default async function AdminDashboardPage({
         />
       </AdminKpiGrid>
 
-      <div id="actividad-plataforma" className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div id="actividad-plataforma" className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <AdminCard title="Actividad de la plataforma" className="lg:col-span-2">
           <AdminActividadChart data={d.actividad} />
         </AdminCard>
@@ -101,7 +101,7 @@ export default async function AdminDashboardPage({
         </AdminCard>
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <AdminCard title="Distribución de suscripciones" className="lg:col-span-2">
           <AdminPlanesDonut distribucion={d.distribucion} />
         </AdminCard>

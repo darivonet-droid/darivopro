@@ -239,7 +239,7 @@ export function NuevaFacturaFormEscritorio({
   /* ── Editor — layout ~60/40 (MD §4.2) ──────────────────── */
   return (
     <div className="flex flex-col gap-4">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <Link href={volverHref} style={{ fontSize: 12, fontWeight: 700, color: ADMIN_COLORS.purple }}>← Volver</Link>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderRadius: 12, background: tipo === "factura" ? ADMIN_COLORS.purplePale : ADMIN_COLORS.greenPale }}>
           <div>
@@ -258,9 +258,9 @@ export function NuevaFacturaFormEscritorio({
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      <div className="flex flex-col lg:flex-row" style={{ gap: 20, alignItems: "flex-start" }}>
         {/* Columna izquierda ~60% */}
-        <div style={{ flex: "1 1 60%", display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="w-full" style={{ flex: "1 1 60%", display: "flex", flexDirection: "column", gap: 14 }}>
           {clientes.length > 0 && (
             <label>
               <span style={{ display: "block", marginBottom: 6, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, color: ADMIN_COLORS.textMid }}>Cliente guardado</span>
@@ -310,7 +310,8 @@ export function NuevaFacturaFormEscritorio({
           <div>
             <span style={{ display: "block", marginBottom: 6, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, color: ADMIN_COLORS.textMid }}>Líneas</span>
             <div style={{ borderRadius: 14, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", background: ADMIN_COLORS.white }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <div className="overflow-x-auto">
+              <table style={{ width: "100%", minWidth: 420, borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: ADMIN_COLORS.slate }}>
                     {["Descripción", "Cant", "P.Unit", "Total", ""].map((h) => (
@@ -340,6 +341,7 @@ export function NuevaFacturaFormEscritorio({
                   ))}
                 </tbody>
               </table>
+              </div>
               <button
                 type="button"
                 onClick={() => setItems((prev) => [...prev, { ...LINEA_VACIA }])}
@@ -363,7 +365,7 @@ export function NuevaFacturaFormEscritorio({
         </div>
 
         {/* Columna derecha ~40% */}
-        <div style={{ flex: "1 1 40%", display: "flex", flexDirection: "column", gap: 14, position: "sticky", top: 20 }}>
+        <div className="w-full lg:sticky" style={{ flex: "1 1 40%", display: "flex", flexDirection: "column", gap: 14, top: 20 }}>
           {/* Totales */}
           <div style={{ padding: 16, borderRadius: 14, background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>Resumen totales</p>

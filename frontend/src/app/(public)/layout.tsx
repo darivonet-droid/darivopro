@@ -1,6 +1,19 @@
+"use client";
+import { usePathname } from "next/navigation";
 import { T } from "@/lib/theme";
 
+// /precios necesita más ancho en escritorio para mostrar los 3 planes lado a
+// lado (23/07/2026, adaptación responsive) — el resto de rutas de este grupo
+// (login, registro, recuperar, legales) son formularios/textos que se ven
+// bien centrados y angostos también en escritorio, así que mantienen los
+// 390px originales.
+const ANCHO_ANGOSTO = 390;
+const ANCHO_PRECIOS = 1100;
+
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const maxWidth = pathname === "/precios" ? ANCHO_PRECIOS : ANCHO_ANGOSTO;
+
   return (
     <div className="flex min-h-screen flex-col">
 

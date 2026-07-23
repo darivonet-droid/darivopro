@@ -222,7 +222,7 @@ Barra sobre el área de contenido (no en sidebar):
 
 ## 5.3 Área de contenido
 
-* Fondo `slate`, padding 24–32px, mín. ancho útil 1024px.
+* Fondo `slate`, padding 24–32px en escritorio (≥1024px) · 16px en teléfono. Diseñado para escritorio (ancho de referencia 1024px+); desde 23/07/2026 también responsive en teléfono (menú en cajón, columnas apiladas, tablas con scroll horizontal) — ver `docs-internos/tareas/2026-07-23-responsive-empresa-admin-precios.md`.
 * **Tablas** para listas (Clientes, Facturas, Empleados).
 * **Paneles laterales** para fichas de detalle (Cliente, cotización).
 * **Cards** radius 14px (Fable 5 §6.3).

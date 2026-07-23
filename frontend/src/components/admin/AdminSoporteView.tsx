@@ -66,7 +66,7 @@ export function AdminSoporteView({ tickets: ticketsIniciales }: AdminSoporteView
     <div>
       {error && <AdminErrorBanner mensaje={error} />}
 
-      <div className="mb-4 grid grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <AdminKpiCard label="Abiertos" value={resumen.abiertos} />
         <AdminKpiCard label="En progreso" value={resumen.enProgreso} />
         <AdminKpiCard label="Resueltos" value={resumen.resueltos} />

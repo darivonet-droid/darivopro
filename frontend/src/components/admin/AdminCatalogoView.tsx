@@ -236,7 +236,7 @@ export function AdminCatalogoView({
   const esTabPartidas = tab === "Partidas" || tab === "Precios sugeridos";
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div className="lg:col-span-2">
         {error && <AdminErrorBanner mensaje={error} />}
         {aviso && (
@@ -245,7 +245,7 @@ export function AdminCatalogoView({
           </div>
         )}
 
-        <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
           <AdminCard>
             <p className="text-xs font-bold uppercase" style={{ color: ADMIN_COLORS.textMid }}>Categorías</p>
             <p className="mt-2 text-2xl font-black" style={{ color: ADMIN_COLORS.text }}>
@@ -338,7 +338,7 @@ export function AdminCatalogoView({
 
         {mostrarNuevaCategoria && esTabCategorias && (
           <div className="mb-4 rounded-2xl p-4" style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <input placeholder="Nombre *" value={fCatNombre} onChange={(e) => setFCatNombre(e.target.value)} className="rounded-xl border px-3 py-2 text-sm sm:col-span-2" style={{ borderColor: ADMIN_COLORS.slateD }} />
               <input placeholder="Emoji" value={fCatEmoji} onChange={(e) => setFCatEmoji(e.target.value)} className="rounded-xl border px-3 py-2 text-sm" style={{ borderColor: ADMIN_COLORS.slateD }} />
               {tab !== "Subcategorías" && (
@@ -359,7 +359,7 @@ export function AdminCatalogoView({
 
         {mostrarNuevaPartida && esTabPartidas && (
           <div className="mb-4 rounded-2xl p-4" style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input placeholder="Nombre *" value={fParNombre} onChange={(e) => setFParNombre(e.target.value)} className="rounded-xl border px-3 py-2 text-sm sm:col-span-2" style={{ borderColor: ADMIN_COLORS.slateD }} />
               <select value={fParCategoria} onChange={(e) => setFParCategoria(e.target.value)} className="rounded-xl border px-3 py-2 text-sm sm:col-span-2" style={{ borderColor: ADMIN_COLORS.slateD }}>
                 <option value="">Categoría *</option>
@@ -398,7 +398,7 @@ export function AdminCatalogoView({
               ])}
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {categoriasFiltradas.map((c) => (
                 <button key={c.id} type="button" onClick={() => setPanel({ tipo: "categoria", id: c.id })} className="rounded-2xl p-4 text-left" style={{ background: ADMIN_COLORS.white, border: `1px solid ${panel?.id === c.id ? ADMIN_COLORS.purple : ADMIN_COLORS.slateD}` }}>
                   <p className="font-bold" style={{ color: ADMIN_COLORS.text }}>{c.emoji} {c.nombre}</p>
@@ -428,7 +428,7 @@ export function AdminCatalogoView({
               ])}
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {partidasFiltradas.map((p) => (
                 <button key={p.id} type="button" onClick={() => setPanel({ tipo: "partida", id: p.id })} className="rounded-2xl p-4 text-left" style={{ background: ADMIN_COLORS.white, border: `1px solid ${panel?.id === p.id ? ADMIN_COLORS.purple : ADMIN_COLORS.slateD}` }}>
                   <p className="font-bold" style={{ color: ADMIN_COLORS.text }}>{p.nombre}</p>

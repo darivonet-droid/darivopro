@@ -1,7 +1,7 @@
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 
 export function AdminKpiGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">{children}</div>;
+  return <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">{children}</div>;
 }
 
 export function AdminKpiCard({

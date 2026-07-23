@@ -5,6 +5,7 @@ import { EMPRESA_NAV } from "@/lib/empresa-modules";
 import { EMPRESA_LAYOUT } from "@/lib/design-system/empresa-tokens";
 import { ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
+import { MobileNavDrawer } from "@/components/common/MobileNavDrawer";
 
 export { EMPRESA_NAV };
 
@@ -18,9 +19,11 @@ export function EmpresaShell({
   children?: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const itemsVisibles = EMPRESA_NAV.filter((item) => !item.ocultoEnSidebar);
+  const esActivo = (href: string) => (href === "/empresa" ? pathname === "/empresa" : pathname.startsWith(href));
 
   return (
-    <div className="flex min-h-screen" style={{ background: EMPRESA_LAYOUT.contentBg }}>
+    <div className="flex min-h-screen flex-col lg:flex-row" style={{ background: EMPRESA_LAYOUT.contentBg }}>
       <aside
         className="hidden shrink-0 flex-col border-r p-4 lg:flex"
         style={{
@@ -33,25 +36,19 @@ export function EmpresaShell({
           DARIVO PRO EMPRESA
         </p>
         <nav className="flex flex-col gap-0.5">
-          {EMPRESA_NAV.filter((item) => !item.ocultoEnSidebar).map((item) => {
-            const activo =
-              item.href === "/empresa"
-                ? pathname === "/empresa"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-lg px-3 py-2 text-sm font-semibold"
-                style={{
-                  background: activo ? ADMIN_COLORS.sidebarActiveBg : "transparent",
-                  color: activo ? ADMIN_COLORS.sidebarActiveText : ADMIN_COLORS.sidebarTextMuted,
-                }}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {itemsVisibles.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-lg px-3 py-2 text-sm font-semibold"
+              style={{
+                background: esActivo(item.href) ? ADMIN_COLORS.sidebarActiveBg : "transparent",
+                color: esActivo(item.href) ? ADMIN_COLORS.sidebarActiveText : ADMIN_COLORS.sidebarTextMuted,
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
         <div className="mt-auto flex flex-col gap-2 pt-6">
           <Link href="/dashboard" className="text-xs font-bold" style={{ color: ADMIN_COLORS.textLight }}>
@@ -60,16 +57,37 @@ export function EmpresaShell({
           <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: ADMIN_COLORS.red }} />
         </div>
       </aside>
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="border-b px-6 py-4"
+          className="flex items-center gap-3 border-b px-4 py-3 lg:px-6 lg:py-4"
           style={{ background: EMPRESA_LAYOUT.headerBg, borderColor: ADMIN_COLORS.sidebarBorder }}
         >
-          <h1 className="text-xl font-black" style={{ color: ADMIN_COLORS.text }}>
+          <MobileNavDrawer
+            brand="DARIVO PRO EMPRESA"
+            items={itemsVisibles}
+            isActive={esActivo}
+            colors={{
+              sidebarBg: EMPRESA_LAYOUT.sidebarBg,
+              sidebarBorder: ADMIN_COLORS.sidebarBorder,
+              text: ADMIN_COLORS.sidebarText,
+              textMuted: ADMIN_COLORS.sidebarTextMuted,
+              activeBg: ADMIN_COLORS.sidebarActiveBg,
+              activeText: ADMIN_COLORS.sidebarActiveText,
+            }}
+            footer={
+              <>
+                <Link href="/dashboard" className="text-xs font-bold" style={{ color: ADMIN_COLORS.textLight }}>
+                  ← Volver a Móvil
+                </Link>
+                <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: ADMIN_COLORS.red }} />
+              </>
+            }
+          />
+          <h1 className="text-lg font-black lg:text-xl" style={{ color: ADMIN_COLORS.text }}>
             {titulo}
           </h1>
         </header>
-        <main className="flex-1" style={{ padding: EMPRESA_LAYOUT.contentPadding }}>
+        <main className="min-w-0 flex-1 overflow-x-auto p-4 lg:p-7" style={{ background: EMPRESA_LAYOUT.contentBg }}>
           {children ?? (
             <div
               className="rounded-2xl p-6"

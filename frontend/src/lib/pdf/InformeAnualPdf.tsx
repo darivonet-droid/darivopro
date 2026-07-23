@@ -1,8 +1,8 @@
-// DARIVO PRO — Documento PDF del informe trimestral
+// DARIVO PRO — Documento PDF del informe anual
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { C, fmtMoney } from "./styles";
-import type { DatosTrimestre } from "@/hooks/useInformes";
+import type { DatosAnual } from "@/hooks/useInformes";
 
 const s = StyleSheet.create({
   page:        { padding: 0, fontSize: 10, fontFamily: "Helvetica", color: C.text },
@@ -27,24 +27,22 @@ const s = StyleSheet.create({
   badgeText:   { fontSize: 9, color: C.white, fontFamily: "Helvetica-Bold" },
 });
 
-function trimLabel(): string {
-  const now = new Date();
-  const q   = Math.floor(now.getMonth() / 3) + 1;
-  return `Q${q} ${now.getFullYear()}`;
+function anioLabel(): string {
+  return String(new Date().getFullYear());
 }
 
-export function InformeTrimestralPdf({ data }: { data: DatosTrimestre }) {
+export function InformeAnualPdf({ data }: { data: DatosAnual }) {
   return (
     <Document>
       <Page size="A4" style={s.page}>
 
         {/* Header navy */}
         <View style={s.header}>
-          <Text style={s.headerTitle}>INFORME TRIMESTRAL</Text>
+          <Text style={s.headerTitle}>INFORME ANUAL</Text>
           <Text style={s.headerSub}>
             {data.empresa.razonSocial}
             {data.empresa.ruc ? `  ·  RUC ${data.empresa.ruc}` : ""}
-            {"  ·  "}{trimLabel()}
+            {"  ·  "}{anioLabel()}
           </Text>
         </View>
 
@@ -85,7 +83,7 @@ export function InformeTrimestralPdf({ data }: { data: DatosTrimestre }) {
 
           {/* Highlights */}
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Destacados del trimestre</Text>
+            <Text style={s.sectionTitle}>Destacados del año</Text>
             <View style={s.highlight}>
               <Text style={s.highlightL}>Cliente principal</Text>
               <Text style={s.highlightV}>{data.clientePrincipal}</Text>

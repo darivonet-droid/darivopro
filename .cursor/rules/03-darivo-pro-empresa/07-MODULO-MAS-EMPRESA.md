@@ -1,10 +1,14 @@
 # 07 – NAVEGACIÓN DIRECTA (EX-MÓDULO MÁS) – DARIVO PRO EMPRESA
 
-**Versión:** 2.0
+**Versión:** 2.1
 
-**Estado:** ✅ Documentación reorganizada (22/07/2026) — pendientes 7 imágenes oficiales nuevas (una por entrada directa), no bloquea la documentación (Reglas §7.1).
+**Estado:** ✅ Documentación reorganizada (22/07/2026) — pendientes 6 imágenes oficiales nuevas (una por entrada directa), no bloquea la documentación (Reglas §7.1).
 
-**Cambio principal (v2.0 — 22/07/2026, pedido explícito del propietario):** el "Módulo Más" deja de existir como pantalla contenedora en Darivo Pro Empresa. Sus 7 funcionalidades (antes tabs + panel lateral "Más opciones") pasan a ser **entradas directas del sidebar**, igual que Darivo Pro Admin — sin agrupador intermedio (`01-VISION-DEL-PRODUCTO.md` §16 v2.19, `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.7 §5.1). Este archivo conserva su nombre y numeración (`07`) por continuidad de las referencias cruzadas ya existentes en el resto de la documentación de Empresa. **Ninguna lógica ni funcionalidad cambia** — únicamente la navegación: cada apartado de este documento (§5.1–§5.7) es ahora una pantalla propia con su propia posición de sidebar, no una sección dentro de "Más". No aplica a Darivo Pro Móvil, que conserva "Más" en posición 6 de su navegación inferior.
+**Changelog:**
+- v2.1 (23/07/2026, pedido explícito del propietario) — **Informes (antes §5.3, sidebar 10) deja de ser entrada directa**: se reintegra como 3ª pestaña del módulo Cierre (`09-MODULO-CIERRE-EMPRESA.md` §7). De las 7 pantallas ex-Más quedan **6** entradas directas. `/empresa/informes` redirige a `/empresa/cierre?tab=informe`.
+- v2.0 (22/07/2026) — Versión original: "Módulo Más" retirado, 7 funcionalidades pasan a entrada directa.
+
+**Cambio principal (v2.0 — 22/07/2026, pedido explícito del propietario):** el "Módulo Más" deja de existir como pantalla contenedora en Darivo Pro Empresa. Sus funcionalidades (antes tabs + panel lateral "Más opciones") pasan a ser **entradas directas del sidebar**, igual que Darivo Pro Admin — sin agrupador intermedio (`01-VISION-DEL-PRODUCTO.md` §16 v2.19, `16-SISTEMA-DE-DISEÑO-EMPRESA.md` v2.7 §5.1). Este archivo conserva su nombre y numeración (`07`) por continuidad de las referencias cruzadas ya existentes en el resto de la documentación de Empresa. **Ninguna lógica ni funcionalidad cambia** — únicamente la navegación: cada apartado de este documento es ahora una pantalla propia con su propia posición de sidebar, no una sección dentro de "Más" (excepción: Informes, ver v2.1 arriba). No aplica a Darivo Pro Móvil, que conserva "Más" en posición 6 de su navegación inferior.
 
 **Relacionado:** `01-VISION-DEL-PRODUCTO.md` §11, §16 · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §5.1, §6.7 · `01-darivo-pro-movil/07-MODULO-MAS.md` v2.2
 
@@ -31,7 +35,7 @@
 
 # 1. Objetivo
 
-Documentar las **7 pantallas de escritorio** que antes vivían agrupadas bajo "Más" y que ahora son entradas directas del sidebar de Darivo Pro Empresa (`01-VISION-DEL-PRODUCTO.md` §16, excepción de navegación).
+Documentar las **6 pantallas de escritorio** que antes vivían agrupadas bajo "Más" y que ahora son entradas directas del sidebar de Darivo Pro Empresa (`01-VISION-DEL-PRODUCTO.md` §16, excepción de navegación). Informes (7ª, antes también aquí) se reintegró como pestaña de Cierre el 23/07/2026 — ver `09-MODULO-CIERRE-EMPRESA.md` §7.
 
 Cada una centraliza una funcionalidad **secundaria, administrativa o de configuración** del cliente — nunca operativa (esa sigue en Inicio, Clientes, IA, Facturas, Cierre).
 
@@ -40,8 +44,8 @@ Cada una centraliza una funcionalidad **secundaria, administrativa o de configur
 | ✅ Pertenece a esta redistribución | ❌ No pertenece (otro módulo) |
 |-------------------------------------|-------------------------------------|
 | Categorías · Mis Tarifas · Datos empresa | Clientes (03) |
-| Perfil · Informes · Documentos | Cotizaciones (05) |
-| Mi Plan · Soporte · Preferencias | Facturas (06) · Cierre (09) |
+| Perfil · Documentos | Cotizaciones (05) |
+| Mi Plan · Soporte · Preferencias | Facturas (06) · Cierre (09) — incl. Informes desde 23/07/2026 |
 | Preferencias IA (ajustes, no el asistente) | IA asistente (08) |
 | | Empleados (10) · Roles y Permisos (11) |
 
@@ -57,21 +61,22 @@ Las imágenes previas de "Más" (`07 - MODULO MAS - DARIVO PRO EMPRESA.png`) doc
 
 ---
 
-# 3. Navegación — 7 entradas directas del sidebar
+# 3. Navegación — 6 entradas directas del sidebar
 
 | Pos. sidebar | Pantalla | Sección de este MD | Origen (Móvil §6, dentro de "Más") |
 |--------------|----------|---------------------|--------------------------------------|
 | 6 | **Catálogo · Mis Tarifas** | §5.1 | Pestaña Categorías + Mis Tarifas |
 | 9 | **Empresa** | §5.2 | Pestaña Empresa (datos) |
-| 10 | **Informes** | §5.3 | Ítem "Informes" |
-| 11 | **Documentos** | §5.4 | Ítem "Documentos" |
-| 12 | **Mi Plan** | §5.5 | Ítem "Mi Plan" |
-| 13 | **Soporte** | §5.6 | Ítem "Soporte" |
-| 14 | **Configuración** | §5.7 | Perfil + IA-Preferencias + Preferencias generales |
+| 10 | **Documentos** | §5.4 | Ítem "Documentos" |
+| 11 | **Mi Plan** | §5.5 | Ítem "Mi Plan" |
+| 12 | **Soporte** | §5.6 | Ítem "Soporte" |
+| 13 | **Configuración** | §5.7 | Perfil + IA-Preferencias + Preferencias generales |
+
+**Informes** (antes posición 10, §5.3) ya no es entrada directa — desde 23/07/2026 es la 3ª pestaña de Cierre (`09-MODULO-CIERRE-EMPRESA.md` §7). §5.3 de este documento queda como referencia histórica de la especificación funcional (misma lógica, solo cambió dónde se monta).
 
 Posiciones 7–8 (Empleados, Roles y Permisos) ya documentadas en `10-MODULO-EMPLEADOS-EMPRESA.md` y `11-ROLES-PLANES-PERMISOS-EMPRESA.md` — no se repiten aquí.
 
-Orden completo del sidebar Empresa: Inicio(1) · Clientes(2) · IA(3) · Facturas(4) · Cierre(5) · Catálogo·Mis Tarifas(6) · Empleados(7) · Roles y Permisos(8) · Empresa(9) · Informes(10) · Documentos(11) · Mi Plan(12) · Soporte(13) · Configuración(14).
+Orden completo del sidebar Empresa: Inicio(1) · Clientes(2) · IA(3) · Facturas(4) · Cierre(5, incluye Informe) · Catálogo·Mis Tarifas(6) · Empleados(7) · Roles y Permisos(8) · Empresa(9) · Documentos(10) · Mi Plan(11) · Soporte(12) · Configuración(13).
 
 ---
 
@@ -143,21 +148,23 @@ Card formulario (Móvil §5):
 
 Card informativa «Backend · Supabase» (estado conexión — solo lectura).
 
-## 5.3 Informes (sidebar 10)
+## 5.3 Informes (histórico — desde 23/07/2026 es pestaña de Cierre, ver `09-MODULO-CIERRE-EMPRESA.md` §7)
+
+⚠️ Ya **no** es entrada directa del sidebar — se conserva este apartado como especificación funcional de referencia (la lógica no cambió, solo dónde se monta el componente `InformesTab`).
 
 Consolida Clientes, Cotizaciones y Facturación en modo consulta (Móvil §8):
 
 * Periodicidad: Semana / Mes / Anual.
 * No genera datos propios — consulta los módulos operativos (Móvil §8).
 
-## 5.4 Documentos (sidebar 11)
+## 5.4 Documentos (sidebar 10)
 
 Facturas y cotizaciones por período — historial documental (Móvil §6):
 
 * No genera datos propios — consulta los módulos operativos.
 * Relación con gestión documental transversal: `01-VISION-DEL-PRODUCTO.md` §17.
 
-## 5.5 Mi Plan (sidebar 12)
+## 5.5 Mi Plan (sidebar 11)
 
 * Plan actual (Básico / Pro / Business), renovación, cambiar plan — referencia única `04-PANEL-ADMIN-SUSCRIPCIONES.md`.
 * Pasarela: **dLocal API** (`08-PANEL-ADMIN-CONFIGURACION-DE-APIS.md` §5.3 · Móvil §8).
@@ -166,7 +173,7 @@ Facturas y cotizaciones por período — historial documental (Móvil §6):
 
 Presentación escritorio: patrón Admin Suscripciones, en modo lectura + acción de cambio — Empresa **no** administra planes de otras empresas, solo el propio (Móvil §8, Visión §19).
 
-## 5.6 Soporte (sidebar 13)
+## 5.6 Soporte (sidebar 12)
 
 Crear y consultar tickets (Asunto + Descripción). Este ítem es la vía de **tickets estructurados**; el agente conversacional Darivo (Agente IA 2) vive en el módulo **IA** (sidebar 3) — ver `08-MODULO-IA-EMPRESA.md` §10.
 
@@ -181,9 +188,9 @@ Cuando la IA no puede resolver con certeza → ticket escalado automáticamente 
 
 > La IA nunca inventa una solución sin certeza. Deriva automáticamente al soporte humano mediante ticket.
 
-Esta pantalla (Soporte, sidebar 13) es donde el Gerente **crea y consulta tickets directamente** (sin pasar por Darivo), y donde ve su estado: **Nuevo / En proceso / Resuelto** (Admin §5).
+Esta pantalla (Soporte, sidebar 12) es donde el Gerente **crea y consulta tickets directamente** (sin pasar por Darivo), y donde ve su estado: **Nuevo / En proceso / Resuelto** (Admin §5).
 
-## 5.7 Configuración (sidebar 14)
+## 5.7 Configuración (sidebar 13)
 
 Agrupa lo que antes eran 3 ítems distintos del panel "Más opciones" — Perfil, Preferencias de IA y Preferencias generales — en una sola pantalla, siguiendo el patrón de Admin (`11-PANEL-ADMIN-CONFIGURACION.md`: cuenta personal simple) ampliado con las preferencias de producto propias de Empresa que Admin no tiene:
 
@@ -201,8 +208,8 @@ Agrupa lo que antes eran 3 ítems distintos del panel "Más opciones" — Perfil
 
 * **Asistente IA** (cotizaciones voz/texto y Darivo/soporte conversacional): módulo **IA** (08, sidebar 3) — `08-MODULO-IA-EMPRESA.md`.
 * **Soporte (tickets estructurados):** §5.6 de este documento — estados Nuevo / En proceso / Resuelto (Admin §5).
-* **Informes / Documentos:** no generan datos propios — consultan módulos operativos (Móvil §8).
-* **No incluir** en ninguna de estas 7 pantallas: Empleados ni Roles y Permisos (tienen sidebar propio, posiciones 7–8).
+* **Informes** (ahora pestaña de Cierre, `09-MODULO-CIERRE-EMPRESA.md` §7) **/ Documentos:** no generan datos propios — consultan módulos operativos (Móvil §8).
+* **No incluir** en ninguna de estas 6 pantallas: Empleados ni Roles y Permisos (tienen sidebar propio, posiciones 7–8).
 
 ---
 
@@ -231,7 +238,7 @@ Agrupa lo que antes eran 3 ítems distintos del panel "Más opciones" — Perfil
 
 # 9. Permisos
 
-**Gerente:** acceso completo a las 7 pantallas, incl. Catálogo/Mis Tarifas (Visión §11).
+**Gerente:** acceso completo a las 6 pantallas, incl. Catálogo/Mis Tarifas (Visión §11).
 
 **Técnico:** no administra Catálogo ni Mis Tarifas; no accede a Empresa, Mi Plan ni Configuración de la empresa — consulta según permisos (`11-ROLES-PLANES-PERMISOS-EMPRESA.md` — pendiente matriz detallada).
 
@@ -255,14 +262,15 @@ Agrupa lo que antes eran 3 ítems distintos del panel "Más opciones" — Perfil
 
 * [x] Lógica ↔ Móvil `07-MODULO-MAS.md` v2.2
 * [x] Navegación ↔ `01-VISION-DEL-PRODUCTO.md` §16 v2.19 (excepción Empresa) · `16-SISTEMA-DE-DISEÑO-EMPRESA.md` §5.1, §6.7
-* [x] Sin funcionalidades ajenas a estas 7 pantallas
+* [x] Sin funcionalidades ajenas a estas 6 pantallas
 * [x] Sin duplicar Empleados / Roles / módulos operativos
-* [ ] Imágenes oficiales ↔ MD — **7 pendientes** (Reglas §7.1, no bloquea)
+* [x] Informes retirado de aquí y movido a `09-MODULO-CIERRE-EMPRESA.md` §7 (23/07/2026) — sin duplicar la especificación funcional, §5.3 queda como referencia histórica
+* [ ] Imágenes oficiales ↔ MD — **6 pendientes** (Reglas §7.1, no bloquea)
 
 ---
 
 # 12. Estado
 
-✅ **Documentación reorganizada** — 22/07/2026, pedido explícito del propietario. Reemplaza la "Producción completada" de v1.0 (02/07/2026), que documentaba la pantalla "Más" ya retirada.
+✅ **Documentación reorganizada** — v2.1 (23/07/2026, Informes se retira de aquí hacia Cierre) sobre v2.0 (22/07/2026, pedido explícito del propietario, "Módulo Más" retirado). Reemplaza la "Producción completada" de v1.0 (02/07/2026), que documentaba la pantalla "Más" ya retirada.
 
 **Fin del documento.**

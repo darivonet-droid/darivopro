@@ -146,7 +146,7 @@ Cuando posteriormente ese cliente contrata Darivo Pro Empresa, los roles pueden 
 
 # 6. Darivo Pro Empresa
 
-Darivo Pro Empresa es la versión empresarial del ecosistema Darivo Pro para trabajar desde ordenador.
+Darivo Pro Empresa es la versión empresarial del ecosistema Darivo Pro, pensada principalmente para trabajar desde ordenador.
 
 No es un producto independiente.
 
@@ -156,7 +156,7 @@ No es una lógica de negocio diferente.
 
 Reutiliza íntegramente la lógica de negocio de Darivo Pro Móvil y consume la información administrada por Darivo Pro Admin.
 
-Su objetivo es permitir que una empresa gestione su actividad desde un entorno de escritorio utilizando exactamente las mismas funcionalidades del ecosistema.
+Su objetivo es permitir que una empresa gestione su actividad desde un entorno de escritorio utilizando exactamente las mismas funcionalidades del ecosistema. Desde el 23/07/2026 (pedido explícito del propietario) su interfaz también se adapta de forma responsive a pantallas de teléfono — sigue siendo el mismo diseño de escritorio de Darivo Pro Admin (sección 10, Diseño), no una segunda versión de Fable 5; solo se reorganiza el mismo contenido para que quepa en pantallas pequeñas (menú de navegación en cajón, columnas que se apilan, tablas con scroll horizontal).
 
 La única diferencia funcional respecto a Darivo Pro Móvil es la gestión interna de la empresa mediante:
 
@@ -291,7 +291,7 @@ Además de Suscripción/Producto/Rol/Permisos, el tipo de dispositivo desde el q
 
 | Rol | Dispositivo | Aviso mostrado |
 | --- | --- | --- |
-| Administrador Darivo / Empresa — Gerente | Móvil | "Para una mejor experiencia, usa Darivo Pro Empresa desde un ordenador." |
+| Administrador Darivo / Empresa — Gerente | Móvil | "Como Gerente/Admin, gestiona la empresa desde el panel de Darivo Pro Empresa (funciona igual de bien en tu celular que en el ordenador)." (texto actualizado 23/07/2026, Empresa/Admin ya son responsive) |
 | Administrador Darivo / Empresa — Gerente | Ordenador | Sin aviso |
 | Técnico (vinculado a empresa) / Darivo Pro Móvil independiente | Ordenador | "Para una mejor experiencia, usa la app Darivo Pro Móvil desde tu celular." |
 | Técnico / Darivo Pro Móvil independiente | Móvil | Sin aviso |
@@ -363,7 +363,7 @@ Cada producto dispone del siguiente diseño oficial:
 * **Darivo Pro Admin**: dispone de su propio diseño oficial, y este diseño es además **la referencia visual única** para el resto de productos de escritorio del ecosistema (actualmente, Darivo Pro Empresa).
 * **Darivo Pro Empresa**: reutiliza el mismo diseño visual de Darivo Pro Admin — mismos componentes, mismos botones, misma paleta — adaptado a su propia navegación y estructura de contenido. No dispone de un diseño visual propio e independiente.
 
-**Razón del principio:** Darivo Pro Admin y Darivo Pro Empresa se utilizan siempre **desde ordenador** — comparten el mismo entorno de uso y, por tanto, el mismo diseño visual. Darivo Pro Móvil se utiliza desde dispositivo móvil y constituye un entorno de uso distinto, con su propio diseño (Fable 5).
+**Razón del principio:** Darivo Pro Admin y Darivo Pro Empresa están pensados **principalmente para ordenador** — comparten el mismo entorno de uso y, por tanto, el mismo diseño visual. Desde el 23/07/2026 ambos también se adaptan de forma responsive a pantallas de teléfono (menú en cajón, columnas apiladas, tablas con scroll horizontal), pero siguen siendo el mismo diseño de escritorio reorganizado — no una versión Fable 5. Darivo Pro Móvil se utiliza desde dispositivo móvil y constituye un entorno de uso distinto, con su propio diseño (Fable 5) diseñado mobile-first desde el origen — eso no cambia.
 
 Esto significa que cuando se apruebe o modifique un componente visual en Darivo Pro Admin, ese mismo diseño debe aplicarse en Darivo Pro Empresa. Únicamente el **contenido funcional** (el MD específico de cada módulo) puede diferir entre Admin y Empresa — nunca el diseño visual de los componentes compartidos.
 
@@ -391,7 +391,7 @@ Las funcionalidades compartidas del ecosistema tienen una única referencia ofic
 
 Cuando se cree, modifique o apruebe una funcionalidad o el comportamiento de un botón en Darivo Pro Admin, esa funcionalidad deberá sincronizarse con Darivo Pro Móvil y Darivo Pro Empresa.
 
-El aspecto visual de los botones y componentes entre **Darivo Pro Admin y Darivo Pro Empresa debe ser el mismo** (sección 10, Diseño) — comparten diseño por ser ambos productos de escritorio. Únicamente **Darivo Pro Móvil** (Fable 5) mantiene un diseño visual independiente, adaptado a su entorno móvil.
+El aspecto visual de los botones y componentes entre **Darivo Pro Admin y Darivo Pro Empresa debe ser el mismo** (sección 10, Diseño) — comparten diseño por ser ambos productos pensados principalmente para escritorio, ahora también responsive a teléfono (23/07/2026). Únicamente **Darivo Pro Móvil** (Fable 5) mantiene un diseño visual independiente, diseñado mobile-first desde el origen.
 
 Sin embargo, en los tres productos, el comportamiento, las reglas de negocio y el funcionamiento deberán ser siempre los mismos en todo el ecosistema Darivo Pro.
 

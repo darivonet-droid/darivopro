@@ -108,7 +108,7 @@ export function AdminProductosView({ productos, error }: AdminProductosViewProps
         panel. El <span className="font-mono text-xs">slug</span> es de solo lectura (clave funcional).
       </AdminNotice>
 
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3">
         <AdminKpiCard label="Productos" value={items.length} />
         <AdminKpiCard label="Activos" value={activos} />
         <AdminKpiCard label="Inactivos" value={items.length - activos} />
