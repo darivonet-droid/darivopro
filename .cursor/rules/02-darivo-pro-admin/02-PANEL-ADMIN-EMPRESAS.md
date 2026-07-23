@@ -1,8 +1,10 @@
 ﻿# 02 – PANEL ADMIN – EMPRESAS
 
-**Versión:** 1.2
+**Versión:** 1.3
 
 **Estado:** Diseño oficial aprobado
+
+**Cambio principal (v1.3 — 23/07/2026, Tarea 3):** confirmado que la vía de cambio de plan de este módulo **es legítima y se mantiene** — opera sobre el gerente de **una empresa concreta**, que es el contexto propio del módulo, a diferencia del cambio genérico por cuenta que salió de Usuarios hacia Suscripciones. Lo que sí cambia: **ya no escribe el plan directamente**. Delega en la lógica única de cambio de plan, así que **queda auditado** igual que las otras vías (§5.1). Ningún cambio de plan del ecosistema queda ya sin registro.
 
 **Cambio principal (v1.2 — 09/07/2026):** corrección documental. §4 añade la entrada real "Productos" del sidebar; §8 actualiza el catálogo de planes de 2 a los 3 planes reales (Básico/Pro/Business). Módulo migrado en código de lectura de `perfiles` a la tabla real `empresas` (cambiar plan / activar / desactivar).
 
@@ -26,6 +28,12 @@ Desde este módulo el administrador podrá:
 * Consultar el estado de la cuenta.
 * Consultar la actividad general de la empresa.
 * Consultar la información de contacto.
+
+## 5.1 Cambio de plan desde este módulo — legítimo y auditado (23/07/2026)
+
+El selector de Plan de la tabla de empresas **se mantiene**. Su alcance es el que corresponde a este módulo: cambia el plan del **gerente de una empresa concreta**, en el contexto de esa empresa. Es distinto del cambio de plan genérico por cuenta, que dejó de estar en el módulo Usuarios y ahora vive en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1.
+
+**Ningún cambio de plan queda sin registro.** Esta acción ya no escribe el plan por su cuenta: delega en la lógica única del ecosistema, de modo que cada cambio hecho desde aquí se anota en el log de auditoría (quién, qué cuenta, plan anterior → nuevo, cuándo, motivo) y es consultable desde Suscripciones → "Historial de cambios" (`04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.2). Como el selector de la tabla no pide motivo, el registro queda con un motivo automático que identifica la vía; para dejar constancia de una razón concreta, usar la pestaña "Cuentas" de Suscripciones.
 * Solicitar la eliminación de una empresa mediante el procedimiento administrativo correspondiente.
 
 Este módulo también permite conocer el estado general de las empresas registradas mediante indicadores visibles en el Panel Administrador.
@@ -175,7 +183,7 @@ La gestión de usuarios pertenece exclusivamente al módulo **Usuarios**.
 
 El catálogo oficial de planes (**Básico**, **Pro** y **Business**) está definido únicamente en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6 (fuente única de precios y límites — no duplicar aquí).
 
-Este módulo utiliza ese catálogo para el campo "Plan" asociado a cada empresa.
+Este módulo utiliza ese catálogo para el campo "Plan" asociado a cada empresa. Asignarlo o cambiarlo pasa siempre por la lógica única con auditoría (§5.1).
 
 No duplicar la definición de planes en este documento.
 
@@ -220,7 +228,8 @@ Este MD no define permisos propios. En Darivo Pro Admin, el acceso a este módul
 * No modificar el diseño oficial.
 * Este módulo administra exclusivamente empresas.
 * La gestión de usuarios pertenece al módulo **Usuarios**.
-* El cambio de plan se realiza desde este módulo.
+* El cambio de plan **de la empresa** (su gerente) se realiza desde este módulo, y **siempre queda registrado** en el log de auditoría — ver §5.1. Ninguna vía puede escribir el plan sin dejar rastro.
+* El cambio de plan **genérico por cuenta** no pertenece a este módulo: vive en `04-PANEL-ADMIN-SUSCRIPCIONES.md` §6.1.
 * La activación y desactivación de empresas se realiza desde este módulo.
 * La eliminación definitiva de una empresa forma parte de un procedimiento administrativo autorizado por Darivo Pro.
 * Documentar únicamente la información visible y aprobada oficialmente.

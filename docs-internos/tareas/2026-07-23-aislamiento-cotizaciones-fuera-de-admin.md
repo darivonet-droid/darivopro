@@ -143,6 +143,41 @@ Al verificar los consumidores apareció `cambiarPlanEmpresaAction` (`app/admin/e
 
 **Qué NO se hizo, y queda para el propietario:** no se retiró la acción de Empresas. `02-PANEL-ADMIN-EMPRESAS.md` §5/§12 dice explícitamente que el cambio de plan se hace desde ese módulo, y retirarlo no estaba pedido. **Pregunta abierta:** si la decisión es "el plan solo se gestiona desde Suscripciones", ¿Empresas también debe perderlo, o su vía se considera legítima por operar sobre el gerente de una empresa concreta?
 
+### Blindaje — auditoría de escrituras a `perfiles.plan_tipo` (23/07/2026)
+
+Barrido de todo el repo (`frontend/src` TS/TSX, `supabase/migrations` SQL, `backend` Python) buscando escrituras a `perfiles.plan_tipo`.
+
+**Confirmado: las 3 vías de operador delegan en `lib/plan-cuenta.ts` y ninguna escribe en crudo.**
+
+| Vía | Archivo | Estado |
+| --- | --- | --- |
+| Admin → Suscripciones | `app/admin/suscripciones/actions.ts` (`cambiarPlanCuentaAction`) | ✅ delega |
+| Admin → Usuarios | `app/admin/usuarios/actions.ts` (`cambiarPlanUsuarioAction`) | ✅ delega (en retirada, FASE C) |
+| Admin → Empresas | `app/admin/empresas/actions.ts` (`cambiarPlanEmpresaAction`) | ✅ delega |
+
+El único `.update({ plan_tipo })` que queda dentro del camino auditado es `lib/plan-cuenta.ts:74`, que es precisamente el que escribe el log.
+
+#### Escrituras crudas que se saltan el log — REPORTADAS, NO CORREGIDAS
+
+Como se pidió, se reportan sin tocarlas. Clasificadas por si son o no una decisión de operador:
+
+| # | Archivo:línea | Qué hace | ¿Decisión de operador? | Veredicto |
+| --- | --- | --- | --- | --- |
+| 1 | `frontend/src/lib/activar-plan.ts:88` | `.update({ plan_tipo: plan })` tras **pago confirmado** (llamada desde `api/pagos/webhook/route.ts:231`) y al otorgar Business a un Partner activo (`ecosystem-store.ts:191`) | **No** — automatismo de facturación | Aceptable fuera del log de planes: el pago ya deja su propio rastro. Se documenta como excepción. |
+| 2 | `frontend/src/lib/activar-plan.ts:153` | `.update({ plan_tipo: 'gratis', plan_origen_partner_id: null })` — revoca el Business regalado al suspender un Partner (`ecosystem-store.ts:193`) | **Zona gris** — la dispara un Admin al suspender el Partner | ⚠️ Degrada el plan de una cuenta a `gratis` **sin rastro en el log**. Candidato claro a auditar. |
+| 3 | `frontend/src/app/admin/empresas/actions.ts:115` | `.upsert({ ..., plan_tipo: "business" })` al **crear una empresa** desde Admin | **Sí** — acción de operador | ⚠️ El hueco más relevante: un Admin fija plan Business a una cuenta y no queda registrado. |
+| 4 | `frontend/src/app/empresa/empleados/actions.ts:90` | `.upsert({ ..., plan_tipo: gerentePerfil?.plan_tipo ?? "gratis" })` al invitar un Técnico | **No** — herencia del plan del Gerente al crear su perfil | Aceptable: no es una decisión de plan, es propagación. Auditarlo generaría ruido por cada invitación. |
+| 5 | `supabase/migrations/20260706123000_plan_tipo_business.sql:27` y `:55` | `SET plan_tipo = 'business'` — renombre histórico `'empresa'`→`'business'` | **No** — migración one-off ya ejecutada | Sin acción. No es código vivo. |
+
+Sin hallazgos en `backend/` (Python): no toca `plan_tipo`.
+
+**Preguntas abiertas para el propietario** (nada se corrige hasta que respondas):
+1. ¿Se audita también la **revocación del Business regalado** al suspender un Partner (#2)? Es un cambio de plan real hecho a raíz de una acción de Admin.
+2. ¿Se audita el **plan Business que se fija al crear una empresa** desde Admin (#3)? Es la escritura de operador más clara que hoy queda fuera del log.
+3. ¿Se audita también la **activación por pago** (#1), para tener el ciclo de vida completo del plan en un solo sitio, o se deja al rastro del webhook de pagos?
+
+Invariante escrito en `CLAUDE.md` ("Invariante — camino único auditado para el cambio de plan"), con estas excepciones listadas para que un cambio futuro no las reintroduzca por descuido.
+
 ### Diagnóstico previo que motivó el alto (se conserva como contexto)
 
 Qué existía antes de esta fase:

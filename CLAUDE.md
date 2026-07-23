@@ -55,6 +55,21 @@ Por defecto, autorización para ejecutar tareas de forma autónoma, sin pedir pe
 
 Para todo lo demás (código de frontend/backend, commits a develop, buscar e implementar assets, build/lint/typecheck, correcciones de texto, etc.) actúa sin preguntar, salvo ambigüedad real que no se pueda resolver razonablemente por cuenta propia.
 
+### Invariante — camino único auditado para el cambio de plan (23/07/2026)
+
+**Todo cambio del plan de una cuenta pasa por `frontend/src/lib/plan-cuenta.ts` (`cambiarPlanCuenta()`), que registra en `admin_plan_auditoria`. Está prohibido escribir `perfiles.plan_tipo` en crudo desde cualquier punto nuevo** (`.update({ plan_tipo })`, `.upsert({ ... plan_tipo })`, `UPDATE ... SET plan_tipo`). Si una tarea futura parece necesitarlo, se para y se reporta — un `UPDATE` crudo deja el cambio fuera del log y rompe el estándar de auditoría (banco/fintech).
+
+Las 3 vías de operador ya delegan ahí y están cerradas: Admin → Suscripciones (`cambiarPlanCuentaAction`), Admin → Usuarios (`cambiarPlanUsuarioAction`, en retirada) y Admin → Empresas (`cambiarPlanEmpresaAction`, legítima — opera sobre el gerente de una empresa concreta).
+
+**Excepciones conocidas y aceptadas** (escrituras crudas que quedan fuera del log **a propósito**, porque no son decisiones de un operador; auditadas y reportadas el 23/07/2026, ninguna se corrigió sin pedirlo):
+- `lib/activar-plan.ts:88` — activación tras **pago confirmado** (webhook de pagos) y otorgamiento del Business regalado a un Partner activo. Es un automatismo de facturación, no una decisión manual.
+- `lib/activar-plan.ts:153` — revocación del Business regalado al suspender un Partner. **Zona gris**: la dispara un Admin al suspender el partner, y degrada a `gratis` sin dejar rastro en el log de planes.
+- `app/admin/empresas/actions.ts:115` — `upsert` con `plan_tipo:'business'` al **crear** una empresa desde Admin. **Zona gris real**: es una acción de operador que fija un plan y hoy no queda registrada.
+- `app/empresa/empleados/actions.ts:90` — el Técnico invitado **hereda** el `plan_tipo` del Gerente al crearse su perfil. No es una decisión de plan, es propagación del plan del Gerente.
+- `supabase/migrations/20260706123000_plan_tipo_business.sql:27,55` — migración histórica del renombre `'empresa'`→`'business'`, ya ejecutada. One-off, no es código vivo.
+
+Las dos zonas grises (revocación de Partner y creación de empresa) están **pendientes de decisión del propietario**: detalle en `docs-internos/tareas/2026-07-23-aislamiento-cotizaciones-fuera-de-admin.md`.
+
 ### Verificación obligatoria de schema en migraciones
 
 Toda migración que referencie columnas de una tabla ya existente debe incluir, como parte de la respuesta, el extracto literal del `CREATE TABLE` de esa tabla (con número de archivo y líneas), no solo la afirmación de que se verificó el schema. Si la tabla pudo haber sido modificada por `ALTER TABLE` en otra migración posterior, debe confirmarse explícitamente que no hay ningún `ALTER TABLE` que la afecte, listando el resultado de esa búsqueda. Sin este extracto, la migración no se considera verificada y no debe entregarse como final.
