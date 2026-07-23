@@ -7,9 +7,14 @@
 // aviso informativo, no bloqueante y descartable.
 //
 // Tabla exacta (aviso, no bloqueo):
-//   Admin / Empresa — Gerente, en móvil       → aviso "usa Empresa desde un ordenador"
+//   Admin / Empresa — Gerente, en móvil       → aviso "usa el panel de Empresa/Admin, no la app Móvil"
 //   Técnico / Darivo Pro Móvil independiente, en ordenador → aviso "usa la app Móvil desde tu celular"
 //   Partner                                   → SIN aviso, en ningún dispositivo
+//
+// 23/07/2026 (adaptación responsive, pedido explícito del propietario):
+// Empresa/Admin ya funcionan también en teléfono, así que el mensaje ya no
+// dice "desde un ordenador" — el aviso solo redirige al Gerente/Admin al
+// panel correcto (Empresa/Admin), no le indica el dispositivo.
 //
 // Este archivo contiene solo las funciones "puras" (sin dependencias de
 // servidor) — es importado tanto por middleware.ts/layouts (server) como por
@@ -36,7 +41,7 @@ export interface AvisoDispositivo {
 }
 
 const MENSAJE_USA_EMPRESA =
-  "Para una mejor experiencia, usa Darivo Pro Empresa desde un ordenador.";
+  "Como Gerente/Admin, gestiona la empresa desde el panel de Darivo Pro Empresa (funciona igual de bien en tu celular que en el ordenador).";
 const MENSAJE_USA_MOVIL =
   "Para una mejor experiencia, usa la app Darivo Pro Móvil desde tu celular.";
 

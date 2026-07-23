@@ -161,9 +161,9 @@ export function CierreViewEscritorio({ tabInicial, resumenExpediente }: CierreVi
           <InformesTab esEmpresa />
         </div>
       ) : (
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      <div className="flex flex-col lg:flex-row" style={{ gap: 20, alignItems: "flex-start" }}>
         {/* Columna principal ~58% */}
-        <div style={{ flex: "1 1 58%", display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className="w-full" style={{ flex: "1 1 58%", display: "flex", flexDirection: "column", gap: 16 }}>
           {tab === "gastos" ? (
             <>
               <div>
@@ -175,7 +175,7 @@ export function CierreViewEscritorio({ tabInicial, resumenExpediente }: CierreVi
               <div style={{ borderRadius: 18, padding: 20, background: `linear-gradient(135deg, ${ADMIN_COLORS.purpleDark}, ${ADMIN_COLORS.purple})`, boxShadow: `0 6px 24px ${ADMIN_COLORS.purple}44` }}>
                 <p style={{ fontSize: 16, fontWeight: 900, color: ADMIN_COLORS.white }}>Registrar gasto</p>
                 <p style={{ marginTop: 4, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>📷 La Calculadora inteligente analizará tu documento automáticamente</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 14 }}>
+                <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 8, marginTop: 14 }}>
                   <button type="button" onClick={abrirCamara} disabled={analizando} style={{ padding: "10px 6px", borderRadius: 12, fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", background: "rgba(255,255,255,0.15)", color: ADMIN_COLORS.white, opacity: analizando ? 0.6 : 1 }}>
                     {analizando ? "Analizando…" : "📷 Tomar foto"}
                   </button>
@@ -217,8 +217,8 @@ export function CierreViewEscritorio({ tabInicial, resumenExpediente }: CierreVi
                     </button>
                   </div>
                 ) : (
-                  <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", background: ADMIN_COLORS.white }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <div className="overflow-x-auto" style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white }}>
+                    <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse" }}>
                       <thead>
                         <tr style={{ background: ADMIN_COLORS.slate }}>
                           {["Categoría", "Proveedor", "Fecha", "Importe", "Estado"].map((h) => (
@@ -292,7 +292,7 @@ export function CierreViewEscritorio({ tabInicial, resumenExpediente }: CierreVi
         </div>
 
         {/* Panel lateral ~42% (§5.4 / §6.2) */}
-        <div style={{ flex: "1 1 42%", position: "sticky", top: 20 }}>
+        <div className="w-full lg:sticky" style={{ flex: "1 1 42%", top: 20 }}>
           {tab === "gastos" ? (
             registrando ? (
               <PanelRegistrarGasto

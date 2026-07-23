@@ -146,7 +146,7 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
   return (
     <div className="flex flex-col gap-5">
       {/* Header (§5.1) */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <div>
           <p style={{ fontSize: 18, fontWeight: 900, color: ADMIN_COLORS.text }}>Facturación</p>
           <p style={{ fontSize: 12, color: ADMIN_COLORS.textMid, marginTop: 2 }}>
@@ -205,7 +205,7 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
       )}
 
       {/* Toolbar (§5.4) — 2 accesos directos al formulario, sin pantalla intermedia de "¿tiene RUC?" */}
-      <div style={{ display: "flex", gap: 12 }}>
+      <div className="flex flex-col sm:flex-row" style={{ gap: 12 }}>
         <Link
           href={`${nuevaFacturaHref}?tipo=factura`}
           style={{ display: "inline-flex", flexDirection: "column", gap: 2, borderRadius: 14, padding: "12px 20px", background: ADMIN_COLORS.purple, color: ADMIN_COLORS.white }}
@@ -229,8 +229,8 @@ export function FacturasTableEmpresa({ facturas, rucEmpresa, aprobados, nuevaFac
           <p style={{ fontSize: 13, fontWeight: 700, color: ADMIN_COLORS.textMid }}>Sin facturas todavía</p>
         </div>
       ) : (
-        <div style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, overflow: "hidden", background: ADMIN_COLORS.white }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="overflow-x-auto" style={{ borderRadius: 16, border: `1px solid ${ADMIN_COLORS.slateD}`, background: ADMIN_COLORS.white }}>
+          <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: ADMIN_COLORS.slate, borderBottom: `1px solid ${ADMIN_COLORS.slateD}` }}>
                 {["Número", "Cliente", "Doc.", "Fecha", "Total", "Estado", ""].map((h) => (

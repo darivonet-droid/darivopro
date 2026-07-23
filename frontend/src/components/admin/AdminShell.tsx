@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ADMIN_LAYOUT, ADMIN_COLORS } from "@/lib/design-system/admin-tokens";
 import { CerrarSesionButton } from "@/components/CerrarSesionButton";
+import { MobileNavDrawer } from "@/components/common/MobileNavDrawer";
 
 /** Navegación oficial — 00-PANEL-ADMIN-DASHBOARD.md §4 */
 export const ADMIN_NAV = [
@@ -31,11 +32,12 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const esActivo = (href: string) => (href === "/admin" ? pathname === "/admin" : pathname.startsWith(href));
 
   return (
-    <div className="flex min-h-screen" style={{ background: ADMIN_LAYOUT.contentBg }}>
+    <div className="flex min-h-screen flex-col lg:flex-row" style={{ background: ADMIN_LAYOUT.contentBg }}>
       <aside
-        className="hidden shrink-0 flex-col border-r p-4 md:flex"
+        className="hidden shrink-0 flex-col border-r p-4 lg:flex"
         style={{
           width: ADMIN_LAYOUT.sidebarWidth,
           background: ADMIN_LAYOUT.sidebarBg,
@@ -49,26 +51,20 @@ export function AdminShell({
           DARIVO PRO ADMIN
         </p>
         <nav className="flex flex-col gap-1">
-          {ADMIN_NAV.map((item) => {
-            const activo =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors"
-                style={{
-                  background: activo ? ADMIN_COLORS.sidebarActiveBg : "transparent",
-                  color: activo ? ADMIN_COLORS.sidebarActiveText : ADMIN_COLORS.sidebarTextMuted,
-                }}
-              >
-                <span>{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
+          {ADMIN_NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors"
+              style={{
+                background: esActivo(item.href) ? ADMIN_COLORS.sidebarActiveBg : "transparent",
+                color: esActivo(item.href) ? ADMIN_COLORS.sidebarActiveText : ADMIN_COLORS.sidebarTextMuted,
+              }}
+            >
+              <span>{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
         </nav>
         <div className="mt-auto flex flex-col gap-2 pt-6">
           <Link
@@ -87,20 +83,43 @@ export function AdminShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4"
+          className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 lg:px-6 lg:py-4"
           style={{ background: ADMIN_LAYOUT.headerBg, borderColor: ADMIN_LAYOUT.headerBorder }}
         >
-          <div>
-            <h1 className="text-xl font-black" style={{ color: ADMIN_COLORS.text }}>
-              {titulo}
-            </h1>
-            <p className="text-xs" style={{ color: ADMIN_COLORS.textMid }}>
-              Panel Administrador
-            </p>
+          <div className="flex items-center gap-3">
+            <MobileNavDrawer
+              brand="DARIVO PRO ADMIN"
+              items={ADMIN_NAV}
+              isActive={esActivo}
+              colors={{
+                sidebarBg: ADMIN_LAYOUT.sidebarBg,
+                sidebarBorder: ADMIN_COLORS.sidebarBorder,
+                text: ADMIN_COLORS.sidebarText,
+                textMuted: ADMIN_COLORS.sidebarTextMuted,
+                activeBg: ADMIN_COLORS.sidebarActiveBg,
+                activeText: ADMIN_COLORS.sidebarActiveText,
+              }}
+              footer={
+                <>
+                  <Link href="/dashboard" className="text-xs font-bold" style={{ color: ADMIN_COLORS.sidebarTextMuted }}>
+                    ← Volver a Móvil
+                  </Link>
+                  <CerrarSesionButton className="text-left text-xs font-bold" style={{ color: ADMIN_COLORS.red }} />
+                </>
+              }
+            />
+            <div>
+              <h1 className="text-lg font-black lg:text-xl" style={{ color: ADMIN_COLORS.text }}>
+                {titulo}
+              </h1>
+              <p className="hidden text-xs sm:block" style={{ color: ADMIN_COLORS.textMid }}>
+                Panel Administrador
+              </p>
+            </div>
           </div>
           {headerExtra}
         </header>
-        <main className="flex-1" style={{ padding: ADMIN_LAYOUT.contentPadding }}>
+        <main className="min-w-0 flex-1 overflow-x-auto p-4 lg:p-6" style={{ background: ADMIN_LAYOUT.contentBg }}>
           {children}
         </main>
       </div>

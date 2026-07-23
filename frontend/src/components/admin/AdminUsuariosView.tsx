@@ -239,7 +239,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
         </div>
       )}
 
-      <div className="mb-6 grid gap-4 md:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <AdminKpiCard label="Total usuarios" value={usuarios.length} />
         <AdminKpiCard label="Activos" value={activos} />
         <AdminKpiCard label="Bloqueados" value={bloqueados} />
@@ -332,7 +332,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
 
       {mostrarLote && (
         <div
-          className="mb-4 grid gap-4 rounded-2xl p-4 md:grid-cols-2"
+          className="mb-4 grid grid-cols-1 gap-4 rounded-2xl p-4 md:grid-cols-2"
           style={{ background: ADMIN_COLORS.white, border: `1px solid ${ADMIN_COLORS.slateD}` }}
         >
           <div>
@@ -375,7 +375,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
         </div>
       )}
 
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="min-w-0 flex-1">
           <AdminTable
             headers={["Usuario", "Contacto", "Plan", "Estado", "Último acceso", "Registro", "Acciones"]}
@@ -432,7 +432,7 @@ export function AdminUsuariosView({ usuarios: usuariosIniciales }: AdminUsuarios
 
         {seleccionado && (
           <div
-            className="w-[360px] shrink-0 rounded-2xl p-4"
+            className="w-full rounded-2xl p-4 lg:w-[360px] lg:shrink-0"
             style={{ background: ADMIN_COLORS.slate, border: `1px solid ${ADMIN_COLORS.slateD}`, maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}
           >
             <button

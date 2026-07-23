@@ -99,8 +99,8 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
   const filaActivaIndex = selectedId ? filtrados.findIndex((c) => c.id === selectedId) : undefined;
 
   return (
-    <div className="flex items-start gap-4">
-      <div className="min-w-0 flex-1">
+    <div className="flex flex-col items-start gap-4 lg:flex-row">
+      <div className="min-w-0 w-full flex-1">
         <p className="mb-3 text-xs font-semibold" style={{ color: ADMIN_COLORS.textMid }}>
           {clientes.length} contacto{clientes.length !== 1 ? "s" : ""}
         </p>
@@ -208,7 +208,7 @@ export function EmpresaClientesPanel({ iniciales }: { iniciales: EmpresaClienteR
 
       {selectedId && (
         <div
-          className="w-[380px] shrink-0 rounded-2xl p-4"
+          className="w-full shrink-0 rounded-2xl p-4 lg:w-[380px]"
           style={{ background: ADMIN_COLORS.slate, border: `1px solid ${ADMIN_COLORS.slateD}`, maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}
         >
           <button

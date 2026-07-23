@@ -168,8 +168,8 @@ export function PreciosView() {
         })}
       </div>
 
-      {/* Tarjetas apiladas */}
-      <div className="flex flex-col gap-5 pt-1">
+      {/* Apiladas en móvil, lado a lado desde escritorio (lg) */}
+      <div className="grid grid-cols-1 gap-5 pt-1 lg:grid-cols-3 lg:items-start lg:gap-6 lg:pt-3">
         {PLANES.map((plan) => (
           <PlanCard key={plan.id} plan={plan} ciclo={ciclo} extraTop={!!plan.badge} />
         ))}

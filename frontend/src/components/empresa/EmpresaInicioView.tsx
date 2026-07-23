@@ -158,8 +158,8 @@ function KpiCard({
 
 function AdminStyleTable({ recientes }: { recientes: CotizacionReciente[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl" style={{ border: `1px solid ${ADMIN_COLORS.slateD}` }}>
-      <table className="w-full text-left text-sm">
+    <div className="overflow-x-auto rounded-2xl" style={{ border: `1px solid ${ADMIN_COLORS.slateD}` }}>
+      <table className="w-full min-w-[480px] text-left text-sm">
         <thead style={{ background: ADMIN_COLORS.tableHeaderBg }}>
           <tr>
             {["Cliente", "Resumen", "Importe S/", "Estado"].map((h) => (

@@ -472,7 +472,7 @@ export function NuevoCotizacionWizardEscritorio() {
 
   /** Panel de categorías — izquierda, ~240px (MD §4/§5.1) */
   const renderPanelCategorias = () => (
-    <div style={{ width: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+    <div className="w-full lg:w-[260px] flex-shrink-0 flex flex-col gap-1.5">
       <p style={{ fontSize: 11, fontWeight: 700, color: ADMIN_COLORS.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>
         Categorías
       </p>
@@ -646,7 +646,7 @@ export function NuevoCotizacionWizardEscritorio() {
 
       {/* ══ PASO 1: SELECCIÓN — panel categorías + panel partidas simultáneos (MD §4/§5.1) ══ */}
       {phase === "cats" && (
-        <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start">
           {renderPanelCategorias()}
           {renderPanelPartidas()}
         </div>
