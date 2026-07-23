@@ -46,4 +46,19 @@ Un agente reportó (y corrigió en sus 4 archivos asignados) grids `grid lg:grid
 - `npm run typecheck` — ✅ verde.
 - `npm run lint` — ✅ verde (mismos 2 warnings preexistentes de siempre, no relacionados).
 - `npm run build` — ✅ verde.
-- Pruebas funcionales en vivo (login Google, escritorio + móvil): ver sección final de este documento, completada tras el merge a `main`.
+- Merge a `main` vía PR #8, deploy de producción confirmado `READY` (`dpl_4bVF3E4xhAQyEj1FQ9GyqBDTr1pU`).
+
+### Pruebas funcionales en vivo (post-merge, darivopro.com)
+
+**Empresa** (`empresa.darivopro.com`, sesión Google ya abierta en Chrome) — ✅ todo probado y funcionando:
+- Sidebar: 13 entradas exactas, sin "Informes" suelto.
+- Cierre: 3 pestañas (Gastos/Expediente Mensual/Informe) — Informe con Semanal/Mensual/**Anual** (sin Trimestral), botón Descargar PDF presente.
+- Expediente Mensual: **generación real del ZIP probada end-to-end** — "Generar expediente" → resumen con datos reales (2 cotizaciones, 0 facturas, 0 gastos de la cuenta de prueba) → "Descargar ZIP" ejecutado sin errores de consola → "Enviar a gestoría" deshabilitado como se pidió.
+- Mi Plan: muestra "Plan BUSINESS", S/130/mes, S/1,300/año — precios oficiales correctos.
+- Facturas, Roles y Permisos: cargan sin errores visuales, filtros/tablas se ven bien.
+- Menú móvil (`MobileNavDrawer`): verificado **funcionalmente** (clic real vía JS sobre el botón oculto por CSS en escritorio — el entorno de automatización no permitió redimensionar la ventana real de Chrome a un ancho de teléfono, ver nota abajo) — el cajón abre, `aria-expanded` cambia a `true`, y las 13 entradas del menú coinciden exactamente con el sidebar.
+- `/precios` (sin login): ✅ verificado visualmente en escritorio — 3 planes lado a lado, ya no la columna de 390px angosta. Verificación en viewport móvil real no realizada (misma limitación de la ventana de Chrome).
+
+**Admin** (`darivopro.com/admin`) — ⚠️ **no se pudo probar en vivo**: la cuenta de Google activa en la sesión de Chrome de este entorno no tiene acceso a Darivo Pro Admin ("No tienes acceso a Darivo Pro Admin. Contacta al equipo Darivo..."). No se intentó cambiar de cuenta. Verificación de Admin queda respaldada solo por `build`/`lint`/`typecheck` en verde y por ser el mismo patrón (`MobileNavDrawer`, mismos breakpoints) ya verificado en vivo en Empresa — pendiente de que el propietario confirme la cuenta correcta o pruebe él mismo.
+
+**Limitación de entorno (no es un bug del código):** la ventana de Chrome real controlada por esta sesión no respondió a los intentos de redimensionar a un ancho de teléfono (`resize_window` reportó éxito pero `window.innerWidth` no cambió) — pantalla fija de 1280×720. La verificación mobile-viewport real (pixel-perfect) de las pantallas autenticadas queda pendiente de que el propietario la haga desde su propio teléfono o achicando la ventana del navegador manualmente.
